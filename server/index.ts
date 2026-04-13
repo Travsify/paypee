@@ -600,9 +600,8 @@ app.post('/api/verify/identity', authenticateToken, async (req: any, res: any): 
     const userId = req.user.userId;
 
     const PREMBLY_SECRET_KEY = process.env.PREMBLY_SECRET_KEY;
-    const PREMBLY_APP_ID = process.env.PREMBLY_APP_ID;
 
-    if (!PREMBLY_SECRET_KEY || !PREMBLY_APP_ID) {
+    if (!PREMBLY_SECRET_KEY) {
       return res.status(503).json({ 
         error: 'Verification service is temporarily unavailable. Please try again later or contact support.' 
       });
@@ -668,7 +667,6 @@ app.post('/api/verify/identity', authenticateToken, async (req: any, res: any): 
       const response = await axios.post(endpoint, payload, {
         headers: {
           'x-api-key': PREMBLY_SECRET_KEY,
-          'app-id': PREMBLY_APP_ID,
           'Content-Type': 'application/json'
         },
         timeout: 30000
