@@ -6,7 +6,7 @@ export class IbanService {
   /**
    * Provisions a new virtual global account for a user.
    */
-  static async provisionGlobalAccount(userId: string, currency: string) {
+  static async provisionGlobalAccount(userId: string, currency: string, userName?: string) {
     console.log(`🌍 Provisioning ${currency} account for User ${userId}...`);
 
     const prefixes: Record<string, string> = {
@@ -29,7 +29,7 @@ export class IbanService {
            console.log(`🔧 Patching missing metadata for Wallet ${existingWallet.id}...`);
            const iban = (prefixes[currency] || 'PP00') + Math.random().toString().slice(2, 14);
            details = {
-               accountHolder: "Paypee / TechStream Ltd",
+               accountHolder: userName || "Paypee / TechStream Ltd",
                iban: iban,
                bic: 'PAYPBEBB',
                bankName: 'Paypee Global Clearing',
@@ -61,7 +61,7 @@ export class IbanService {
         currency: currency as Currency,
         balance: 0.00,
         metadata: {
-           accountHolder: "Paypee / TechStream Ltd",
+           accountHolder: userName || "Paypee / TechStream Ltd",
            iban: iban,
            bic: bic,
            bankName: bankName,
@@ -74,7 +74,7 @@ export class IbanService {
       walletId: wallet.id,
       currency,
       accountDetails: {
-        accountHolder: "Paypee / TechStream Ltd",
+        accountHolder: userName || "Paypee / TechStream Ltd",
         iban: iban,
         bic: bic,
         bankName: bankName,

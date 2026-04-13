@@ -159,7 +159,8 @@ app.get('/api/users/me', authenticateToken, async (req: any, res: any): Promise<
        console.log(`🔄 Auto-syncing metadata for user ${user.id}...`);
        await Promise.all(wallets.map(w => {
           if (!w.metadata) {
-             return IbanService.provisionGlobalAccount(user.id, w.currency);
+             const name = user.businessName || `${user.firstName} ${user.lastName}`;
+             return IbanService.provisionGlobalAccount(user.id, w.currency, name);
           }
           return Promise.resolve();
        }));
@@ -776,7 +777,9 @@ app.post('/api/accounts/provision', authenticateToken, async (req: any, res: any
     if (!['USD', 'EUR', 'GBP', 'NGN', 'BTC'].includes(currency)) {
       return res.status(400).json({ error: 'Unsupported currency for account generation.' });
     }
-    const account = await IbanService.provisionGlobalAccount(req.user.userId, currency);
+    const user = await prisma.user.findUnique({ where: { id: req.user.userId } });
+    const name = user?.businessName || `${user?.firstName} ${user?.lastName}`;
+    const account = await IbanService.provisionGlobalAccount(req.user.userId, currency, name);
     res.status(201).json(account);
   } catch (error) {
     res.status(500).json({ error: 'Failed to provision global IBAN' });

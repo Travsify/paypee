@@ -33,6 +33,7 @@ import AiAdvisor from './AiAdvisor';
 import VaultsDashboard from './VaultsDashboard';
 import BillsDashboard from './BillsDashboard';
 import AccountCreationModal from './AccountCreationModal';
+import BalanceCard from './components/BalanceCard';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart as ReBarChart, Bar, Cell } from 'recharts';
 
 const SidebarItem = ({ icon: Icon, label, active = false, onClick }: { icon: any, label: string, active?: boolean, onClick?: () => void }) => (
@@ -242,22 +243,30 @@ const BusinessDashboard = ({ onLogout }: { onLogout?: () => void }) => {
             {activeSection === 'wallets' && (
               <div style={{ padding: '1rem' }}>
               <h2 style={{ fontSize: '1.8rem', fontWeight: 700, marginBottom: '2rem' }}>Treasury Accounts</h2>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.5rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '2rem' }}>
                 {userData?.wallets?.map((w: any) => {
-                  const details = w.metadata ? (typeof w.metadata === 'string' ? JSON.parse(w.metadata) : w.metadata) : {};
+                  const symbols: any = { USD: '$', EUR: '€', GBP: '£', NGN: '₦' };
+                  const gradients: any = {
+                    USD: "linear-gradient(135deg, #6366f1 0%, #a855f7 100%)",
+                    EUR: "linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)",
+                    GBP: "linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%)",
+                    NGN: "linear-gradient(135deg, #10b981 0%, #059669 100%)"
+                  };
                   return (
-                    <div key={w.id} style={{ padding: '2rem', borderRadius: '24px', background: 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)', border: '1px solid rgba(255,255,255,0.1)', position: 'relative', overflow: 'hidden' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '1.5rem', fontWeight: 800, letterSpacing: '1px' }}>{w.currency} BUSINESS WALLET</div>
-                        <div style={{ background: 'rgba(16, 185, 129, 0.1)', color: '#10b981', padding: '0.3rem 0.6rem', borderRadius: '8px', fontSize: '0.65rem', fontWeight: 800 }}>ACTIVE</div>
-                      </div>
-                      <div style={{ fontSize: '2.5rem', fontWeight: 900, marginBottom: '2rem' }}>{w.currency === 'USD' ? '$' : w.currency === 'NGN' ? '₦' : w.currency === 'EUR' ? '€' : '£'}{parseFloat(w.balance).toFixed(2)}</div>
-                      <div style={{ padding: '1.25rem', background: 'rgba(255,255,255,0.03)', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                         <div style={{ fontSize: '0.65rem', opacity: 0.6, textTransform: 'uppercase', marginBottom: '0.4rem', fontWeight: 800 }}>Bank Account Details</div>
-                         <div style={{ fontSize: '0.85rem', fontWeight: 800, fontFamily: 'monospace' }}>{details.iban || details.accountNumber || details.account_number || details.address || 'PENDING...'}</div>
-                         <div style={{ fontSize: '0.75rem', opacity: 0.9, marginTop: '0.3rem', fontWeight: 600 }}>{details.bankName || details.bank_name || 'Integrated Bank Network'}</div>
-                      </div>
-                    </div>
+                    <BalanceCard 
+                      key={w.id}
+                      currency={w.currency}
+                      symbol={symbols[w.currency] || w.currency}
+                      amount={parseFloat(w.balance).toFixed(2)}
+                      gradient={gradients[w.currency] || "linear-gradient(135deg, #1e293b 0%, #0f172a 100%)"}
+                      details={w.metadata ? (typeof w.metadata === 'string' ? JSON.parse(w.metadata) : w.metadata) : {}}
+                      userName={userData?.businessName || userData?.firstName}
+                      type="BUSINESS"
+                    />
+                  );
+                })}
+              </div>
+div>
                   );
                 })}
                 <motion.div 
