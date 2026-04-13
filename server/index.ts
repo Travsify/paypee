@@ -504,7 +504,7 @@ app.post('/api/payment-links', authenticateToken, async (req: any, res: any): Pr
 
 app.get('/api/pub/payment-links/:slug', async (req: Request, res: Response): Promise<any> => {
    try {
-      const { slug } = req.params;
+      const slug = req.params.slug as string;
       const link = await prisma.paymentLink.findUnique({
          where: { slug },
          include: { user: { select: { businessName: true, firstName: true } } }
