@@ -134,7 +134,7 @@ const BusinessDashboard = ({ onLogout }: { onLogout?: () => void }) => {
         </div>
 
         <div style={{ flex: 1 }}>
-          <SidebarItem icon={LayoutDashboard} label="Treasury Dashboard" active={activeSection === 'dashboard'} onClick={() => setActiveSection('dashboard')} />
+           <SidebarItem icon={LayoutDashboard} label="Treasury Dashboard" active={activeSection === 'dashboard'} onClick={() => setActiveSection('dashboard')} />
           <SidebarItem icon={Layers} label="Accounts & IBANs" active={activeSection === 'accounts'} onClick={() => setActiveSection('accounts')} />
           <SidebarItem icon={Users} label="Payroll Engine" active={activeSection === 'payroll'} onClick={() => setActiveSection('payroll')} />
           <SidebarItem icon={Send} label="Bulk Payouts" active={activeSection === 'payouts'} onClick={() => setActiveSection('payouts')} />
@@ -151,8 +151,103 @@ const BusinessDashboard = ({ onLogout }: { onLogout?: () => void }) => {
 
       {/* Main Content */}
       <main style={{ flex: 1, overflowY: 'auto', padding: '2rem 3rem' }}>
-         {activeSection === 'settings' ? (
+          {activeSection === 'settings' ? (
            <SettingsView />
+         ) : activeSection === 'accounts' ? (
+           <div style={{ padding: '1rem' }}>
+              <h2 style={{ fontSize: '1.8rem', fontWeight: 700, marginBottom: '2rem' }}>Global Virtual Accounts</h2>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))', gap: '2rem' }}>
+                {userData?.wallets?.map((w: any) => (
+                  <div key={w.id} style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border)', borderRadius: '24px', padding: '2rem' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
+                      <Building2 size={32} color="var(--primary)" />
+                      <div style={{ textAlign: 'right' }}>
+                        <div style={{ fontWeight: 800 }}>{w.currency} Account</div>
+                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Paypee Direct</div>
+                      </div>
+                    </div>
+                    <div style={{ marginBottom: '1.5rem' }}>
+                      <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginBottom: '0.2rem' }}>ACCOUNT NUMBER</div>
+                      <div style={{ fontSize: '1.2rem', fontWeight: 700, letterSpacing: '1px' }}>0123456789</div>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '1rem' }}>
+                      <div style={{ fontWeight: 800, color: 'var(--accent)' }}>{w.currency} {parseFloat(w.balance).toFixed(2)}</div>
+                      <button style={{ color: 'var(--primary)', background: 'transparent', border: 'none', fontWeight: 700, cursor: 'pointer', fontSize: '0.8rem' }}>View Details</button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+           </div>
+         ) : activeSection === 'payroll' ? (
+            <div style={{ padding: '1rem', textAlign: 'center' }}>
+              <Users size={80} color="var(--primary)" style={{ opacity: 0.2, marginBottom: '2rem' }} />
+              <h2 style={{ fontSize: '1.8rem', fontWeight: 800, marginBottom: '1rem' }}>Payroll Engine</h2>
+              <p style={{ color: 'var(--text-muted)', marginBottom: '3rem' }}>Schedule and automate salary payments for your global team.</p>
+              <button style={{ background: 'var(--primary)', color: '#fff', border: 'none', padding: '1.2rem 2.5rem', borderRadius: '16px', fontWeight: 700, cursor: 'pointer' }}>Initialize Payroll Run</button>
+            </div>
+         ) : activeSection === 'payouts' ? (
+            <div style={{ padding: '1rem' }}>
+              <h2 style={{ fontSize: '1.8rem', fontWeight: 700, marginBottom: '2rem' }}>Bulk Payouts</h2>
+              <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border)', borderRadius: '24px', padding: '3rem', textAlign: 'center' }}>
+                <Send size={60} color="var(--primary)" style={{ marginBottom: '1.5rem' }} />
+                <h3 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '1rem' }}>Instant Global Disbursements</h3>
+                <p style={{ color: 'var(--text-muted)', marginBottom: '2rem', maxWidth: '500px', margin: '0 auto 2.5rem' }}>Upload a CSV file to pay up to 5,000 recipients across 140+ countries instantly via the Bitnob network.</p>
+                <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem' }}>
+                  <button style={{ background: 'var(--primary)', color: '#fff', border: 'none', padding: '1rem 2rem', borderRadius: '12px', fontWeight: 700, cursor: 'pointer' }}>Upload CSV</button>
+                  <button style={{ background: 'rgba(255,255,255,0.05)', color: '#fff', border: '1px solid var(--border)', padding: '1rem 2rem', borderRadius: '12px', fontWeight: 700, cursor: 'pointer' }}>Manual Entry</button>
+                </div>
+              </div>
+            </div>
+         ) : activeSection === 'analytics' ? (
+            <div style={{ padding: '1rem' }}>
+              <h2 style={{ fontSize: '1.8rem', fontWeight: 700, marginBottom: '2rem' }}>Flow Analytics</h2>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1.5rem', marginBottom: '2rem' }}>
+                <MetricCard label="Net Inbound" value="$14,200.00" trend="+18.2%" icon={ArrowDownLeft} color="#10b981" />
+                <MetricCard label="Net Outbound" value="$8,400.00" trend="-4.1%" icon={ArrowUpRight} color="#f43f5e" />
+                <MetricCard label="Average TX Fee" value="$0.12" trend="-15%" icon={Zap} color="var(--secondary)" />
+              </div>
+              <div style={{ height: '300px', background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border)', borderRadius: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)' }}>
+                [Interactive Flow Chart Coming Soon]
+              </div>
+            </div>
+         ) : activeSection === 'tax' ? (
+            <div style={{ padding: '1rem' }}>
+              <h2 style={{ fontSize: '1.8rem', fontWeight: 700, marginBottom: '2rem' }}>Tax Compliance</h2>
+              <div style={{ display: 'grid', gap: '1.5rem' }}>
+                {[
+                  { name: 'VAT/GST Report - Q1 2026', date: 'March 2026', size: '2.4 MB' },
+                  { name: 'Withholding Tax Certs', date: 'Feb 2026', size: '1.1 MB' },
+                  { name: 'Annual Corporate Return', date: 'Jan 2026', size: '15.8 MB' }
+                ].map((doc, i) => (
+                  <div key={i} style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border)', borderRadius: '20px', padding: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
+                      <FileText size={24} color="var(--primary)" />
+                      <div>
+                        <div style={{ fontWeight: 700 }}>{doc.name}</div>
+                        <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{doc.date} • {doc.size}</div>
+                      </div>
+                    </div>
+                    <button style={{ color: 'var(--primary)', background: 'rgba(99, 102, 241, 0.1)', border: 'none', padding: '0.6rem 1.2rem', borderRadius: '10px', fontWeight: 700, cursor: 'pointer' }}>Download PDF</button>
+                  </div>
+                ))}
+              </div>
+            </div>
+         ) : activeSection === 'help' ? (
+            <div style={{ padding: '1rem', textAlign: 'center', maxWidth: '600px', margin: '0 auto' }}>
+              <HelpCircle size={80} color="var(--secondary)" style={{ marginBottom: '2rem' }} />
+              <h2 style={{ fontSize: '2rem', fontWeight: 800, marginBottom: '1rem' }}>Business Support Center</h2>
+              <p style={{ color: 'var(--text-muted)', marginBottom: '3rem' }}>Your dedicated account manager is available for priority treasury assistance.</p>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border)', padding: '2rem', borderRadius: '24px' }}>
+                  <h4 style={{ marginBottom: '0.5rem' }}>Direct Line</h4>
+                  <div style={{ color: 'var(--primary)', fontWeight: 700 }}>+1 800-PAYPEE-BIZ</div>
+                </div>
+                <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border)', padding: '2rem', borderRadius: '24px' }}>
+                  <h4 style={{ marginBottom: '0.5rem' }}>Enterprise Support</h4>
+                  <div style={{ color: 'var(--secondary)', fontWeight: 700 }}>biz-support@paypee.com</div>
+                </div>
+              </div>
+            </div>
          ) : (
            <>
             {/* Header */}

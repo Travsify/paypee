@@ -150,8 +150,104 @@ const DeveloperDashboard = ({ onLogout }: { onLogout?: () => void }) => {
 
       {/* Main Content */}
       <main style={{ flex: 1, overflowY: 'auto', padding: '2rem 3rem' }}>
-         {activeSection === 'settings' ? (
+          {activeSection === 'settings' ? (
            <SettingsView />
+         ) : activeSection === 'apikeys' ? (
+            <div style={{ padding: '1rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+                <h2 style={{ fontSize: '1.8rem', fontWeight: 700 }}>API Authentication Keys</h2>
+                <button style={{ background: 'var(--primary)', color: '#fff', border: 'none', padding: '0.8rem 1.5rem', borderRadius: '14px', fontWeight: 600, cursor: 'pointer' }}>Generate New KeyPair</button>
+              </div>
+              <div style={{ display: 'grid', gap: '2rem' }}>
+                <APIKeyCard label="Primary Secret Key" keyVal={apiKeys.length > 0 ? apiKeys[0].key : "sk_live_hidden_example"} isLive={mode === 'live'} />
+                <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border)', borderRadius: '24px', padding: '2rem' }}>
+                  <h3 style={{ fontSize: '1.2rem', fontWeight: 700, marginBottom: '1rem' }}>Restricted Keys</h3>
+                  <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '1.5rem' }}>Create keys with scoped permissions for specific features like Card Issuing or Payouts only.</p>
+                  <button style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border)', color: '#fff', padding: '0.8rem 1.5rem', borderRadius: '12px', fontWeight: 600, cursor: 'pointer' }}>Create Scoped Key</button>
+                </div>
+              </div>
+            </div>
+         ) : activeSection === 'webhooks' ? (
+            <div style={{ padding: '1rem' }}>
+              <h2 style={{ fontSize: '1.8rem', fontWeight: 700, marginBottom: '2rem' }}>Webhook Management</h2>
+              <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border)', borderRadius: '24px', padding: '2.5rem' }}>
+                <div style={{ marginBottom: '2.5rem' }}>
+                   <label style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '0.8rem', fontWeight: 600 }}>LISTENER URL</label>
+                   <input type="text" placeholder="https://your-server.com/paypee-webhook" style={{ width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border)', padding: '1rem', borderRadius: '14px', color: '#fff', outline: 'none' }} />
+                </div>
+                <div>
+                   <label style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '1.5rem', fontWeight: 600 }}>EVENT SUBSCRIPTIONS</label>
+                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1rem' }}>
+                     {['transfer.success', 'transfer.failed', 'card.created', 'card.charged', 'wallet.funded', 'kyc.updated'].map((e, idx) => (
+                       <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '1rem', background: 'rgba(255,255,255,0.02)', padding: '1rem', borderRadius: '12px', border: '1px solid var(--border)' }}>
+                         <input type="checkbox" defaultChecked={idx < 3} style={{ width: '18px', height: '18px', accentColor: 'var(--primary)' }} />
+                         <span style={{ fontSize: '0.9rem', fontWeight: 600 }}>{e}</span>
+                       </div>
+                     ))}
+                   </div>
+                </div>
+                <button style={{ marginTop: '2.5rem', width: '100%', background: 'var(--primary)', color: '#fff', border: 'none', padding: '1.2rem', borderRadius: '16px', fontWeight: 700, cursor: 'pointer' }}>Save Webhook Configuration</button>
+              </div>
+            </div>
+         ) : activeSection === 'logs' ? (
+            <div style={{ padding: '1rem' }}>
+              <h2 style={{ fontSize: '1.8rem', fontWeight: 700, marginBottom: '2rem' }}>Traffic Logs</h2>
+              <div style={{ background: '#0a0f1e', border: '1px solid var(--border)', borderRadius: '24px', overflow: 'hidden' }}>
+                <div style={{ padding: '1.5rem', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div style={{ display: 'flex', gap: '1rem' }}>
+                    <div style={{ padding: '0.5rem 1rem', background: 'var(--primary)', borderRadius: '8px', fontSize: '0.8rem', fontWeight: 600 }}>All Events</div>
+                    <div style={{ padding: '0.5rem 1rem', background: 'rgba(255,255,255,0.05)', borderRadius: '8px', fontSize: '0.8rem', fontWeight: 600 }}>Errors</div>
+                  </div>
+                  <Search size={18} color="var(--text-muted)" />
+                </div>
+                <div style={{ padding: '1rem' }}>
+                   {[1,2,3,4,5,6,7,8].map(i => (
+                     <div key={i} style={{ display: 'flex', justifyContent: 'space-between', padding: '1rem', borderBottom: '1px solid rgba(255,255,255,0.05)', fontSize: '0.85rem' }}>
+                        <div style={{ display: 'flex', gap: '2rem', flex: 2 }}>
+                           <span style={{ color: i % 3 === 0 ? '#f43f5e' : '#10b981', fontWeight: 800 }}>{i % 3 === 0 ? '400' : '200'}</span>
+                           <span style={{ fontWeight: 700 }}>POST</span>
+                           <span style={{ fontFamily: 'monospace', opacity: 0.7 }}>/v1/payouts/execute</span>
+                        </div>
+                        <div style={{ flex: 1, color: 'var(--text-muted)' }}>{20 + i}ms</div>
+                        <div style={{ flex: 1, textAlign: 'right', color: 'var(--text-muted)', fontSize: '0.75rem' }}>2 mins ago</div>
+                     </div>
+                   ))}
+                </div>
+              </div>
+            </div>
+         ) : activeSection === 'docs' ? (
+            <div style={{ padding: '1rem' }}>
+               <h2 style={{ fontSize: '1.8rem', fontWeight: 700, marginBottom: '2rem' }}>Integration SDKs</h2>
+               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.5rem' }}>
+                 {[
+                   { name: 'Node.js SDK', version: 'v2.4.1', color: '#68a063' },
+                   { name: 'Python SDK', version: 'v1.12.0', color: '#3776ab' },
+                   { name: 'Ruby Gem', version: 'v0.9.4', color: '#cc342d' },
+                   { name: 'Go Module', version: 'v1.0.1', color: '#00add8' }
+                 ].map((sdk, i) => (
+                   <div key={i} style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border)', padding: '2rem', borderRadius: '24px' }}>
+                     <div style={{ width: '50px', height: '50px', background: sdk.color + '22', borderRadius: '14px', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center', color: sdk.color }}>
+                       <Cpu size={28} />
+                     </div>
+                     <h3 style={{ fontSize: '1.2rem', fontWeight: 700, marginBottom: '0.5rem' }}>{sdk.name}</h3>
+                     <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '1.5rem' }}>Latest Version: {sdk.version}</div>
+                     <button style={{ width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border)', color: '#fff', padding: '0.8rem', borderRadius: '12px', fontWeight: 600 }}>Install via CLI</button>
+                   </div>
+                 ))}
+               </div>
+            </div>
+         ) : activeSection === 'support' ? (
+            <div style={{ padding: '1rem', textAlign: 'center', maxWidth: '600px', margin: '0 auto' }}>
+              <Terminal size={80} color="var(--primary)" style={{ opacity: 0.4, marginBottom: '2rem' }} />
+              <h2 style={{ fontSize: '2rem', fontWeight: 800, marginBottom: '1rem' }}>API Engineering Support</h2>
+              <p style={{ color: 'var(--text-muted)', marginBottom: '2.5rem' }}>Direct Slack access to our core infrastructure team is available for all production-grade accounts.</p>
+              <div style={{ display: 'grid', gap: '1rem' }}>
+                <button style={{ background: 'var(--primary)', color: '#fff', border: 'none', padding: '1.2rem', borderRadius: '16px', fontWeight: 700, cursor: 'pointer' }}>Join Dev Slack Community</button>
+                <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border)', padding: '1.5rem', borderRadius: '16px', fontSize: '0.9rem', color: 'var(--text-muted)' }}>
+                  Technical Documentation: <span style={{ color: 'var(--primary)', fontWeight: 600, cursor: 'pointer' }}>docs.paypee.com</span>
+                </div>
+              </div>
+            </div>
          ) : (
            <>
             {/* Header */}
