@@ -127,9 +127,24 @@ const BusinessDashboard = ({ onLogout }: { onLogout?: () => void }) => {
   const statLabelStyle: React.CSSProperties = { fontSize: '0.65rem', fontWeight: 800, color: '#475569', letterSpacing: '1px', display: 'block', marginBottom: '1rem' };
   const statValueStyle: React.CSSProperties = { fontSize: '1.75rem', fontWeight: 800, marginBottom: '0.5rem' };
 
+  const isVerified = userData?.kycStatus === 'VERIFIED';
+
+  const navigate = (section: string) => {
+    const openSections = ['dashboard', 'settings', 'members'];
+    if (!isVerified && !openSections.includes(section)) {
+      setActiveSection('kyc_blocked');
+      return;
+    }
+    setActiveSection(section);
+  };
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', background: '#020617', color: '#fff', overflow: 'hidden' }}>
-      <VerificationGate kycStatus={userData?.kycStatus || 'PENDING'} accountType="BUSINESS" />
+      <VerificationGate 
+        kycStatus={userData?.kycStatus || 'PENDING'} 
+        accountType="BUSINESS"
+        onStatusChange={(status) => setUserData((prev: any) => ({ ...prev, kycStatus: status }))}
+      />
       <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
         {/* Sidebar */}
       <aside style={{ 
@@ -146,18 +161,18 @@ const BusinessDashboard = ({ onLogout }: { onLogout?: () => void }) => {
         </div>
 
         <div style={{ flex: 1 }}>
-           <SidebarItem icon={LayoutDashboard} label="Treasury Dashboard" active={activeSection === 'dashboard'} onClick={() => setActiveSection('dashboard')} />
-           <SidebarItem icon={BarChart3} label="Analytics" active={activeSection === 'analytics'} onClick={() => setActiveSection('analytics')} />
-           <SidebarItem icon={Users} label="Payroll Engine" active={activeSection === 'payroll'} onClick={() => setActiveSection('payroll')} />
-           <SidebarItem icon={Send} label="Bulk Payouts" active={activeSection === 'payouts'} onClick={() => setActiveSection('payouts')} />
-           <SidebarItem icon={Lock} label="Global Vaults" active={activeSection === 'vaults'} onClick={() => setActiveSection('vaults')} />
-           <SidebarItem icon={Zap} label="Utility Payments" active={activeSection === 'bills'} onClick={() => setActiveSection('bills')} />
-           <SidebarItem icon={Bot} label="AI Advisor" active={activeSection === 'ai'} onClick={() => setActiveSection('ai')} />
-           <SidebarItem icon={FileText} label="Tax Reports" active={activeSection === 'tax'} onClick={() => setActiveSection('tax')} />
+           <SidebarItem icon={LayoutDashboard} label="Treasury Dashboard" active={activeSection === 'dashboard'} onClick={() => navigate('dashboard')} />
+           <SidebarItem icon={BarChart3} label="Analytics" active={activeSection === 'analytics'} onClick={() => navigate('analytics')} />
+           <SidebarItem icon={Users} label="Payroll Engine" active={activeSection === 'payroll'} onClick={() => navigate('payroll')} />
+           <SidebarItem icon={Send} label="Bulk Payouts" active={activeSection === 'payouts'} onClick={() => navigate('payouts')} />
+           <SidebarItem icon={Lock} label="Global Vaults" active={activeSection === 'vaults'} onClick={() => navigate('vaults')} />
+           <SidebarItem icon={Zap} label="Utility Payments" active={activeSection === 'bills'} onClick={() => navigate('bills')} />
+           <SidebarItem icon={Bot} label="AI Advisor" active={activeSection === 'ai'} onClick={() => navigate('ai')} />
+           <SidebarItem icon={FileText} label="Tax Reports" active={activeSection === 'tax'} onClick={() => navigate('tax')} />
         </div>
 
         <div>
-          <SidebarItem icon={Settings} label="Admin Settings" active={activeSection === 'settings'} onClick={() => setActiveSection('settings')} />
+          <SidebarItem icon={Settings} label="Admin Settings" active={activeSection === 'settings'} onClick={() => navigate('settings')} />
           <SidebarItem icon={HelpCircle} label="Help Center" active={activeSection === 'help'} onClick={() => setActiveSection('help')} />
           <SidebarItem icon={LogOut} label="Log Out" onClick={onLogout} />
         </div>
@@ -165,6 +180,23 @@ const BusinessDashboard = ({ onLogout }: { onLogout?: () => void }) => {
 
       {/* Main Content */}
       <main style={{ flex: 1, overflowY: 'auto', padding: '2rem 3rem' }}>
+            {activeSection === 'kyc_blocked' && (
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '70vh', textAlign: 'center', gap: '1.5rem' }}>
+                <div style={{ width: 80, height: 80, background: 'rgba(99,102,241,0.1)', borderRadius: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#6366f1' }}>
+                  <ShieldCheck size={40} />
+                </div>
+                <h2 style={{ fontSize: '1.8rem', fontWeight: 800 }}>KYB Verification Required</h2>
+                <p style={{ color: '#64748b', maxWidth: '420px', lineHeight: 1.7 }}>
+                  This feature is locked until your business is verified. Complete your KYB to unlock Treasury, Analytics, Payroll, Bulk Payouts, Vaults, and all enterprise features.
+                </p>
+                <button
+                  onClick={() => setActiveSection('dashboard')}
+                  style={{ background: '#6366f1', color: '#fff', border: 'none', padding: '0.9rem 2.5rem', borderRadius: '12px', fontWeight: 700, cursor: 'pointer', fontSize: '1rem' }}
+                >
+                  Return to Dashboard
+                </button>
+              </div>
+            )}
             {activeSection === 'ai' && <AiAdvisor />}
             {activeSection === 'vaults' && <VaultsDashboard />}
             {activeSection === 'bills' && <BillsDashboard />}

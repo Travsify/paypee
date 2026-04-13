@@ -87,25 +87,24 @@ const IndividualDashboard = ({ onLogout }: { onLogout: () => void }) => {
     fetchUserData();
   }, []);
 
-  const fetchUserData = () => {
+  const fetchUserData = async () => {
     const token = localStorage.getItem('paypee_token');
     const headers = { 'Authorization': `Bearer ${token}` };
-
-    fetch('https://paypee-api.onrender.com/api/users/me', { headers })
-      .then(res => res.json())
-      .then(data => {
-        setUserData(data);
-        if (data.wallets && data.wallets.length > 0) {
-           // For now just show mock transactions
-           setTransactions([
-             { id: '1', type: 'DEPOSIT', amount: '250.00', status: 'COMPLETED', date: '2026-04-12', desc: 'Wallet Funding via Bitnob' },
-             { id: '2', type: 'CARD_PAYMENT', amount: '45.20', status: 'COMPLETED', date: '2026-04-11', desc: 'Uber Trip' },
-             { id: '3', type: 'TRANSFER', amount: '1,200.00', status: 'PENDING', date: '2026-04-13', desc: 'Transfer to J. Doe' }
-           ]);
-           // Mock card
-           setCards([{ id: 'c1', cardNumber: '4242424242424491', expiry: '12/28', status: 'ACTIVE', dailyLimit: '2,500.00' }]);
-        }
-      });
+    try {
+      const [userRes, txRes, cardRes] = await Promise.all([
+        fetch('https://paypee-api.onrender.com/api/users/me', { headers }),
+        fetch('https://paypee-api.onrender.com/api/transactions', { headers }),
+        fetch('https://paypee-api.onrender.com/api/cards', { headers })
+      ]);
+      const user = await userRes.json();
+      const txData = txRes.ok ? await txRes.json() : [];
+      const cardData = cardRes.ok ? await cardRes.json() : [];
+      setUserData(user);
+      setTransactions(Array.isArray(txData) ? txData : []);
+      setCards(Array.isArray(cardData) ? cardData : []);
+    } catch (err) {
+      console.error('Failed to load user data:', err);
+    }
   };
 
   const getWalletBalance = () => {
@@ -147,10 +146,25 @@ const IndividualDashboard = ({ onLogout }: { onLogout: () => void }) => {
     }
   };
 
+  const isVerified = userData?.kycStatus === 'VERIFIED';
+
+  // Block navigation to protected sections until verified
+  const navigate = (section: string) => {
+    const openSections = ['overview', 'settings', 'support'];
+    if (!isVerified && !openSections.includes(section)) {
+      setActiveSection('kyc_blocked');
+      return;
+    }
+    setActiveSection(section);
+  };
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', background: '#020617', color: '#fff', overflow: 'hidden' }}>
-      <VerificationGate kycStatus={userData?.kycStatus || 'PENDING'} accountType="INDIVIDUAL" />
-      
+      <VerificationGate 
+        kycStatus={userData?.kycStatus || 'PENDING'} 
+        accountType="INDIVIDUAL"
+        onStatusChange={(status) => setUserData((prev: any) => ({ ...prev, kycStatus: status }))}
+      />
       <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
       {/* Sidebar */}
       <aside style={{ width: '280px', background: '#0a0f1e', borderRight: '1px solid var(--border)', padding: '2rem 1rem', display: 'flex', flexDirection: 'column' }}>
@@ -162,25 +176,41 @@ const IndividualDashboard = ({ onLogout }: { onLogout: () => void }) => {
         </div>
 
         <div style={{ flex: 1 }}>
-          <SidebarItem icon={Wallet} label="Overview" active={activeSection === 'overview'} onClick={() => setActiveSection('overview')} />
-           <SidebarItem icon={Wallet} label="Overview" active={activeSection === 'overview'} onClick={() => setActiveSection('overview')} />
-           <SidebarItem icon={CreditCard} label="Virtual Cards" active={activeSection === 'cards'} onClick={() => setActiveSection('cards')} />
-           <SidebarItem icon={Lock} label="Smart Vaults" active={activeSection === 'vaults'} onClick={() => setActiveSection('vaults')} />
-           <SidebarItem icon={Zap} label="Bill Payments" active={activeSection === 'bills'} onClick={() => setActiveSection('bills')} />
-           <SidebarItem icon={Bot} label="AI Advisor" active={activeSection === 'ai'} onClick={() => setActiveSection('ai')} />
-          <SidebarItem icon={History} label="Transactions" active={activeSection === 'history'} onClick={() => setActiveSection('history')} />
-          <SidebarItem icon={ShieldCheck} label="Security" active={activeSection === 'security'} onClick={() => setActiveSection('security')} />
+          <SidebarItem icon={Wallet} label="Overview" active={activeSection === 'overview'} onClick={() => navigate('overview')} />
+          <SidebarItem icon={CreditCard} label="Virtual Cards" active={activeSection === 'cards'} onClick={() => navigate('cards')} />
+          <SidebarItem icon={Lock} label="Smart Vaults" active={activeSection === 'vaults'} onClick={() => navigate('vaults')} />
+          <SidebarItem icon={Zap} label="Bill Payments" active={activeSection === 'bills'} onClick={() => navigate('bills')} />
+          <SidebarItem icon={Bot} label="AI Advisor" active={activeSection === 'ai'} onClick={() => navigate('ai')} />
+          <SidebarItem icon={History} label="Transactions" active={activeSection === 'history'} onClick={() => navigate('history')} />
+          <SidebarItem icon={ShieldCheck} label="Security" active={activeSection === 'security'} onClick={() => navigate('security')} />
         </div>
 
         <div>
-          <SidebarItem icon={Settings} label="Settings" active={activeSection === 'settings'} onClick={() => setActiveSection('settings')} />
-          <SidebarItem icon={HelpCircle} label="Support" active={activeSection === 'support'} onClick={() => setActiveSection('support')} />
+          <SidebarItem icon={Settings} label="Settings" active={activeSection === 'settings'} onClick={() => navigate('settings')} />
+          <SidebarItem icon={HelpCircle} label="Support" active={activeSection === 'support'} onClick={() => navigate('support')} />
           <SidebarItem icon={LogOut} label="Log Out" onClick={onLogout} />
         </div>
       </aside>
 
       {/* Main Content */}
       <main style={{ flex: 1, padding: '2rem 3rem', overflowY: 'auto', position: 'relative' }}>
+        {activeSection === 'kyc_blocked' && (
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '70vh', textAlign: 'center', gap: '1.5rem' }}>
+            <div style={{ width: 80, height: 80, background: 'rgba(99,102,241,0.1)', borderRadius: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#6366f1' }}>
+              <ShieldCheck size={40} />
+            </div>
+            <h2 style={{ fontSize: '1.8rem', fontWeight: 800 }}>Verification Required</h2>
+            <p style={{ color: '#64748b', maxWidth: '400px', lineHeight: 1.7 }}>
+              This feature is locked until your identity is verified. Complete your KYC to unlock full access to all Paypee features including transfers, cards, and vaults.
+            </p>
+            <button
+              onClick={() => setActiveSection('overview')}
+              style={{ background: '#6366f1', color: '#fff', border: 'none', padding: '0.9rem 2.5rem', borderRadius: '12px', fontWeight: 700, cursor: 'pointer', fontSize: '1rem' }}
+            >
+              Return to Overview
+            </button>
+          </div>
+        )}
         {activeSection === 'vaults' && <VaultsDashboard />}
         {activeSection === 'bills' && <BillsDashboard />}
         {activeSection === 'ai' && <AiAdvisor />}

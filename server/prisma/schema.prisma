@@ -19,6 +19,7 @@ enum AccountRole {
 
 enum KycStatus {
   PENDING
+  PROCESSING
   VERIFIED
   REJECTED
 }
@@ -56,13 +57,14 @@ model User {
   createdAt    DateTime     @default(now())
   updatedAt    DateTime     @updatedAt
 
-  wallets      Wallet[]
-  cards        VirtualCard[]
-  transactions Transaction[]
-  apiKeys      ApiKey[]
-  paymentLinks PaymentLink[]
-  teamMembers  TeamMember[]
-  vaults       Vault[]
+  wallets       Wallet[]
+  cards         VirtualCard[]
+  transactions  Transaction[]
+  apiKeys       ApiKey[]
+  paymentLinks  PaymentLink[]
+  teamMembers   TeamMember[]
+  vaults        Vault[]
+  notifications Notification[]
 }
 
 model Wallet {
@@ -159,4 +161,16 @@ model ApiKey {
   createdAt    DateTime @default(now())
 
   user         User     @relation(fields: [userId], references: [id])
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String
+  title     String
+  message   String
+  type      String   @default("INFO") // INFO, SUCCESS, ERROR, WARNING
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id])
 }
