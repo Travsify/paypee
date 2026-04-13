@@ -478,10 +478,7 @@ const BusinessDashboard = ({ onLogout }: { onLogout?: () => void }) => {
                 <div style={{ padding: '0.6rem', background: 'rgba(255,255,255,0.05)', borderRadius: '12px', border: '1px solid var(--border)', cursor: 'pointer' }}>
                   <RefreshCcw size={18} color="var(--text-muted)" />
                 </div>
-                <div style={{ padding: '0.6rem', background: 'rgba(255,255,255,0.05)', borderRadius: '12px', border: '1px solid var(--border)', cursor: 'pointer', position: 'relative' }}>
-                  <Bell size={20} color="var(--text-muted)" />
-                  <div style={{ position: 'absolute', top: '0', right: '0', width: '8px', height: '8px', background: 'var(--secondary)', borderRadius: '50%', border: '2px solid #020617' }} />
-                </div>
+
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.4rem 0.8rem', background: 'rgba(255,255,255,0.05)', borderRadius: '14px', border: '1px solid var(--border)' }}>
                   <img 
                     src="https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah" 

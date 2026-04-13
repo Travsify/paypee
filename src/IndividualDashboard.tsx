@@ -219,17 +219,28 @@ const IndividualDashboard = ({ onLogout }: { onLogout: () => void }) => {
         )}
         {activeSection === 'wallets' && (
             <div style={{ padding: '1rem' }}>
-              <h2 style={{ fontSize: '1.8rem', fontWeight: 700, marginBottom: '2rem' }}>My Wallets</h2>
+              <h2 style={{ fontSize: '1.8rem', fontWeight: 700, marginBottom: '2rem' }}>My Accounts</h2>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.5rem' }}>
                 {userData?.wallets?.map((w: any) => (
-                  <BalanceCard key={w.id} currency={w.currency} symbol={w.currency === 'USD' ? '$' : '₦'} amount={parseFloat(w.balance).toFixed(2)} gradient="linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)" />
+                  <BalanceCard key={w.id} currency={w.currency} symbol={w.currency === 'USD' ? '$' : w.currency === 'NGN' ? '₦' : w.currency === 'EUR' ? '€' : '£'} amount={parseFloat(w.balance).toFixed(2)} gradient="linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)" />
                 ))}
                 <motion.div 
                   whileHover={{ y: -5 }}
+                  onClick={() => {
+                    if (userData?.kycStatus !== 'VERIFIED') {
+                      alert('Please complete verification first to generate Fincra accounts.');
+                      return;
+                    }
+                    const currency = window.prompt("Which currency? (USD, EUR, GBP, NGN)", "USD");
+                    if (currency) {
+                      alert(`Generating new ${currency.toUpperCase()} account via Fincra...`);
+                      // Fincra API call would go here
+                    }
+                  }}
                   style={{ border: '2px dashed var(--border)', borderRadius: '24px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '2rem', cursor: 'pointer', minHeight: '180px' }}
                 >
                   <Plus size={40} color="var(--text-muted)" style={{ marginBottom: '1rem' }} />
-                  <span style={{ fontWeight: 600, color: 'var(--text-muted)' }}>Request New Wallet</span>
+                  <span style={{ fontWeight: 600, color: 'var(--text-muted)' }}>Generate Account</span>
                 </motion.div>
               </div>
             </div>
@@ -403,9 +414,6 @@ const IndividualDashboard = ({ onLogout }: { onLogout: () => void }) => {
                    <p style={{ color: 'var(--text-muted)' }}>Welcome back to your high-speed financial command center.</p>
                  </div>
                  <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-                    <div style={{ padding: '0.6rem', background: 'rgba(255,255,255,0.05)', borderRadius: '12px', border: '1px solid var(--border)', cursor: 'pointer' }}>
-                       <Bell size={20} color="var(--text-muted)" />
-                    </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.4rem 0.8rem', background: 'rgba(255,255,255,0.05)', borderRadius: '14px', border: '1px solid var(--border)' }}>
                        <div style={{ width: 32, height: 32, background: 'var(--primary)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><User size={18} /></div>
                        <div style={{ fontSize: '0.85rem', fontWeight: 600 }}>{userData?.firstName || 'Profile'}</div>

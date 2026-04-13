@@ -79,15 +79,6 @@ app.post('/api/auth/register', async (req: Request, res: Response): Promise<any>
       data: userData
     });
 
-    // Auto-provision a default USD Wallet upon registration
-    await prisma.wallet.create({
-      data: {
-        userId: user.id,
-        currency: 'USD',
-        balance: 0.00
-      }
-    });
-
     const token = jwt.sign({ userId: user.id, role: user.role }, JWT_SECRET, { expiresIn: '12h' });
 
     res.status(201).json({

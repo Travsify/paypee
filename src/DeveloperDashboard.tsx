@@ -328,9 +328,6 @@ const DeveloperDashboard = ({ onLogout }: { onLogout?: () => void }) => {
                   <button onClick={() => setMode('sandbox')} style={{ background: mode === 'sandbox' ? 'var(--primary)' : 'transparent', color: '#fff', padding: '0.5rem 1.2rem', borderRadius: '99px', border: 'none', fontSize: '0.75rem', fontWeight: 700, cursor: 'pointer' }}>SANDBOX</button>
                   <button onClick={() => setMode('live')} style={{ background: mode === 'live' ? '#10b981' : 'transparent', color: '#fff', padding: '0.5rem 1.2rem', borderRadius: '99px', border: 'none', fontSize: '0.75rem', fontWeight: 700, cursor: 'pointer' }}>LIVE</button>
                 </div>
-                <div style={{ padding: '0.6rem', background: 'rgba(255,255,255,0.05)', borderRadius: '12px', border: '1px solid var(--border)', cursor: 'pointer' }}>
-                   <Bell size={20} color="var(--text-muted)" />
-                </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.4rem 0.8rem', background: 'rgba(255,255,255,0.05)', borderRadius: '14px', border: '1px solid var(--border)' }}>
                    <div style={{ width: 32, height: 32, background: 'var(--primary)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Code2 size={18} /></div>
                    <div style={{ fontSize: '0.85rem', fontWeight: 600 }}>{userData?.firstName || (userData ? userData.email.split('@')[0] : 'Dev_Admin')}</div>
