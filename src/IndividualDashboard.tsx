@@ -3,7 +3,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Wallet, 
   CreditCard, 
-  Send as SendIcon, 
   History, 
   ShieldCheck, 
   Settings, 
@@ -20,7 +19,10 @@ import {
   Smartphone,
   Lock,
   Bot,
-  LayoutDashboard
+  LayoutDashboard,
+  Activity,
+  ExternalLink,
+  Send
 } from 'lucide-react';
 import SettingsView from './SettingsView';
 import VerificationGate from './VerificationGate';
