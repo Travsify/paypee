@@ -22,7 +22,8 @@ import {
   LayoutDashboard,
   Activity,
   ExternalLink,
-  Send
+  Send,
+  Repeat
 } from 'lucide-react';
 import SettingsView from './SettingsView';
 import VerificationGate from './VerificationGate';
@@ -56,44 +57,60 @@ const SidebarItem = ({ icon: Icon, label, active = false, onClick }: { icon: any
   </motion.div>
 );
 
-const BalanceCard = ({ currency, symbol, amount, gradient, details }: { currency: string, symbol: string, amount: string, gradient: string, details?: any }) => (
-  <motion.div 
-    whileHover={{ y: -5 }}
-    style={{ 
-      padding: '2rem', 
-      borderRadius: '24px', 
-      background: gradient, 
-      color: '#fff', 
-      minWidth: '280px',
-      boxShadow: '0 20px 40px -10px rgba(0,0,0,0.3)',
-      position: 'relative',
-      overflow: 'hidden',
-      border: '1px solid rgba(255,255,255,0.1)'
-    }}
-  >
-    <div style={{ position: 'absolute', top: '-10%', right: '-10%', opacity: 0.1 }}>
-       <Wallet size={150} />
-    </div>
-    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-      <div style={{ marginBottom: '1.5rem', fontWeight: 800, fontSize: '0.7rem', letterSpacing: '2px', opacity: 0.8 }}>{currency} TREASURY NODE</div>
-      <div style={{ background: 'rgba(255,255,255,0.1)', padding: '0.4rem 0.8rem', borderRadius: '10px', fontSize: '0.7rem', fontWeight: 800 }}>LIVE</div>
-    </div>
-    <div style={{ fontSize: '2.5rem', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-      <span style={{ fontSize: '1.2rem', opacity: 0.7 }}>{symbol}</span>
-      {amount}
-    </div>
-    <div style={{ marginTop: '1.5rem', paddingTop: '1.2rem', borderTop: '1px solid rgba(255,255,255,0.1)' }}>
-       <div style={{ fontSize: '0.6rem', opacity: 0.6, textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '0.4rem', fontWeight: 800 }}>Primary Settlement ID</div>
-       <div style={{ fontSize: '0.85rem', fontWeight: 800, fontFamily: 'monospace', wordBreak: 'break-all' }}>
-         {details?.iban || details?.accountNumber || details?.account_number || details?.address || 'PROVISIONING_NODE...'}
-       </div>
-       <div style={{ fontSize: '0.7rem', opacity: 0.8, marginTop: '0.4rem', fontWeight: 600 }}>
-         {details?.bankName || details?.bank_name || 'Paypee High-Speed Rail'}
-       </div>
-    </div>
-    <div className="glow-overlay" />
-  </motion.div>
-);
+const getAccountNumber = (details: any) => {
+  if (!details) return null;
+  return details.iban || 
+         details.accountNumber || 
+         details.account_number || 
+         details.virtual_account_number || 
+         details.address || 
+         details.nuban;
+};
+
+const getBankName = (details: any) => {
+  if (!details) return null;
+  return details.bankName || details.bank_name || details.bank || details.provider;
+};
+
+const BalanceCard = ({ currency, symbol, amount, gradient, details }: { currency: string, symbol: string, amount: string, gradient: string, details?: any }) => {
+  const accNo = getAccountNumber(details);
+  const bank = getBankName(details);
+  
+  return (
+    <motion.div 
+      whileHover={{ y: -5 }}
+      style={{ 
+        padding: '2rem', 
+        borderRadius: '24px', 
+        background: gradient, 
+        color: '#fff', 
+        minWidth: '280px',
+        boxShadow: '0 20px 40px -10px rgba(0,0,0,0.3)',
+        position: 'relative',
+        overflow: 'hidden',
+        border: '1px solid rgba(255,255,255,0.1)'
+      }}
+    >
+      <div style={{ position: 'absolute', top: '-10%', right: '-10%', opacity: 0.1 }}>
+         <Wallet size={150} />
+      </div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+        <div style={{ marginBottom: '1.5rem', fontWeight: 800, fontSize: '0.75rem', letterSpacing: '1px', opacity: 0.9 }}>{currency} WALLET</div>
+        <div style={{ background: 'rgba(255,255,255,0.2)', padding: '0.4rem 0.8rem', borderRadius: '10px', fontSize: '0.7rem', fontWeight: 800 }}>ACTIVE</div>
+      </div>
+      <div style={{ fontSize: '2.5rem', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+        <span style={{ fontSize: '1.2rem', opacity: 0.7 }}>{symbol}</span>
+        {amount}
+      </div>
+      <div style={{ marginTop: '1.5rem', paddingTop: '1.2rem', borderTop: '1px solid rgba(255,255,255,0.1)' }}>
+         <div style={{ fontSize: '0.65rem', opacity: 0.6, textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '0.4rem', fontWeight: 800 }}>Account Number</div>
+         <div style={{ fontSize: '0.9rem', fontWeight: 800, fontFamily: 'monospace', wordBreak: 'break-all' }}>{accNo || 'GENERATING...'}</div>
+         <div style={{ fontSize: '0.75rem', opacity: 0.9, marginTop: '0.4rem', fontWeight: 600 }}>{bank || 'Provisioning Bank Details'}</div>
+      </div>
+      <div className="glow-overlay" />
+    </motion.div>
+  );
+};
 
 const IndividualDashboard = ({ onLogout }: { onLogout: () => void }) => {
   const [activeSection, setActiveSection] = useState('overview');
@@ -532,8 +549,8 @@ const IndividualDashboard = ({ onLogout }: { onLogout: () => void }) => {
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '3rem' }}>
                     <section>
                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                         <h2 style={{ fontSize: '1.25rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.75rem' }}><Activity size={22} color="var(--primary)" /> Live Nodes</h2>
-                         <button onClick={() => setActiveSection('wallets')} style={{ color: 'var(--primary)', background: 'transparent', border: 'none', fontWeight: 700, fontSize: '0.8rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>MANAGE_INFRA <ExternalLink size={14} /></button>
+                         <h2 style={{ fontSize: '1.25rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.75rem' }}><Activity size={22} color="var(--primary)" /> Smart Wallets</h2>
+                         <button onClick={fetchUserData} style={{ color: 'var(--primary)', background: 'transparent', border: 'none', fontWeight: 700, fontSize: '0.8rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>REFRESH STATUS <Repeat size={14} /></button>
                        </div>
                        <div style={{ display: 'flex', gap: '1.5rem', overflowX: 'auto', paddingBottom: '1rem', scrollbarWidth: 'none' }}>
                           {userData?.wallets && userData.wallets.length > 0 ? (
@@ -568,8 +585,8 @@ const IndividualDashboard = ({ onLogout }: { onLogout: () => void }) => {
 
                     <section>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                        <h2 style={{ fontSize: '1.25rem', fontWeight: 800 }}>Master Ledger</h2>
-                        <button onClick={() => setActiveSection('history')} style={{ color: 'var(--primary)', background: 'transparent', border: 'none', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.4rem', cursor: 'pointer', fontSize: '0.8rem' }}>STREAM_VIEW <ChevronRight size={16} /></button>
+                        <h2 style={{ fontSize: '1.25rem', fontWeight: 800 }}>History</h2>
+                        <button onClick={() => setActiveSection('history')} style={{ color: 'var(--primary)', background: 'transparent', border: 'none', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.4rem', cursor: 'pointer', fontSize: '0.8rem' }}>VIEW ALL <ChevronRight size={16} /></button>
                       </div>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                         {transactions.length > 0 ? transactions.slice(0, 4).map((tx, i) => (
