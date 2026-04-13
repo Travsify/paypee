@@ -1,6 +1,42 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Wallet, ShieldCheck } from 'lucide-react';
+import { Wallet, ShieldCheck, Copy, Check } from 'lucide-react';
+
+const CopyButton = ({ text, label }: { text: string, label: string }) => {
+  const [copied, setCopied] = useState(false);
+  
+  const handleCopy = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!text) return;
+    navigator.clipboard.writeText(text);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1500);
+  };
+
+  return (
+    <motion.div 
+      whileHover={{ scale: 1.1 }}
+      whileTap={{ scale: 0.9 }}
+      onClick={handleCopy}
+      style={{ 
+        display: 'flex', 
+        alignItems: 'center', 
+        gap: '0.4rem', 
+        padding: '0.2rem 0.5rem', 
+        borderRadius: '6px', 
+        background: copied ? 'rgba(16, 185, 129, 0.1)' : 'rgba(0,0,0,0.05)',
+        cursor: 'pointer',
+        transition: 'all 0.2s',
+        border: '1px solid rgba(0,0,0,0.05)'
+      }}
+    >
+      {copied ? <Check size={12} color="#10b981" /> : <Copy size={12} opacity={0.5} />}
+      <span style={{ fontSize: '0.6rem', fontWeight: 800, color: copied ? '#10b981' : 'inherit' }}>
+        {copied ? 'COPIED' : 'COPY'}
+      </span>
+    </motion.div>
+  );
+};
 
 interface BalanceCardProps {
   currency: string;
@@ -87,17 +123,26 @@ const BalanceCard: React.FC<BalanceCardProps> = ({ currency, symbol, amount, gra
            </div>
            
            <div>
-              <div style={{ fontSize: '0.6rem', opacity: 0.5, fontWeight: 700, textTransform: 'uppercase' }}>Account Name</div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.2rem' }}>
+                <div style={{ fontSize: '0.6rem', opacity: 0.5, fontWeight: 700, textTransform: 'uppercase' }}>Account Name</div>
+                <CopyButton text={accName} label="Account Name" />
+              </div>
               <div style={{ fontSize: '0.9rem', fontWeight: 800 }}>{accName}</div>
            </div>
 
-           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+           <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '1rem' }}>
               <div>
-                <div style={{ fontSize: '0.6rem', opacity: 0.5, fontWeight: 700, textTransform: 'uppercase' }}>Account Number</div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.2rem' }}>
+                  <div style={{ fontSize: '0.6rem', opacity: 0.5, fontWeight: 700, textTransform: 'uppercase' }}>Account Number</div>
+                  <CopyButton text={accNo || ""} label="Account Number" />
+                </div>
                 <div style={{ fontSize: '0.95rem', fontWeight: 900, fontFamily: 'monospace' }}>{accNo || 'GENERATING...'}</div>
               </div>
               <div>
-                <div style={{ fontSize: '0.6rem', opacity: 0.5, fontWeight: 700, textTransform: 'uppercase' }}>Bank Name</div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.2rem' }}>
+                  <div style={{ fontSize: '0.6rem', opacity: 0.5, fontWeight: 700, textTransform: 'uppercase' }}>Bank Name</div>
+                  <CopyButton text={bank || ""} label="Bank Name" />
+                </div>
                 <div style={{ fontSize: '0.85rem', fontWeight: 800 }}>{bank || 'Provisioning...'}</div>
               </div>
            </div>
