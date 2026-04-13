@@ -786,6 +786,23 @@ app.post('/api/accounts/provision', authenticateToken, async (req: any, res: any
   }
 });
 
+app.delete('/api/accounts/:id', authenticateToken, async (req: any, res: any): Promise<any> => {
+   try {
+      const { id } = req.params;
+      const wallet = await prisma.wallet.findUnique({ where: { id } });
+      
+      if (!wallet || wallet.userId !== req.user.userId) {
+         return res.status(404).json({ error: 'Account not found or access denied.' });
+      }
+
+      await prisma.wallet.delete({ where: { id } });
+      res.status(200).json({ message: 'Account deleted successfully' });
+   } catch (error) {
+      console.error('Delete account error:', error);
+      res.status(500).json({ error: 'Failed to delete account' });
+   }
+});
+
 // ==========================================
 // Bill Payments (Airtime, Data, Utilities)
 // ==========================================

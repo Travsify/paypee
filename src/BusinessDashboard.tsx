@@ -141,6 +141,25 @@ const BusinessDashboard = ({ onLogout }: { onLogout?: () => void }) => {
     }
   };
 
+  const deleteAccount = async (id: string) => {
+     try {
+        const response = await fetch(`https://paypee-api.onrender.com/api/accounts/${id}`, {
+           method: 'DELETE',
+           headers: {
+              'Authorization': `Bearer ${localStorage.getItem('paypee_token')}`
+           }
+        });
+        if (response.ok) {
+           fetchUserData();
+        } else {
+           const err = await response.json();
+           alert(err.error || 'Failed to delete account.');
+        }
+     } catch (err) {
+        console.error('Delete account error:', err);
+     }
+  };
+
   const statCardStyle: React.CSSProperties = { background: 'rgba(255,255,255,0.02)', border: '1px solid #1e293b', padding: '1.5rem', borderRadius: '20px' };
   const statLabelStyle: React.CSSProperties = { fontSize: '0.65rem', fontWeight: 800, color: '#475569', letterSpacing: '1px', display: 'block', marginBottom: '1rem' };
   const statValueStyle: React.CSSProperties = { fontSize: '1.75rem', fontWeight: 800, marginBottom: '0.5rem' };
@@ -148,90 +167,75 @@ const BusinessDashboard = ({ onLogout }: { onLogout?: () => void }) => {
   const isVerified = userData?.kycStatus === 'VERIFIED';
 
   const navigate = (section: string) => {
-    const openSections = ['dashboard', 'settings', 'help'];
-    if (!isVerified && !openSections.includes(section)) {
-      setActiveSection('kyc_blocked');
-      return;
+    const publicSections = ['dashboard', 'settings', 'help'];
+    if (!isVerified && !publicSections.includes(section)) {
+        setActiveSection('verification_required');
+        return;
     }
     setActiveSection(section);
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', background: '#020617', color: '#fff', overflow: 'hidden' }}>
+    <div style={{ display: 'flex', height: '100vh', background: '#020617', color: '#fff', overflow: 'hidden' }}>
       <VerificationGate 
         kycStatus={userData?.kycStatus || 'PENDING'} 
         accountType="BUSINESS"
         onStatusChange={(status) => setUserData((prev: any) => ({ ...prev, kycStatus: status }))}
       />
-      <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
-        {/* Sidebar */}
-        <aside style={{ 
-          width: '280px', 
-          background: '#0a0f1e', 
-          borderRight: '1px solid var(--border)',
-          padding: '2rem 1.5rem',
-          display: 'flex',
-          flexDirection: 'column'
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '3rem', fontSize: '1.5rem', fontWeight: 800, color: 'var(--primary)' }}>
-            <Building2 size={28} color="var(--primary)" />
-            Paypee Business
+      
+      <aside style={{ width: '280px', borderRight: '1px solid var(--border)', background: '#0a0f1e', padding: '2rem 1.5rem', display: 'flex', flexDirection: 'column' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0 0.5rem', marginBottom: '3rem' }}>
+          <div style={{ width: 32, height: 32, background: 'var(--primary)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+             <Zap size={20} color="#fff" strokeWidth={3} />
           </div>
+          <span style={{ fontSize: '1.25rem', fontWeight: 900, letterSpacing: '-0.02em' }}>Paypee <span style={{ color: 'var(--primary)', fontSize: '0.6rem', verticalAlign: 'top', marginLeft: '2px' }}>BIZ</span></span>
+        </div>
+        
+        <div style={{ flex: 1, overflowY: 'auto' }}>
+           <SidebarItem icon={LayoutDashboard} label="Treasury Hub" active={activeSection === 'dashboard'} onClick={() => navigate('dashboard')} />
+           <SidebarItem icon={Wallet} label="Corporate Wallets" active={activeSection === 'wallets'} onClick={() => navigate('wallets')} />
+           <SidebarItem icon={Send} label="Bulk Payouts" active={activeSection === 'payouts'} onClick={() => navigate('payouts')} />
+           <SidebarItem icon={Layers} label="Sub-Accounts" active={activeSection === 'subs'} onClick={() => navigate('subs')} />
+           <SidebarItem icon={Zap} label="Business Bills" active={activeSection === 'bills'} onClick={() => navigate('bills')} />
+           <SidebarItem icon={Lock} label="Corporate Vaults" active={activeSection === 'vaults'} onClick={() => navigate('vaults')} />
+           <SidebarItem icon={BarChart3} label="Global Analytics" active={activeSection === 'analytics'} onClick={() => navigate('analytics')} />
+           <SidebarItem icon={Users} label="Team Access" active={activeSection === 'team'} onClick={() => navigate('team')} />
+           <SidebarItem icon={Bot} label="Business AI" active={activeSection === 'ai'} onClick={() => navigate('ai')} />
+        </div>
 
-          <div style={{ flex: 1, overflowY: 'auto', paddingRight: '0.5rem', margin: '0 -0.5rem' }}>
-             <SidebarItem icon={LayoutDashboard} label="Overview" active={activeSection === 'dashboard'} onClick={() => navigate('dashboard')} />
-             <SidebarItem icon={Wallet} label="My Wallets" active={activeSection === 'wallets'} onClick={() => navigate('wallets')} />
-             <SidebarItem icon={BarChart3} label="Money Stats" active={activeSection === 'analytics'} onClick={() => navigate('analytics')} />
-             <SidebarItem icon={Users} label="Pay Employees" active={activeSection === 'payroll'} onClick={() => navigate('payroll')} />
-             <SidebarItem icon={Send} label="Send to Many" active={activeSection === 'payouts'} onClick={() => navigate('payouts')} />
-             <SidebarItem icon={Lock} label="Safe Box" active={activeSection === 'vaults'} onClick={() => navigate('vaults')} />
-             <SidebarItem icon={Zap} label="Pay Bills" active={activeSection === 'bills'} onClick={() => navigate('bills')} />
-             <SidebarItem icon={Bot} label="AI Helper" active={activeSection === 'ai'} onClick={() => navigate('ai')} />
-             <SidebarItem icon={FileText} label="Tax Help" active={activeSection === 'tax'} onClick={() => navigate('tax')} />
+        <div style={{ borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '1.5rem', marginTop: '1.5rem' }}>
+          <SidebarItem icon={Settings} label="Settings" active={activeSection === 'settings'} onClick={() => navigate('settings')} />
+          <SidebarItem icon={HelpCircle} label="Help & Support" onClick={() => navigate('help')} />
+          <SidebarItem icon={LogOut} label="Log Out" onClick={onLogout} />
+        </div>
+      </aside>
+
+      <main style={{ flex: 1, overflowY: 'auto', padding: '3rem 4rem' }}>
+        {activeSection === 'verification_required' && (
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', textAlign: 'center' }}>
+            <div style={{ width: 80, height: 80, background: 'rgba(99,102,241,0.1)', borderRadius: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary)', marginBottom: '2rem' }}><Building2 size={40} /></div>
+            <h2 style={{ fontSize: '2rem', fontWeight: 800, marginBottom: '1rem' }}>Business Verification Required</h2>
+            <p style={{ color: 'var(--text-muted)', maxWidth: '450px', lineHeight: 1.6, marginBottom: '2.5rem' }}>Your business profile needs to be verified before you can access advanced treasury features, wholesale liquidity, and bulk payouts.</p>
+            <button onClick={() => setActiveSection('dashboard')} style={{ background: 'var(--primary)', color: '#fff', border: 'none', padding: '1.2rem 3rem', borderRadius: '16px', fontWeight: 700, cursor: 'pointer' }}>Complete Verification</button>
           </div>
+        )}
 
-          <div>
-            <SidebarItem icon={Settings} label="Admin Settings" active={activeSection === 'settings'} onClick={() => navigate('settings')} />
-            <SidebarItem icon={HelpCircle} label="Help Center" active={activeSection === 'help'} onClick={() => navigate('help')} />
-            <SidebarItem icon={LogOut} label="Log Out" onClick={onLogout} />
-          </div>
-        </aside>
+        {activeSection === 'settings' && <SettingsView />}
+        {activeSection === 'ai' && <AiAdvisor transactions={transactions} userName={userData?.businessName} />}
+        {activeSection === 'vaults' && <VaultsDashboard />}
+        {activeSection === 'bills' && <BillsDashboard />}
 
-        {/* Main Content */}
-        <main style={{ flex: 1, overflowY: 'auto', padding: '2rem 3rem' }}>
-          {activeSection === 'kyc_blocked' ? (
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '70vh', textAlign: 'center', gap: '1.5rem' }}>
-              <div style={{ width: 80, height: 80, background: 'rgba(99,102,241,0.1)', borderRadius: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#6366f1' }}>
-                <ShieldCheck size={40} />
-              </div>
-              <h2 style={{ fontSize: '1.8rem', fontWeight: 800 }}>KYB Verification Required</h2>
-              <p style={{ color: '#64748b', maxWidth: '420px', lineHeight: 1.7 }}>
-                This feature is locked until your business is verified. Complete your KYB to unlock Treasury, Analytics, Payroll, Bulk Payouts, Vaults, and all enterprise features.
-              </p>
-              <button
-                onClick={() => setActiveSection('dashboard')}
-                style={{ background: '#6366f1', color: '#fff', border: 'none', padding: '0.9rem 2.5rem', borderRadius: '12px', fontWeight: 700, cursor: 'pointer', fontSize: '1rem' }}
-              >
-                Return to Dashboard
-              </button>
-            </div>
-          ) : activeSection === 'ai' ? (
-            <AiAdvisor transactions={transactions} userName={userData?.companyName || userData?.firstName} />
-          ) : activeSection === 'vaults' ? (
-            <VaultsDashboard />
-          ) : activeSection === 'bills' ? (
-            <BillsDashboard />
-          ) : activeSection === 'wallets' ? (
-            <div style={{ padding: '1rem' }}>
-              <h2 style={{ fontSize: '1.8rem', fontWeight: 700, marginBottom: '2rem' }}>Treasury Accounts</h2>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '2rem' }}>
+        {activeSection === 'wallets' && (
+           <div style={{ animation: 'fadeIn 0.5s ease-out' }}>
+             <h2 style={{ fontSize: '1.8rem', fontWeight: 800, marginBottom: '2rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}><Wallet size={28} color="var(--primary)" /> Corporate Treasury Nodes</h2>
+             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '2rem' }}>
                 {userData?.wallets?.map((w: any) => {
-                  const symbols: any = { USD: '$', EUR: '€', GBP: '£', NGN: '₦' };
+                  const symbols: any = { USD: '$', EUR: '€', NGN: '₦', GBP: '£', BTC: '₿' };
                   const gradients: any = {
                     USD: "linear-gradient(135deg, #6366f1 0%, #a855f7 100%)",
+                    NGN: "linear-gradient(135deg, #10b981 0%, #059669 100%)",
                     EUR: "linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)",
-                    GBP: "linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%)",
-                    NGN: "linear-gradient(135deg, #10b981 0%, #059669 100%)"
+                    BTC: "linear-gradient(135deg, #f59e0b 0%, #d97706 100%)"
                   };
                   return (
                     <BalanceCard 
@@ -241,151 +245,114 @@ const BusinessDashboard = ({ onLogout }: { onLogout?: () => void }) => {
                       amount={parseFloat(w.balance).toFixed(2)}
                       gradient={gradients[w.currency] || "linear-gradient(135deg, #1e293b 0%, #0f172a 100%)"}
                       details={w.metadata ? (typeof w.metadata === 'string' ? JSON.parse(w.metadata) : w.metadata) : {}}
-                      userName={userData?.businessName || userData?.firstName}
+                      userName={userData?.businessName}
                       type="BUSINESS"
+                      onDelete={deleteAccount}
                     />
                   );
                 })}
                 <motion.div 
-                  whileHover={{ y: -5 }}
-                  onClick={() => setIsAccountModalOpen(true)}
-                  style={{ border: '2px dashed var(--border)', borderRadius: '24px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '2rem', cursor: 'pointer', minHeight: '180px' }}
+                   whileHover={{ scale: 1.02, y: -5 }}
+                   onClick={() => setIsAccountModalOpen(true)}
+                   style={{ border: '2px dashed var(--border)', borderRadius: '24px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '2rem', cursor: 'pointer', minHeight: '200px' }}
                 >
-                  <Plus size={40} color="var(--text-muted)" style={{ marginBottom: '1rem' }} />
-                  <span style={{ fontWeight: 600, color: 'var(--text-muted)' }}>Generate Treasury Rail</span>
+                   <Plus size={40} color="var(--primary)" style={{ opacity: 0.3, marginBottom: '1rem' }} />
+                   <span style={{ fontWeight: 800, color: 'var(--text-muted)' }}>Deploy Treasury Rail</span>
                 </motion.div>
+             </div>
+           </div>
+        )}
+
+        {activeSection === 'dashboard' && (
+          <>
+            <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3rem' }}>
+              <div>
+                <h1 style={{ fontSize: '2.5rem', fontWeight: 900, marginBottom: '0.5rem', letterSpacing: '-0.02em' }}>Treasury Control</h1>
+                <div style={{ display: 'flex', gap: '2rem' }}>
+                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.8rem', color: '#10b981', fontWeight: 800 }}><div style={{ width: 6, height: 6, background: '#10b981', borderRadius: '50%' }} /> LIQUIDITY_RAILS_ACTIVE</div>
+                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 800 }}><Building2 size={16} /> {userData?.businessName || 'Enterprise Node'}</div>
+                </div>
               </div>
+              <div style={{ display: 'flex', gap: '1rem' }}>
+                <button style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid var(--border)', padding: '0.75rem 1.25rem', borderRadius: '12px', fontWeight: 700, cursor: 'pointer' }} onClick={fetchUserData}><RefreshCcw size={18} /></button>
+                <button style={{ background: 'var(--primary)', color: '#fff', border: 'none', padding: '0.75rem 1.5rem', borderRadius: '12px', fontWeight: 700, cursor: 'pointer' }} onClick={() => setIsAccountModalOpen(true)}>Generate Rail</button>
+              </div>
+            </header>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '2rem', marginBottom: '3.5rem' }}>
+               <MetricCard label="Total Treasury" value={`$${(userData?.wallets?.reduce((acc: any, w: any) => acc + (w.currency === 'USD' ? parseFloat(w.balance) : 0), 0) || 0).toLocaleString()}`} trend="+12.4%" icon={TrendingUp} color="#10b981" />
+               <MetricCard label="Global Transfers" value="1.2k" trend="+85%" icon={Send} color="var(--primary)" />
+               <MetricCard label="Sub-Accounts" value="12" trend="Active" icon={Layers} color="var(--secondary)" />
+               <MetricCard label="Settlement Health" value="100%" trend="Optimized" icon={ShieldCheck} color="#10b981" />
             </div>
-          ) : activeSection === 'analytics' ? (
-            <div style={{ padding: '1rem' }}>
-              <h2 style={{ fontSize: '1.8rem', fontWeight: 800, marginBottom: '2rem' }}>Revenue Intelligence</h2>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1.5rem', marginBottom: '3rem' }}>
-                <MetricCard label="TOTAL VOLUME" value="$4,281,090.00" trend="+12.5%" icon={BarChart3} color="var(--primary)" />
-                <MetricCard label="AVG SETTLEMENT" value="1.82s" trend="99.9%" icon={Zap} color="#f59e0b" />
-                <MetricCard label="PAYROLL COUNT" value="128" trend="Active" icon={Users} color="#10b981" />
-              </div>
-              <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid #1e293b', borderRadius: '32px', padding: '2.5rem' }}>
-                 <h3 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '2rem' }}>Monthly Revenue Growth (USD)</h3>
-                 <div style={{ height: '350px', width: '100%' }}>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1.4fr) minmax(0, 0.6fr)', gap: '3rem' }}>
+               <div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+                    <h2 style={{ fontSize: '1.4rem', fontWeight: 800 }}>Cash-Flow Velocity</h2>
+                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                       {['1D', '1W', '1M', '1Y'].map(p => (<button key={p} style={{ background: p === '1M' ? 'var(--primary)' : 'rgba(255,255,255,0.03)', border: 'none', padding: '0.4rem 0.8rem', borderRadius: '8px', fontSize: '0.7rem', fontWeight: 800, cursor: 'pointer' }}>{p}</button>))}
+                    </div>
+                  </div>
+                  <div style={{ height: '350px', background: 'rgba(255,255,255,0.01)', border: '1px solid var(--border)', borderRadius: '32px', padding: '2rem' }}>
                     <ResponsiveContainer width="100%" height="100%">
-                      <AreaChart data={[
-                        { name: 'Jan', val: 4000 }, { name: 'Feb', val: 3000 }, { name: 'Mar', val: 5000 },
-                        { name: 'Apr', val: 8000 }, { name: 'May', val: 7500 }, { name: 'Jun', val: 9000 },
-                      ]}>
-                        <XAxis dataKey="name" stroke="#475569" axisLine={false} tickLine={false} />
-                        <YAxis stroke="#475569" axisLine={false} tickLine={false} />
-                        <Tooltip contentStyle={{ background: '#0a0f1e', border: 'none', borderRadius: '12px' }} />
-                        <Area type="monotone" dataKey="val" stroke="var(--primary)" fill="var(--primary)" fillOpacity={0.1} strokeWidth={3} />
-                      </AreaChart>
+                       <AreaChart data={[
+                         { name: 'Mon', income: 4000, expense: 2400 },
+                         { name: 'Tue', income: 3000, expense: 1398 },
+                         { name: 'Wed', income: 2000, expense: 9800 },
+                         { name: 'Thu', income: 2780, expense: 3908 },
+                         { name: 'Fri', income: 1890, expense: 4800 },
+                         { name: 'Sat', income: 2390, expense: 3800 },
+                         { name: 'Sun', income: 3490, expense: 4300 },
+                       ]}>
+                         <defs>
+                           <linearGradient id="colorIncome" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="var(--primary)" stopOpacity={0.3}/><stop offset="95%" stopColor="var(--primary)" stopOpacity={0}/></linearGradient>
+                         </defs>
+                         <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.05)" />
+                         <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#64748b' }} dy={10} />
+                         <YAxis hide />
+                         <Tooltip contentStyle={{ background: '#0a1122', border: '1px solid #1e293b', borderRadius: '12px' }} />
+                         <Area type="monotone" dataKey="income" stroke="var(--primary)" strokeWidth={3} fillOpacity={1} fill="url(#colorIncome)" />
+                       </AreaChart>
                     </ResponsiveContainer>
-                 </div>
-              </div>
-            </div>
-          ) : activeSection === 'payroll' ? (
-            <div style={{ padding: '1rem', textAlign: 'center' }}>
-              <Users size={80} color="var(--primary)" style={{ opacity: 0.2, marginBottom: '2rem' }} />
-              <h2 style={{ fontSize: '1.8rem', fontWeight: 800, marginBottom: '1rem' }}>Enterprise Payroll</h2>
-              <p style={{ color: 'var(--text-muted)', marginBottom: '3rem' }}>Automate salaries and tax withholding for your global workforce.</p>
-              <button style={{ background: 'var(--primary)', color: '#fff', border: 'none', padding: '1.2rem 2.5rem', borderRadius: '16px', fontWeight: 700 }}>Launch Payroll Run</button>
-            </div>
-          ) : activeSection === 'payouts' ? (
-            <div style={{ padding: '1rem' }}>
-              <h2 style={{ fontSize: '1.8rem', fontWeight: 700, marginBottom: '2rem' }}>Bulk Payouts</h2>
-              <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border)', borderRadius: '24px', padding: '3rem', textAlign: 'center' }}>
-                <Send size={60} color="var(--primary)" style={{ marginBottom: '1.5rem' }} />
-                <h3 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '1rem' }}>Global Disbursements</h3>
-                <p style={{ color: 'var(--text-muted)', marginBottom: '2rem' }}>Upload a CSV to pay thousands of recipients across 140+ countries.</p>
-                <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem' }}>
-                  <button style={{ background: 'var(--primary)', color: '#fff', border: 'none', padding: '1rem 2rem', borderRadius: '12px', fontWeight: 700 }}>Upload CSV</button>
-                  <button style={{ background: 'rgba(255,255,255,0.05)', color: '#fff', border: '1px solid var(--border)', padding: '1rem 2rem', borderRadius: '12px', fontWeight: 700 }}>Manual Entry</button>
-                </div>
-              </div>
-            </div>
-          ) : activeSection === 'tax' ? (
-            <div style={{ padding: '1rem' }}>
-              <h2 style={{ fontSize: '1.8rem', fontWeight: 700, marginBottom: '2rem' }}>Tax & Compliance</h2>
-              <div style={{ display: 'grid', gap: '1rem' }}>
-                {['VAT/GST Report - Q1 2026', 'Corporate Tax Filing', 'Withholding Certs'].map((doc, i) => (
-                  <div key={i} style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border)', borderRadius: '20px', padding: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
-                      <FileText size={24} color="var(--primary)" />
-                      <span style={{ fontWeight: 700 }}>{doc}</span>
-                    </div>
-                    <button style={{ color: 'var(--primary)', background: 'rgba(99, 102, 241, 0.1)', border: 'none', padding: '0.6rem 1.2rem', borderRadius: '10px', fontWeight: 700 }}>Download</button>
                   </div>
-                ))}
-              </div>
-            </div>
-          ) : activeSection === 'help' ? (
-            <div style={{ padding: '1rem', maxWidth: '600px' }}>
-              <h2 style={{ fontSize: '1.8rem', fontWeight: 700, marginBottom: '2rem' }}>Enterprise Support</h2>
-              <div style={{ background: 'rgba(255,255,255,0.02)', padding: '2.5rem', borderRadius: '24px', border: '1px solid var(--border)' }}>
-                <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem' }}>Direct access to treasury engineering. Average response: 12 minutes.</p>
-                <textarea placeholder="Message..." style={{ width: '100%', height: '150px', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border)', borderRadius: '14px', padding: '1rem', color: '#fff', outline: 'none', marginBottom: '1.5rem' }} />
-                <button style={{ width: '100%', padding: '1.2rem', background: 'var(--primary)', color: '#fff', border: 'none', borderRadius: '14px', fontWeight: 800 }}>Summon Priority Agent</button>
-              </div>
-            </div>
-          ) : activeSection === 'settings' ? (
-            <SettingsView />
-          ) : (
-            <>
-              {/* Default Overview */}
-              <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3rem' }}>
-                <div>
-                  <h1 style={{ fontSize: '1.75rem', fontWeight: 800 }}>Business Overview</h1>
-                  <p style={{ color: 'var(--text-muted)' }}>Welcome back, {userData?.firstName || 'Admin'}</p>
-                </div>
-                <div style={{ display: 'flex', gap: '1rem' }}>
-                  <div style={{ padding: '0.5rem 1rem', background: 'rgba(255,255,255,0.05)', borderRadius: '12px', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <ShieldCheck size={18} color="#10b981" />
-                    <span style={{ fontSize: '0.8rem', fontWeight: 700 }}>KYB VERIFIED</span>
+               </div>
+
+               <div>
+                  <h2 style={{ fontSize: '1.4rem', fontWeight: 800, marginBottom: '2rem' }}>Active Node Status</h2>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+                    {userData?.wallets?.map((w: any) => (
+                      <div key={w.id} style={{ padding: '1.25rem', background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border)', borderRadius: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                         <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                            <div style={{ width: 44, height: 44, background: 'rgba(255,255,255,0.05)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem' }}>
+                               {w.currency === 'USD' ? '🇺🇸' : w.currency === 'NGN' ? '🇳🇬' : w.currency === 'EUR' ? '🇪🇺' : '🌐'}
+                            </div>
+                            <div>
+                               <div style={{ fontWeight: 800, fontSize: '0.95rem' }}>{w.currency} Treasury Rail</div>
+                               <div style={{ fontSize: '0.7rem', color: '#10b981', fontWeight: 700 }}>SYNCHRONIZED</div>
+                            </div>
+                         </div>
+                         <ChevronRight size={18} opacity={0.3} />
+                      </div>
+                    ))}
+                    <motion.button 
+                      whileTap={{ scale: 0.98 }}
+                      onClick={() => setIsAccountModalOpen(true)}
+                      style={{ width: '100%', padding: '1rem', border: '2px dashed var(--border)', background: 'transparent', borderRadius: '20px', color: 'var(--text-muted)', fontWeight: 700, cursor: 'pointer' }}
+                    >+ Add Rail</motion.button>
                   </div>
-                  <motion.button whileTap={{ scale: 0.95 }} onClick={fetchUserData} style={{ padding: '0.5rem', borderRadius: '12px', background: 'var(--primary)', border: 'none', color: '#fff' }}><RefreshCcw size={20} /></motion.button>
-                </div>
-              </header>
+               </div>
+            </div>
+          </>
+        )}
+      </main>
 
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1.5rem', marginBottom: '3rem' }}>
-                <MetricCard label="LIQUIDITY" value={userData?.wallets?.reduce((a: any, b: any) => a + parseFloat(b.balance), 0).toLocaleString('en-US', { style: 'currency', currency: 'USD' }) || "$0.00"} trend="+5.2%" icon={Wallet} color="var(--primary)" />
-                <MetricCard label="PENDING TRADES" value="0" trend="Active" icon={History} color="#f59e0b" />
-                <MetricCard label="ACTIVE EMPLOYEES" value="42" trend="+3" icon={Users} color="#10b981" />
-              </div>
-
-              <section style={{ marginBottom: '3rem' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                  <h2 style={{ fontSize: '1.25rem', fontWeight: 800 }}>Network Ledger</h2>
-                  <button style={{ fontSize: '0.8rem', color: 'var(--primary)', background: 'transparent', border: 'none', fontWeight: 700 }}>Export History</button>
-                </div>
-                <div style={{ background: '#0a0f1e', border: '1px solid var(--border)', borderRadius: '24px', overflow: 'hidden' }}>
-                  {transactions.length > 0 ? transactions.map((log, i) => (
-                    <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1.2rem 2rem', borderBottom: i === transactions.length - 1 ? 'none' : '1px solid rgba(255,255,255,0.05)' }}>
-                      <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-                         <div style={{ color: log.type === 'DEPOSIT' ? '#10b981' : '#f43f5e' }}>
-                            {log.type === 'DEPOSIT' ? <ArrowDownLeft /> : <ArrowUpRight />}
-                         </div>
-                         <div>
-                            <div style={{ fontWeight: 700 }}>{log.desc}</div>
-                            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>ID: {log.reference.slice(0, 12)}...</div>
-                         </div>
-                      </div>
-                      <div style={{ textAlign: 'right' }}>
-                        <div style={{ fontWeight: 800 }}>{log.currency} {log.amount}</div>
-                        <div style={{ fontSize: '0.7rem', color: '#10b981', fontWeight: 700 }}>SUCCESS</div>
-                      </div>
-                    </div>
-                  )) : (
-                    <div style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-muted)' }}>No activities logged.</div>
-                  )}
-                </div>
-              </section>
-            </>
-          )}
-        </main>
-      </div>
       <AccountCreationModal 
         isOpen={isAccountModalOpen} 
         onClose={() => setIsAccountModalOpen(false)} 
         onSelect={generateAccount} 
         isProcessing={isGenerating} 
+        existingCurrencies={userData?.wallets?.map((w: any) => w.currency) || []}
       />
     </div>
   );

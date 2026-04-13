@@ -1,4 +1,5 @@
 import { PrismaClient, Currency } from '@prisma/client';
+import { issueVirtualAccount } from './fincra';
 
 const prisma = new PrismaClient();
 
@@ -23,63 +24,68 @@ export class IbanService {
         where: { userId, currency: currency as Currency }
     });
 
-    if (existingWallet) {
-        let details = (existingWallet.metadata as any);
-        if (!details) {
-           console.log(`🔧 Patching missing metadata for Wallet ${existingWallet.id}...`);
-           const iban = (prefixes[currency] || 'PP00') + Math.random().toString().slice(2, 14);
-           details = {
-               accountHolder: userName || "Paypee / TechStream Ltd",
-               iban: iban,
-               bic: 'PAYPBEBB',
-               bankName: 'Paypee Global Clearing',
-               address: "123 Fintech Lane, Brussels, Belgium"
-           };
-           await prisma.wallet.update({
-               where: { id: existingWallet.id },
-               data: { metadata: details }
-           });
-        }
+    if (existingWallet && existingWallet.metadata) {
         return {
             walletId: existingWallet.id,
             currency,
             isExisting: true,
-            accountDetails: details
+            accountDetails: existingWallet.metadata
         };
     }
 
-    // In a real scenario, this would call Fincra / Currencycloud / Sudo
+    // 2. Provision external details
+    let details: any = null;
 
-    const iban = (prefixes[currency] || 'PP00') + Math.random().toString().slice(2, 14);
-    const bic = 'PAYPBEBB';
-    const bankName = 'Paypee Global Clearing';
+    if (currency === 'NGN') {
+       try {
+          console.log(`🇳🇬 Calling Fincra for real NGN rails...`);
+          const fincraData = await issueVirtualAccount(userName || "Valued Customer", 'NGN');
+          details = {
+             accountHolder: fincraData.accountName || userName || "Paypee Local Node",
+             iban: fincraData.accountNumber,
+             bic: fincraData.bankCode || '0000',
+             bankName: fincraData.bankName || 'Paypee Clearing',
+             address: "Lagos, Nigeria"
+          };
+       } catch (err) {
+          console.error(`❌ Fincra NGN Provisioning failed:`, err);
+          // Fallback to mock if it fails? User said live is what we use.
+          throw err; 
+       }
+    } else {
+       // Mock for other rails for now
+       const iban = (prefixes[currency] || 'PP00') + Math.random().toString().slice(2, 14);
+       details = {
+           accountHolder: userName || "Paypee / TechStream Ltd",
+           iban: iban,
+           bic: 'PAYPBEBB',
+           bankName: 'Paypee Global Clearing',
+           address: "123 Fintech Lane, Brussels, Belgium"
+       };
+    }
 
-    // 2. Create the wallet
+    // 3. Create or update the wallet
+    if (existingWallet) {
+       await prisma.wallet.update({
+          where: { id: existingWallet.id },
+          data: { metadata: details }
+       });
+       return { walletId: existingWallet.id, currency, accountDetails: details };
+    }
+
     const wallet = await prisma.wallet.create({
       data: {
         userId,
         currency: currency as Currency,
         balance: 0.00,
-        metadata: {
-           accountHolder: userName || "Paypee / TechStream Ltd",
-           iban: iban,
-           bic: bic,
-           bankName: bankName,
-           address: "123 Fintech Lane, Brussels, Belgium"
-        }
+        metadata: details
       }
     });
 
     return {
       walletId: wallet.id,
       currency,
-      accountDetails: {
-        accountHolder: userName || "Paypee / TechStream Ltd",
-        iban: iban,
-        bic: bic,
-        bankName: bankName,
-        address: "123 Fintech Lane, Brussels, Belgium"
-      }
+      accountDetails: details
     };
   }
 }

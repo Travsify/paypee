@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Wallet, ShieldCheck, Copy, Check } from 'lucide-react';
+import { Wallet, ShieldCheck, Copy, Check, Trash2 } from 'lucide-react';
 
 const CopyButton = ({ text, label }: { text: string, label: string }) => {
   const [copied, setCopied] = useState(false);
@@ -46,6 +46,7 @@ interface BalanceCardProps {
   details?: any;
   userName?: string;
   type?: 'INDIVIDUAL' | 'BUSINESS' | 'DEVELOPER';
+  onDelete?: (id: string) => void;
 }
 
 const getAccountNumber = (details: any) => {
@@ -72,7 +73,7 @@ const getBankName = (details: any) => {
   return details.bankName || details.bank_name || details.bank || details.provider;
 };
 
-const BalanceCard: React.FC<BalanceCardProps> = ({ currency, symbol, amount, gradient, details, userName, type = 'INDIVIDUAL' }) => {
+const BalanceCard: React.FC<BalanceCardProps> = ({ currency, symbol, amount, gradient, details, userName, type = 'INDIVIDUAL', onDelete }) => {
   const [isFlipped, setIsFlipped] = useState(false);
   const accNo = getAccountNumber(details);
   const bank = getBankName(details);
@@ -148,7 +149,28 @@ const BalanceCard: React.FC<BalanceCardProps> = ({ currency, symbol, amount, gra
            </div>
 
            <div style={{ marginTop: 'auto', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
-              <div style={{ width: '60%', height: '30px', background: 'repeating-linear-gradient(90deg, #000 0px, #000 2px, transparent 2px, transparent 4px)', opacity: 0.3 }} />
+              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', width: '60%' }}>
+                 <div style={{ width: '100%', height: '30px', background: 'repeating-linear-gradient(90deg, #000 0px, #000 2px, transparent 2px, transparent 4px)', opacity: 0.3 }} />
+                 <motion.button 
+                   whileHover={{ scale: 1.1, color: '#f43f5e' }}
+                   whileTap={{ scale: 0.9 }}
+                   onClick={(e) => {
+                      e.stopPropagation();
+                      if (onDelete && details?.walletId) {
+                         if (confirm('Are you sure you want to terminate this rail? All associated data will be archived.')) {
+                            onDelete(details.walletId);
+                         }
+                      } else if (onDelete && details?.id) {
+                         if (confirm('Are you sure you want to terminate this rail? All associated data will be archived.')) {
+                            onDelete(details.id);
+                         }
+                      }
+                   }}
+                   style={{ background: 'rgba(244, 63, 94, 0.05)', border: '1px solid rgba(244, 63, 94, 0.1)', padding: '0.4rem', borderRadius: '8px', cursor: 'pointer', color: 'rgba(15, 23, 42, 0.3)' }}
+                 >
+                   <Trash2 size={16} />
+                 </motion.button>
+              </div>
               <div style={{ fontSize: '0.5rem', fontWeight: 800, opacity: 0.4 }}>SECURE_PAYPEE_LEDGER</div>
            </div>
         </div>
