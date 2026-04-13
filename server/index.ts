@@ -4,6 +4,8 @@ import dotenv from 'dotenv';
 import { PrismaClient, AccountRole } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import { issueVirtualCard, processFiatPayout } from './services/fincra';
+import { processCryptoPayout, createLightningInvoice } from './services/bitnob';
 
 dotenv.config();
 
@@ -167,9 +169,21 @@ app.post('/api/cards', authenticateToken, async (req: any, res: any): Promise<an
     const { walletId } = req.body;
     
     // In a real system, you would call a card issuer API like Stripe or Fincra here
-    const cardNumber = "4242" + Math.floor(Math.random() * 1000000000000).toString().padStart(12, '0');
-    const cvv = Math.floor(Math.random() * 900 + 100).toString();
-    const expiry = "12/28";
+    // Attempt to issue real card via Fincra
+    let cardNumber = "4242" + Math.floor(Math.random() * 1000000000000).toString().padStart(12, '0');
+    let cvv = Math.floor(Math.random() * 900 + 100).toString();
+    let expiry = "12/28";
+
+    if (process.env.FINCRA_SECRET_KEY) {
+      try {
+        const fincraCard = await issueVirtualCard(req.user.userId, 'USD');
+        cardNumber = fincraCard.cardNumber || cardNumber;
+        cvv = fincraCard.cvv || cvv;
+        expiry = fincraCard.expiry || expiry;
+      } catch (err) {
+        console.warn('Fincra Card Error, falling back to simulation logic.', err);
+      }
+    }
 
     const card = await prisma.virtualCard.create({
       data: {
@@ -230,17 +244,36 @@ app.post('/api/transactions', authenticateToken, async (req: any, res: any): Pro
       }
     });
 
-    // Update wallet balance for deposits
-    if (type === 'DEPOSIT') {
-      await prisma.wallet.update({
-        where: { id: walletId },
-        data: { balance: { increment: amount } }
-      });
-    } else if (type === 'WITHDRAWAL' || type === 'TRANSFER') {
+    // External Gateway Routing (Fincra or Bitnob)
+    if (type === 'WITHDRAWAL' || type === 'PAYOUT') {
        if (wallet.balance < amount) return res.status(400).json({ error: 'Insufficient funds' });
+       
+       if (currency === 'USD' && process.env.BITNOB_SECRET_KEY) {
+         try {
+           await processCryptoPayout(amount, req.body.destinationAddress || 'lightning_address');
+         } catch (err) {
+           console.warn('Bitnob failure:', err);
+         }
+       } else if (process.env.FINCRA_SECRET_KEY) {
+         try {
+           await processFiatPayout(amount, currency, { number: '0123456789', bankCode: '058' });
+         } catch (err) {
+           console.warn('Fincra failure:', err);
+         }
+       }
+       
        await prisma.wallet.update({
         where: { id: walletId },
         data: { balance: { decrement: amount } }
+      });
+    } else if (type === 'DEPOSIT') {
+       if (currency === 'USD' && process.env.BITNOB_SECRET_KEY) {
+         // Could generate lightning invoice here
+         await createLightningInvoice(amount, 'user@example.com').catch(console.warn);
+       }
+       await prisma.wallet.update({
+        where: { id: walletId },
+        data: { balance: { increment: amount } }
       });
     }
 
@@ -297,6 +330,46 @@ app.post('/api/keys', authenticateToken, async (req: any, res: any): Promise<any
      console.error('Create API key error:', error);
      res.status(500).json({ error: 'Failed to generate API key' });
    }
+})
+
+// ==========================================
+// Webhook Handlers
+// ==========================================
+
+app.post('/api/webhooks/fincra', async (req: Request, res: Response) => {
+  try {
+    const payload = req.body;
+    console.log('[FINCRA WEBHOOK DECODED]:', payload.event);
+    
+    // Example: Fincra successfully paid out fiat
+    if (payload.event === 'payout.successful') {
+       await prisma.transaction.update({
+         where: { reference: payload.data.reference },
+         data: { status: 'COMPLETED' }
+       });
+    }
+
+    res.status(200).send('Webhook Received');
+  } catch (error) {
+    res.status(500).send('Webhook parsing error');
+  }
+});
+
+app.post('/api/webhooks/bitnob', async (req: Request, res: Response) => {
+  try {
+    const payload = req.body;
+    console.log('[BITNOB WEBHOOK DECODED]:', payload.event);
+    
+    // Example: Bitnob lighting invoice paid
+    if (payload.event === 'invoice.success') {
+       // Lookup user wallet by ID
+       // Update balance
+    }
+
+    res.status(200).send('Webhook Received');
+  } catch (error) {
+    res.status(500).send('Webhook parsing error');
+  }
 });
 
 app.listen(PORT, () => {
