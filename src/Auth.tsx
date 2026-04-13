@@ -259,7 +259,7 @@ const Auth = ({ onComplete, onBack }: AuthProps) => {
           </button>
         </form>
 
-        <div style={{ marginTop: '3rem', display: 'flex', itemsCenter: 'center', gap: '1rem' }}>
+        <div style={{ marginTop: '3rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
           <div style={{ flex: 1, height: '1px', background: 'var(--border)' }} />
           <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px' }}>Trusted Security</span>
           <div style={{ flex: 1, height: '1px', background: 'var(--border)' }} />

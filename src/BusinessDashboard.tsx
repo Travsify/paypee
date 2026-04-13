@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { 
   LayoutDashboard, 
@@ -20,7 +20,8 @@ import {
   ShieldCheck,
   Plus,
   RefreshCcw,
-  ExternalLink
+  ExternalLink,
+  Zap
 } from 'lucide-react';
 import SettingsView from './SettingsView';
 
