@@ -358,36 +358,77 @@ app.post('/api/keys', authenticateToken, async (req: any, res: any): Promise<any
 app.post('/api/webhooks/fincra', async (req: Request, res: Response) => {
   try {
     const payload = req.body;
-    console.log('[FINCRA WEBHOOK DECODED]:', payload.event);
+    console.log('[FINCRA WEBHOOK RECEIVED]:', payload.event);
     
-    // Example: Fincra successfully paid out fiat
+    // Handle successful payout reconciliation
     if (payload.event === 'payout.successful') {
+       const reference = payload.data.reference;
+       
        await prisma.transaction.update({
-         where: { reference: payload.data.reference },
+         where: { reference },
          data: { status: 'COMPLETED' }
+       });
+       
+       console.log(`[RECONCILED]: Fincra Payout ${reference} marked as COMPLETED.`);
+    }
+
+    if (payload.event === 'payout.failed') {
+       const reference = payload.data.reference;
+       // Refund logic could go here
+       await prisma.transaction.update({
+         where: { reference },
+         data: { status: 'FAILED' }
        });
     }
 
-    res.status(200).send('Webhook Received');
+    res.status(200).send('Webhook Processed');
   } catch (error) {
-    res.status(500).send('Webhook parsing error');
+    console.error('Fincra Webhook Error:', error);
+    res.status(500).send('Webhook Error');
   }
 });
 
 app.post('/api/webhooks/bitnob', async (req: Request, res: Response) => {
   try {
     const payload = req.body;
-    console.log('[BITNOB WEBHOOK DECODED]:', payload.event);
+    console.log('[BITNOB WEBHOOK RECEIVED]:', payload.event);
     
-    // Example: Bitnob lighting invoice paid
+    // Handle Lightning Invoice Payment
     if (payload.event === 'invoice.success') {
-       // Lookup user wallet by ID
-       // Update balance
+       const { customerId, amount, currency } = payload.data;
+       
+       // 1. Find the user's wallet
+       const user = await prisma.user.findFirst({
+          where: { id: customerId } // Bitnob customerId mapped to Paypee userId
+       });
+
+       if (user) {
+         await prisma.$transaction([
+            // Credit the wallet
+            prisma.wallet.updateMany({
+               where: { userId: user.id, currency: 'USD' }, // Logic for USD settlement
+               data: { balance: { increment: amount } }
+            }),
+            // Log the deposit transaction
+            prisma.transaction.create({
+               data: {
+                  userId: user.id,
+                  type: 'DEPOSIT',
+                  amount: amount,
+                  currency: 'USD',
+                  status: 'COMPLETED',
+                  reference: `BITNOB_${payload.data.id}`
+               }
+            })
+         ]);
+         console.log(`[SETTLED]: Credited $${amount} to User ${user.id} via Bitnob Lightning.`);
+       }
     }
 
-    res.status(200).send('Webhook Received');
+    res.status(200).send('Webhook Processed');
   } catch (error) {
-    res.status(500).send('Webhook parsing error');
+    console.error('Bitnob Webhook Error:', error);
+    res.status(500).send('Webhook Error');
   }
 });
 
