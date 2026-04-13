@@ -62,6 +62,14 @@ const StatItem = ({ value, label, icon }: { value: string, label: string, icon: 
 const App = () => {
   const [view, setView] = useState<'landing' | 'individual' | 'business' | 'developer' | 'auth' | 'checkout' | 'docs'>('landing');
   const [landingView, setLandingView] = useState<'main' | 'individual' | 'business' | 'developer' | 'legal_privacy' | 'legal_terms' | 'legal_pci'>('main');
+  const [activeTab, setActiveTab] = useState<'individual' | 'business' | 'developer'>('individual');
+  const [devLanguage, setDevLanguage] = useState<'node' | 'python' | 'go'>('node');
+  
+  const codeSnippets: Record<string, string> = {
+    node: `import Paypee from '@paypee/sdk';\n\nconst paypee = new Paypee('sk_live_...');\nconst account = await paypee.createGlobalAccount('EUR');`,
+    python: `from paypee import Paypee\n\npaypee = Paypee('sk_live_...')\naccount = paypee.create_global_account('EUR')`,
+    go: `import "github.com/paypee/sdk-go"\n\nclient := paypee.NewClient("sk_live_...")\naccount, _ := client.CreateGlobalAccount("EUR")`
+  };
   
   // Detect Payment Link URL
   useEffect(() => {
@@ -319,10 +327,9 @@ client.Cards.Create(paypee.CardParams{
                           <div style={{ fontSize: '0.75rem', opacity: 0.7, textTransform: 'uppercase', marginBottom: '0.3rem' }}>Authorized Entity</div>
                           <div style={{ fontWeight: 700, fontSize: '1.1rem' }}>PAYPEE TECHNOLOGIES</div>
                        </div>
-                       <div style={{ textAlign: 'right' }}>
-                          <Route path="/docs" element={<Docs />} />
-        <Route path="/pay/:slug" element={<Checkout />} />
-                       </div>
+                        <div style={{ textAlign: 'right' }}>
+                           <div style={{ fontSize: '0.8rem', opacity: 0.6, letterSpacing: '2px' }}>EXPIRES 12/30</div>
+                        </div>
                    </div>
                    <div className="glow-overlay" />
                 </motion.div>
@@ -458,11 +465,11 @@ client.Cards.Create(paypee.CardParams{
             >
               <div className="info-row" style={{ alignItems: 'flex-start' }}>
                 <div className="info-content">
-                  <h3>{audienceContent[activeTab].title}</h3>
-                  <p style={{ color: 'var(--text-muted)', fontSize: '1.2rem', marginBottom: '3rem' }}>{audienceContent[activeTab].subtitle}</p>
+                  <h3>{audienceContent[activeTab as keyof typeof audienceContent].title}</h3>
+                  <p style={{ color: 'var(--text-muted)', fontSize: '1.2rem', marginBottom: '3rem' }}>{audienceContent[activeTab as keyof typeof audienceContent].subtitle}</p>
                   
                   <div className="stepped-container">
-                     {audienceContent[activeTab].steps.map((step, idx) => (
+                     {audienceContent[activeTab as keyof typeof audienceContent].steps.map((step, idx) => (
                         <motion.div className="step-item" key={idx} initial={{ opacity: 0, x: -20 }} whileInView={{ opacity: 1, x: 0 }} transition={{ delay: idx * 0.2 }} viewport={{ once: true }}>
                            <div className="step-content">
                               <div className="step-number">0{idx + 1}</div>
@@ -487,10 +494,10 @@ client.Cards.Create(paypee.CardParams{
                 <div className="hero-visual-content" style={{ position: 'sticky', top: '2rem' }}>
                    <div className="card floating-glass" style={{ minHeight: '400px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '2rem', background: 'var(--glass)', borderColor: 'var(--glass-border)', overflow: 'hidden' }}>
                       <motion.div animate={{ scale: [1, 1.1, 1], rotate: [0, 5, 0] }} transition={{ duration: 6, repeat: Infinity }}>
-                         {audienceContent[activeTab].visual}
+                         {audienceContent[activeTab as keyof typeof audienceContent].visual}
                       </motion.div>
                       <div style={{ textAlign: 'center', zIndex: 2 }}>
-                         <div style={{ fontWeight: 800, fontSize: '1.5rem', color: '#fff', marginBottom: '0.5rem' }}>{audienceContent[activeTab].label}</div>
+                         <div style={{ fontWeight: 800, fontSize: '1.5rem', color: '#fff', marginBottom: '0.5rem' }}>{audienceContent[activeTab as keyof typeof audienceContent].label}</div>
                          <div className="badge" style={{ background: 'var(--primary)', color: '#fff' }}>PAYPEE OPTIMIZED</div>
                       </div>
                    </div>
@@ -670,7 +677,7 @@ client.Cards.Create(paypee.CardParams{
             <motion.div className="code-window" initial={{ rotateY: 10, opacity: 0 }} whileInView={{ rotateY: 0, opacity: 1 }} viewport={{ once: true }}>
                <div className="code-header"> Paypee SDK </div>
                <div className="code-body" style={{ background: '#0f172a' }}>
-                  <pre style={{ margin: 0, color: '#f8fafc' }}><code>{codeSnippets[devLanguage]}</code></pre>
+                  <pre style={{ margin: 0, color: '#f8fafc' }}><code>{codeSnippets[devLanguage as keyof typeof codeSnippets]}</code></pre>
                </div>
             </motion.div>
           </div>
