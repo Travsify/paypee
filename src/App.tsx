@@ -59,8 +59,28 @@ const StatItem = ({ value, label, icon }: { value: string, label: string, icon: 
   );
 };
 
+const getInitialView = () => {
+  const path = window.location.pathname;
+  if (path.startsWith('/pay/')) return 'checkout';
+  if (path === '/docs') return 'docs';
+  
+  const token = localStorage.getItem('paypee_token');
+  const userStr = localStorage.getItem('paypee_user');
+  if (token && userStr) {
+    try {
+      const user = JSON.parse(userStr);
+      if (user && user.role) {
+        return user.role.toLowerCase() as any;
+      }
+    } catch (e) {
+      console.error('Session restore failed', e);
+    }
+  }
+  return 'landing';
+};
+
 const App = () => {
-  const [view, setView] = useState<'landing' | 'individual' | 'business' | 'developer' | 'auth' | 'checkout' | 'docs'>('landing');
+  const [view, setView] = useState<'landing' | 'individual' | 'business' | 'developer' | 'auth' | 'checkout' | 'docs'>(getInitialView());
   const [landingView, setLandingView] = useState<'main' | 'individual' | 'business' | 'developer' | 'legal_privacy' | 'legal_terms' | 'legal_pci'>('main');
   const [activeTab, setActiveTab] = useState<'individual' | 'business' | 'developer'>('individual');
   const [devLanguage, setDevLanguage] = useState<'node' | 'python' | 'go'>('node');
@@ -71,31 +91,8 @@ const App = () => {
     go: `import "github.com/paypee/sdk-go"\n\nclient := paypee.NewClient("sk_live_...")\naccount, _ := client.CreateGlobalAccount("EUR")`
   };
   
-  // Detect Payment Link URL and handle Session Persistence
-  useEffect(() => {
-    const path = window.location.pathname;
-    if (path.startsWith('/pay/')) {
-      setView('checkout');
-      return;
-    } else if (path === '/docs') {
-      setView('docs');
-      return;
-    }
-
-    // Auto-login if token exists
-    const token = localStorage.getItem('paypee_token');
-    const userStr = localStorage.getItem('paypee_user');
-    if (token && userStr) {
-      try {
-        const user = JSON.parse(userStr);
-        if (user && user.role) {
-          setView(user.role.toLowerCase());
-        }
-      } catch (e) {
-        console.error('Session restore failed', e);
-      }
-    }
-  }, []);
+  // Empty useEffect for cleanup (initialization is now synchronous)
+  useEffect(() => {}, []);
 
   // Set up Auto-Logout after 5 minutes of inactivity (only when logged in)
   useEffect(() => {
