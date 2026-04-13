@@ -131,22 +131,27 @@ const DeveloperDashboard = ({ onLogout }: { onLogout?: () => void }) => {
         display: 'flex',
         flexDirection: 'column'
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '3rem', fontSize: '1.5rem', fontWeight: 800, color: 'var(--primary)' }}>
-          <Terminal size={28} color="var(--primary)" />
-          Paypee Dev
+        <div style={{ padding: '2rem 1rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0 1rem', marginBottom: '3rem' }}>
+          <div style={{ width: 32, height: 32, background: 'var(--primary)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Cpu size={20} color="#fff" />
+          </div>
+          <span style={{ fontSize: '1rem', fontWeight: 800, letterSpacing: '-0.02em' }}>PAYPEE <span style={{ color: 'var(--primary)', fontSize: '0.7rem' }}>DEV</span></span>
         </div>
 
-        <div style={{ flex: 1 }}>
-          <SidebarItem icon={Activity} label="Overview" active={activeSection === 'overview'} onClick={() => setActiveSection('overview')} />
-          <SidebarItem icon={Key} label="API Keys" active={activeSection === 'apikeys'} onClick={() => setActiveSection('apikeys')} />
+        <nav style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+          <SidebarItem icon={LayoutDashboard} label="Overview" active={activeSection === 'overview'} onClick={() => setActiveSection('overview')} />
+          <SidebarItem icon={Key} label="API Keys" active={activeSection === 'keys'} onClick={() => setActiveSection('keys')} />
           <SidebarItem icon={Webhook} label="Webhooks" active={activeSection === 'webhooks'} onClick={() => setActiveSection('webhooks')} />
-          <SidebarItem icon={Database} label="Logs & Events" active={activeSection === 'logs'} onClick={() => setActiveSection('logs')} />
-          <SidebarItem icon={BookOpen} label="SDK & Docs" active={activeSection === 'docs'} onClick={() => setActiveSection('docs')} />
-        </div>
+          <SidebarItem icon={Activity} label="Traffic Logs" active={activeSection === 'logs'} onClick={() => setActiveSection('logs')} />
+          <SidebarItem icon={FileJson} label="API Docs" active={activeSection === 'docs'} onClick={() => window.location.href = '/docs'} />
+          <SidebarItem icon={ShieldCheck} label="Security" active={activeSection === 'security'} onClick={() => setActiveSection('security')} />
+          <SidebarItem icon={HelpCircle} label="Support" active={activeSection === 'support'} onClick={() => setActiveSection('support')} />
+        </nav>
+      </div>
 
-        <div>
+        <div style={{ marginTop: 'auto' }}>
           <SidebarItem icon={Settings} label="Project Settings" active={activeSection === 'settings'} onClick={() => setActiveSection('settings')} />
-          <SidebarItem icon={HelpCircle} label="API Support" active={activeSection === 'support'} onClick={() => setActiveSection('support')} />
           <SidebarItem icon={LogOut} label="Sign Out" onClick={onLogout} />
         </div>
       </aside>
@@ -183,7 +188,11 @@ const DeveloperDashboard = ({ onLogout }: { onLogout?: () => void }) => {
                 <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border)', borderRadius: '24px', padding: '2rem' }}>
                   <h3 style={{ fontSize: '1.2rem', fontWeight: 700, marginBottom: '1rem' }}>Restricted Keys</h3>
                   <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '1.5rem' }}>Create keys with scoped permissions for specific features like Card Issuing or Payouts only.</p>
-                  <button style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border)', color: '#fff', padding: '0.8rem 1.5rem', borderRadius: '12px', fontWeight: 600, cursor: 'pointer' }}>Create Scoped Key</button>
+                  <Link to="/docs" style={{ textDecoration: 'none' }}>
+                   <button style={{ background: 'rgba(255,255,255,0.05)', color: '#fff', border: '1px solid var(--border)', padding: '0.8rem 1.5rem', borderRadius: '14px', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <Globe size={18} /> Public Docs
+                   </button>
+                </Link>
                 </div>
               </div>
             </div>

@@ -23,6 +23,7 @@ import {
 } from 'lucide-react';
 import SettingsView from './SettingsView';
 import VerificationGate from './VerificationGate';
+import PayoutModal from './PayoutModal';
 
 const SidebarItem = ({ icon: Icon, label, active = false, onClick }: { icon: any, label: string, active?: boolean, onClick?: () => void }) => (
   <motion.div 
@@ -115,8 +116,9 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
   const [userData, setUserData] = useState<any>(null);
   const [transactions, setTransactions] = useState<any[]>([]);
   const [cards, setCards] = useState<any[]>([]);
+  const [isPayoutOpen, setIsPayoutOpen] = useState(false);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const token = localStorage.getItem('paypee_token');
     const headers = { 'Authorization': `Bearer ${token}` };
 
@@ -135,6 +137,41 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
     if (!userData || !userData.wallets) return "0.00";
     const wallet = userData.wallets.find((w: any) => w.currency === currency);
     return wallet ? parseFloat(wallet.balance).toFixed(2) : "0.00";
+  };
+
+  const toggleCardFreeze = async (cardId: string) => {
+    try {
+      const response = await fetch(`https://paypee-api.onrender.com/api/cards/${cardId}/toggle-freeze`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('paypee_token')}`
+        }
+      });
+      if (response.ok) {
+        // Optimistically update or refetch
+        const data = await response.json();
+        alert(data.message);
+        fetchUserData();
+      }
+    } catch (err) {
+      console.error('Failed to toggle freeze:', err);
+    }
+  };
+
+  const showCardPIN = async (cardId: string) => {
+    try {
+      const response = await fetch(`https://paypee-api.onrender.com/api/cards/${cardId}/pin`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('paypee_token')}`
+        }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        alert(`Your PIN is: ${data.pin}. Please keep it secret.`);
+      }
+    } catch (err) {
+      console.error('Failed to fetch PIN:', err);
+    }
   };
 
   return (
@@ -275,30 +312,30 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
                   <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.8rem', fontWeight: 600 }}>AMOUNT</label>
                   <input type="number" placeholder="0.00" style={{ width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border)', padding: '1rem', borderRadius: '14px', color: '#fff', fontSize: '1.5rem', fontWeight: 700, outline: 'none' }} />
                 </div>
-                <motion.button 
-                  whileTap={{ scale: 0.98 }}
-                  onClick={() => {
-                    if (userData?.kycStatus !== 'VERIFIED') {
-                      alert('Please complete your KYC verification to initiate transfers.');
-                    } else {
-                      // Original transfer logic here
-                    }
-                  }}
-                  style={{ 
-                    width: '100%', 
-                    background: userData?.kycStatus === 'VERIFIED' ? 'var(--primary)' : '#1e293b', 
-                    color: userData?.kycStatus === 'VERIFIED' ? '#fff' : '#64748b', 
-                    border: 'none', 
-                    padding: '1.2rem', 
-                    borderRadius: '16px', 
-                    fontSize: '1.1rem', 
-                    fontWeight: 700, 
-                    cursor: userData?.kycStatus === 'VERIFIED' ? 'pointer' : 'not-allowed', 
-                    boxShadow: userData?.kycStatus === 'VERIFIED' ? '0 20px 40px -10px rgba(99, 102, 241, 0.4)' : 'none' 
-                  }}
-                >
-                  {userData?.kycStatus === 'VERIFIED' ? 'Confirm Transfer' : 'Verify Account to Transfer'}
-                </motion.button>
+                  <motion.button 
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => {
+                      if (userData?.kycStatus !== 'VERIFIED') {
+                        alert('Please complete your KYC verification to initiate transfers.');
+                      } else {
+                        setIsPayoutOpen(true);
+                      }
+                    }}
+                    style={{ 
+                      width: '100%', 
+                      background: userData?.kycStatus === 'VERIFIED' ? 'var(--primary)' : '#1e293b', 
+                      color: userData?.kycStatus === 'VERIFIED' ? '#fff' : '#64748b', 
+                      border: 'none', 
+                      padding: '1.2rem', 
+                      borderRadius: '16px', 
+                      fontSize: '1.1rem', 
+                      fontWeight: 700, 
+                      cursor: userData?.kycStatus === 'VERIFIED' ? 'pointer' : 'not-allowed', 
+                      boxShadow: userData?.kycStatus === 'VERIFIED' ? '0 20px 40px -10px rgba(99, 102, 241, 0.4)' : 'none' 
+                    }}
+                  >
+                    {userData?.kycStatus === 'VERIFIED' ? 'Confirm Transfer' : 'Verify Account to Transfer'}
+                  </motion.button>
               </div>
            </div>
          ) : activeSection === 'security' ? (
@@ -492,6 +529,15 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
          )}
       </main>
       </div>
+      <PayoutModal 
+        isOpen={isPayoutOpen} 
+        onClose={() => setIsPayoutOpen(false)} 
+        balance={getWalletBalance()} 
+        onSuccess={() => {
+          fetchUserData();
+          // Modal handle state 3 internall
+        }} 
+      />
     </div>
   );
 };

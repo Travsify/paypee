@@ -166,6 +166,42 @@ app.get('/api/users/me', authenticateToken, async (req: any, res: any): Promise<
 });
 
 // ==========================================
+// Virtual Card Management
+// ==========================================
+
+app.post('/api/cards/:cardId/toggle-freeze', authenticateToken, async (req: any, res: any): Promise<any> => {
+   try {
+      const { cardId } = req.params;
+      const card = await prisma.virtualCard.findUnique({ where: { id: cardId } });
+      
+      if (!card || card.userId !== req.user.userId) return res.status(404).json({ error: 'Card not found' });
+
+      const updatedCard = await prisma.virtualCard.update({
+         where: { id: cardId },
+         data: { status: card.status === 'FROZEN' ? 'ACTIVE' : 'FROZEN' }
+      });
+
+      res.status(200).json({ message: `Card ${updatedCard.status === 'FROZEN' ? 'frozen' : 'activated'} successfully`, status: updatedCard.status });
+   } catch (error) {
+      res.status(500).json({ error: 'Failed to toggle card status' });
+   }
+});
+
+app.get('/api/cards/:cardId/pin', authenticateToken, async (req: any, res: any): Promise<any> => {
+   try {
+      const { cardId } = req.params;
+      const card = await prisma.virtualCard.findUnique({ where: { id: cardId } });
+      
+      if (!card || card.userId !== req.user.userId) return res.status(404).json({ error: 'Card not found' });
+
+      // In production, you would fetch this from the provider (Marqeta/Lithic)
+      res.status(200).json({ pin: '4491' }); 
+   } catch (error) {
+      res.status(500).json({ error: 'Failed to fetch PIN' });
+   }
+});
+
+// ==========================================
 // Virtual Cards Routes
 // ==========================================
 

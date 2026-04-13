@@ -35,6 +35,7 @@ import {
 import IndividualDashboard from './IndividualDashboard';
 import BusinessDashboard from './BusinessDashboard';
 import DeveloperDashboard from './DeveloperDashboard';
+import Docs from './Docs';
 import Auth from './Auth';
 import LandingIndividual from './LandingIndividual';
 import LandingBusiness from './LandingBusiness';
