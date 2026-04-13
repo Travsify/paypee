@@ -101,6 +101,21 @@ const APIKeyCard = ({ label, keyVal, isLive }: { label: string, keyVal: string, 
 const DeveloperDashboard = ({ onLogout }: { onLogout?: () => void }) => {
   const [mode, setMode] = useState<'sandbox' | 'live'>('sandbox');
   const [activeSection, setActiveSection] = useState('overview');
+  const [userData, setUserData] = useState<any>(null);
+  const [apiKeys, setApiKeys] = useState<any[]>([]);
+
+  React.useEffect(() => {
+    const token = localStorage.getItem('paypee_token');
+    const headers = { 'Authorization': `Bearer ${token}` };
+
+    Promise.all([
+      fetch('http://localhost:5000/api/users/me', { headers }).then(res => res.json()),
+      fetch('http://localhost:5000/api/keys', { headers }).then(res => res.json())
+    ]).then(([uData, keysData]) => {
+      if(!uData.error) setUserData(uData);
+      if(Array.isArray(keysData)) setApiKeys(keysData);
+    });
+  }, []);
 
   return (
     <div style={{ display: 'flex', height: '100vh', background: '#020617', color: '#fff', overflow: 'hidden' }}>
@@ -155,7 +170,7 @@ const DeveloperDashboard = ({ onLogout }: { onLogout?: () => void }) => {
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.4rem 0.8rem', background: 'rgba(255,255,255,0.05)', borderRadius: '14px', border: '1px solid var(--border)' }}>
                    <div style={{ width: 32, height: 32, background: 'var(--primary)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Code2 size={18} /></div>
-                   <div style={{ fontSize: '0.85rem', fontWeight: 600 }}>Dev_Admin</div>
+                   <div style={{ fontSize: '0.85rem', fontWeight: 600 }}>{userData ? userData.email.split('@')[0] : 'Dev_Admin'}</div>
                 </div>
               </div>
             </header>
@@ -167,8 +182,11 @@ const DeveloperDashboard = ({ onLogout }: { onLogout?: () => void }) => {
                 <button className="btn btn-outline" style={{ fontSize: '0.8rem', padding: '0.4rem 1rem' }}>Roll All Keys</button>
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
-                 <APIKeyCard label="Public Key" keyVal="pk_test_51Mz9GkSJ4R9Vq...x0z" isLive={mode === 'live'} />
-                 <APIKeyCard label="Secret Key" keyVal="sk_test_51Mz9GkSJ4R9Vq...Lp8" isLive={mode === 'live'} />
+                 {apiKeys.filter(k => k.isLive === (mode === 'live')).length > 0 ? apiKeys.filter(k => k.isLive === (mode === 'live')).map((k, i) => (
+                    <APIKeyCard key={i} label={`API Key (${k.id.slice(-4)})`} keyVal={k.key} isLive={k.isLive} />
+                 )) : (
+                    <div style={{ gridColumn: 'span 2', color: 'var(--text-muted)', fontSize: '0.9rem', textAlign: 'center', padding: '2rem 0', background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border)', borderRadius: '20px' }}>No keys active for {mode} mode.</div>
+                 )}
               </div>
             </section>
 

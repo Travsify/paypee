@@ -146,6 +146,159 @@ app.get('/api/users/me', authenticateToken, async (req: any, res: any): Promise<
   }
 });
 
+// ==========================================
+// Virtual Cards Routes
+// ==========================================
+
+app.get('/api/cards', authenticateToken, async (req: any, res: any): Promise<any> => {
+  try {
+    const cards = await prisma.virtualCard.findMany({ 
+      where: { userId: req.user.userId },
+      include: { wallet: true }
+    });
+    res.json(cards);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch virtual cards' });
+  }
+});
+
+app.post('/api/cards', authenticateToken, async (req: any, res: any): Promise<any> => {
+  try {
+    const { walletId } = req.body;
+    
+    // In a real system, you would call a card issuer API like Stripe or Fincra here
+    const cardNumber = "4242" + Math.floor(Math.random() * 1000000000000).toString().padStart(12, '0');
+    const cvv = Math.floor(Math.random() * 900 + 100).toString();
+    const expiry = "12/28";
+
+    const card = await prisma.virtualCard.create({
+      data: {
+        userId: req.user.userId,
+        walletId: walletId,
+        cardNumber,
+        expiry,
+        cvv,
+        status: "ACTIVE"
+      }
+    });
+    
+    res.status(201).json(card);
+  } catch (error) {
+    console.error('Create card error:', error);
+    res.status(500).json({ error: 'Failed to issue virtual card' });
+  }
+});
+
+// ==========================================
+// Transactions Routes
+// ==========================================
+
+app.get('/api/transactions', authenticateToken, async (req: any, res: any): Promise<any> => {
+  try {
+    const transactions = await prisma.transaction.findMany({ 
+      where: { userId: req.user.userId },
+      orderBy: { createdAt: 'desc' },
+      take: 20
+    });
+    res.json(transactions);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch transactions' });
+  }
+});
+
+app.post('/api/transactions', authenticateToken, async (req: any, res: any): Promise<any> => {
+  try {
+    const { amount, currency, type, walletId } = req.body;
+    
+    const reference = "TXN-" + Math.random().toString(36).substring(2, 10).toUpperCase();
+
+    // Verify wallet
+    const wallet = await prisma.wallet.findUnique({ where: { id: walletId } });
+    if (!wallet || wallet.userId !== req.user.userId) {
+      return res.status(400).json({ error: 'Invalid wallet ID' });
+    }
+
+    const transaction = await prisma.transaction.create({
+      data: {
+        userId: req.user.userId,
+        walletId,
+        type,
+        amount,
+        currency,
+        reference,
+        status: "COMPLETED" // Marking completed immediately for mock MVP
+      }
+    });
+
+    // Update wallet balance for deposits
+    if (type === 'DEPOSIT') {
+      await prisma.wallet.update({
+        where: { id: walletId },
+        data: { balance: { increment: amount } }
+      });
+    } else if (type === 'WITHDRAWAL' || type === 'TRANSFER') {
+       if (wallet.balance < amount) return res.status(400).json({ error: 'Insufficient funds' });
+       await prisma.wallet.update({
+        where: { id: walletId },
+        data: { balance: { decrement: amount } }
+      });
+    }
+
+    res.status(201).json(transaction);
+  } catch (error) {
+    console.error('Transaction error:', error);
+    res.status(500).json({ error: 'Failed to process transaction' });
+  }
+});
+
+// ==========================================
+// Developer API Keys Routes
+// ==========================================
+
+app.get('/api/keys', authenticateToken, async (req: any, res: any): Promise<any> => {
+   try {
+     const keys = await prisma.apiKey.findMany({ 
+       where: { userId: req.user.userId },
+       select: { id: true, key: true, isLive: true, createdAt: true } // Exclude secretHash
+     });
+     res.json(keys);
+   } catch (error) {
+     res.status(500).json({ error: 'Failed to fetch API keys' });
+   }
+});
+
+app.post('/api/keys', authenticateToken, async (req: any, res: any): Promise<any> => {
+   try {
+     const { isLive } = req.body;
+     const rawSecret = require('crypto').randomBytes(32).toString('hex');
+     const keyPrefix = isLive ? 'sk_live_' : 'sk_test_';
+     const keyString = keyPrefix + require('crypto').randomBytes(16).toString('hex');
+
+     const salt = await bcrypt.genSalt(10);
+     const secretHash = await bcrypt.hash(rawSecret, salt);
+
+     const newKey = await prisma.apiKey.create({
+       data: {
+         userId: req.user.userId,
+         key: keyString,
+         secretHash,
+         isLive: isLive || false
+       }
+     });
+
+     res.status(201).json({
+       id: newKey.id,
+       key: newKey.key,
+       isLive: newKey.isLive,
+       secret: rawSecret, // ONLY Return secret ONCE during creation
+       createdAt: newKey.createdAt
+     });
+   } catch (error) {
+     console.error('Create API key error:', error);
+     res.status(500).json({ error: 'Failed to generate API key' });
+   }
+});
+
 app.listen(PORT, () => {
   console.log(`🚀 Paypee Core API running on http://localhost:${PORT}`);
 });

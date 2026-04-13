@@ -111,6 +111,30 @@ const TransactionItem = ({ type, title, date, amount, status }: { type: 'in' | '
 
 const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
   const [activeSection, setActiveSection] = useState('dashboard');
+  const [userData, setUserData] = useState<any>(null);
+  const [transactions, setTransactions] = useState<any[]>([]);
+  const [cards, setCards] = useState<any[]>([]);
+
+  React.useEffect(() => {
+    const token = localStorage.getItem('paypee_token');
+    const headers = { 'Authorization': `Bearer ${token}` };
+
+    Promise.all([
+      fetch('http://localhost:5000/api/users/me', { headers }).then(res => res.json()),
+      fetch('http://localhost:5000/api/transactions', { headers }).then(res => res.json()),
+      fetch('http://localhost:5000/api/cards', { headers }).then(res => res.json())
+    ]).then(([uData, txData, cardData]) => {
+      if(!uData.error) setUserData(uData);
+      if(Array.isArray(txData)) setTransactions(txData);
+      if(Array.isArray(cardData)) setCards(cardData);
+    });
+  }, []);
+
+  const getBalance = (currency: string) => {
+    if (!userData || !userData.wallets) return "0.00";
+    const wallet = userData.wallets.find((w: any) => w.currency === currency);
+    return wallet ? parseFloat(wallet.balance).toFixed(2) : "0.00";
+  };
 
   return (
     <div style={{ display: 'flex', height: '100vh', background: '#020617', color: '#fff', overflow: 'hidden' }}>
@@ -152,7 +176,7 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
             {/* Header */}
             <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3rem' }}>
               <div>
-                <h1 style={{ fontSize: '1.75rem', marginBottom: '0.2rem' }}>Hello, Sarah! 👋</h1>
+                <h1 style={{ fontSize: '1.75rem', marginBottom: '0.2rem' }}>Hello, {userData ? userData.email.split('@')[0] : 'Sarah'}! 👋</h1>
                 <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Welcome back. Here's what's happening with your money.</p>
               </div>
               <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
@@ -191,9 +215,9 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
                 <button style={{ color: 'var(--primary)', background: 'transparent', border: 'none', fontWeight: 600, cursor: 'pointer', fontSize: '0.9rem' }}>See all accounts</button>
               </div>
               <div style={{ display: 'flex', gap: '1.5rem', overflowX: 'auto', paddingBottom: '1rem' }}>
-                <BalanceCard currency="USD" symbol="$" amount="12,450.00" gradient="linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)" />
-                <BalanceCard currency="NGN" symbol="₦" amount="2,450,000.00" gradient="linear-gradient(135deg, #10b981 0%, #059669 100%)" />
-                <BalanceCard currency="EUR" symbol="€" amount="1,840.50" gradient="linear-gradient(135deg, #374151 0%, #111827 100%)" />
+                <BalanceCard currency="USD" symbol="$" amount={getBalance("USD")} gradient="linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)" />
+                <BalanceCard currency="NGN" symbol="₦" amount={getBalance("NGN")} gradient="linear-gradient(135deg, #10b981 0%, #059669 100%)" />
+                <BalanceCard currency="EUR" symbol="€" amount={getBalance("EUR")} gradient="linear-gradient(135deg, #374151 0%, #111827 100%)" />
               </div>
             </section>
 
@@ -206,11 +230,18 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
                   <MoreHorizontal size={20} color="var(--text-muted)" style={{ cursor: 'pointer' }} />
                 </div>
                 <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border)', borderRadius: '24px', padding: '1.5rem' }}>
-                  <TransactionItem type="out" title="Amazon Web Services" date="12 April, 2026 • 2:34 PM" amount="145.00" status="Completed" />
-                  <TransactionItem type="in" title="Apple Inc. Dividend" date="11 April, 2026 • 10:15 AM" amount="1,240.00" status="Completed" />
-                  <TransactionItem type="out" title="Starbucks Coffee" date="10 April, 2026 • 8:45 AM" amount="12.50" status="Completed" />
-                  <TransactionItem type="out" title="Netflix Subscription" date="09 April, 2026 • 11:30 PM" amount="15.99" status="Completed" />
-                  <TransactionItem type="in" title="Payment from Freelance" date="08 April, 2026 • 5:20 PM" amount="3,500.00" status="Pending" />
+                  {transactions.length > 0 ? transactions.map((tx, i) => (
+                    <TransactionItem 
+                      key={i}
+                      type={tx.type === 'DEPOSIT' || tx.type === 'TRANSFER_IN' ? 'in' : 'out'} 
+                      title={tx.reference} 
+                      date={new Date(tx.createdAt).toLocaleString()} 
+                      amount={tx.amount.toString()} 
+                      status={tx.status} 
+                    />
+                  )) : (
+                     <div style={{ color: 'var(--text-muted)', fontSize: '0.9rem', textAlign: 'center', padding: '2rem 0' }}>No recent transactions.</div>
+                  )}
                 </div>
               </section>
 
@@ -235,15 +266,17 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
                     <Zap size={24} color="var(--primary)" />
                     <span style={{ fontSize: '0.75rem', fontWeight: 700, opacity: 0.6 }}>VIRTUAL DEBIT</span>
                   </div>
-                  <div style={{ fontSize: '1.25rem', letterSpacing: '2px', fontWeight: 600 }}>**** **** **** 4021</div>
+                  <div style={{ fontSize: '1.25rem', letterSpacing: '2px', fontWeight: 600 }}>
+                    {cards.length > 0 ? "**** **** **** " + cards[0].cardNumber.slice(-4) : "**** **** **** 0000"}
+                  </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', fontSize: '0.8rem' }}>
                     <div>
                       <div style={{ opacity: 0.5, fontSize: '0.65rem', marginBottom: '0.2rem' }}>CARD HOLDER</div>
-                      <div style={{ fontWeight: 600 }}>SARAH CHEN</div>
+                      <div style={{ fontWeight: 600 }}>{userData ? userData.email.split('@')[0].toUpperCase() : 'USER'}</div>
                     </div>
                     <div>
                       <div style={{ opacity: 0.5, fontSize: '0.65rem', marginBottom: '0.2rem' }}>EXPIRES</div>
-                      <div style={{ fontWeight: 600 }}>08/29</div>
+                      <div style={{ fontWeight: 600 }}>{cards.length > 0 ? cards[0].expiry : "00/00"}</div>
                     </div>
                   </div>
                   <div style={{ position: 'absolute', top: '-10%', right: '-10%', width: '150px', height: '150px', background: 'var(--primary)', borderRadius: '50%', filter: 'blur(100px)', opacity: 0.2 }} />

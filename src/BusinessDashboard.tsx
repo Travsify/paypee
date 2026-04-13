@@ -96,7 +96,27 @@ const SubAccountItem = ({ name, type, balance, flag }: { name: string, type: str
 
 const BusinessDashboard = ({ onLogout }: { onLogout?: () => void }) => {
   const [activeSection, setActiveSection] = useState('dashboard');
+  const [userData, setUserData] = useState<any>(null);
+  const [transactions, setTransactions] = useState<any[]>([]);
 
+  React.useEffect(() => {
+    const token = localStorage.getItem('paypee_token');
+    const headers = { 'Authorization': `Bearer ${token}` };
+
+    Promise.all([
+      fetch('http://localhost:5000/api/users/me', { headers }).then(res => res.json()),
+      fetch('http://localhost:5000/api/transactions', { headers }).then(res => res.json())
+    ]).then(([uData, txData]) => {
+      if(!uData.error) setUserData(uData);
+      if(Array.isArray(txData)) setTransactions(txData);
+    });
+  }, []);
+
+  const getTotalUSD = () => {
+    if (!userData || !userData.wallets) return "0.00";
+    const sum = userData.wallets.reduce((acc: number, w: any) => acc + parseFloat(w.balance), 0);
+    return "$" + sum.toFixed(2);
+  };
   return (
     <div style={{ display: 'flex', height: '100vh', background: '#020617', color: '#fff', overflow: 'hidden' }}>
       {/* Sidebar */}
@@ -139,7 +159,7 @@ const BusinessDashboard = ({ onLogout }: { onLogout?: () => void }) => {
             <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3rem' }}>
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.2rem' }}>
-                  <h1 style={{ fontSize: '1.75rem', margin: 0 }}>TechStream Ltd.</h1>
+                  <h1 style={{ fontSize: '1.75rem', margin: 0 }}>{userData ? userData.email.split('@')[0].toUpperCase() + ' Ltd.' : 'TechStream Ltd.'}</h1>
                   <div style={{ background: 'rgba(16, 185, 129, 0.1)', color: '#10b981', padding: '0.2rem 0.6rem', borderRadius: '6px', fontSize: '0.7rem', fontWeight: 800 }}>VERIFIED BUSINESS</div>
                 </div>
                 <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Treasury Operations • Mainnet Node: #7721</p>
@@ -165,8 +185,8 @@ const BusinessDashboard = ({ onLogout }: { onLogout?: () => void }) => {
 
             {/* Analytics Summary */}
             <section style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1.5rem', marginBottom: '3rem' }}>
-              <MetricCard label="Total Revenue (Apr)" value="$1.24M" trend="+12.4%" icon={TrendingUp} color="var(--accent)" />
-              <MetricCard label="Pending Disbursements" value="$450,200" trend="-4.2%" icon={Send} color="var(--primary)" />
+              <MetricCard label="Total Treasury Volume" value={getTotalUSD()} trend="+12.4%" icon={TrendingUp} color="var(--accent)" />
+              <MetricCard label="Pending Disbursements" value="0.00" trend="Up to date" icon={Send} color="var(--primary)" />
               <MetricCard label="Average Settlement" value="1.8s" trend="Optimized" icon={Zap} color="var(--secondary)" />
               <MetricCard label="Security Compliance" value="100%" trend="Active" icon={ShieldCheck} color="var(--accent)" />
             </section>
@@ -181,10 +201,17 @@ const BusinessDashboard = ({ onLogout }: { onLogout?: () => void }) => {
                   </button>
                 </div>
                 <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border)', borderRadius: '24px', padding: '1.5rem' }}>
-                  <SubAccountItem name="UK Operations" type="GBP Virtual" balance="£142,500.00" flag="🇬🇧" />
-                  <SubAccountItem name="Lagos Main Office" type="NGN Collection" balance="₦45,000,000.00" flag="🇳🇬" />
-                  <SubAccountItem name="EU Expansion" type="EUR IBAN" balance="€18,400.00" flag="🇪🇺" />
-                  <SubAccountItem name="US Treasury" type="USD Domestic" balance="$340,900.00" flag="🇺🇸" />
+                  {userData && userData.wallets ? userData.wallets.map((w: any, idx: number) => (
+                    <SubAccountItem 
+                       key={idx} 
+                       name={w.currency + " Operations"} 
+                       type={w.currency + " Virtual"} 
+                       balance={w.currency === 'USD' ? '$' + parseFloat(w.balance).toFixed(2) : parseFloat(w.balance).toFixed(2) + ' ' + w.currency} 
+                       flag={w.currency === 'USD' ? "🇺🇸" : w.currency === 'GBP' ? "🇬🇧" : w.currency === 'EUR' ? "🇪🇺" : "🇳🇬"} 
+                    />
+                  )) : (
+                     <div style={{ color: 'var(--text-muted)', fontSize: '0.9rem', textAlign: 'center', padding: '2rem 0' }}>No wallets deployed.</div>
+                  )}
                   <motion.div 
                     whileHover={{ scale: 1.02 }}
                     style={{ marginTop: '1.5rem', padding: '1rem', textAlign: 'center', background: 'rgba(99, 102, 241, 0.1)', borderRadius: '16px', color: 'var(--primary)', fontWeight: 600, cursor: 'pointer', fontSize: '0.9rem' }}
@@ -236,24 +263,24 @@ const BusinessDashboard = ({ onLogout }: { onLogout?: () => void }) => {
                 </div>
               </div>
               <div style={{ background: '#0a0f1e', border: '1px solid var(--border)', borderRadius: '24px', padding: '1rem' }}>
-                 {[
-                   { event: "Payment Received", sub: "Lagos Office • ₦2,500,000", time: "Just now", icon: <ArrowDownLeft /> },
-                   { event: "Auto-conversion Triggered", sub: "NGN → USDC • $1,204.00", time: "2 mins ago", icon: <RefreshCcw /> },
-                   { event: "Bulk Payout Initiated", sub: "UK Payroll • 142 Recipients", time: "15 mins ago", icon: <Send /> }
-                 ].map((log, i) => (
-                    <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1rem', borderBottom: i === 2 ? 'none' : '1px solid rgba(255,255,255,0.05)' }}>
+                 {transactions.length > 0 ? transactions.map((log, i) => (
+                    <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1rem', borderBottom: i === transactions.length - 1 ? 'none' : '1px solid rgba(255,255,255,0.05)' }}>
                        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-                          <div style={{ color: 'var(--primary)' }}>{log.icon}</div>
+                          <div style={{ color: 'var(--primary)' }}>
+                             {log.type === 'DEPOSIT' || log.type === 'TRANSFER_IN' ? <ArrowDownLeft /> : <ArrowUpRight />}
+                          </div>
                           <div>
-                            <div style={{ fontWeight: 600, fontSize: '0.9rem' }}>{log.event}</div>
-                            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{log.sub}</div>
+                            <div style={{ fontWeight: 600, fontSize: '0.9rem' }}>{log.type.replace('_', ' ')}</div>
+                            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{log.reference} • {log.currency} {log.amount}</div>
                           </div>
                        </div>
                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-muted)', fontSize: '0.8rem' }}>
-                          {log.time} <ExternalLink size={14} />
+                          {new Date(log.createdAt).toLocaleTimeString()} <ExternalLink size={14} />
                        </div>
                     </div>
-                 ))}
+                 )) : (
+                    <div style={{ color: 'var(--text-muted)', fontSize: '0.9rem', textAlign: 'center', padding: '2rem 0' }}>No network events detected.</div>
+                 )}
               </div>
             </section>
            </>
