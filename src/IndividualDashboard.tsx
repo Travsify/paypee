@@ -539,11 +539,11 @@ const IndividualDashboard = ({ onLogout }: { onLogout: () => void }) => {
                    <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', marginTop: '0.75rem' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', color: 'var(--text-muted)' }}>
                          <div style={{ width: 8, height: 8, background: '#10b981', borderRadius: '50%', boxShadow: '0 0 10px #10b981' }} />
-                         NETWORK_SYNC_ACTIVE
+                         SYSTEM_READY
                       </div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', color: 'var(--text-muted)' }}>
                          <ShieldCheck size={16} color="var(--primary)" />
-                         ENCRYPTION_LOCKED
+                         SECURE_ENCRYPTION
                       </div>
                    </div>
                  </div>
@@ -635,8 +635,8 @@ const IndividualDashboard = ({ onLogout }: { onLogout: () => void }) => {
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '3rem' }}>
                      <section>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                           <h2 style={{ fontSize: '1.25rem', fontWeight: 800 }}>Virtual Node</h2>
-                           <button onClick={() => setActiveSection('cards')} style={{ color: 'var(--primary)', background: 'transparent', border: 'none', fontWeight: 700, fontSize: '0.8rem', cursor: 'pointer' }}>NEW_ISSUE +</button>
+                           <h2 style={{ fontSize: '1.25rem', fontWeight: 800 }}>Virtual Card</h2>
+                           <button onClick={() => setActiveSection('cards')} style={{ color: 'var(--primary)', background: 'transparent', border: 'none', fontWeight: 700, fontSize: '0.8rem', cursor: 'pointer' }}>NEW CARD +</button>
                         </div>
                         {cards.length > 0 ? (
                            <div style={{ 
@@ -654,7 +654,7 @@ const IndividualDashboard = ({ onLogout }: { onLogout: () => void }) => {
                               <div style={{ marginTop: '2.5rem', fontSize: '1.2rem', fontWeight: 700, letterSpacing: '4px', fontFamily: 'monospace' }}>•••• •••• •••• {cards[0].cardNumber.slice(-4)}</div>
                               <div style={{ marginTop: '2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
                                  <div>
-                                    <div style={{ fontSize: '0.55rem', opacity: 0.5, textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '0.3rem' }}>Node Operator</div>
+                                    <div style={{ fontSize: '0.55rem', opacity: 0.5, textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '0.3rem' }}>Account Holder</div>
                                     <div style={{ fontWeight: 700, fontSize: '0.9rem' }}>{userData?.firstName?.toUpperCase()} {userData?.lastName?.toUpperCase()}</div>
                                  </div>
                                  <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Mastercard-logo.svg/1280px-Mastercard-logo.svg.png" style={{ height: 28 }} />
@@ -670,11 +670,11 @@ const IndividualDashboard = ({ onLogout }: { onLogout: () => void }) => {
                      </section>
 
                      <section style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                        <h2 style={{ fontSize: '1.25rem', fontWeight: 800 }}>Quick Switch</h2>
+                        <h2 style={{ fontSize: '1.25rem', fontWeight: 800 }}>Quick Actions</h2>
                         {[
-                          { icon: <Send size={20} />, label: "Initiate Payout", desc: "Send to bank or crypto", action: () => setIsPayoutOpen(true), color: "var(--primary)" },
-                          { icon: <Zap size={20} />, label: "Settlement Gas", desc: "Airtime & Utilities", action: () => setActiveSection('bills'), color: "var(--secondary)" },
-                          { icon: <History size={20} />, label: "Flow Analysis", desc: "Export ledger logs", action: () => setActiveSection('history'), color: "var(--accent)" }
+                          { icon: <Send size={20} />, label: "Send Money", desc: "To bank or crypto", action: () => setIsPayoutOpen(true), color: "var(--primary)" },
+                          { icon: <Zap size={20} />, label: "Pay Bills", desc: "Airtime & Utilities", action: () => setActiveSection('bills'), color: "var(--secondary)" },
+                          { icon: <History size={20} />, label: "Full History", desc: "View all records", action: () => setActiveSection('history'), color: "var(--accent)" }
                         ].map((act, i) => (
                           <motion.button 
                             key={i}

@@ -151,7 +151,21 @@ app.get('/api/users/me', authenticateToken, async (req: any, res: any): Promise<
     if (!user) return res.status(404).json({ error: 'User not found' });
     
     // Fetch associated wallets
-    const wallets = await prisma.wallet.findMany({ where: { userId: user.id } });
+    let wallets = await prisma.wallet.findMany({ where: { userId: user.id } });
+
+    // AUTO-SYNC: If any wallet is missing metadata, try to provision/patch it now
+    const needsSync = wallets.some(w => !w.metadata);
+    if (needsSync) {
+       console.log(`🔄 Auto-syncing metadata for user ${user.id}...`);
+       await Promise.all(wallets.map(w => {
+          if (!w.metadata) {
+             return IbanService.provisionGlobalAccount(user.id, w.currency);
+          }
+          return Promise.resolve();
+       }));
+       // Refetch wallets after sync
+       wallets = await prisma.wallet.findMany({ where: { userId: user.id } });
+    }
 
     res.json({ ...user, wallets });
   } catch (error) {
