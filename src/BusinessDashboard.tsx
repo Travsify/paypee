@@ -21,7 +21,8 @@ import {
   Plus,
   RefreshCcw,
   ExternalLink,
-  Zap
+  Zap,
+  Bot
 } from 'lucide-react';
 import SettingsView from './SettingsView';
 import VerificationGate from './VerificationGate';
@@ -168,7 +169,7 @@ const BusinessDashboard = ({ onLogout }: { onLogout?: () => void }) => {
             {activeSection === 'vaults' && <VaultsDashboard />}
             {activeSection === 'bills' && <BillsDashboard />}
             {activeSection === 'analytics' && (
-             <div style={{ padding: '1rem' }}>
+              <div style={{ padding: '1rem' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem' }}>
                   <div>
                     <h2 style={{ fontSize: '1.8rem', fontWeight: 800 }}>Revenue Intelligence</h2>
@@ -221,12 +222,11 @@ const BusinessDashboard = ({ onLogout }: { onLogout?: () => void }) => {
                         </AreaChart>
                       </ResponsiveContainer>
                    </div>
-                    </div>
-                 </div>
+                </div>
               </div>
             )}
             {activeSection === 'team' && (
-             <div style={{ padding: '1rem' }}>
+              <div style={{ padding: '1rem' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem' }}>
                   <div>
                     <h2 style={{ fontSize: '1.8rem', fontWeight: 800 }}>Team Management</h2>
@@ -274,7 +274,7 @@ const BusinessDashboard = ({ onLogout }: { onLogout?: () => void }) => {
                        ))}
                     </div>
                 </div>
-             </div>
+              </div>
             )}
             {activeSection === 'settings' && (
              <SettingsView />
@@ -341,7 +341,7 @@ const BusinessDashboard = ({ onLogout }: { onLogout?: () => void }) => {
                   <button 
                     onClick={() => {
                       if (userData?.kycStatus !== 'VERIFIED') {
-                        alert('KYB Verification required for bulk payouts.');
+                        alert('KYB Verification required for bulk uploads.');
                       }
                     }}
                     style={{ 
@@ -354,7 +354,7 @@ const BusinessDashboard = ({ onLogout }: { onLogout?: () => void }) => {
                       cursor: userData?.kycStatus === 'VERIFIED' ? 'pointer' : 'not-allowed' 
                     }}
                   >
-                    {userData?.kycStatus === 'VERIFIED' ? 'Upload CSV' : 'Verify to Unlock'}
+                    Upload CSV
                   </button>
                   <button 
                     onClick={() => {
@@ -363,7 +363,7 @@ const BusinessDashboard = ({ onLogout }: { onLogout?: () => void }) => {
                       }
                     }}
                     style={{ 
-                      background: userData?.kycStatus === 'VERIFIED' ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.05)', 
+                      background: 'rgba(255,255,255,0.05)', 
                       color: '#fff', 
                       border: '1px solid var(--border)', 
                       padding: '1rem 2rem', 
@@ -507,36 +507,35 @@ const BusinessDashboard = ({ onLogout }: { onLogout?: () => void }) => {
                     <div style={{ width: '40px', height: '40px', background: 'rgba(99, 102, 241, 0.1)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary)', marginBottom: '1rem' }}>
                       <Send size={20} />
                     </div>
-                    <div style={{ fontWeight: 700, fontSize: '1.1rem', marginBottom: '0.3rem' }}>Bulk Payouts</div>
-                    <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Pay up to 5k employees.</p>
+                    <div style={{ fontWeight: 700, fontSize: '0.9rem' }}>Disburse Funds</div>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Global payouts & transfers</div>
                   </div>
-                  <div style={{ background: 'var(--glass)', border: '1px solid var(--border)', padding: '1.5rem', borderRadius: '24px', cursor: 'pointer' }}>
+                  <div onClick={() => setActiveSection('accounts')} style={{ background: 'var(--glass)', border: '1px solid var(--border)', padding: '1.5rem', borderRadius: '24px', cursor: 'pointer' }}>
                     <div style={{ width: '40px', height: '40px', background: 'rgba(16, 185, 129, 0.1)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#10b981', marginBottom: '1rem' }}>
-                      <Plus size={20} />
+                      <Layers size={20} />
                     </div>
-                    <div style={{ fontWeight: 700, fontSize: '1.1rem', marginBottom: '0.3rem' }}>Collect Funds</div>
-                    <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Generate payment links.</p>
+                    <div style={{ fontWeight: 700, fontSize: '0.9rem' }}>Virtual Accounts</div>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Manage liquidity rails</div>
                   </div>
                 </div>
-
-                <div style={{ background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(16, 185, 129, 0.1) 100%)', padding: '2rem', borderRadius: '32px', border: '1px solid var(--glass-border)', position: 'relative', overflow: 'hidden' }}>
-                  <h3 style={{ fontSize: '1.1rem', marginBottom: '0.5rem' }}>Auto-Treasury Active</h3>
-                  <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '1.5rem' }}>20% of all incoming NGN is being automatically converted to USDC to hedge inflation.</p>
-                  <div style={{ display: 'flex', gap: '0.5rem' }}>
-                     <div style={{ background: 'var(--primary)', color: '#fff', padding: '0.4rem 1rem', borderRadius: '8px', fontSize: '0.8rem', fontWeight: 600 }}>Modify Rule</div>
-                     <div style={{ background: 'rgba(255,255,255,0.05)', color: '#fff', padding: '0.4rem 1rem', borderRadius: '8px', fontSize: '0.8rem', fontWeight: 600 }}>History</div>
-                  </div>
-                  <BarChart3 size={80} style={{ position: 'absolute', right: '-10px', bottom: '-10px', opacity: 0.1 }} />
+                
+                <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border)', borderRadius: '24px', padding: '2rem', borderLeft: '4px solid var(--primary)' }}>
+                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
+                      <ShieldCheck size={24} color="var(--primary)" />
+                      <div style={{ fontWeight: 800, fontSize: '1rem' }}>Compliance Monitor</div>
+                   </div>
+                   <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', lineHeight: 1.5, marginBottom: '1rem' }}>Your business profile is currently 100% compliant. No pending tax or KYB documents required.</p>
+                   <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--primary)', cursor: 'pointer' }}>Download Compliance Certificate →</div>
                 </div>
               </section>
             </div>
 
-            {/* Global Activity Feed */}
+            {/* Network Ledger Activity */}
             <section style={{ marginTop: '3rem' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                <h2 style={{ fontSize: '1.25rem', fontWeight: 700 }}>Network Event Log</h2>
-                <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-                   <div style={{ fontSize: '0.8rem', color: 'var(--accent)', fontWeight: 700 }}>LIVE UPDATES</div>
+                <h2 style={{ fontSize: '1.25rem', fontWeight: 700 }}>Network Ledger Activity</h2>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-muted)', fontSize: '0.8rem', fontWeight: 600 }}>
+                   REAL-TIME STREAM ACTIVE 
                    <div style={{ width: 8, height: 8, background: 'var(--accent)', borderRadius: '50%', boxShadow: '0 0 10px var(--accent)' }} />
                 </div>
               </div>
@@ -562,7 +561,7 @@ const BusinessDashboard = ({ onLogout }: { onLogout?: () => void }) => {
               </div>
             </section>
             </>
-         )}
+            )}
       </main>
       </div>
     </div>

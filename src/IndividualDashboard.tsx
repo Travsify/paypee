@@ -17,7 +17,9 @@ import {
   User, 
   ArrowUpRight, 
   ArrowDownLeft,
-  Smartphone
+  Smartphone,
+  Lock,
+  Bot
 } from 'lucide-react';
 import SettingsView from './SettingsView';
 import VerificationGate from './VerificationGate';
