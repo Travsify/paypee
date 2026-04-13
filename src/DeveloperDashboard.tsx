@@ -24,6 +24,7 @@ import {
   Cpu
 } from 'lucide-react';
 import SettingsView from './SettingsView';
+import VerificationGate from './VerificationGate';
 
 const SidebarItem = ({ icon: Icon, label, active = false, onClick }: { icon: any, label: string, active?: boolean, onClick?: () => void }) => (
   <motion.div 
@@ -118,8 +119,10 @@ const DeveloperDashboard = ({ onLogout }: { onLogout?: () => void }) => {
   }, []);
 
   return (
-    <div style={{ display: 'flex', height: '100vh', background: '#020617', color: '#fff', overflow: 'hidden' }}>
-      {/* Sidebar */}
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', background: '#020617', color: '#fff', overflow: 'hidden' }}>
+      <VerificationGate kycStatus={userData?.kycStatus || 'PENDING'} accountType="DEVELOPER" />
+      <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
+        {/* Sidebar */}
       <aside style={{ 
         width: '280px', 
         background: '#0a0f1e', 
@@ -156,7 +159,24 @@ const DeveloperDashboard = ({ onLogout }: { onLogout?: () => void }) => {
             <div style={{ padding: '1rem' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
                 <h2 style={{ fontSize: '1.8rem', fontWeight: 700 }}>API Authentication Keys</h2>
-                <button style={{ background: 'var(--primary)', color: '#fff', border: 'none', padding: '0.8rem 1.5rem', borderRadius: '14px', fontWeight: 600, cursor: 'pointer' }}>Generate New KeyPair</button>
+                <button 
+                  onClick={() => {
+                    if (userData?.kycStatus !== 'VERIFIED') {
+                      alert('Developer KYB Verification required to access Production API Keys.');
+                    }
+                  }}
+                  style={{ 
+                    background: userData?.kycStatus === 'VERIFIED' ? 'var(--primary)' : 'rgba(255,255,255,0.05)', 
+                    color: userData?.kycStatus === 'VERIFIED' ? '#fff' : '#64748b', 
+                    border: 'none', 
+                    padding: '0.8rem 1.5rem', 
+                    borderRadius: '14px', 
+                    fontWeight: 600, 
+                    cursor: userData?.kycStatus === 'VERIFIED' ? 'pointer' : 'not-allowed' 
+                  }}
+                >
+                  {userData?.kycStatus === 'VERIFIED' ? 'Generate New KeyPair' : 'Verify to Unlock Keys'}
+                </button>
               </div>
               <div style={{ display: 'grid', gap: '2rem' }}>
                 <APIKeyCard label="Primary Secret Key" keyVal={apiKeys.length > 0 ? apiKeys[0].key : "sk_live_hidden_example"} isLive={mode === 'live'} />
@@ -266,7 +286,7 @@ const DeveloperDashboard = ({ onLogout }: { onLogout?: () => void }) => {
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.4rem 0.8rem', background: 'rgba(255,255,255,0.05)', borderRadius: '14px', border: '1px solid var(--border)' }}>
                    <div style={{ width: 32, height: 32, background: 'var(--primary)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Code2 size={18} /></div>
-                   <div style={{ fontSize: '0.85rem', fontWeight: 600 }}>{userData ? userData.email.split('@')[0] : 'Dev_Admin'}</div>
+                   <div style={{ fontSize: '0.85rem', fontWeight: 600 }}>{userData?.firstName || (userData ? userData.email.split('@')[0] : 'Dev_Admin')}</div>
                 </div>
               </div>
             </header>
@@ -380,6 +400,7 @@ const DeveloperDashboard = ({ onLogout }: { onLogout?: () => void }) => {
            </>
          )}
       </main>
+      </div>
     </div>
   );
 };

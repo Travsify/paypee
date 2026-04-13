@@ -22,6 +22,7 @@ import {
   Navigation
 } from 'lucide-react';
 import SettingsView from './SettingsView';
+import VerificationGate from './VerificationGate';
 
 const SidebarItem = ({ icon: Icon, label, active = false, onClick }: { icon: any, label: string, active?: boolean, onClick?: () => void }) => (
   <motion.div 
@@ -137,8 +138,10 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
   };
 
   return (
-    <div style={{ display: 'flex', height: '100vh', background: '#020617', color: '#fff', overflow: 'hidden' }}>
-      {/* Sidebar */}
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', background: '#020617', color: '#fff', overflow: 'hidden' }}>
+      <VerificationGate kycStatus={userData?.kycStatus || 'PENDING'} accountType="INDIVIDUAL" />
+      <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
+        {/* Sidebar */}
       <aside style={{ 
         width: '280px', 
         background: '#0a0f1e', 
@@ -193,9 +196,27 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
                 <h2 style={{ fontSize: '1.8rem', fontWeight: 700 }}>Virtual Cards</h2>
                 <motion.button 
                   whileTap={{ scale: 0.95 }}
-                  style={{ background: 'var(--primary)', color: '#fff', border: 'none', padding: '0.8rem 1.5rem', borderRadius: '14px', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+                  onClick={() => {
+                    if (userData?.kycStatus !== 'VERIFIED') {
+                      alert('KYC Verification required to issue virtual cards.');
+                    } else {
+                      // Logic to open issuing modal
+                    }
+                  }}
+                  style={{ 
+                    background: userData?.kycStatus === 'VERIFIED' ? 'var(--primary)' : 'rgba(255,255,255,0.05)', 
+                    color: userData?.kycStatus === 'VERIFIED' ? '#fff' : '#64748b', 
+                    border: 'none', 
+                    padding: '0.8rem 1.5rem', 
+                    borderRadius: '14px', 
+                    fontWeight: 600, 
+                    cursor: userData?.kycStatus === 'VERIFIED' ? 'pointer' : 'not-allowed', 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    gap: '0.5rem' 
+                  }}
                 >
-                  <Plus size={20} /> Issue New Card
+                  <Plus size={20} /> {userData?.kycStatus === 'VERIFIED' ? 'Issue New Card' : 'Verify to Issue Card'}
                 </motion.button>
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))', gap: '2rem' }}>
@@ -223,7 +244,7 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
                       <div>
                         <div style={{ opacity: 0.5, fontSize: '0.7rem', marginBottom: '0.2rem' }}>CARD HOLDER</div>
-                        <div style={{ fontWeight: 600, fontSize: '1rem' }}>{userData?.email.split('@')[0].toUpperCase()}</div>
+                        <div style={{ fontWeight: 600, fontSize: '1rem' }}>{userData?.firstName ? userData.firstName.toUpperCase() : userData?.email.split('@')[0].toUpperCase()}</div>
                       </div>
                       <div style={{ textAlign: 'right' }}>
                         <div style={{ opacity: 0.5, fontSize: '0.7rem', marginBottom: '0.2rem' }}>EXPIRY</div>
@@ -256,9 +277,27 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
                 </div>
                 <motion.button 
                   whileTap={{ scale: 0.98 }}
-                  style={{ width: '100%', background: 'var(--primary)', color: '#fff', border: 'none', padding: '1.2rem', borderRadius: '16px', fontSize: '1.1rem', fontWeight: 700, cursor: 'pointer', boxShadow: '0 20px 40px -10px rgba(99, 102, 241, 0.4)' }}
+                  onClick={() => {
+                    if (userData?.kycStatus !== 'VERIFIED') {
+                      alert('Please complete your KYC verification to initiate transfers.');
+                    } else {
+                      // Original transfer logic here
+                    }
+                  }}
+                  style={{ 
+                    width: '100%', 
+                    background: userData?.kycStatus === 'VERIFIED' ? 'var(--primary)' : '#1e293b', 
+                    color: userData?.kycStatus === 'VERIFIED' ? '#fff' : '#64748b', 
+                    border: 'none', 
+                    padding: '1.2rem', 
+                    borderRadius: '16px', 
+                    fontSize: '1.1rem', 
+                    fontWeight: 700, 
+                    cursor: userData?.kycStatus === 'VERIFIED' ? 'pointer' : 'not-allowed', 
+                    boxShadow: userData?.kycStatus === 'VERIFIED' ? '0 20px 40px -10px rgba(99, 102, 241, 0.4)' : 'none' 
+                  }}
                 >
-                  Confirm Transfer
+                  {userData?.kycStatus === 'VERIFIED' ? 'Confirm Transfer' : 'Verify Account to Transfer'}
                 </motion.button>
               </div>
            </div>
@@ -301,7 +340,7 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
             {/* Header */}
             <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3rem' }}>
               <div>
-                <h1 style={{ fontSize: '1.75rem', marginBottom: '0.2rem' }}>Hello, {userData ? userData.email.split('@')[0] : 'Sarah'}! 👋</h1>
+                <h1 style={{ fontSize: '1.75rem', marginBottom: '0.2rem' }}>Hello, {userData?.firstName || 'User'}! 👋</h1>
                 <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Welcome back. Here's what's happening with your money.</p>
               </div>
               <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
@@ -397,7 +436,7 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', fontSize: '0.8rem' }}>
                     <div>
                       <div style={{ opacity: 0.5, fontSize: '0.65rem', marginBottom: '0.2rem' }}>CARD HOLDER</div>
-                      <div style={{ fontWeight: 600 }}>{userData ? userData.email.split('@')[0].toUpperCase() : 'USER'}</div>
+                      <div style={{ fontWeight: 600 }}>{userData?.firstName ? userData.firstName.toUpperCase() : 'USER'}</div>
                     </div>
                     <div>
                       <div style={{ opacity: 0.5, fontSize: '0.65rem', marginBottom: '0.2rem' }}>EXPIRES</div>
@@ -452,6 +491,7 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
            </>
          )}
       </main>
+      </div>
     </div>
   );
 };

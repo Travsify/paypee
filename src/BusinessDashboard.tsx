@@ -24,6 +24,7 @@ import {
   Zap
 } from 'lucide-react';
 import SettingsView from './SettingsView';
+import VerificationGate from './VerificationGate';
 
 const SidebarItem = ({ icon: Icon, label, active = false, onClick }: { icon: any, label: string, active?: boolean, onClick?: () => void }) => (
   <motion.div 
@@ -118,8 +119,10 @@ const BusinessDashboard = ({ onLogout }: { onLogout?: () => void }) => {
     return "$" + sum.toFixed(2);
   };
   return (
-    <div style={{ display: 'flex', height: '100vh', background: '#020617', color: '#fff', overflow: 'hidden' }}>
-      {/* Sidebar */}
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', background: '#020617', color: '#fff', overflow: 'hidden' }}>
+      <VerificationGate kycStatus={userData?.kycStatus || 'PENDING'} accountType="BUSINESS" />
+      <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
+        {/* Sidebar */}
       <aside style={{ 
         width: '280px', 
         background: '#0a0f1e', 
@@ -183,7 +186,24 @@ const BusinessDashboard = ({ onLogout }: { onLogout?: () => void }) => {
               <Users size={80} color="var(--primary)" style={{ opacity: 0.2, marginBottom: '2rem' }} />
               <h2 style={{ fontSize: '1.8rem', fontWeight: 800, marginBottom: '1rem' }}>Payroll Engine</h2>
               <p style={{ color: 'var(--text-muted)', marginBottom: '3rem' }}>Schedule and automate salary payments for your global team.</p>
-              <button style={{ background: 'var(--primary)', color: '#fff', border: 'none', padding: '1.2rem 2.5rem', borderRadius: '16px', fontWeight: 700, cursor: 'pointer' }}>Initialize Payroll Run</button>
+              <button 
+                onClick={() => {
+                  if (userData?.kycStatus !== 'VERIFIED') {
+                    alert('KYB Verification required to perform payroll operations.');
+                  }
+                }}
+                style={{ 
+                  background: userData?.kycStatus === 'VERIFIED' ? 'var(--primary)' : 'rgba(255,255,255,0.05)', 
+                  color: userData?.kycStatus === 'VERIFIED' ? '#fff' : '#64748b', 
+                  border: 'none', 
+                  padding: '1.2rem 2.5rem', 
+                  borderRadius: '16px', 
+                  fontWeight: 700, 
+                  cursor: userData?.kycStatus === 'VERIFIED' ? 'pointer' : 'not-allowed' 
+                }}
+              >
+                {userData?.kycStatus === 'VERIFIED' ? 'Initialize Payroll Run' : 'Verify Account to Access Payroll'}
+              </button>
             </div>
          ) : activeSection === 'payouts' ? (
             <div style={{ padding: '1rem' }}>
@@ -193,8 +213,42 @@ const BusinessDashboard = ({ onLogout }: { onLogout?: () => void }) => {
                 <h3 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '1rem' }}>Instant Global Disbursements</h3>
                 <p style={{ color: 'var(--text-muted)', marginBottom: '2rem', maxWidth: '500px', margin: '0 auto 2.5rem' }}>Upload a CSV file to pay up to 5,000 recipients across 140+ countries instantly via the Bitnob network.</p>
                 <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem' }}>
-                  <button style={{ background: 'var(--primary)', color: '#fff', border: 'none', padding: '1rem 2rem', borderRadius: '12px', fontWeight: 700, cursor: 'pointer' }}>Upload CSV</button>
-                  <button style={{ background: 'rgba(255,255,255,0.05)', color: '#fff', border: '1px solid var(--border)', padding: '1rem 2rem', borderRadius: '12px', fontWeight: 700, cursor: 'pointer' }}>Manual Entry</button>
+                  <button 
+                    onClick={() => {
+                      if (userData?.kycStatus !== 'VERIFIED') {
+                        alert('KYB Verification required for bulk payouts.');
+                      }
+                    }}
+                    style={{ 
+                      background: userData?.kycStatus === 'VERIFIED' ? 'var(--primary)' : 'rgba(255,255,255,0.05)', 
+                      color: userData?.kycStatus === 'VERIFIED' ? '#fff' : '#64748b', 
+                      border: 'none', 
+                      padding: '1rem 2rem', 
+                      borderRadius: '12px', 
+                      fontWeight: 700, 
+                      cursor: userData?.kycStatus === 'VERIFIED' ? 'pointer' : 'not-allowed' 
+                    }}
+                  >
+                    {userData?.kycStatus === 'VERIFIED' ? 'Upload CSV' : 'Verify to Unlock'}
+                  </button>
+                  <button 
+                    onClick={() => {
+                      if (userData?.kycStatus !== 'VERIFIED') {
+                        alert('KYB Verification required for manual entry.');
+                      }
+                    }}
+                    style={{ 
+                      background: userData?.kycStatus === 'VERIFIED' ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.05)', 
+                      color: '#fff', 
+                      border: '1px solid var(--border)', 
+                      padding: '1rem 2rem', 
+                      borderRadius: '12px', 
+                      fontWeight: 700, 
+                      cursor: userData?.kycStatus === 'VERIFIED' ? 'pointer' : 'not-allowed' 
+                    }}
+                  >
+                    Manual Entry
+                  </button>
                 </div>
               </div>
             </div>
@@ -254,7 +308,7 @@ const BusinessDashboard = ({ onLogout }: { onLogout?: () => void }) => {
             <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3rem' }}>
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.2rem' }}>
-                  <h1 style={{ fontSize: '1.75rem', margin: 0 }}>{userData ? userData.email.split('@')[0].toUpperCase() + ' Ltd.' : 'TechStream Ltd.'}</h1>
+                  <h1 style={{ fontSize: '1.75rem', margin: 0 }}>{userData?.businessName || (userData ? userData.email.split('@')[0].toUpperCase() + ' Ltd.' : 'TechStream Ltd.')}</h1>
                   <div style={{ background: 'rgba(16, 185, 129, 0.1)', color: '#10b981', padding: '0.2rem 0.6rem', borderRadius: '6px', fontSize: '0.7rem', fontWeight: 800 }}>VERIFIED BUSINESS</div>
                 </div>
                 <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Treasury Operations • Mainnet Node: #7721</p>
@@ -273,7 +327,7 @@ const BusinessDashboard = ({ onLogout }: { onLogout?: () => void }) => {
                     alt="Admin" 
                     style={{ width: '32px', height: '32px', borderRadius: '10px' }} 
                   />
-                  <div style={{ fontSize: '0.85rem', fontWeight: 600 }}>Sarah C. (Admin)</div>
+                  <div style={{ fontSize: '0.85rem', fontWeight: 600 }}>{userData?.firstName || 'Admin'}</div>
                 </div>
               </div>
             </header>
@@ -381,6 +435,7 @@ const BusinessDashboard = ({ onLogout }: { onLogout?: () => void }) => {
            </>
          )}
       </main>
+      </div>
     </div>
   );
 };

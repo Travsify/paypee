@@ -142,7 +142,16 @@ app.get('/api/users/me', authenticateToken, async (req: any, res: any): Promise<
   try {
     const user = await prisma.user.findUnique({ 
       where: { id: req.user.userId },
-      select: { id: true, email: true, role: true, kycStatus: true, createdAt: true }
+      select: { 
+        id: true, 
+        email: true, 
+        role: true, 
+        kycStatus: true, 
+        firstName: true,
+        lastName: true,
+        businessName: true,
+        createdAt: true 
+      }
     });
 
     if (!user) return res.status(404).json({ error: 'User not found' });
