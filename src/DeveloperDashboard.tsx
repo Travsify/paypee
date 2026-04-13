@@ -35,6 +35,7 @@ import {
 import SettingsView from './SettingsView';
 import VerificationGate from './VerificationGate';
 import AiAdvisor from './AiAdvisor';
+import AccountCreationModal from './AccountCreationModal';
 
 const SidebarItem = ({ icon: Icon, label, active = false, onClick }: { icon: any, label: string, active?: boolean, onClick?: () => void }) => (
   <motion.div 
@@ -115,6 +116,8 @@ const DeveloperDashboard = ({ onLogout }: { onLogout?: () => void }) => {
   const [userData, setUserData] = useState<any>(null);
   const [apiKeys, setApiKeys] = useState<any[]>([]);
   const [transactions, setTransactions] = useState<any[]>([]);
+  const [isAccountModalOpen, setIsAccountModalOpen] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
 
   const fetchUserData = async () => {
     const token = localStorage.getItem('paypee_token');
@@ -139,6 +142,7 @@ const DeveloperDashboard = ({ onLogout }: { onLogout?: () => void }) => {
   }, []);
 
   const generateAccount = async (currency: string) => {
+    setIsGenerating(true);
     try {
       const response = await fetch('https://paypee-api.onrender.com/api/accounts/provision', {
         method: 'POST',
@@ -149,8 +153,7 @@ const DeveloperDashboard = ({ onLogout }: { onLogout?: () => void }) => {
         body: JSON.stringify({ currency: currency.toUpperCase() })
       });
       if (response.ok) {
-        const data = await response.json();
-        alert(`Developer treasury account generated! Details: ${data.accountDetails.iban}`);
+        setIsAccountModalOpen(false);
         fetchUserData();
       } else {
         const err = await response.json();
@@ -158,6 +161,8 @@ const DeveloperDashboard = ({ onLogout }: { onLogout?: () => void }) => {
       }
     } catch (err) {
       console.error('Account generation error:', err);
+    } finally {
+      setIsGenerating(false);
     }
   };
 
@@ -243,22 +248,29 @@ const DeveloperDashboard = ({ onLogout }: { onLogout?: () => void }) => {
            <div style={{ padding: '1rem' }}>
               <h2 style={{ fontSize: '1.8rem', fontWeight: 700, marginBottom: '2rem' }}>Treasury Accounts</h2>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.5rem' }}>
-                {userData?.wallets?.map((w: any) => (
-                  <div key={w.id} style={{ padding: '2rem', borderRadius: '24px', background: 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)', border: '1px solid var(--border)' }}>
-                    <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '1rem' }}>{w.currency} ACCOUNT</div>
-                    <div style={{ fontSize: '2.5rem', fontWeight: 900 }}>{w.currency === 'USD' ? '$' : w.currency === 'NGN' ? '₦' : w.currency === 'EUR' ? '€' : '£'}{parseFloat(w.balance).toFixed(2)}</div>
-                  </div>
-                ))}
+                {userData?.wallets?.map((w: any) => {
+                  const details = w.metadata ? (typeof w.metadata === 'string' ? JSON.parse(w.metadata) : w.metadata) : {};
+                  return (
+                    <div key={w.id} style={{ padding: '2rem', borderRadius: '24px', background: 'linear-gradient(135deg, #0f172a 0%, #020617 100%)', border: '1px solid rgba(255,255,255,0.1)', position: 'relative' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem' }}>
+                        <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', fontWeight: 800, letterSpacing: '2px' }}>{w.currency} SETTLEMENT RAIL</div>
+                        <div style={{ background: 'rgba(99, 102, 241, 0.1)', color: 'var(--primary)', padding: '0.3rem 0.6rem', borderRadius: '8px', fontSize: '0.6rem', fontWeight: 800 }}>LIVE_NODE</div>
+                      </div>
+                      <div style={{ fontSize: '2rem', fontWeight: 900, marginBottom: '2rem' }}>{w.currency === 'USD' ? '$' : w.currency === 'NGN' ? '₦' : w.currency === 'EUR' ? '€' : '£'}{parseFloat(w.balance).toFixed(2)}</div>
+                      <div style={{ background: 'rgba(0,0,0,0.3)', padding: '1rem', borderRadius: '14px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                         <div style={{ fontSize: '0.55rem', opacity: 0.5, textTransform: 'uppercase', marginBottom: '0.4rem', fontWeight: 800 }}>Account Reference</div>
+                         <div style={{ fontSize: '0.75rem', fontWeight: 800, fontFamily: 'monospace', color: '#6366f1' }}>{details.iban || details.accountNumber || 'PROVISIONING...'}</div>
+                      </div>
+                    </div>
+                  );
+                })}
                 <motion.div 
                   whileHover={{ y: -5 }}
-                  onClick={() => {
-                    const currency = window.prompt("Which currency? (USD, EUR, GBP, NGN, BTC)", "USD");
-                    if (currency) generateAccount(currency);
-                  }}
+                  onClick={() => setIsAccountModalOpen(true)}
                   style={{ border: '2px dashed var(--border)', borderRadius: '24px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '2rem', cursor: 'pointer', minHeight: '180px' }}
                 >
                   <Plus size={40} color="var(--text-muted)" style={{ marginBottom: '1rem' }} />
-                  <span style={{ fontWeight: 600, color: 'var(--text-muted)' }}>Generate Treasury Account</span>
+                  <span style={{ fontWeight: 600, color: 'var(--text-muted)' }}>Provision Account</span>
                 </motion.div>
               </div>
             </div>
@@ -545,6 +557,12 @@ const DeveloperDashboard = ({ onLogout }: { onLogout?: () => void }) => {
          )}
       </main>
       </div>
+      <AccountCreationModal 
+        isOpen={isAccountModalOpen} 
+        onClose={() => setIsAccountModalOpen(false)} 
+        onSelect={generateAccount} 
+        isProcessing={isGenerating} 
+      />
     </div>
   );
 };

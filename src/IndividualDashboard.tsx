@@ -29,6 +29,8 @@ import BillsDashboard from './BillsDashboard';
 import AiAdvisor from './AiAdvisor';
 import PayoutModal from './PayoutModal';
 
+import AccountCreationModal from './AccountCreationModal';
+
 const SidebarItem = ({ icon: Icon, label, active = false, onClick }: { icon: any, label: string, active?: boolean, onClick?: () => void }) => (
   <motion.div 
     whileHover={{ x: 5, background: 'rgba(255,255,255,0.05)' }}
@@ -52,7 +54,7 @@ const SidebarItem = ({ icon: Icon, label, active = false, onClick }: { icon: any
   </motion.div>
 );
 
-const BalanceCard = ({ currency, symbol, amount, gradient }: { currency: string, symbol: string, amount: string, gradient: string }) => (
+const BalanceCard = ({ currency, symbol, amount, gradient, details }: { currency: string, symbol: string, amount: string, gradient: string, details?: any }) => (
   <motion.div 
     whileHover={{ y: -5 }}
     style={{ 
@@ -63,17 +65,27 @@ const BalanceCard = ({ currency, symbol, amount, gradient }: { currency: string,
       minWidth: '280px',
       boxShadow: '0 20px 40px -10px rgba(0,0,0,0.3)',
       position: 'relative',
-      overflow: 'hidden'
+      overflow: 'hidden',
+      border: '1px solid rgba(255,255,255,0.1)'
     }}
   >
     <div style={{ position: 'absolute', top: '-10%', right: '-10%', opacity: 0.1 }}>
        <Wallet size={150} />
     </div>
-    <div style={{ marginBottom: '1.5rem', fontWeight: 800, fontSize: '0.8rem', letterSpacing: '2px', opacity: 0.8 }}>{currency} BALANCE</div>
+    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+      <div style={{ marginBottom: '1.5rem', fontWeight: 800, fontSize: '0.7rem', letterSpacing: '2px', opacity: 0.8 }}>{currency} TREASURY NODE</div>
+      <div style={{ background: 'rgba(255,255,255,0.1)', padding: '0.4rem 0.8rem', borderRadius: '10px', fontSize: '0.7rem', fontWeight: 800 }}>LIVE</div>
+    </div>
     <div style={{ fontSize: '2.5rem', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
       <span style={{ fontSize: '1.2rem', opacity: 0.7 }}>{symbol}</span>
       {amount}
     </div>
+    <div style={{ marginTop: '1.5rem', paddingTop: '1.2rem', borderTop: '1px solid rgba(255,255,255,0.1)' }}>
+       <div style={{ fontSize: '0.6rem', opacity: 0.6, textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '0.4rem', fontWeight: 800 }}>Primary Settlement ID</div>
+       <div style={{ fontSize: '0.85rem', fontWeight: 800, fontFamily: 'monospace', wordBreak: 'break-all' }}>{details?.iban || details?.accountNumber || 'PROVISIONING_NODE...'}</div>
+       <div style={{ fontSize: '0.7rem', opacity: 0.8, marginTop: '0.4rem', fontWeight: 600 }}>{details?.bankName || 'Paypee High-Speed Rail'}</div>
+    </div>
+    <div className="glow-overlay" />
   </motion.div>
 );
 
@@ -83,6 +95,8 @@ const IndividualDashboard = ({ onLogout }: { onLogout: () => void }) => {
   const [transactions, setTransactions] = useState<any[]>([]);
   const [cards, setCards] = useState<any[]>([]);
   const [isPayoutOpen, setIsPayoutOpen] = useState(false);
+  const [isAccountModalOpen, setIsAccountModalOpen] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
 
   useEffect(() => {
     fetchUserData();
@@ -109,6 +123,7 @@ const IndividualDashboard = ({ onLogout }: { onLogout: () => void }) => {
   };
 
   const generateAccount = async (currency: string) => {
+    setIsGenerating(true);
     try {
       const response = await fetch('https://paypee-api.onrender.com/api/accounts/provision', {
         method: 'POST',
@@ -119,8 +134,7 @@ const IndividualDashboard = ({ onLogout }: { onLogout: () => void }) => {
         body: JSON.stringify({ currency: currency.toUpperCase() })
       });
       if (response.ok) {
-        const data = await response.json();
-        alert(`Account generated! Details: ${data.accountDetails.iban} (${data.accountDetails.bankName})`);
+        setIsAccountModalOpen(false);
         fetchUserData();
       } else {
         const err = await response.json();
@@ -128,6 +142,8 @@ const IndividualDashboard = ({ onLogout }: { onLogout: () => void }) => {
       }
     } catch (err) {
       console.error('Account generation error:', err);
+    } finally {
+      setIsGenerating(false);
     }
   };
 
@@ -297,19 +313,19 @@ const IndividualDashboard = ({ onLogout }: { onLogout: () => void }) => {
               <h2 style={{ fontSize: '1.8rem', fontWeight: 700, marginBottom: '2rem' }}>My Accounts</h2>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.5rem' }}>
                 {userData?.wallets?.map((w: any) => (
-                  <BalanceCard key={w.id} currency={w.currency} symbol={w.currency === 'USD' ? '$' : w.currency === 'NGN' ? '₦' : w.currency === 'EUR' ? '€' : '£'} amount={parseFloat(w.balance).toFixed(2)} gradient="linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)" />
+                  <BalanceCard 
+                    key={w.id} 
+                    currency={w.currency} 
+                    symbol={w.currency === 'USD' ? '$' : w.currency === 'NGN' ? '₦' : w.currency === 'EUR' ? '€' : '£'} 
+                    amount={parseFloat(w.balance).toFixed(2)} 
+                    gradient="linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)" 
+                    details={w.metadata ? (typeof w.metadata === 'string' ? JSON.parse(w.metadata) : w.metadata) : {}}
+                  />
                 ))}
                 <motion.div 
                   whileHover={{ y: -5 }}
                   onClick={() => {
-                    if (userData?.kycStatus !== 'VERIFIED') {
-                      alert('Please complete verification first to generate Fincra accounts.');
-                      return;
-                    }
-                    const currency = window.prompt("Which currency? (USD, EUR, GBP, NGN, BTC)", "USD");
-                    if (currency) {
-                      generateAccount(currency);
-                    }
+                    setIsAccountModalOpen(true);
                   }}
                   style={{ border: '2px dashed var(--border)', borderRadius: '24px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '2rem', cursor: 'pointer', minHeight: '180px' }}
                 >
@@ -479,110 +495,179 @@ const IndividualDashboard = ({ onLogout }: { onLogout: () => void }) => {
                  ))}
                </div>
              </div>
-            )}
-            {activeSection === 'overview' && (
+                    {activeSection === 'overview' && (
              <>
                <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3rem' }}>
                  <div>
-                   <h1 style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>Good Morning, {userData?.firstName || 'User'}</h1>
-                   <p style={{ color: 'var(--text-muted)' }}>Welcome back to your high-speed financial command center.</p>
+                   <h1 style={{ fontSize: '2.25rem', fontWeight: 900, marginBottom: '0.5rem', letterSpacing: '-0.02em' }}>Good Morning, {userData?.firstName || 'User'}</h1>
+                   <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', marginTop: '0.75rem' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+                         <div style={{ width: 8, height: 8, background: '#10b981', borderRadius: '50%', boxShadow: '0 0 10px #10b981' }} />
+                         NETWORK_SYNC_ACTIVE
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+                         <ShieldCheck size={16} color="var(--primary)" />
+                         ENCRYPTION_LOCKED
+                      </div>
+                   </div>
                  </div>
                  <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.4rem 0.8rem', background: 'rgba(255,255,255,0.05)', borderRadius: '14px', border: '1px solid var(--border)' }}>
-                       <div style={{ width: 32, height: 32, background: 'var(--primary)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><User size={18} /></div>
-                       <div style={{ fontSize: '0.85rem', fontWeight: 600 }}>{userData?.firstName || 'Profile'}</div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.6rem 1.2rem', background: 'rgba(255,255,255,0.03)', borderRadius: '18px', border: '1px solid var(--border)' }}>
+                       <div style={{ width: 36, height: 36, background: 'var(--primary)', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><User size={20} /></div>
+                       <div style={{ fontSize: '0.9rem', fontWeight: 700 }}>{userData?.firstName || 'Profile'}</div>
+                       <ChevronRight size={16} opacity={0.3} />
                     </div>
                  </div>
                </header>
 
-               <div style={{ display: 'flex', gap: '2rem', marginBottom: '3rem', overflowX: 'auto', paddingBottom: '1rem' }}>
-                  {userData?.wallets && userData.wallets.length > 0 ? (
-                    userData.wallets.map((w: any) => {
-                      const gradients: Record<string, string> = {
-                        USD: "linear-gradient(135deg, #6366f1 0%, #a855f7 100%)",
-                        EUR: "linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)",
-                        GBP: "linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%)",
-                        NGN: "linear-gradient(135deg, #10b981 0%, #059669 100%)"
-                      };
-                      const symbols: Record<string, string> = { USD: '$', EUR: '€', GBP: '£', NGN: '₦' };
-                      return (
-                        <BalanceCard 
-                          key={w.id} 
-                          currency={w.currency} 
-                          symbol={symbols[w.currency] || w.currency} 
-                          amount={parseFloat(w.balance).toFixed(2)} 
-                          gradient={gradients[w.currency] || "linear-gradient(135deg, #1e293b 0%, #334155 100%)"} 
-                        />
-                      );
-                    })
-                   ) : (
-                     <div style={{ padding: '3rem', background: 'rgba(99, 102, 241, 0.05)', border: '2px dashed var(--primary)', borderRadius: '32px', width: '100%', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1.5rem' }}>
-                       <div style={{ padding: '1rem', background: 'rgba(99, 102, 241, 0.1)', borderRadius: '20px', color: 'var(--primary)' }}><Wallet size={40} /></div>
-                       <div>
-                         <h3 style={{ fontSize: '1.5rem', fontWeight: 800, marginBottom: '0.5rem' }}>Start Your Treasury</h3>
-                         <p style={{ color: 'var(--text-muted)', maxWidth: '300px', margin: '0 auto' }}>You haven't generated any currency accounts yet. Create USD, NGN, or EUR accounts in seconds.</p>
+               <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1.3fr) minmax(0, 0.7fr)', gap: '3rem' }}>
+                  {/* Left Column: Treasury & History */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '3rem' }}>
+                    <section>
+                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                         <h2 style={{ fontSize: '1.25rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.75rem' }}><Activity size={22} color="var(--primary)" /> Live Nodes</h2>
+                         <button onClick={() => setActiveSection('wallets')} style={{ color: 'var(--primary)', background: 'transparent', border: 'none', fontWeight: 700, fontSize: '0.8rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>MANAGE_INFRA <ExternalLink size={14} /></button>
                        </div>
-                       <button 
-                         onClick={() => setActiveSection('wallets')}
-                         style={{ background: 'var(--primary)', color: '#fff', border: 'none', padding: '1rem 2rem', borderRadius: '16px', fontWeight: 700, cursor: 'pointer', boxShadow: '0 15px 30px -10px rgba(99, 102, 241, 0.4)' }}
-                       >
-                         Generate Account Now
-                       </button>
-                     </div>
-                   )}
-               </div>
+                       <div style={{ display: 'flex', gap: '1.5rem', overflowX: 'auto', paddingBottom: '1rem', scrollbarWidth: 'none' }}>
+                          {userData?.wallets && userData.wallets.length > 0 ? (
+                            userData.wallets.map((w: any) => {
+                              const gradients: Record<string, string> = {
+                                USD: "linear-gradient(135deg, #6366f1 0%, #a855f7 100%)",
+                                EUR: "linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)",
+                                GBP: "linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%)",
+                                NGN: "linear-gradient(135deg, #10b981 0%, #059669 100%)"
+                              };
+                              const symbols: Record<string, string> = { USD: '$', EUR: '€', GBP: '£', NGN: '₦' };
+                              return (
+                                <BalanceCard 
+                                  key={w.id} 
+                                  currency={w.currency} 
+                                  symbol={symbols[w.currency] || w.currency} 
+                                  amount={parseFloat(w.balance).toFixed(2)} 
+                                  gradient={gradients[w.currency] || "linear-gradient(135deg, #1e293b 0%, #334155 100%)"} 
+                                  details={w.metadata ? (typeof w.metadata === 'string' ? JSON.parse(w.metadata) : w.metadata) : {}}
+                                />
+                              );
+                            })
+                          ) : (
+                            <div onClick={() => setIsAccountModalOpen(true)} style={{ width: '100%', padding: '3rem', background: 'rgba(99, 102, 241, 0.03)', border: '2px dashed rgba(99, 102, 241, 0.2)', borderRadius: '32px', textAlign: 'center', cursor: 'pointer', transition: 'all 0.3s' }}>
+                               <div style={{ width: 64, height: 64, background: 'rgba(99, 102, 241, 0.1)', borderRadius: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem', color: 'var(--primary)' }}><Plus size={32} /></div>
+                               <h3 style={{ fontWeight: 800, fontSize: '1.25rem', marginBottom: '0.5rem' }}>No Treasury Nodes</h3>
+                               <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', maxWidth: '280px', margin: '0 auto' }}>Tap here to provision your first high-speed global currency account.</p>
+                            </div>
+                          )}
+                       </div>
+                    </section>
 
-               <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 2fr) minmax(0, 1fr)', gap: '3rem' }}>
-                 <section>
-                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                     <h2 style={{ fontSize: '1.25rem', fontWeight: 700 }}>Recent Activity</h2>
-                     <button onClick={() => setActiveSection('history')} style={{ color: 'var(--primary)', background: 'transparent', border: 'none', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.4rem', cursor: 'pointer' }}>View All <ChevronRight size={16} /></button>
-                   </div>
-                   <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                     {transactions.map((tx, i) => (
-                        <motion.div 
-                          key={i} 
-                          whileHover={{ x: 5, background: 'rgba(255,255,255,0.03)' }}
-                          style={{ background: 'rgba(255,255,255,0.015)', padding: '1.25rem', borderRadius: '18px', border: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
-                        >
-                          <div style={{ display: 'flex', gap: '1.25rem', alignItems: 'center' }}>
-                             <div style={{ padding: '0.75rem', background: tx.type === 'DEPOSIT' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(244, 63, 94, 0.1)', color: tx.type === 'DEPOSIT' ? '#10b981' : '#f43f5e', borderRadius: '14px' }}>
-                                {tx.type === 'DEPOSIT' ? <ArrowDownLeft size={20} /> : <ArrowUpRight size={20} />}
+                    <section>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                        <h2 style={{ fontSize: '1.25rem', fontWeight: 800 }}>Master Ledger</h2>
+                        <button onClick={() => setActiveSection('history')} style={{ color: 'var(--primary)', background: 'transparent', border: 'none', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.4rem', cursor: 'pointer', fontSize: '0.8rem' }}>STREAM_VIEW <ChevronRight size={16} /></button>
+                      </div>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                        {transactions.length > 0 ? transactions.slice(0, 4).map((tx, i) => (
+                           <motion.div 
+                             key={i} 
+                             whileHover={{ x: 5, background: 'rgba(255,255,255,0.03)' }}
+                             style={{ background: 'rgba(255,255,255,0.015)', padding: '1.2rem', borderRadius: '20px', border: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+                           >
+                             <div style={{ display: 'flex', gap: '1.2rem', alignItems: 'center' }}>
+                                <div style={{ width: 44, height: 44, display: 'flex', alignItems: 'center', justifyContent: 'center', background: tx.type === 'DEPOSIT' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(244, 63, 94, 0.1)', color: tx.type === 'DEPOSIT' ? '#10b981' : '#f43f5e', borderRadius: '14px' }}>
+                                   {tx.type === 'DEPOSIT' ? <ArrowDownLeft size={20} /> : <ArrowUpRight size={20} />}
+                                </div>
+                                <div>
+                                   <div style={{ fontWeight: 800, fontSize: '1rem' }}>{tx.desc}</div>
+                                   <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>{tx.date} • {tx.type}</div>
+                                </div>
                              </div>
-                             <div>
-                                <div style={{ fontWeight: 700, fontSize: '1rem' }}>{tx.desc}</div>
-                                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>{tx.date} • {tx.type}</div>
+                             <div style={{ textAlign: 'right' }}>
+                                <div style={{ fontWeight: 900, fontSize: '1.1rem', color: tx.type === 'DEPOSIT' ? '#10b981' : '#fff' }}>{tx.type === 'DEPOSIT' ? '+' : '-'}${tx.amount}</div>
+                                <div style={{ fontSize: '0.6rem', fontWeight: 800, color: '#10b981', background: 'rgba(16, 185, 129, 0.1)', padding: '0.1rem 0.4rem', borderRadius: '4px', display: 'inline-block', marginTop: '0.2rem' }}>{tx.status}</div>
                              </div>
+                           </motion.div>
+                        )) : (
+                          <div style={{ padding: '4rem', textAlign: 'center', color: 'var(--text-muted)', background: 'rgba(255,255,255,0.01)', borderRadius: '32px', border: '1px solid var(--border)' }}>
+                             <History size={40} style={{ opacity: 0.1, marginBottom: '1.5rem' }} />
+                             <div style={{ fontSize: '0.95rem', fontWeight: 600 }}>Zero activity on network ledger.</div>
                           </div>
-                          <div style={{ textAlign: 'right' }}>
-                             <div style={{ fontWeight: 800, fontSize: '1.1rem', color: tx.type === 'DEPOSIT' ? '#10b981' : '#fff' }}>{tx.type === 'DEPOSIT' ? '+' : '-'}${tx.amount}</div>
-                             <div style={{ fontSize: '0.65rem', color: tx.status === 'COMPLETED' ? '#10b981' : '#f59e0b', fontWeight: 800, marginTop: '0.2rem' }}>{tx.status}</div>
-                          </div>
-                        </motion.div>
-                     ))}
-                   </div>
-                 </section>
+                        )}
+                      </div>
+                    </section>
+                  </div>
 
-                 <section>
-                   <h2 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '1.5rem' }}>Active Cards</h2>
-                   <div style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
-                      {cards.map((card, i) => (
-                        <motion.div key={i} whileHover={{ scale: 1.02 }} style={{ background: 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)', padding: '1.5rem', borderRadius: '20px', border: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                           <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-                              <div style={{ padding: '0.6rem', background: 'rgba(255,255,255,0.05)', borderRadius: '10px' }}><Zap size={18} color="var(--primary)" /></div>
-                              <div>
-                                <div style={{ fontWeight: 600, fontSize: '0.9rem' }}>VIRTUAL • {card.cardNumber.slice(-4)}</div>
-                                <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>{card.status}</div>
+                  {/* Right Column: Virtual Cards & Actions */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '3rem' }}>
+                     <section>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                           <h2 style={{ fontSize: '1.25rem', fontWeight: 800 }}>Virtual Node</h2>
+                           <button onClick={() => setActiveSection('cards')} style={{ color: 'var(--primary)', background: 'transparent', border: 'none', fontWeight: 700, fontSize: '0.8rem', cursor: 'pointer' }}>NEW_ISSUE +</button>
+                        </div>
+                        {cards.length > 0 ? (
+                           <div style={{ 
+                             padding: '2rem', 
+                             background: 'linear-gradient(135deg, #1e1e2e 0%, #0a0a0f 100%)', 
+                             borderRadius: '28px', 
+                             border: '1px solid rgba(255,255,255,0.1)',
+                             position: 'relative',
+                             overflow: 'hidden',
+                             aspectRatio: '1.58'
+                           }}>
+                              <div style={{ position: 'absolute', top: 0, right: 0, padding: '1.5rem' }}>
+                                 <Zap size={24} color="var(--primary)" />
+                              </div>
+                              <div style={{ marginTop: '2.5rem', fontSize: '1.2rem', fontWeight: 700, letterSpacing: '4px', fontFamily: 'monospace' }}>•••• •••• •••• {cards[0].cardNumber.slice(-4)}</div>
+                              <div style={{ marginTop: '2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+                                 <div>
+                                    <div style={{ fontSize: '0.55rem', opacity: 0.5, textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '0.3rem' }}>Node Operator</div>
+                                    <div style={{ fontWeight: 700, fontSize: '0.9rem' }}>{userData?.firstName?.toUpperCase()} {userData?.lastName?.toUpperCase()}</div>
+                                 </div>
+                                 <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Mastercard-logo.svg/1280px-Mastercard-logo.svg.png" style={{ height: 28 }} />
                               </div>
                            </div>
-                           <ChevronRight size={18} color="var(--text-muted)" />
-                        </motion.div>
-                      ))}
-                      <button onClick={() => setActiveSection('cards')} style={{ width: '100%', padding: '1rem', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border)', borderRadius: '16px', color: '#fff', fontSize: '0.9rem', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
-                         <Plus size={18} /> Add Card
-                      </button>
-                   </div>
-                 </section>
+                        ) : (
+                           <div onClick={() => setActiveSection('cards')} style={{ padding: '3rem 2rem', background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border)', borderRadius: '32px', textAlign: 'center', cursor: 'pointer' }}>
+                              <CreditCard size={40} color="var(--text-muted)" style={{ opacity: 0.2, marginBottom: '1.5rem' }} />
+                              <div style={{ fontWeight: 800, color: 'rgba(255,255,255,0.4)', marginBottom: '0.5rem' }}>Card Hub Empty</div>
+                              <button style={{ color: 'var(--primary)', fontWeight: 800, fontSize: '0.85rem', background: 'transparent', border: 'none' }}>Issue Secure Card</button>
+                           </div>
+                        )}
+                     </section>
+
+                     <section style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                        <h2 style={{ fontSize: '1.25rem', fontWeight: 800 }}>Quick Switch</h2>
+                        {[
+                          { icon: <Send size={20} />, label: "Initiate Payout", desc: "Send to bank or crypto", action: () => setIsPayoutOpen(true), color: "var(--primary)" },
+                          { icon: <Zap size={20} />, label: "Settlement Gas", desc: "Airtime & Utilities", action: () => setActiveSection('bills'), color: "var(--secondary)" },
+                          { icon: <History size={20} />, label: "Flow Analysis", desc: "Export ledger logs", action: () => setActiveSection('history'), color: "var(--accent)" }
+                        ].map((act, i) => (
+                          <motion.button 
+                            key={i}
+                            whileHover={{ x: 5, background: 'rgba(255,255,255,0.05)' }}
+                            whileTap={{ scale: 0.98 }}
+                            onClick={act.action}
+                            style={{ 
+                              width: '100%', 
+                              padding: '1.25rem', 
+                              background: 'rgba(255,255,255,0.02)', 
+                              border: '1px solid var(--border)', 
+                              borderRadius: '22px', 
+                              color: '#fff', 
+                              display: 'flex', 
+                              alignItems: 'center', 
+                              gap: '1.25rem', 
+                              cursor: 'pointer',
+                              textAlign: 'left'
+                            } as any}
+                          >
+                            <div style={{ width: 44, height: 44, background: 'rgba(255,255,255,0.03)', borderRadius: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: act.color }}>{act.icon}</div>
+                            <div>
+                               <div style={{ fontWeight: 800, fontSize: '0.95rem' }}>{act.label}</div>
+                               <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{act.desc}</div>
+                            </div>
+                          </motion.button>
+                        ))}
+                     </section>
+                  </div>
                </div>
              </>
             )}
@@ -595,6 +680,12 @@ const IndividualDashboard = ({ onLogout }: { onLogout: () => void }) => {
         onSuccess={() => {
           fetchUserData();
         }} 
+      />
+      <AccountCreationModal 
+        isOpen={isAccountModalOpen} 
+        onClose={() => setIsAccountModalOpen(false)} 
+        onSelect={generateAccount} 
+        isProcessing={isGenerating} 
       />
     </div>
   );

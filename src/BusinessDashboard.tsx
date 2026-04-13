@@ -32,6 +32,7 @@ import VerificationGate from './VerificationGate';
 import AiAdvisor from './AiAdvisor';
 import VaultsDashboard from './VaultsDashboard';
 import BillsDashboard from './BillsDashboard';
+import AccountCreationModal from './AccountCreationModal';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart as ReBarChart, Bar, Cell } from 'recharts';
 
 const SidebarItem = ({ icon: Icon, label, active = false, onClick }: { icon: any, label: string, active?: boolean, onClick?: () => void }) => (
@@ -107,6 +108,8 @@ const BusinessDashboard = ({ onLogout }: { onLogout?: () => void }) => {
   const [activeSection, setActiveSection] = useState('dashboard');
   const [userData, setUserData] = useState<any>(null);
   const [transactions, setTransactions] = useState<any[]>([]);
+  const [isAccountModalOpen, setIsAccountModalOpen] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
 
   const fetchUserData = async () => {
     const token = localStorage.getItem('paypee_token');
@@ -129,6 +132,7 @@ const BusinessDashboard = ({ onLogout }: { onLogout?: () => void }) => {
   }, []);
 
   const generateAccount = async (currency: string) => {
+    setIsGenerating(true);
     try {
       const response = await fetch('https://paypee-api.onrender.com/api/accounts/provision', {
         method: 'POST',
@@ -139,8 +143,7 @@ const BusinessDashboard = ({ onLogout }: { onLogout?: () => void }) => {
         body: JSON.stringify({ currency: currency.toUpperCase() })
       });
       if (response.ok) {
-        const data = await response.json();
-        alert(`Treasury account generated! Details: ${data.accountDetails.iban} (${data.accountDetails.bankName})`);
+        setIsAccountModalOpen(false);
         fetchUserData();
       } else {
         const err = await response.json();
@@ -148,6 +151,8 @@ const BusinessDashboard = ({ onLogout }: { onLogout?: () => void }) => {
       }
     } catch (err) {
       console.error('Account generation error:', err);
+    } finally {
+      setIsGenerating(false);
     }
   };
 
@@ -238,22 +243,32 @@ const BusinessDashboard = ({ onLogout }: { onLogout?: () => void }) => {
               <div style={{ padding: '1rem' }}>
               <h2 style={{ fontSize: '1.8rem', fontWeight: 700, marginBottom: '2rem' }}>Treasury Accounts</h2>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.5rem' }}>
-                {userData?.wallets?.map((w: any) => (
-                  <div key={w.id} style={{ padding: '2rem', borderRadius: '24px', background: 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)', border: '1px solid var(--border)' }}>
-                    <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '1rem' }}>{w.currency} ACCOUNT</div>
-                    <div style={{ fontSize: '2.5rem', fontWeight: 900 }}>{w.currency === 'USD' ? '$' : w.currency === 'NGN' ? '₦' : w.currency === 'EUR' ? '€' : '£'}{parseFloat(w.balance).toFixed(2)}</div>
-                  </div>
-                ))}
+                {userData?.wallets?.map((w: any) => {
+                  const details = w.metadata ? (typeof w.metadata === 'string' ? JSON.parse(w.metadata) : w.metadata) : {};
+                  return (
+                    <div key={w.id} style={{ padding: '2rem', borderRadius: '24px', background: 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)', border: '1px solid rgba(255,255,255,0.1)', position: 'relative', overflow: 'hidden' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                        <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginBottom: '1.5rem', fontWeight: 800, letterSpacing: '1px' }}>{w.currency} TREASURY DEPLOYMENT</div>
+                        <div style={{ background: 'rgba(16, 185, 129, 0.1)', color: '#10b981', padding: '0.3rem 0.6rem', borderRadius: '8px', fontSize: '0.65rem', fontWeight: 800 }}>ON-CHAIN</div>
+                      </div>
+                      <div style={{ fontSize: '2.5rem', fontWeight: 900, marginBottom: '2rem' }}>{w.currency === 'USD' ? '$' : w.currency === 'NGN' ? '₦' : w.currency === 'EUR' ? '€' : '£'}{parseFloat(w.balance).toFixed(2)}</div>
+                      <div style={{ padding: '1.25rem', background: 'rgba(255,255,255,0.03)', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                         <div style={{ fontSize: '0.6rem', opacity: 0.5, textTransform: 'uppercase', marginBottom: '0.4rem', fontWeight: 800 }}>Fincra Settlement ID</div>
+                         <div style={{ fontSize: '0.8rem', fontWeight: 800, fontFamily: 'monospace' }}>{details.iban || details.accountNumber || 'PENDING...'}</div>
+                         <div style={{ fontSize: '0.7rem', opacity: 0.7, marginTop: '0.3rem' }}>{details.bankName || 'Integrated Network Hub'}</div>
+                      </div>
+                    </div>
+                  );
+                })}
                 <motion.div 
                   whileHover={{ y: -5 }}
                   onClick={() => {
-                    const currency = window.prompt("Which currency? (USD, EUR, GBP, NGN, BTC)", "USD");
-                    if (currency) generateAccount(currency);
+                    setIsAccountModalOpen(true);
                   }}
                   style={{ border: '2px dashed var(--border)', borderRadius: '24px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '2rem', cursor: 'pointer', minHeight: '180px' }}
                 >
                   <Plus size={40} color="var(--text-muted)" style={{ marginBottom: '1rem' }} />
-                  <span style={{ fontWeight: 600, color: 'var(--text-muted)' }}>Generate Treasury Account</span>
+                  <span style={{ fontWeight: 600, color: 'var(--text-muted)' }}>Generate Treasury Rail</span>
                 </motion.div>
               </div>
             </div>
@@ -682,6 +697,12 @@ const BusinessDashboard = ({ onLogout }: { onLogout?: () => void }) => {
             )}
       </main>
       </div>
+      <AccountCreationModal 
+        isOpen={isAccountModalOpen} 
+        onClose={() => setIsAccountModalOpen(false)} 
+        onSelect={generateAccount} 
+        isProcessing={isGenerating} 
+      />
     </div>
   );
 };
