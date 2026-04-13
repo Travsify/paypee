@@ -759,8 +759,8 @@ app.get('/api/ai/insights', authenticateToken, async (req: any, res: any) => {
 app.post('/api/accounts/provision', authenticateToken, async (req: any, res: any) => {
   try {
     const { currency } = req.body;
-    if (!['EUR', 'GBP', 'CNY'].includes(currency)) {
-      return res.status(400).json({ error: 'Unsupported currency for global IBAN.' });
+    if (!['USD', 'EUR', 'GBP', 'NGN', 'BTC'].includes(currency)) {
+      return res.status(400).json({ error: 'Unsupported currency for account generation.' });
     }
     const account = await IbanService.provisionGlobalAccount(req.user.userId, currency);
     res.status(201).json(account);

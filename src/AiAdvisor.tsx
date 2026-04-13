@@ -18,9 +18,9 @@ interface Message {
   type?: 'insight' | 'action' | 'normal';
 }
 
-const AiAdvisor = () => {
+const AiAdvisor = ({ transactions = [], userName = 'User' }: { transactions?: any[], userName?: string }) => {
   const [messages, setMessages] = useState<Message[]>([
-    { id: '1', role: 'assistant', text: "Hello! I'm your Paypee AI Intelligence. Ask me anything about your balance, spending, or even request a transfer.", type: 'normal' }
+    { id: '1', role: 'assistant', text: `Hello ${userName}! I'm your Paypee AI Intelligence. Ask me anything about your balance, spending, or even request a transfer.`, type: 'normal' }
   ]);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
@@ -40,19 +40,30 @@ const AiAdvisor = () => {
     setInput('');
     setIsTyping(true);
 
-    // Simulate AI response
+    // Simulate AI computing real facts
     setTimeout(() => {
       setIsTyping(false);
-      let aiText = "I've analyzed your recent traffic. You've spent $142.50 across 3 virtual cards this week. Most of it went to 'Cloud Infrastructure'.";
-      let aiType: Message['type'] = 'insight';
+      let aiText = "";
+      let aiType: Message['type'] = 'normal';
+      
+      const totalSpend = transactions.filter(t => t.type === 'WITHDRAWAL').reduce((acc, t) => acc + parseFloat(t.amount || 0), 0);
+      const totalIncome = transactions.filter(t => t.type === 'DEPOSIT').reduce((acc, t) => acc + parseFloat(t.amount || 0), 0);
 
-      if (input.toLowerCase().includes('transfer') || input.toLowerCase().includes('send')) {
-         aiText = "Understood. I've prepared a transfer of $25.00 to 'John Doe'. Would you like me to execute this now?";
+      const query = input.toLowerCase();
+      if (query.includes('spend') || query.includes('spent') || query.includes('burn')) {
+         aiText = transactions.length === 0 
+           ? "You have 0 transactions recorded yet. No spending data to analyze!" 
+           : `I've analyzed your real traffic. You have spent $${totalSpend.toFixed(2)} and received $${totalIncome.toFixed(2)} based on your transaction history.`;
+         aiType = 'insight';
+      } else if (query.includes('transfer') || query.includes('send') || query.includes('pay')) {
+         aiText = transactions.length === 0 ? "You can't initiate transfers yet because you have no funds." : "Understood. Please go to the Transfers tab to execute money movement securely. I am not authorized to move money outside of API requests.";
          aiType = 'action';
+      } else {
+         aiText = `As an AI embedded in your finance hub, I can see you have ${transactions.length} total transactions on record. Let me know if you want deeper analytics on them!`;
       }
 
       setMessages(prev => [...prev, { id: (Date.now() + 1).toString(), role: 'assistant', text: aiText, type: aiType }]);
-    }, 1500);
+    }, 1200);
   };
 
   return (

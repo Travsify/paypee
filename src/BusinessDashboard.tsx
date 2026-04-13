@@ -105,18 +105,48 @@ const BusinessDashboard = ({ onLogout }: { onLogout?: () => void }) => {
   const [userData, setUserData] = useState<any>(null);
   const [transactions, setTransactions] = useState<any[]>([]);
 
-  React.useEffect(() => {
+  const fetchUserData = async () => {
     const token = localStorage.getItem('paypee_token');
     const headers = { 'Authorization': `Bearer ${token}` };
 
-    Promise.all([
-      fetch('https://paypee-api.onrender.com/api/users/me', { headers }).then(res => res.json()),
-      fetch('https://paypee-api.onrender.com/api/transactions', { headers }).then(res => res.json())
-    ]).then(([uData, txData]) => {
+    try {
+      const [uData, txData] = await Promise.all([
+        fetch('https://paypee-api.onrender.com/api/users/me', { headers }).then(res => res.json()),
+        fetch('https://paypee-api.onrender.com/api/transactions', { headers }).then(res => res.json())
+      ]);
       if(!uData.error) setUserData(uData);
       if(Array.isArray(txData)) setTransactions(txData);
-    });
+    } catch (err) {
+      console.error('Failed to fetch business data:', err);
+    }
+  };
+
+  React.useEffect(() => {
+    fetchUserData();
   }, []);
+
+  const generateAccount = async (currency: string) => {
+    try {
+      const response = await fetch('https://paypee-api.onrender.com/api/accounts/provision', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('paypee_token')}`
+        },
+        body: JSON.stringify({ currency: currency.toUpperCase() })
+      });
+      if (response.ok) {
+        const data = await response.json();
+        alert(`Treasury account generated! Details: ${data.accountDetails.iban} (${data.accountDetails.bankName})`);
+        fetchUserData();
+      } else {
+        const err = await response.json();
+        alert(err.error || 'Failed to generate treasury account.');
+      }
+    } catch (err) {
+      console.error('Account generation error:', err);
+    }
+  };
 
   const getTotalUSD = () => {
     if (!userData || !userData.wallets) return "0.00";
@@ -162,6 +192,7 @@ const BusinessDashboard = ({ onLogout }: { onLogout?: () => void }) => {
 
         <div style={{ flex: 1, overflowY: 'auto', paddingRight: '0.5rem', margin: '0 -0.5rem' }}>
            <SidebarItem icon={LayoutDashboard} label="Treasury Dashboard" active={activeSection === 'dashboard'} onClick={() => navigate('dashboard')} />
+           <SidebarItem icon={Wallet} label="Accounts" active={activeSection === 'wallets'} onClick={() => navigate('wallets')} />
            <SidebarItem icon={BarChart3} label="Analytics" active={activeSection === 'analytics'} onClick={() => navigate('analytics')} />
            <SidebarItem icon={Users} label="Payroll Engine" active={activeSection === 'payroll'} onClick={() => navigate('payroll')} />
            <SidebarItem icon={Send} label="Bulk Payouts" active={activeSection === 'payouts'} onClick={() => navigate('payouts')} />
@@ -197,9 +228,64 @@ const BusinessDashboard = ({ onLogout }: { onLogout?: () => void }) => {
                 </button>
               </div>
             )}
-            {activeSection === 'ai' && <AiAdvisor />}
+            {activeSection === 'ai' && <AiAdvisor transactions={transactions} userName={userData?.companyName || userData?.firstName} />}
             {activeSection === 'vaults' && <VaultsDashboard />}
             {activeSection === 'bills' && <BillsDashboard />}
+            {activeSection === 'wallets' && (
+              <div style={{ padding: '1rem' }}>
+              <h2 style={{ fontSize: '1.8rem', fontWeight: 700, marginBottom: '2rem' }}>Treasury Accounts</h2>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.5rem' }}>
+                {userData?.wallets?.map((w: any) => (
+                  <div key={w.id} style={{ padding: '2rem', borderRadius: '24px', background: 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)', border: '1px solid var(--border)' }}>
+                    <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '1rem' }}>{w.currency} ACCOUNT</div>
+                    <div style={{ fontSize: '2.5rem', fontWeight: 900 }}>{w.currency === 'USD' ? '$' : w.currency === 'NGN' ? '₦' : w.currency === 'EUR' ? '€' : '£'}{parseFloat(w.balance).toFixed(2)}</div>
+                  </div>
+                ))}
+                <motion.div 
+                  whileHover={{ y: -5 }}
+                  onClick={() => {
+                    const currency = window.prompt("Which currency? (USD, EUR, GBP, NGN, BTC)", "USD");
+                    if (currency) generateAccount(currency);
+                  }}
+                  style={{ border: '2px dashed var(--border)', borderRadius: '24px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '2rem', cursor: 'pointer', minHeight: '180px' }}
+                >
+                  <Plus size={40} color="var(--text-muted)" style={{ marginBottom: '1rem' }} />
+                  <span style={{ fontWeight: 600, color: 'var(--text-muted)' }}>Generate Treasury Account</span>
+                </motion.div>
+              </div>
+            </div>
+            )}
+            {activeSection === 'settings' && <SettingsView />}
+            {activeSection === 'help' && (
+              <div style={{ padding: '1rem', maxWidth: '600px' }}>
+                <h2 style={{ fontSize: '1.8rem', fontWeight: 700, marginBottom: '2rem' }}>Enterprise Support</h2>
+                <div style={{ background: 'rgba(255,255,255,0.02)', padding: '2.5rem', borderRadius: '24px', border: '1px solid var(--border)' }}>
+                  <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem', lineHeight: 1.7 }}>As a business client, you have priority access to our treasury operations team. Average response time: <span style={{ color: '#10b981', fontWeight: 700 }}>12 minutes</span>.</p>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                    <div>
+                       <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-muted)', marginBottom: '0.5rem' }}>ISSUE TYPE</label>
+                       <select style={{ width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border)', padding: '1rem', borderRadius: '14px', color: '#fff', outline: 'none' }}>
+                          <option>Treasury Settlement</option>
+                          <option>Bulk Payout Issue</option>
+                          <option>Verification (KYB)</option>
+                          <option>API Integration</option>
+                          <option>Others</option>
+                       </select>
+                    </div>
+                    <div>
+                       <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-muted)', marginBottom: '0.5rem' }}>MESSAGE</label>
+                       <textarea placeholder="How can we help your business today?" style={{ width: '100%', height: '150px', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border)', borderRadius: '14px', padding: '1rem', color: '#fff', outline: 'none', resize: 'none' }} />
+                    </div>
+                    <button 
+                      onClick={() => { alert('Priority Support Ticket Created! An agent will join your secure channel shortly.'); setActiveSection('dashboard'); }}
+                      style={{ width: '100%', padding: '1.2rem', background: 'var(--primary)', color: '#fff', border: 'none', borderRadius: '14px', fontWeight: 800, cursor: 'pointer' }}
+                    >
+                      Summon Priority Agent
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
             {activeSection === 'analytics' && (
               <div style={{ padding: '1rem' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem' }}>
@@ -503,7 +589,7 @@ const BusinessDashboard = ({ onLogout }: { onLogout?: () => void }) => {
               <section>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
                   <h2 style={{ fontSize: '1.25rem', fontWeight: 700 }}>Global Sub-accounts</h2>
-                  <button style={{ color: 'var(--primary)', background: 'transparent', border: 'none', fontWeight: 600, cursor: 'pointer', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                  <button onClick={() => setActiveSection('wallets')} style={{ color: 'var(--primary)', background: 'transparent', border: 'none', fontWeight: 600, cursor: 'pointer', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                     <Plus size={16} /> Create New
                   </button>
                 </div>

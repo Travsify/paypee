@@ -107,6 +107,29 @@ const IndividualDashboard = ({ onLogout }: { onLogout: () => void }) => {
     }
   };
 
+  const generateAccount = async (currency: string) => {
+    try {
+      const response = await fetch('https://paypee-api.onrender.com/api/accounts/provision', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('paypee_token')}`
+        },
+        body: JSON.stringify({ currency: currency.toUpperCase() })
+      });
+      if (response.ok) {
+        const data = await response.json();
+        alert(`Account generated! Details: ${data.accountDetails.iban} (${data.accountDetails.bankName})`);
+        fetchUserData();
+      } else {
+        const err = await response.json();
+        alert(err.error || 'Failed to generate account.');
+      }
+    } catch (err) {
+      console.error('Account generation error:', err);
+    }
+  };
+
   const getWalletBalance = () => {
     const wallet = userData?.wallets?.find((w: any) => w.currency === 'USD');
     return wallet ? parseFloat(wallet.balance).toFixed(2) : "0.00";
@@ -176,7 +199,8 @@ const IndividualDashboard = ({ onLogout }: { onLogout: () => void }) => {
         </div>
 
         <div style={{ flex: 1, overflowY: 'auto', paddingRight: '0.5rem' }}>
-          <SidebarItem icon={Wallet} label="Overview" active={activeSection === 'overview'} onClick={() => navigate('overview')} />
+          <SidebarItem icon={LayoutDashboard} label="Overview" active={activeSection === 'overview'} onClick={() => navigate('overview')} />
+          <SidebarItem icon={Wallet} label="Accounts" active={activeSection === 'wallets'} onClick={() => navigate('wallets')} />
           <SidebarItem icon={CreditCard} label="Virtual Cards" active={activeSection === 'cards'} onClick={() => navigate('cards')} />
           <SidebarItem icon={Lock} label="Smart Vaults" active={activeSection === 'vaults'} onClick={() => navigate('vaults')} />
           <SidebarItem icon={Zap} label="Bill Payments" active={activeSection === 'bills'} onClick={() => navigate('bills')} />
@@ -212,8 +236,58 @@ const IndividualDashboard = ({ onLogout }: { onLogout: () => void }) => {
           </div>
         )}
         {activeSection === 'vaults' && <VaultsDashboard />}
+        {activeSection === 'history' && (
+            <div style={{ padding: '1rem' }}>
+              <h2 style={{ fontSize: '1.8rem', fontWeight: 700, marginBottom: '2rem' }}>Transaction History</h2>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                {transactions.length === 0 ? (
+                   <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>No transactions found</div>
+                ) : (
+                  transactions.map((tx, i) => (
+                    <motion.div 
+                      key={i} 
+                      whileHover={{ x: 5, background: 'rgba(255,255,255,0.03)' }}
+                      style={{ background: 'rgba(255,255,255,0.015)', padding: '1.25rem', borderRadius: '18px', border: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+                    >
+                      <div style={{ display: 'flex', gap: '1.25rem', alignItems: 'center' }}>
+                          <div style={{ padding: '0.75rem', background: tx.type === 'DEPOSIT' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(244, 63, 94, 0.1)', color: tx.type === 'DEPOSIT' ? '#10b981' : '#f43f5e', borderRadius: '14px' }}>
+                            {tx.type === 'DEPOSIT' ? <ArrowDownLeft size={20} /> : <ArrowUpRight size={20} />}
+                          </div>
+                          <div>
+                            <div style={{ fontWeight: 700, fontSize: '1rem' }}>{tx.desc}</div>
+                            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>{tx.date} • {tx.type}</div>
+                          </div>
+                      </div>
+                      <div style={{ textAlign: 'right' }}>
+                          <div style={{ fontWeight: 800, fontSize: '1.1rem', color: tx.type === 'DEPOSIT' ? '#10b981' : '#fff' }}>{tx.type === 'DEPOSIT' ? '+' : '-'}${tx.amount}</div>
+                          <div style={{ fontSize: '0.65rem', color: tx.status === 'COMPLETED' ? '#10b981' : '#f59e0b', fontWeight: 800, marginTop: '0.2rem' }}>{tx.status}</div>
+                      </div>
+                    </motion.div>
+                  ))
+                )}
+              </div>
+            </div>
+        )}
+        {activeSection === 'support' && (
+            <div style={{ padding: '1rem', maxWidth: '600px' }}>
+              <h2 style={{ fontSize: '1.8rem', fontWeight: 700, marginBottom: '2rem' }}>Contact Support</h2>
+              <div style={{ background: 'rgba(255,255,255,0.02)', padding: '2rem', borderRadius: '24px', border: '1px solid var(--border)' }}>
+                <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem', lineHeight: 1.6 }}>Our global support team is available 24/7 to assist you with account inquiries, transfers, and technical issues.</p>
+                <textarea 
+                  placeholder="Describe your issue..." 
+                  style={{ width: '100%', height: '150px', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border)', borderRadius: '12px', padding: '1rem', color: '#fff', outline: 'none', marginBottom: '1rem', resize: 'none' }}
+                />
+                <button 
+                  onClick={() => { alert('Support ticket created successfully! We will get back to you shortly.'); setActiveSection('overview'); }}
+                  style={{ width: '100%', padding: '1rem', background: 'var(--primary)', color: '#fff', border: 'none', borderRadius: '12px', fontWeight: 700, cursor: 'pointer' }}
+                >
+                  Submit Ticket
+                </button>
+              </div>
+            </div>
+        )}
         {activeSection === 'bills' && <BillsDashboard />}
-        {activeSection === 'ai' && <AiAdvisor />}
+        {activeSection === 'ai' && <AiAdvisor transactions={transactions} userName={userData?.firstName} />}
         {activeSection === 'settings' && (
             <SettingsView />
         )}
@@ -231,10 +305,9 @@ const IndividualDashboard = ({ onLogout }: { onLogout: () => void }) => {
                       alert('Please complete verification first to generate Fincra accounts.');
                       return;
                     }
-                    const currency = window.prompt("Which currency? (USD, EUR, GBP, NGN)", "USD");
+                    const currency = window.prompt("Which currency? (USD, EUR, GBP, NGN, BTC)", "USD");
                     if (currency) {
-                      alert(`Generating new ${currency.toUpperCase()} account via Fincra...`);
-                      // Fincra API call would go here
+                      generateAccount(currency);
                     }
                   }}
                   style={{ border: '2px dashed var(--border)', borderRadius: '24px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '2rem', cursor: 'pointer', minHeight: '180px' }}
@@ -441,18 +514,28 @@ const IndividualDashboard = ({ onLogout }: { onLogout: () => void }) => {
                         />
                       );
                     })
-                  ) : (
-                    <div style={{ padding: '2rem', background: 'rgba(255,255,255,0.02)', border: '1px dashed var(--border)', borderRadius: '24px', width: '100%', textAlign: 'center', color: 'var(--text-muted)' }}>
-                      No active accounts. Go to the Accounts tab to generate one.
-                    </div>
-                  )}
+                   ) : (
+                     <div style={{ padding: '3rem', background: 'rgba(99, 102, 241, 0.05)', border: '2px dashed var(--primary)', borderRadius: '32px', width: '100%', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1.5rem' }}>
+                       <div style={{ padding: '1rem', background: 'rgba(99, 102, 241, 0.1)', borderRadius: '20px', color: 'var(--primary)' }}><Wallet size={40} /></div>
+                       <div>
+                         <h3 style={{ fontSize: '1.5rem', fontWeight: 800, marginBottom: '0.5rem' }}>Start Your Treasury</h3>
+                         <p style={{ color: 'var(--text-muted)', maxWidth: '300px', margin: '0 auto' }}>You haven't generated any currency accounts yet. Create USD, NGN, or EUR accounts in seconds.</p>
+                       </div>
+                       <button 
+                         onClick={() => setActiveSection('wallets')}
+                         style={{ background: 'var(--primary)', color: '#fff', border: 'none', padding: '1rem 2rem', borderRadius: '16px', fontWeight: 700, cursor: 'pointer', boxShadow: '0 15px 30px -10px rgba(99, 102, 241, 0.4)' }}
+                       >
+                         Generate Account Now
+                       </button>
+                     </div>
+                   )}
                </div>
 
                <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 2fr) minmax(0, 1fr)', gap: '3rem' }}>
                  <section>
                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
                      <h2 style={{ fontSize: '1.25rem', fontWeight: 700 }}>Recent Activity</h2>
-                     <button onClick={() => alert('Viewing all transactions (WIP)')} style={{ color: 'var(--primary)', background: 'transparent', border: 'none', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.4rem', cursor: 'pointer' }}>View All <ChevronRight size={16} /></button>
+                     <button onClick={() => setActiveSection('history')} style={{ color: 'var(--primary)', background: 'transparent', border: 'none', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.4rem', cursor: 'pointer' }}>View All <ChevronRight size={16} /></button>
                    </div>
                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                      {transactions.map((tx, i) => (

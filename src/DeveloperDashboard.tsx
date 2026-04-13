@@ -108,19 +108,52 @@ const DeveloperDashboard = ({ onLogout }: { onLogout?: () => void }) => {
   const [activeSection, setActiveSection] = useState('overview');
   const [userData, setUserData] = useState<any>(null);
   const [apiKeys, setApiKeys] = useState<any[]>([]);
+  const [transactions, setTransactions] = useState<any[]>([]);
 
-  React.useEffect(() => {
+  const fetchUserData = async () => {
     const token = localStorage.getItem('paypee_token');
     const headers = { 'Authorization': `Bearer ${token}` };
 
-    Promise.all([
-      fetch('https://paypee-api.onrender.com/api/users/me', { headers }).then(res => res.json()),
-      fetch('https://paypee-api.onrender.com/api/apikeys', { headers }).then(res => res.json())
-    ]).then(([uData, keysData]) => {
+    try {
+      const [uData, keysData, txData] = await Promise.all([
+        fetch('https://paypee-api.onrender.com/api/users/me', { headers }).then(res => res.json()),
+        fetch('https://paypee-api.onrender.com/api/apikeys', { headers }).then(res => res.json()),
+        fetch('https://paypee-api.onrender.com/api/transactions', { headers }).then(res => res.json())
+      ]);
       if(!uData.error) setUserData(uData);
       if(Array.isArray(keysData)) setApiKeys(keysData);
-    });
+      if(Array.isArray(txData)) setTransactions(txData);
+    } catch (err) {
+      console.error('Failed to fetch developer data:', err);
+    }
+  };
+
+  React.useEffect(() => {
+    fetchUserData();
   }, []);
+
+  const generateAccount = async (currency: string) => {
+    try {
+      const response = await fetch('https://paypee-api.onrender.com/api/accounts/provision', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('paypee_token')}`
+        },
+        body: JSON.stringify({ currency: currency.toUpperCase() })
+      });
+      if (response.ok) {
+        const data = await response.json();
+        alert(`Developer treasury account generated! Details: ${data.accountDetails.iban}`);
+        fetchUserData();
+      } else {
+        const err = await response.json();
+        alert(err.error || 'Failed to generate account.');
+      }
+    } catch (err) {
+      console.error('Account generation error:', err);
+    }
+  };
 
   const isVerified = userData?.kycStatus === 'VERIFIED';
 
@@ -160,9 +193,12 @@ const DeveloperDashboard = ({ onLogout }: { onLogout?: () => void }) => {
 
         <nav style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
           <SidebarItem icon={LayoutDashboard} label="Overview" active={activeSection === 'overview'} onClick={() => navigate('overview')} />
+          <SidebarItem icon={Wallet} label="Accounts" active={activeSection === 'wallets'} onClick={() => navigate('wallets')} />
+          <SidebarItem icon={History} label="Transactions" active={activeSection === 'history'} onClick={() => navigate('history')} />
           <SidebarItem icon={Key} label="API Keys" active={activeSection === 'keys'} onClick={() => navigate('keys')} />
           <SidebarItem icon={Webhook} label="Webhooks" active={activeSection === 'webhooks'} onClick={() => navigate('webhooks')} />
           <SidebarItem icon={Activity} label="Traffic Logs" active={activeSection === 'logs'} onClick={() => navigate('logs')} />
+          <SidebarItem icon={Bot} label="AI Advisor" active={activeSection === 'ai'} onClick={() => navigate('ai')} />
           <SidebarItem icon={FileJson} label="API Docs" active={activeSection === 'docs'} onClick={() => navigate('docs')} />
           <SidebarItem icon={ShieldCheck} label="Security" active={activeSection === 'security'} onClick={() => navigate('security')} />
           <SidebarItem icon={HelpCircle} label="Support" active={activeSection === 'support'} onClick={() => navigate('support')} />
@@ -195,6 +231,59 @@ const DeveloperDashboard = ({ onLogout }: { onLogout?: () => void }) => {
               </div>
          ) : activeSection === 'settings' ? (
            <SettingsView />
+         ) : activeSection === 'ai' ? (
+           <AiAdvisor transactions={transactions} userName={userData?.firstName || 'Developer'} />
+         ) : activeSection === 'wallets' ? (
+           <div style={{ padding: '1rem' }}>
+              <h2 style={{ fontSize: '1.8rem', fontWeight: 700, marginBottom: '2rem' }}>Treasury Accounts</h2>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.5rem' }}>
+                {userData?.wallets?.map((w: any) => (
+                  <div key={w.id} style={{ padding: '2rem', borderRadius: '24px', background: 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)', border: '1px solid var(--border)' }}>
+                    <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '1rem' }}>{w.currency} ACCOUNT</div>
+                    <div style={{ fontSize: '2.5rem', fontWeight: 900 }}>{w.currency === 'USD' ? '$' : w.currency === 'NGN' ? '₦' : w.currency === 'EUR' ? '€' : '£'}{parseFloat(w.balance).toFixed(2)}</div>
+                  </div>
+                ))}
+                <motion.div 
+                  whileHover={{ y: -5 }}
+                  onClick={() => {
+                    const currency = window.prompt("Which currency? (USD, EUR, GBP, NGN, BTC)", "USD");
+                    if (currency) generateAccount(currency);
+                  }}
+                  style={{ border: '2px dashed var(--border)', borderRadius: '24px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '2rem', cursor: 'pointer', minHeight: '180px' }}
+                >
+                  <Plus size={40} color="var(--text-muted)" style={{ marginBottom: '1rem' }} />
+                  <span style={{ fontWeight: 600, color: 'var(--text-muted)' }}>Generate Treasury Account</span>
+                </motion.div>
+              </div>
+            </div>
+         ) : activeSection === 'history' ? (
+           <div style={{ padding: '1rem' }}>
+              <h2 style={{ fontSize: '1.8rem', fontWeight: 700, marginBottom: '2rem' }}>Transaction Tokens</h2>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                {transactions.length === 0 ? (
+                   <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>No API transactions logged yet.</div>
+                ) : (
+                  transactions.map((tx, i) => (
+                    <motion.div 
+                      key={i} 
+                      whileHover={{ x: 5, background: 'rgba(255,255,255,0.03)' }}
+                      style={{ background: 'rgba(255,255,255,0.015)', padding: '1.25rem', borderRadius: '18px', border: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+                    >
+                      <div style={{ display: 'flex', gap: '1.25rem', alignItems: 'center' }}>
+                          <div>
+                            <div style={{ fontWeight: 700, fontSize: '1.1rem' }}>{tx.desc}</div>
+                            <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '0.2rem', fontFamily: 'monospace' }}>TX_REF: {tx.reference}</div>
+                          </div>
+                      </div>
+                      <div style={{ textAlign: 'right' }}>
+                          <div style={{ fontWeight: 800, fontSize: '1.1rem' }}>${tx.amount}</div>
+                          <div style={{ fontSize: '0.7rem', color: tx.status === 'COMPLETED' ? '#10b981' : '#f59e0b', fontWeight: 800, marginTop: '0.2rem' }}>{tx.status}</div>
+                      </div>
+                    </motion.div>
+                  ))
+                )}
+              </div>
+            </div>
          ) : activeSection === 'keys' ? (
             <div style={{ padding: '1rem' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
@@ -304,15 +393,20 @@ const DeveloperDashboard = ({ onLogout }: { onLogout?: () => void }) => {
                </div>
             </div>
          ) : activeSection === 'support' ? (
-            <div style={{ padding: '1rem', textAlign: 'center', maxWidth: '600px', margin: '0 auto' }}>
-              <Terminal size={80} color="var(--primary)" style={{ opacity: 0.4, marginBottom: '2rem' }} />
-              <h2 style={{ fontSize: '2rem', fontWeight: 800, marginBottom: '1rem' }}>API Engineering Support</h2>
-              <p style={{ color: 'var(--text-muted)', marginBottom: '2.5rem' }}>Direct Slack access to our core infrastructure team is available for all production-grade accounts.</p>
-              <div style={{ display: 'grid', gap: '1rem' }}>
-                <button style={{ background: 'var(--primary)', color: '#fff', border: 'none', padding: '1.2rem', borderRadius: '16px', fontWeight: 700, cursor: 'pointer' }}>Join Dev Slack Community</button>
-                <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border)', padding: '1.5rem', borderRadius: '16px', fontSize: '0.9rem', color: 'var(--text-muted)' }}>
-                  Technical Documentation: <span style={{ color: 'var(--primary)', fontWeight: 600, cursor: 'pointer' }}>docs.paypee.com</span>
-                </div>
+            <div style={{ padding: '1rem', maxWidth: '600px' }}>
+              <h2 style={{ fontSize: '1.8rem', fontWeight: 700, marginBottom: '2rem' }}>Developer Support</h2>
+              <div style={{ background: 'rgba(255,255,255,0.02)', padding: '2.5rem', borderRadius: '24px', border: '1px solid var(--border)' }}>
+                <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem', lineHeight: 1.7 }}>Direct access to our infrastructure engineering team. Please include your Project ID and endpoint details.</p>
+                <textarea 
+                  placeholder="Describe the integration issue..." 
+                  style={{ width: '100%', height: '180px', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border)', borderRadius: '14px', padding: '1rem', color: '#fff', outline: 'none', marginBottom: '1.5rem', resize: 'none' }}
+                />
+                <button 
+                  onClick={() => { alert('Dev Support Ticket Created! Our engineers will review your request.'); setActiveSection('overview'); }}
+                  style={{ width: '100%', padding: '1.2rem', background: 'var(--primary)', color: '#fff', border: 'none', borderRadius: '14px', fontWeight: 800, cursor: 'pointer' }}
+                >
+                  Create Engineer Ticket
+                </button>
               </div>
             </div>
          ) : (

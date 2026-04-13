@@ -6,32 +6,51 @@ export class IbanService {
   /**
    * Provisions a new virtual global account for a user.
    */
-  static async provisionGlobalAccount(userId: string, currency: 'EUR' | 'GBP' | 'CNY') {
-    console.log(`🌍 Provisioning ${currency} IBAN for User ${userId}...`);
+  static async provisionGlobalAccount(userId: string, currency: string) {
+    console.log(`🌍 Provisioning ${currency} account for User ${userId}...`);
+
+    // 1. Check if the user already has a wallet in this currency
+    const existingWallet = await prisma.wallet.findFirst({
+        where: { userId, currency: currency as Currency }
+    });
+
+    if (existingWallet) {
+        return {
+            walletId: existingWallet.id,
+            currency,
+            isExisting: true,
+            accountDetails: {
+                accountHolder: "Paypee / TechStream Ltd",
+                iban: "EXISTING_ACCOUNT_" + existingWallet.id.slice(0, 8),
+                bic: 'PAYPBEBB',
+                bankName: 'Paypee Global Clearing'
+            }
+        };
+    }
 
     // In a real scenario, this would call Fincra / Currencycloud / Sudo
     const prefixes: Record<string, string> = {
       EUR: 'BE89',
       GBP: 'GB21',
-      CNY: 'CN38'
+      CNY: 'CN38',
+      USD: 'US11',
+      NGN: 'NG55',
+      BTC: 'BC11'
     };
 
-    const iban = prefixes[currency] + Math.random().toString().slice(2, 14);
+    const iban = (prefixes[currency] || 'PP00') + Math.random().toString().slice(2, 14);
     const bic = 'PAYPBEBB';
     const bankName = 'Paypee Global Clearing';
 
-    // 1. Create the wallet if it doesn't exist
+    // 2. Create the wallet
     const wallet = await prisma.wallet.create({
       data: {
         userId,
         currency: currency as Currency,
         balance: 0.00,
-        // We stores the IBAN in metadata for now or we could extend the schema
       }
     });
 
-    // We'll store the IBAN details in a special transaction or metadata log
-    // For this MVP, we return the details to the UI
     return {
       walletId: wallet.id,
       currency,

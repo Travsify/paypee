@@ -74,8 +74,32 @@ export class BillsService {
         }
       });
 
-      // 4. In production, trigger Fincra's /bills/pay endpoint here
-      console.log(`✅ [BILL PAID]: User ${userId} paid ${amount} to ${providerId} (${customerId})`);
+      // 4. Trigger Fincra's /bills/pay endpoint
+      try {
+        const fincraUrl = process.env.FINCRA_ENV === 'live' 
+          ? 'https://api.fincra.com/core/bills/pay' 
+          : 'https://sandboxapi.fincra.com/core/bills/pay';
+
+        await axios.post(fincraUrl, {
+            amount: amount,
+            customer: customerId,
+            item_id: providerId,
+            bill_id: category === 'AIRTIME' ? '1' : '2', // Mapping depends on Fincra's catalog
+            reference: transaction.reference
+        }, {
+            headers: {
+                'api-key': process.env.FINCRA_SECRET_KEY,
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        console.log(`✅ [FINCRA SETTLED]: User ${userId} airtime/bill finalized.`);
+      } catch (fincraErr: any) {
+        console.error('[FINCRA BILL ERROR]:', fincraErr.response?.data || fincraErr.message);
+        // In a real production app, you might want to reverse the wallet debit if this fails
+        // but often we mark it as PENDING and retry via a background job.
+        throw new Error('Fincra was unable to process this payment at this time.');
+      }
 
       return transaction;
     });
