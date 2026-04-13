@@ -391,42 +391,79 @@ app.post('/api/webhooks/bitnob', async (req: Request, res: Response) => {
   }
 });
 
+import axios from 'axios';
+
 // ==========================================
-// Automated Verification (KYC/KYB)
+// Automated Verification (KYC/KYB) - Prembly (Identitypass) Integration
 // ==========================================
 
 app.post('/api/verify/identity', authenticateToken, async (req: any, res: any): Promise<any> => {
   try {
-    const { idType, idNumber, businessRcNumber } = req.body;
+    const { idType, idNumber } = req.body;
     const userId = req.user.userId;
+    const PREMBLY_SECRET_KEY = process.env.PREMBLY_SECRET_KEY;
+    const PREMBLY_APP_ID = process.env.PREMBLY_APP_ID;
 
-    // This is where we call Prembly (Identitypass) or SmileID
-    // Integration Hook: 
-    // const verificationRes = await axios.post('https://api.prembly.com/verify', { idNumber, idType }, { headers });
-    
-    console.log(`Starting automated verification for User ${userId}...`);
-    
-    // MOCKING AUTOMATED SUCCESS for demonstration
-    // In production, flip user to VERIFIED only if external API returns 'verified'
-    const isSuccess = true; 
-
-    if (isSuccess) {
+    if (!PREMBLY_SECRET_KEY) {
+      // If no key is provided, we stay in 'DEMO' success mode for your testing
+      console.warn('PREMBLY_SECRET_KEY missing. Running in DEMO MODE.');
+      
       await prisma.user.update({
         where: { id: userId },
         data: { kycStatus: 'VERIFIED' }
       });
 
       return res.status(200).json({ 
-        message: 'Verification successful! Your account is now fully unlocked.',
+        message: 'DEMO: Verification successful! (Add PREMBLY_SECRET_KEY for real checks)',
         status: 'VERIFIED'
       });
-    } else {
-      return res.status(400).json({ error: 'Verification failed. Please check your details and try again.' });
     }
 
-  } catch (error) {
-    console.error('Verification error:', error);
-    res.status(500).json({ error: 'Automated verification system is currently offline.' });
+    console.log(`📡 Calling Prembly for User ${userId} (${idType})...`);
+
+    // Determine endpoint based on ID Type (NIN, BVN, or CAC for Business)
+    let endpoint = '';
+    let payload = {};
+
+    if (idType === 'NIN') {
+      endpoint = 'https://api.prembly.com/identitypass/verification/nin';
+      payload = { number: idNumber };
+    } else if (idType === 'BVN') {
+      endpoint = 'https://api.prembly.com/identitypass/verification/bvn';
+      payload = { number: idNumber };
+    } else if (idType === 'CAC') {
+      endpoint = 'https://api.prembly.com/identitypass/verification/cac';
+      payload = { rc_number: idNumber };
+    } else {
+      return res.status(400).json({ error: 'Unsupported ID Type' });
+    }
+
+    const response = await axios.post(endpoint, payload, {
+      headers: {
+        'x-api-key': PREMBLY_SECRET_KEY,
+        'app-id': PREMBLY_APP_ID,
+        'Content-Type': 'application/json'
+      }
+    });
+
+    if (response.data.status === 'success' || response.data.response_code === '00') {
+      await prisma.user.update({
+        where: { id: userId },
+        data: { kycStatus: 'VERIFIED' }
+      });
+
+      return res.status(200).json({ 
+        message: 'Verification successful!',
+        status: 'VERIFIED',
+        details: response.data.data
+      });
+    } else {
+      return res.status(400).json({ error: 'Verification failed: ' + (response.data.message || 'Invalid details') });
+    }
+
+  } catch (error: any) {
+    console.error('Verification error:', error.response?.data || error.message);
+    res.status(500).json({ error: 'Identity verification service error.' });
   }
 });
 
