@@ -9,6 +9,15 @@ export class IbanService {
   static async provisionGlobalAccount(userId: string, currency: string) {
     console.log(`🌍 Provisioning ${currency} account for User ${userId}...`);
 
+    const prefixes: Record<string, string> = {
+      EUR: 'BE89',
+      GBP: 'GB21',
+      CNY: 'CN38',
+      USD: 'US11',
+      NGN: 'NG55',
+      BTC: 'BC11'
+    };
+
     // 1. Check if the user already has a wallet in this currency
     const existingWallet = await prisma.wallet.findFirst({
         where: { userId, currency: currency as Currency }
@@ -40,14 +49,6 @@ export class IbanService {
     }
 
     // In a real scenario, this would call Fincra / Currencycloud / Sudo
-    const prefixes: Record<string, string> = {
-      EUR: 'BE89',
-      GBP: 'GB21',
-      CNY: 'CN38',
-      USD: 'US11',
-      NGN: 'NG55',
-      BTC: 'BC11'
-    };
 
     const iban = (prefixes[currency] || 'PP00') + Math.random().toString().slice(2, 14);
     const bic = 'PAYPBEBB';
