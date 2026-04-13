@@ -25,10 +25,16 @@ import {
   LayoutDashboard,
   FileJson,
   Link,
-  Globe
+  Globe,
+  Wallet,
+  Bot,
+  Plus,
+  History,
+  Lock
 } from 'lucide-react';
 import SettingsView from './SettingsView';
 import VerificationGate from './VerificationGate';
+import AiAdvisor from './AiAdvisor';
 
 const SidebarItem = ({ icon: Icon, label, active = false, onClick }: { icon: any, label: string, active?: boolean, onClick?: () => void }) => (
   <motion.div 

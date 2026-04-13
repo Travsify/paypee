@@ -22,7 +22,10 @@ import {
   RefreshCcw,
   ExternalLink,
   Zap,
-  Bot
+  Bot,
+  Wallet,
+  Lock,
+  History
 } from 'lucide-react';
 import SettingsView from './SettingsView';
 import VerificationGate from './VerificationGate';

@@ -19,7 +19,8 @@ import {
   ArrowDownLeft,
   Smartphone,
   Lock,
-  Bot
+  Bot,
+  LayoutDashboard
 } from 'lucide-react';
 import SettingsView from './SettingsView';
 import VerificationGate from './VerificationGate';
