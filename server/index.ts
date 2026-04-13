@@ -58,17 +58,22 @@ app.post('/api/auth/register', async (req: Request, res: Response): Promise<any>
     const salt = await bcrypt.genSalt(10);
     const passwordHash = await bcrypt.hash(password, salt);
 
-    // Create user internally
+    // Create user internally with explicit data mapping
     const userRole = role.toUpperCase() as AccountRole;
+    
+    const userData: any = {
+      email,
+      passwordHash,
+      role: userRole,
+    };
+
+    // Only assign optional fields if they are actually provided
+    if (firstName && firstName.trim() !== "") userData.firstName = firstName;
+    if (lastName && lastName.trim() !== "") userData.lastName = lastName;
+    if (businessName && businessName.trim() !== "") userData.businessName = businessName;
+
     const user = await prisma.user.create({
-      data: {
-        email,
-        passwordHash,
-        role: userRole,
-        firstName,
-        lastName,
-        businessName
-      }
+      data: userData
     });
 
     // Auto-provision a default USD Wallet upon registration
