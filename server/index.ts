@@ -441,27 +441,32 @@ app.post('/api/webhooks/bitnob', async (req: Request, res: Response) => {
           where: { id: customerId } // Bitnob customerId mapped to Paypee userId
        });
 
-       if (user) {
-         await prisma.$transaction([
-            // Credit the wallet
-            prisma.wallet.updateMany({
-               where: { userId: user.id, currency: 'USD' }, // Logic for USD settlement
-               data: { balance: { increment: amount } }
-            }),
-            // Log the deposit transaction
-            prisma.transaction.create({
-               data: {
-                  userId: user.id,
-                  type: 'DEPOSIT',
-                  amount: amount,
-                  currency: 'USD',
-                  status: 'COMPLETED',
-                  reference: `BITNOB_${payload.data.id}`
-               }
-            })
-         ]);
-         console.log(`[SETTLED]: Credited $${amount} to User ${user.id} via Bitnob Lightning.`);
-       }
+        if (user) {
+          const wallet = await prisma.wallet.findFirst({
+            where: { userId: user.id, currency: 'USD' }
+          });
+
+          if (wallet) {
+            await prisma.$transaction([
+               prisma.wallet.update({
+                  where: { id: wallet.id },
+                  data: { balance: { increment: amount } }
+               }),
+               prisma.transaction.create({
+                  data: {
+                     userId: user.id,
+                     walletId: wallet.id,
+                     type: 'DEPOSIT',
+                     amount: amount,
+                     currency: 'USD',
+                     status: 'COMPLETED',
+                     reference: `BITNOB_${payload.data.id}`
+                  }
+               })
+            ]);
+            console.log(`[SETTLED]: Credited $${amount} to User ${user.id} via Bitnob Lightning.`);
+          }
+        }
     }
 
     res.status(200).send('Webhook Processed');
