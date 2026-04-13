@@ -128,35 +128,6 @@ const App = () => {
     visible: { y: 0, opacity: 1 }
   };
 
-  const codeSnippets = {
-    node: `// Initialize Paypee SDK
-const paypee = new Paypee('sk_live_...');
-
-// Create Virtual Card
-await paypee.cards.create({
-  currency: "USD",
-  amount: 500,
-  label: "Business Cloud"
-});`,
-    python: `# Initialize Paypee SDK
-client = Paypee(api_key='sk_live_...')
-
-# Create Virtual Card
-client.cards.create(
-    currency="USD",
-    amount=500,
-    label="Business Cloud"
-)`,
-    go: `// Initialize Paypee SDK
-client := paypee.New("sk_live_...")
-
-// Create Virtual Card
-client.Cards.Create(paypee.CardParams{
-    Currency: "USD",
-    Amount:   500,
-    Label:    "Business Cloud",
-})`
-  };
 
   const audienceContent = {
     individual: {
