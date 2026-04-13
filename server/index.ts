@@ -646,13 +646,13 @@ app.post('/api/verify/identity', authenticateToken, async (req: any, res: any): 
 
     if (idType === 'NIN') {
       endpoint = 'https://api.prembly.com/identitypass/verification/nin';
-      payload = { number: idNumber };
+      payload = { number_nin: idNumber, number: idNumber }; // Fallback for various API versions
     } else if (idType === 'BVN') {
       endpoint = 'https://api.prembly.com/identitypass/verification/bvn';
-      payload = { number: idNumber };
+      payload = { number_bvn: idNumber, number: idNumber, bvn: idNumber }; 
     } else if (idType === 'CAC') {
       endpoint = 'https://api.prembly.com/identitypass/verification/cac';
-      payload = { rc_number: idNumber };
+      payload = { rc_number: idNumber, company_type: 'rc' }; // Prembly often requires company_type
     } else {
       await prisma.user.update({ where: { id: userId }, data: { kycStatus: 'PENDING' } });
       return res.status(400).json({ error: 'Unsupported ID Type. Use NIN, BVN, or CAC.' });
