@@ -115,16 +115,31 @@ const DeveloperDashboard = ({ onLogout }: { onLogout?: () => void }) => {
 
     Promise.all([
       fetch('https://paypee-api.onrender.com/api/users/me', { headers }).then(res => res.json()),
-      fetch('https://paypee-api.onrender.com/api/keys', { headers }).then(res => res.json())
+      fetch('https://paypee-api.onrender.com/api/apikeys', { headers }).then(res => res.json())
     ]).then(([uData, keysData]) => {
       if(!uData.error) setUserData(uData);
       if(Array.isArray(keysData)) setApiKeys(keysData);
     });
   }, []);
 
+  const isVerified = userData?.kycStatus === 'VERIFIED';
+
+  const navigate = (section: string) => {
+    const openSections = ['overview', 'settings', 'support', 'docs'];
+    if (!isVerified && !openSections.includes(section)) {
+      setActiveSection('kyc_blocked');
+      return;
+    }
+    setActiveSection(section);
+  };
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', background: '#020617', color: '#fff', overflow: 'hidden' }}>
-      <VerificationGate kycStatus={userData?.kycStatus || 'PENDING'} accountType="DEVELOPER" />
+      <VerificationGate 
+        kycStatus={userData?.kycStatus || 'PENDING'} 
+        accountType="DEVELOPER" 
+        onStatusChange={(status) => setUserData((prev: any) => ({ ...prev, kycStatus: status }))}
+      />
       <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
         {/* Sidebar */}
       <aside style={{ 
@@ -135,7 +150,7 @@ const DeveloperDashboard = ({ onLogout }: { onLogout?: () => void }) => {
         display: 'flex',
         flexDirection: 'column'
       }}>
-        <div style={{ padding: '2rem 1rem' }}>
+        <div style={{ flex: 1, overflowY: 'auto', paddingRight: '0.5rem', margin: '0 -0.5rem' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0 1rem', marginBottom: '3rem' }}>
           <div style={{ width: 32, height: 32, background: 'var(--primary)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <Cpu size={20} color="#fff" />
@@ -144,27 +159,43 @@ const DeveloperDashboard = ({ onLogout }: { onLogout?: () => void }) => {
         </div>
 
         <nav style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-          <SidebarItem icon={LayoutDashboard} label="Overview" active={activeSection === 'overview'} onClick={() => setActiveSection('overview')} />
-          <SidebarItem icon={Key} label="API Keys" active={activeSection === 'keys'} onClick={() => setActiveSection('keys')} />
-          <SidebarItem icon={Webhook} label="Webhooks" active={activeSection === 'webhooks'} onClick={() => setActiveSection('webhooks')} />
-          <SidebarItem icon={Activity} label="Traffic Logs" active={activeSection === 'logs'} onClick={() => setActiveSection('logs')} />
-          <SidebarItem icon={FileJson} label="API Docs" active={activeSection === 'docs'} onClick={() => window.location.href = '/docs'} />
-          <SidebarItem icon={ShieldCheck} label="Security" active={activeSection === 'security'} onClick={() => setActiveSection('security')} />
-          <SidebarItem icon={HelpCircle} label="Support" active={activeSection === 'support'} onClick={() => setActiveSection('support')} />
+          <SidebarItem icon={LayoutDashboard} label="Overview" active={activeSection === 'overview'} onClick={() => navigate('overview')} />
+          <SidebarItem icon={Key} label="API Keys" active={activeSection === 'keys'} onClick={() => navigate('keys')} />
+          <SidebarItem icon={Webhook} label="Webhooks" active={activeSection === 'webhooks'} onClick={() => navigate('webhooks')} />
+          <SidebarItem icon={Activity} label="Traffic Logs" active={activeSection === 'logs'} onClick={() => navigate('logs')} />
+          <SidebarItem icon={FileJson} label="API Docs" active={activeSection === 'docs'} onClick={() => navigate('docs')} />
+          <SidebarItem icon={ShieldCheck} label="Security" active={activeSection === 'security'} onClick={() => navigate('security')} />
+          <SidebarItem icon={HelpCircle} label="Support" active={activeSection === 'support'} onClick={() => navigate('support')} />
         </nav>
       </div>
 
         <div style={{ marginTop: 'auto' }}>
-          <SidebarItem icon={Settings} label="Project Settings" active={activeSection === 'settings'} onClick={() => setActiveSection('settings')} />
+          <SidebarItem icon={Settings} label="Project Settings" active={activeSection === 'settings'} onClick={() => navigate('settings')} />
           <SidebarItem icon={LogOut} label="Sign Out" onClick={onLogout} />
         </div>
       </aside>
 
       {/* Main Content */}
       <main style={{ flex: 1, overflowY: 'auto', padding: '2rem 3rem' }}>
-          {activeSection === 'settings' ? (
+          {activeSection === 'kyc_blocked' ? (
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '70vh', textAlign: 'center', gap: '1.5rem' }}>
+                <div style={{ width: 80, height: 80, background: 'rgba(99,102,241,0.1)', borderRadius: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#6366f1' }}>
+                  <ShieldCheck size={40} />
+                </div>
+                <h2 style={{ fontSize: '1.8rem', fontWeight: 800 }}>Account Verification Required</h2>
+                <p style={{ color: '#64748b', maxWidth: '420px', lineHeight: 1.7 }}>
+                  This feature is locked until your developer account is verified. Complete your KYC/KYB to unlock live API keys, Webhooks, Traffic Logs, and more.
+                </p>
+                <button
+                  onClick={() => setActiveSection('overview')}
+                  style={{ background: '#6366f1', color: '#fff', border: 'none', padding: '0.9rem 2.5rem', borderRadius: '12px', fontWeight: 700, cursor: 'pointer', fontSize: '1rem' }}
+                >
+                  Return to Overview
+                </button>
+              </div>
+         ) : activeSection === 'settings' ? (
            <SettingsView />
-         ) : activeSection === 'apikeys' ? (
+         ) : activeSection === 'keys' ? (
             <div style={{ padding: '1rem' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
                 <h2 style={{ fontSize: '1.8rem', fontWeight: 700 }}>API Authentication Keys</h2>

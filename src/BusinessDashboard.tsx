@@ -160,7 +160,7 @@ const BusinessDashboard = ({ onLogout }: { onLogout?: () => void }) => {
           Paypee Business
         </div>
 
-        <div style={{ flex: 1 }}>
+        <div style={{ flex: 1, overflowY: 'auto', paddingRight: '0.5rem', margin: '0 -0.5rem' }}>
            <SidebarItem icon={LayoutDashboard} label="Treasury Dashboard" active={activeSection === 'dashboard'} onClick={() => navigate('dashboard')} />
            <SidebarItem icon={BarChart3} label="Analytics" active={activeSection === 'analytics'} onClick={() => navigate('analytics')} />
            <SidebarItem icon={Users} label="Payroll Engine" active={activeSection === 'payroll'} onClick={() => navigate('payroll')} />

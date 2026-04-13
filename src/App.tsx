@@ -71,15 +71,64 @@ const App = () => {
     go: `import "github.com/paypee/sdk-go"\n\nclient := paypee.NewClient("sk_live_...")\naccount, _ := client.CreateGlobalAccount("EUR")`
   };
   
-  // Detect Payment Link URL
+  // Detect Payment Link URL and handle Session Persistence
   useEffect(() => {
     const path = window.location.pathname;
     if (path.startsWith('/pay/')) {
       setView('checkout');
+      return;
     } else if (path === '/docs') {
       setView('docs');
+      return;
+    }
+
+    // Auto-login if token exists
+    const token = localStorage.getItem('paypee_token');
+    const userStr = localStorage.getItem('paypee_user');
+    if (token && userStr) {
+      try {
+        const user = JSON.parse(userStr);
+        if (user && user.role) {
+          setView(user.role.toLowerCase());
+        }
+      } catch (e) {
+        console.error('Session restore failed', e);
+      }
     }
   }, []);
+
+  // Set up Auto-Logout after 5 minutes of inactivity (only when logged in)
+  useEffect(() => {
+    let timeoutId: NodeJS.Timeout;
+
+    const resetTimer = () => {
+      clearTimeout(timeoutId);
+      // 5 minutes = 300,000 ms
+      timeoutId = setTimeout(() => {
+        if (view === 'individual' || view === 'business' || view === 'developer') {
+          handleLogout();
+          alert('You have been logged out due to inactivity.');
+        }
+      }, 300000); 
+    };
+
+    if (view === 'individual' || view === 'business' || view === 'developer') {
+      window.addEventListener('mousemove', resetTimer);
+      window.addEventListener('keydown', resetTimer);
+      window.addEventListener('scroll', resetTimer);
+      window.addEventListener('click', resetTimer);
+      resetTimer(); // Initialize
+    }
+
+    return () => {
+      clearTimeout(timeoutId);
+      window.removeEventListener('mousemove', resetTimer);
+      window.removeEventListener('keydown', resetTimer);
+      window.removeEventListener('scroll', resetTimer);
+      window.removeEventListener('click', resetTimer);
+    };
+  }, [view]);
+
 
   if (view === 'checkout') {
     const slug = window.location.pathname.split('/pay/')[1];

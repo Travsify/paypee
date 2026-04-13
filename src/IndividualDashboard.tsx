@@ -175,7 +175,7 @@ const IndividualDashboard = ({ onLogout }: { onLogout: () => void }) => {
           <span style={{ fontSize: '1.2rem', fontWeight: 800, letterSpacing: '-0.02em' }}>PAYPEE</span>
         </div>
 
-        <div style={{ flex: 1 }}>
+        <div style={{ flex: 1, overflowY: 'auto', paddingRight: '0.5rem' }}>
           <SidebarItem icon={Wallet} label="Overview" active={activeSection === 'overview'} onClick={() => navigate('overview')} />
           <SidebarItem icon={CreditCard} label="Virtual Cards" active={activeSection === 'cards'} onClick={() => navigate('cards')} />
           <SidebarItem icon={Lock} label="Smart Vaults" active={activeSection === 'vaults'} onClick={() => navigate('vaults')} />
