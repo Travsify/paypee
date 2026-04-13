@@ -84,8 +84,12 @@ const BalanceCard = ({ currency, symbol, amount, gradient, details }: { currency
     </div>
     <div style={{ marginTop: '1.5rem', paddingTop: '1.2rem', borderTop: '1px solid rgba(255,255,255,0.1)' }}>
        <div style={{ fontSize: '0.6rem', opacity: 0.6, textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '0.4rem', fontWeight: 800 }}>Primary Settlement ID</div>
-       <div style={{ fontSize: '0.85rem', fontWeight: 800, fontFamily: 'monospace', wordBreak: 'break-all' }}>{details?.iban || details?.accountNumber || 'PROVISIONING_NODE...'}</div>
-       <div style={{ fontSize: '0.7rem', opacity: 0.8, marginTop: '0.4rem', fontWeight: 600 }}>{details?.bankName || 'Paypee High-Speed Rail'}</div>
+       <div style={{ fontSize: '0.85rem', fontWeight: 800, fontFamily: 'monospace', wordBreak: 'break-all' }}>
+         {details?.iban || details?.accountNumber || details?.account_number || details?.address || 'PROVISIONING_NODE...'}
+       </div>
+       <div style={{ fontSize: '0.7rem', opacity: 0.8, marginTop: '0.4rem', fontWeight: 600 }}>
+         {details?.bankName || details?.bank_name || 'Paypee High-Speed Rail'}
+       </div>
     </div>
     <div className="glow-overlay" />
   </motion.div>

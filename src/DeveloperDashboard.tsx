@@ -259,7 +259,7 @@ const DeveloperDashboard = ({ onLogout }: { onLogout?: () => void }) => {
                       <div style={{ fontSize: '2rem', fontWeight: 900, marginBottom: '2rem' }}>{w.currency === 'USD' ? '$' : w.currency === 'NGN' ? '₦' : w.currency === 'EUR' ? '€' : '£'}{parseFloat(w.balance).toFixed(2)}</div>
                       <div style={{ background: 'rgba(0,0,0,0.3)', padding: '1rem', borderRadius: '14px', border: '1px solid rgba(255,255,255,0.05)' }}>
                          <div style={{ fontSize: '0.55rem', opacity: 0.5, textTransform: 'uppercase', marginBottom: '0.4rem', fontWeight: 800 }}>Account Reference</div>
-                         <div style={{ fontSize: '0.75rem', fontWeight: 800, fontFamily: 'monospace', color: '#6366f1' }}>{details.iban || details.accountNumber || 'PROVISIONING...'}</div>
+                         <div style={{ fontSize: '0.75rem', fontWeight: 800, fontFamily: 'monospace', color: '#6366f1' }}>{details.iban || details.accountNumber || details.account_number || details.address || 'PROVISIONING...'}</div>
                       </div>
                     </div>
                   );

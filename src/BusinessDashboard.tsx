@@ -254,8 +254,8 @@ const BusinessDashboard = ({ onLogout }: { onLogout?: () => void }) => {
                       <div style={{ fontSize: '2.5rem', fontWeight: 900, marginBottom: '2rem' }}>{w.currency === 'USD' ? '$' : w.currency === 'NGN' ? '₦' : w.currency === 'EUR' ? '€' : '£'}{parseFloat(w.balance).toFixed(2)}</div>
                       <div style={{ padding: '1.25rem', background: 'rgba(255,255,255,0.03)', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)' }}>
                          <div style={{ fontSize: '0.6rem', opacity: 0.5, textTransform: 'uppercase', marginBottom: '0.4rem', fontWeight: 800 }}>Fincra Settlement ID</div>
-                         <div style={{ fontSize: '0.8rem', fontWeight: 800, fontFamily: 'monospace' }}>{details.iban || details.accountNumber || 'PENDING...'}</div>
-                         <div style={{ fontSize: '0.7rem', opacity: 0.7, marginTop: '0.3rem' }}>{details.bankName || 'Integrated Network Hub'}</div>
+                         <div style={{ fontSize: '0.8rem', fontWeight: 800, fontFamily: 'monospace' }}>{details.iban || details.accountNumber || details.account_number || details.address || 'PENDING...'}</div>
+                         <div style={{ fontSize: '0.7rem', opacity: 0.7, marginTop: '0.3rem' }}>{details.bankName || details.bank_name || 'Integrated Network Hub'}</div>
                       </div>
                     </div>
                   );
