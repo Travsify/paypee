@@ -256,7 +256,9 @@ app.post('/api/transactions', authenticateToken, async (req: any, res: any): Pro
          }
        } else if (process.env.FINCRA_SECRET_KEY) {
          try {
-           await processFiatPayout(amount, currency, { number: '0123456789', bankCode: '058' });
+           const destNumber = req.body.destinationAccount || '0123456789';
+           const destBank = req.body.bankCode || '058';
+           await processFiatPayout(amount, currency, { number: destNumber, bankCode: destBank });
          } catch (err) {
            console.warn('Fincra failure:', err);
          }
