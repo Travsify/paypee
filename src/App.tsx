@@ -96,7 +96,7 @@ const App = () => {
 
   // Set up Auto-Logout after 5 minutes of inactivity (only when logged in)
   useEffect(() => {
-    let timeoutId: NodeJS.Timeout;
+    let timeoutId: ReturnType<typeof setTimeout>;
 
     const resetTimer = () => {
       clearTimeout(timeoutId);
