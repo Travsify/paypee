@@ -46,6 +46,9 @@ model User {
   email        String       @unique
   passwordHash String
   role         AccountRole
+  firstName    String?
+  lastName     String?
+  businessName String?
   kycStatus    KycStatus    @default(PENDING)
   createdAt    DateTime     @default(now())
   updatedAt    DateTime     @updatedAt

@@ -26,6 +26,9 @@ const Auth = ({ onComplete, onBack }: AuthProps) => {
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [businessName, setBusinessName] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -37,7 +40,7 @@ const Auth = ({ onComplete, onBack }: AuthProps) => {
       const endpoint = isLogin ? '/api/auth/login' : '/api/auth/register';
       const body = isLogin 
         ? JSON.stringify({ email, password })
-        : JSON.stringify({ email, password, role: accountType.toUpperCase() });
+        : JSON.stringify({ email, password, role: accountType.toUpperCase(), firstName, lastName, businessName });
 
       const res = await fetch(`https://paypee-api.onrender.com${endpoint}`, {
         method: 'POST',
@@ -232,6 +235,67 @@ const Auth = ({ onComplete, onBack }: AuthProps) => {
         </div>
 
         <form onSubmit={handleSubmit}>
+          {!isLogin && accountType === 'individual' && (
+            <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem' }}>
+              <div style={{ flex: 1 }}>
+                <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>First Name</label>
+                <input 
+                  type="text" 
+                  required
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
+                  placeholder="Sarah"
+                  style={{ width: '100%', background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border)', padding: '1rem', borderRadius: '12px', color: '#fff', outline: 'none' }}
+                />
+              </div>
+              <div style={{ flex: 1 }}>
+                <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>Last Name</label>
+                <input 
+                  type="text" 
+                  required
+                  value={lastName}
+                  onChange={(e) => setLastName(e.target.value)}
+                  placeholder="Chen"
+                  style={{ width: '100%', background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border)', padding: '1rem', borderRadius: '12px', color: '#fff', outline: 'none' }}
+                />
+              </div>
+            </div>
+          )}
+
+          {!isLogin && (accountType === 'business') && (
+            <div style={{ marginBottom: '1.5rem' }}>
+              <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>Business Name</label>
+              <div style={{ position: 'relative' }}>
+                <input 
+                  type="text" 
+                  required
+                  value={businessName}
+                  onChange={(e) => setBusinessName(e.target.value)}
+                  placeholder="TechStream Ltd."
+                  style={{ width: '100%', background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border)', padding: '1rem 1rem 1rem 3rem', borderRadius: '12px', color: '#fff', outline: 'none' }}
+                />
+                <Building2 size={18} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+              </div>
+            </div>
+          )}
+
+          {!isLogin && accountType === 'developer' && (
+            <div style={{ marginBottom: '1.5rem' }}>
+              <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>Full Name</label>
+              <div style={{ position: 'relative' }}>
+                <input 
+                  type="text" 
+                  required
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
+                  placeholder="Sarah Chen"
+                  style={{ width: '100%', background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border)', padding: '1rem 1rem 1rem 3rem', borderRadius: '12px', color: '#fff', outline: 'none' }}
+                />
+                <User size={18} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+              </div>
+            </div>
+          )}
+
           <div style={{ marginBottom: '1.5rem' }}>
             <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>Email Address</label>
             <div style={{ position: 'relative' }}>

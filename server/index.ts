@@ -42,7 +42,7 @@ const authenticateToken = (req: any, res: any, next: any) => {
 
 app.post('/api/auth/register', async (req: Request, res: Response): Promise<any> => {
   try {
-    const { email, password, role } = req.body;
+    const { email, password, role, firstName, lastName, businessName } = req.body;
 
     if (!email || !password || !role) {
       return res.status(400).json({ error: 'Email, password, and role are required.' });
@@ -65,6 +65,9 @@ app.post('/api/auth/register', async (req: Request, res: Response): Promise<any>
         email,
         passwordHash,
         role: userRole,
+        firstName,
+        lastName,
+        businessName
       }
     });
 
