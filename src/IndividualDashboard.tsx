@@ -495,7 +495,8 @@ const IndividualDashboard = ({ onLogout }: { onLogout: () => void }) => {
                  ))}
                </div>
              </div>
-                    {activeSection === 'overview' && (
+            )}
+            {activeSection === 'overview' && (
              <>
                <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3rem' }}>
                  <div>
