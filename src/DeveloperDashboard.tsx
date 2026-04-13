@@ -21,7 +21,11 @@ import {
   Search,
   ChevronRight,
   ExternalLink,
-  Cpu
+  Cpu,
+  LayoutDashboard,
+  FileJson,
+  Link,
+  Globe
 } from 'lucide-react';
 import SettingsView from './SettingsView';
 import VerificationGate from './VerificationGate';
@@ -188,11 +192,14 @@ const DeveloperDashboard = ({ onLogout }: { onLogout?: () => void }) => {
                 <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border)', borderRadius: '24px', padding: '2rem' }}>
                   <h3 style={{ fontSize: '1.2rem', fontWeight: 700, marginBottom: '1rem' }}>Restricted Keys</h3>
                   <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '1.5rem' }}>Create keys with scoped permissions for specific features like Card Issuing or Payouts only.</p>
-                  <Link to="/docs" style={{ textDecoration: 'none' }}>
-                   <button style={{ background: 'rgba(255,255,255,0.05)', color: '#fff', border: '1px solid var(--border)', padding: '0.8rem 1.5rem', borderRadius: '14px', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <div style={{ textDecoration: 'none' }}>
+                   <button 
+                     onClick={() => window.location.href = '#'}
+                     style={{ background: 'rgba(255,255,255,0.05)', color: '#fff', border: '1px solid var(--border)', padding: '0.8rem 1.5rem', borderRadius: '14px', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+                   >
                       <Globe size={18} /> Public Docs
                    </button>
-                </Link>
+                 </div>
                 </div>
               </div>
             </div>

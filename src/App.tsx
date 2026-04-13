@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   ShieldCheck, 
@@ -36,6 +36,8 @@ import IndividualDashboard from './IndividualDashboard';
 import BusinessDashboard from './BusinessDashboard';
 import DeveloperDashboard from './DeveloperDashboard';
 import Docs from './Docs';
+import Checkout from './Checkout';
+import LandingV2 from './LandingV2';
 import Auth from './Auth';
 import LandingIndividual from './LandingIndividual';
 import LandingBusiness from './LandingBusiness';
@@ -58,10 +60,27 @@ const StatItem = ({ value, label, icon }: { value: string, label: string, icon: 
 };
 
 const App = () => {
-  const [view, setView] = useState<'landing' | 'individual' | 'business' | 'developer' | 'auth'>('landing');
+  const [view, setView] = useState<'landing' | 'individual' | 'business' | 'developer' | 'auth' | 'checkout' | 'docs'>('landing');
   const [landingView, setLandingView] = useState<'main' | 'individual' | 'business' | 'developer' | 'legal_privacy' | 'legal_terms' | 'legal_pci'>('main');
-  const [activeTab, setActiveTab] = useState<'individual' | 'business' | 'developer'>('individual');
-  const [devLanguage, setDevLanguage] = useState<'node' | 'python' | 'go'>('node');
+  
+  // Detect Payment Link URL
+  useEffect(() => {
+    const path = window.location.pathname;
+    if (path.startsWith('/pay/')) {
+      setView('checkout');
+    } else if (path === '/docs') {
+      setView('docs');
+    }
+  }, []);
+
+  if (view === 'checkout') {
+    const slug = window.location.pathname.split('/pay/')[1];
+    return <Checkout slug={slug} onBack={() => setView('landing')} />;
+  }
+
+  if (view === 'docs') {
+    return <Docs onBack={() => setView('landing')} />;
+  }
 
   if (view === 'auth') {
     return (
@@ -200,9 +219,10 @@ client.Cards.Create(paypee.CardParams{
       </header>
 
       <main>
-        {landingView === 'main' && (
+        {landingView === 'main' && <LandingV2 onAuth={() => setView('auth')} />}
+        {false && (
           <>
-            {/* Hero Section */}
+            {/* Old Landing Content */}
             <section className="hero container perspective-3d" style={{ paddingTop: '5rem', paddingBottom: '4rem' }}>
           <div className="info-row" style={{ alignItems: 'center', textAlign: 'left', marginBottom: 0, gap: '2rem' }}>
              <div className="hero-text-content">
@@ -300,7 +320,8 @@ client.Cards.Create(paypee.CardParams{
                           <div style={{ fontWeight: 700, fontSize: '1.1rem' }}>PAYPEE TECHNOLOGIES</div>
                        </div>
                        <div style={{ textAlign: 'right' }}>
-                          <Sparkles size={28} />
+                          <Route path="/docs" element={<Docs />} />
+        <Route path="/pay/:slug" element={<Checkout />} />
                        </div>
                    </div>
                    <div className="glow-overlay" />

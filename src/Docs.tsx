@@ -10,21 +10,20 @@ import {
   Lock,
   ChevronRight
 } from 'lucide-react';
-import { Link } from 'react-router-dom';
 
-const Docs = () => {
+const Docs = ({ onBack }: { onBack: () => void }) => {
   return (
     <div style={{ minHeight: '100vh', background: '#020617', color: '#fff', fontFamily: 'Inter, sans-serif' }}>
       {/* Docs Header */}
       <nav style={{ padding: '1.5rem 4rem', borderBottom: '1px solid #1e293b', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(2, 6, 23, 0.8)', backdropFilter: 'blur(10px)', position: 'sticky', top: 0, zIndex: 100 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          <div style={{ width: 40, height: 40, background: 'var(--primary)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div onClick={onBack} style={{ width: 40, height: 40, background: 'var(--primary)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
             <Cpu size={24} color="#fff" />
           </div>
           <span style={{ fontSize: '1.25rem', fontWeight: 800, letterSpacing: '-0.02em' }}>PAYPEE <span style={{ color: 'var(--primary)', fontSize: '0.8rem' }}>DOCS</span></span>
         </div>
         <div style={{ display: 'flex', gap: '2rem', alignItems: 'center' }}>
-          <Link to="/" style={{ color: '#64748b', textDecoration: 'none', fontSize: '0.9rem', fontWeight: 600 }}>Back to Landing</Link>
+          <button onClick={onBack} style={{ background: 'transparent', border: 'none', color: '#64748b', fontSize: '0.9rem', fontWeight: 600, cursor: 'pointer' }}>Back to Landing</button>
           <button style={{ background: 'var(--primary)', color: '#fff', border: 'none', padding: '0.6rem 1.2rem', borderRadius: '10px', fontWeight: 700, cursor: 'pointer' }}>API Reference</button>
         </div>
       </nav>

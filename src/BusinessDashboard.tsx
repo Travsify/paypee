@@ -25,6 +25,10 @@ import {
 } from 'lucide-react';
 import SettingsView from './SettingsView';
 import VerificationGate from './VerificationGate';
+import AiAdvisor from './AiAdvisor';
+import VaultsDashboard from './VaultsDashboard';
+import BillsDashboard from './BillsDashboard';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart as ReBarChart, Bar, Cell } from 'recharts';
 
 const SidebarItem = ({ icon: Icon, label, active = false, onClick }: { icon: any, label: string, active?: boolean, onClick?: () => void }) => (
   <motion.div 
@@ -118,6 +122,10 @@ const BusinessDashboard = ({ onLogout }: { onLogout?: () => void }) => {
     const sum = userData.wallets.reduce((acc: number, w: any) => acc + parseFloat(w.balance), 0);
     return "$" + sum.toFixed(2);
   };
+  const statCardStyle: React.CSSProperties = { background: 'rgba(255,255,255,0.02)', border: '1px solid #1e293b', padding: '1.5rem', borderRadius: '20px' };
+  const statLabelStyle: React.CSSProperties = { fontSize: '0.65rem', fontWeight: 800, color: '#475569', letterSpacing: '1px', display: 'block', marginBottom: '1rem' };
+  const statValueStyle: React.CSSProperties = { fontSize: '1.75rem', fontWeight: 800, marginBottom: '0.5rem' };
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', background: '#020617', color: '#fff', overflow: 'hidden' }}>
       <VerificationGate kycStatus={userData?.kycStatus || 'PENDING'} accountType="BUSINESS" />
@@ -138,11 +146,13 @@ const BusinessDashboard = ({ onLogout }: { onLogout?: () => void }) => {
 
         <div style={{ flex: 1 }}>
            <SidebarItem icon={LayoutDashboard} label="Treasury Dashboard" active={activeSection === 'dashboard'} onClick={() => setActiveSection('dashboard')} />
-          <SidebarItem icon={Layers} label="Accounts & IBANs" active={activeSection === 'accounts'} onClick={() => setActiveSection('accounts')} />
-          <SidebarItem icon={Users} label="Payroll Engine" active={activeSection === 'payroll'} onClick={() => setActiveSection('payroll')} />
-          <SidebarItem icon={Send} label="Bulk Payouts" active={activeSection === 'payouts'} onClick={() => setActiveSection('payouts')} />
-          <SidebarItem icon={BarChart3} label="Analytics" active={activeSection === 'analytics'} onClick={() => setActiveSection('analytics')} />
-          <SidebarItem icon={FileText} label="Tax Reports" active={activeSection === 'tax'} onClick={() => setActiveSection('tax')} />
+           <SidebarItem icon={BarChart3} label="Analytics" active={activeSection === 'analytics'} onClick={() => setActiveSection('analytics')} />
+           <SidebarItem icon={Users} label="Payroll Engine" active={activeSection === 'payroll'} onClick={() => setActiveSection('payroll')} />
+           <SidebarItem icon={Send} label="Bulk Payouts" active={activeSection === 'payouts'} onClick={() => setActiveSection('payouts')} />
+           <SidebarItem icon={Lock} label="Global Vaults" active={activeSection === 'vaults'} onClick={() => setActiveSection('vaults')} />
+           <SidebarItem icon={Zap} label="Utility Payments" active={activeSection === 'bills'} onClick={() => setActiveSection('bills')} />
+           <SidebarItem icon={Bot} label="AI Advisor" active={activeSection === 'ai'} onClick={() => setActiveSection('ai')} />
+           <SidebarItem icon={FileText} label="Tax Reports" active={activeSection === 'tax'} onClick={() => setActiveSection('tax')} />
         </div>
 
         <div>
@@ -154,7 +164,116 @@ const BusinessDashboard = ({ onLogout }: { onLogout?: () => void }) => {
 
       {/* Main Content */}
       <main style={{ flex: 1, overflowY: 'auto', padding: '2rem 3rem' }}>
-          {activeSection === 'settings' ? (
+            {activeSection === 'ai' && <AiAdvisor />}
+            {activeSection === 'vaults' && <VaultsDashboard />}
+            {activeSection === 'bills' && <BillsDashboard />}
+            {activeSection === 'analytics' && (
+             <div style={{ padding: '1rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem' }}>
+                  <div>
+                    <h2 style={{ fontSize: '1.8rem', fontWeight: 800 }}>Revenue Intelligence</h2>
+                    <p style={{ color: '#64748b' }}>Real-time settlement and liquidity analytics</p>
+                  </div>
+                  <div style={{ padding: '0.6rem 1.2rem', background: 'rgba(99, 102, 241, 0.1)', color: 'var(--primary)', borderRadius: '12px', fontSize: '0.85rem', fontWeight: 700 }}>Export Report</div>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1.5rem', marginBottom: '3rem' }}>
+                   <div style={statCardStyle}>
+                      <span style={statLabelStyle}>TOTAL VOLUME</span>
+                      <div style={statValueStyle}>$4,281,090.00</div>
+                      <div style={{ color: '#10b981', fontSize: '0.75rem', fontWeight: 800 }}>+12.5% from last month</div>
+                   </div>
+                   <div style={statCardStyle}>
+                      <span style={statLabelStyle}>AVG SETTLEMENT TIME</span>
+                      <div style={statValueStyle}>1.82s</div>
+                      <div style={{ color: 'var(--primary)', fontSize: '0.75rem', fontWeight: 800 }}>99.9% success rate</div>
+                   </div>
+                   <div style={statCardStyle}>
+                      <span style={statLabelStyle}>ACTIVE PAYROLLS</span>
+                      <div style={statValueStyle}>128</div>
+                      <div style={{ color: '#64748b', fontSize: '0.75rem', fontWeight: 800 }}>5 pending approval</div>
+                   </div>
+                </div>
+
+                <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid #1e293b', borderRadius: '32px', padding: '2.5rem', marginBottom: '2.5rem' }}>
+                   <h3 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '2rem' }}>Monthly Revenue Growth (USD)</h3>
+                   <div style={{ height: '300px', width: '100%' }}>
+                      <ResponsiveContainer width="100%" height="100%">
+                        <AreaChart data={[
+                          { name: 'Jan', val: 4000 },
+                          { name: 'Feb', val: 3000 },
+                          { name: 'Mar', val: 5000 },
+                          { name: 'Apr', val: 8000 },
+                          { name: 'May', val: 7500 },
+                          { name: 'Jun', val: 9000 },
+                        ]}>
+                          <defs>
+                            <linearGradient id="colorVal" x1="0" y1="0" x2="0" y2="1">
+                              <stop offset="5%" stopColor="var(--primary)" stopOpacity={0.3}/>
+                              <stop offset="95%" stopColor="var(--primary)" stopOpacity={0}/>
+                            </linearGradient>
+                          </defs>
+                          <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
+                          <XAxis dataKey="name" stroke="#475569" fontSize={12} axisLine={false} tickLine={false} />
+                          <YAxis stroke="#475569" fontSize={12} axisLine={false} tickLine={false} />
+                          <Tooltip contentStyle={{ background: '#0a0f1e', border: '1px solid #1e293b', borderRadius: '12px' }} />
+                          <Area type="monotone" dataKey="val" stroke="var(--primary)" fillOpacity={1} fill="url(#colorVal)" strokeWidth={3} />
+                        </AreaChart>
+                      </ResponsiveContainer>
+                   </div>
+                </div>
+             </div>
+          ) : activeSection === 'team' ? (
+             <div style={{ padding: '1rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem' }}>
+                  <div>
+                    <h2 style={{ fontSize: '1.8rem', fontWeight: 800 }}>Team Management</h2>
+                    <p style={{ color: '#64748b' }}>Manage project access and permissions</p>
+                  </div>
+                  <button style={{ background: 'var(--primary)', color: '#fff', border: 'none', padding: '0.8rem 1.5rem', borderRadius: '14px', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <Plus size={18} /> Invite Member
+                  </button>
+                </div>
+
+                <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid #1e293b', borderRadius: '32px', overflow: 'hidden' }}>
+                    <div style={{ padding: '1.5rem 2rem', background: 'rgba(255,255,255,0.01)', borderBottom: '1px solid #1e293b', display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', fontWeight: 800, color: '#475569', letterSpacing: '1px' }}>
+                       <div style={{ flex: 2 }}>MEMBER</div>
+                       <div style={{ flex: 1 }}>ROLE</div>
+                       <div style={{ flex: 1 }}>STATUS</div>
+                       <div style={{ flex: 1, textAlign: 'right' }}>ACTIONS</div>
+                    </div>
+                    <div>
+                       {[
+                         { name: 'Sarah Chen', email: 'sarah@techstream.io', role: 'OWNER', status: 'ACTIVE' },
+                         { name: 'Marcus Wright', email: 'marcus@techstream.io', role: 'ACCOUNTANT', status: 'ACTIVE' },
+                         { name: 'Elena Rossi', email: 'elena@techstream.io', role: 'MANAGER', status: 'INVITED' },
+                       ].map((member, i) => (
+                         <div key={i} style={{ padding: '1.5rem 2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: i === 2 ? 'none' : '1px solid rgba(255,255,255,0.03)' }}>
+                            <div style={{ flex: 2, display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                               <div style={{ width: 40, height: 40, background: 'var(--primary)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800 }}>{member.name[0]}</div>
+                               <div>
+                                  <div style={{ fontWeight: 700 }}>{member.name}</div>
+                                  <div style={{ fontSize: '0.8rem', color: '#64748b' }}>{member.email}</div>
+                               </div>
+                            </div>
+                            <div style={{ flex: 1 }}>
+                               <span style={{ fontSize: '0.7rem', fontWeight: 800, padding: '0.4rem 0.8rem', background: 'rgba(255,255,255,0.05)', borderRadius: '8px' }}>{member.role}</span>
+                            </div>
+                            <div style={{ flex: 1 }}>
+                               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                  <div style={{ width: 8, height: 8, borderRadius: '50%', background: member.status === 'ACTIVE' ? '#10b981' : '#f59e0b' }} />
+                                  <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>{member.status}</span>
+                               </div>
+                            </div>
+                            <div style={{ flex: 1, textAlign: 'right' }}>
+                               <button style={{ background: 'transparent', border: 'none', color: '#64748b', cursor: 'pointer' }}>Manage</button>
+                            </div>
+                         </div>
+                       ))}
+                    </div>
+                </div>
+             </div>
+          ) : activeSection === 'settings' ? (
            <SettingsView />
          ) : activeSection === 'accounts' ? (
            <div style={{ padding: '1rem' }}>

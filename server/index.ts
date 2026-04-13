@@ -6,6 +6,9 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { issueVirtualCard, processFiatPayout } from './services/fincra';
 import { processCryptoPayout, createLightningInvoice } from './services/bitnob';
+import { AiIntelligenceService } from './services/ai.service';
+import { IbanService } from './services/iban.service';
+import { BillsService } from './services/bills.service';
 
 dotenv.config();
 
@@ -467,6 +470,47 @@ app.post('/api/webhooks/bitnob', async (req: Request, res: Response) => {
     res.status(500).send('Webhook Error');
   }
 });
+// ==========================================
+// Payment Links
+// ==========================================
+
+app.post('/api/payment-links', authenticateToken, async (req: any, res: any): Promise<any> => {
+  try {
+     const { title, description, amount, currency } = req.body;
+     const userId = req.user.userId;
+     const slug = Math.random().toString(36).substring(2, 10);
+
+     const link = await prisma.paymentLink.create({
+        data: {
+           userId,
+           title,
+           description,
+           amount,
+           currency: currency || 'USD',
+           slug
+        }
+     });
+
+     res.status(201).json(link);
+  } catch (error) {
+     res.status(500).json({ error: 'Failed to create payment link' });
+  }
+});
+
+app.get('/api/pub/payment-links/:slug', async (req: Request, res: Response): Promise<any> => {
+   try {
+      const { slug } = req.params;
+      const link = await prisma.paymentLink.findUnique({
+         where: { slug },
+         include: { user: { select: { businessName: true, firstName: true } } }
+      });
+
+      if (!link || !link.isActive) return res.status(404).json({ error: 'Link not found' });
+      res.status(200).json(link);
+   } catch (error) {
+      res.status(500).json({ error: 'Failed to fetch link context' });
+   }
+});
 
 import axios from 'axios';
 
@@ -541,6 +585,67 @@ app.post('/api/verify/identity', authenticateToken, async (req: any, res: any): 
   } catch (error: any) {
     console.error('Verification error:', error.response?.data || error.message);
     res.status(500).json({ error: 'Identity verification service error.' });
+  }
+});
+
+// ==========================================
+// AI Treasury & Autonomous Banking
+// ==========================================
+
+app.post('/api/ai/hedge', authenticateToken, async (req: any, res: any) => {
+  try {
+    const result = await AiIntelligenceService.performAutonomousHedging(req.user.userId);
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ error: 'AI Hedging engine failed' });
+  }
+});
+
+app.get('/api/ai/insights', authenticateToken, async (req: any, res: any) => {
+  try {
+    const insights = await AiIntelligenceService.getFinancialInsights(req.user.userId);
+    res.json(insights);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch AI insights' });
+  }
+});
+
+// ==========================================
+// Global Accounts (Virtual IBANs)
+// ==========================================
+
+app.post('/api/accounts/provision', authenticateToken, async (req: any, res: any) => {
+  try {
+    const { currency } = req.body;
+    if (!['EUR', 'GBP', 'CNY'].includes(currency)) {
+      return res.status(400).json({ error: 'Unsupported currency for global IBAN.' });
+    }
+    const account = await IbanService.provisionGlobalAccount(req.user.userId, currency);
+    res.status(201).json(account);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to provision global IBAN' });
+  }
+});
+
+// ==========================================
+// Bill Payments (Airtime, Data, Utilities)
+// ==========================================
+
+app.get('/api/bills/providers', authenticateToken, async (req: any, res: any) => {
+  try {
+    const providers = await BillsService.getProviders(req.query.category as string || 'AIRTIME');
+    res.json(providers);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch billers' });
+  }
+});
+
+app.post('/api/bills/pay', authenticateToken, async (req: any, res: any) => {
+  try {
+    const transaction = await BillsService.payBill(req.user.userId, req.body);
+    res.status(201).json(transaction);
+  } catch (error: any) {
+    res.status(400).json({ error: error.message });
   }
 });
 
