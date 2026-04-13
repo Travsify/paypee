@@ -59,12 +59,24 @@ const SidebarItem = ({ icon: Icon, label, active = false, onClick }: { icon: any
 
 const getAccountNumber = (details: any) => {
   if (!details) return null;
-  return details.iban || 
-         details.accountNumber || 
-         details.account_number || 
-         details.virtual_account_number || 
-         details.address || 
-         details.nuban;
+  // Check common flat keys
+  const flat = details.iban || 
+               details.accountNumber || 
+               details.account_number || 
+               details.virtual_account_number || 
+               details.address || 
+               details.nuban;
+  if (flat) return flat;
+  
+  // Check nested data keys (common in Fincra/Bitnob responses)
+  if (details.data) {
+    return details.data.account_number || 
+           details.data.accountNumber || 
+           details.data.virtual_account_number || 
+           details.data.address;
+  }
+  
+  return null;
 };
 
 const getBankName = (details: any) => {
