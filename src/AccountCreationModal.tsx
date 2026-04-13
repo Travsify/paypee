@@ -188,7 +188,7 @@ const AccountCreationModal: React.FC<AccountCreationModalProps> = ({ isOpen, onC
               {isProcessing ? (
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '1rem', color: 'var(--primary)', fontWeight: 700 }}>
                    <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1, ease: 'linear' }}><Zap size={24} /></motion.div>
-                   Provisioning Virtual Infrastructure...
+                   Opening Your Account...
                 </div>
               ) : (
                 <button 
@@ -207,7 +207,7 @@ const AccountCreationModal: React.FC<AccountCreationModalProps> = ({ isOpen, onC
                     boxShadow: selected ? '0 15px 30px -10px rgba(99, 102, 241, 0.4)' : 'none'
                   }}
                 >
-                  Generate {selected || ''} Account Now
+                  Get My {selected || ''} Account
                 </button>
               )}
               <div style={{ marginTop: '1rem', textAlign: 'center', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>

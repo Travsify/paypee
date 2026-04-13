@@ -85,42 +85,73 @@ const getBankName = (details: any) => {
 };
 
 const BalanceCard = ({ currency, symbol, amount, gradient, details }: { currency: string, symbol: string, amount: string, gradient: string, details?: any }) => {
+  const [isFlipped, setIsFlipped] = useState(false);
   const accNo = getAccountNumber(details);
   const bank = getBankName(details);
+  const accName = details?.accountInformation?.accountName || details?.accountName || "Valued Customer";
   
   return (
-    <motion.div 
-      whileHover={{ y: -5 }}
-      style={{ 
-        padding: '2rem', 
-        borderRadius: '24px', 
-        background: gradient, 
-        color: '#fff', 
-        minWidth: '280px',
-        boxShadow: '0 20px 40px -10px rgba(0,0,0,0.3)',
-        position: 'relative',
-        overflow: 'hidden',
-        border: '1px solid rgba(255,255,255,0.1)'
-      }}
-    >
-      <div style={{ position: 'absolute', top: '-10%', right: '-10%', opacity: 0.1 }}>
-         <Wallet size={150} />
-      </div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-        <div style={{ marginBottom: '1.5rem', fontWeight: 800, fontSize: '0.75rem', letterSpacing: '1px', opacity: 0.9 }}>{currency} WALLET</div>
-        <div style={{ background: 'rgba(255,255,255,0.2)', padding: '0.4rem 0.8rem', borderRadius: '10px', fontSize: '0.7rem', fontWeight: 800 }}>ACTIVE</div>
-      </div>
-      <div style={{ fontSize: '2.5rem', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-        <span style={{ fontSize: '1.2rem', opacity: 0.7 }}>{symbol}</span>
-        {amount}
-      </div>
-      <div style={{ marginTop: '1.5rem', paddingTop: '1.2rem', borderTop: '1px solid rgba(255,255,255,0.1)' }}>
-         <div style={{ fontSize: '0.65rem', opacity: 0.6, textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '0.4rem', fontWeight: 800 }}>Account Number</div>
-         <div style={{ fontSize: '0.9rem', fontWeight: 800, fontFamily: 'monospace', wordBreak: 'break-all' }}>{accNo || 'GENERATING...'}</div>
-         <div style={{ fontSize: '0.75rem', opacity: 0.9, marginTop: '0.4rem', fontWeight: 600 }}>{bank || 'Provisioning Bank Details'}</div>
-      </div>
-      <div className="glow-overlay" />
-    </motion.div>
+    <div style={{ perspective: '1000px', minWidth: '320px', height: '200px', cursor: 'pointer' }} onClick={() => setIsFlipped(!isFlipped)}>
+      <motion.div
+        initial={false}
+        animate={{ rotateY: isFlipped ? 180 : 0 }}
+        transition={{ duration: 0.6, type: 'spring', stiffness: 260, damping: 20 }}
+        style={{ width: '100%', height: '100%', transformStyle: 'preserve-3d', position: 'relative' }}
+      >
+        {/* FRONT: Balance View */}
+        <div style={{ 
+          position: 'absolute', width: '100%', height: '100%', backfaceVisibility: 'hidden',
+          padding: '2rem', borderRadius: '24px', background: gradient, color: '#fff', 
+          boxShadow: '0 20px 40px -10px rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.1)',
+          display: 'flex', flexDirection: 'column', justifyContent: 'space-between', overflow: 'hidden'
+        }}>
+          <div style={{ position: 'absolute', top: '-10%', right: '-10%', opacity: 0.1 }}><Wallet size={120} /></div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', position: 'relative' }}>
+            <div style={{ fontWeight: 800, fontSize: '0.75rem', letterSpacing: '1px', opacity: 0.9 }}>{currency} WALLET</div>
+            <div style={{ background: 'rgba(255,255,255,0.2)', padding: '0.4rem 0.8rem', borderRadius: '10px', fontSize: '0.65rem', fontWeight: 800 }}>TAP TO VIEW INFO</div>
+          </div>
+          <div style={{ fontSize: '2.4rem', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '0.5rem', position: 'relative' }}>
+            <span style={{ fontSize: '1.2rem', opacity: 0.7 }}>{symbol}</span>
+            {amount}
+          </div>
+          <div style={{ fontSize: '0.8rem', opacity: 0.8, fontWeight: 600 }}>•••• {accNo ? accNo.slice(-4) : 'REFRESH'}</div>
+        </div>
+
+        {/* BACK: Account Details View */}
+        <div style={{ 
+          position: 'absolute', width: '100%', height: '100%', backfaceVisibility: 'hidden', transform: 'rotateY(180deg)',
+          padding: '1.5rem', borderRadius: '24px', background: '#ffffff', color: '#0f172a', 
+          boxShadow: '0 20px 40px -10px rgba(0,0,0,0.3)', border: '1px solid #e2e8f0',
+          display: 'flex', flexDirection: 'column', gap: '0.8rem'
+        }}>
+           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+             <div style={{ fontSize: '0.6rem', fontWeight: 800, color: 'var(--primary)', letterSpacing: '1px' }}>VIRTUAL SETTLEMENT NODE</div>
+             <ShieldCheck size={18} color="var(--primary)" />
+           </div>
+           
+           <div>
+              <div style={{ fontSize: '0.6rem', opacity: 0.5, fontWeight: 700, textTransform: 'uppercase' }}>Account Name</div>
+              <div style={{ fontSize: '0.9rem', fontWeight: 800 }}>{accName}</div>
+           </div>
+
+           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+              <div>
+                <div style={{ fontSize: '0.6rem', opacity: 0.5, fontWeight: 700, textTransform: 'uppercase' }}>Account Number</div>
+                <div style={{ fontSize: '0.95rem', fontWeight: 900, fontFamily: 'monospace' }}>{accNo || 'GENERATING...'}</div>
+              </div>
+              <div>
+                <div style={{ fontSize: '0.6rem', opacity: 0.5, fontWeight: 700, textTransform: 'uppercase' }}>Bank Name</div>
+                <div style={{ fontSize: '0.85rem', fontWeight: 800 }}>{bank || 'Provisioning...'}</div>
+              </div>
+           </div>
+
+           <div style={{ marginTop: 'auto', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+              <div style={{ width: '60%', height: '30px', background: 'repeating-linear-gradient(90deg, #000 0px, #000 2px, transparent 2px, transparent 4px)', opacity: 0.3 }} />
+              <div style={{ fontSize: '0.5rem', fontWeight: 800, opacity: 0.4 }}>SECURE_PAYPEE_LEDGER</div>
+           </div>
+        </div>
+      </motion.div>
+    </div>
   );
 };
 
