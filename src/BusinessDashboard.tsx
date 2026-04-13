@@ -221,9 +221,11 @@ const BusinessDashboard = ({ onLogout }: { onLogout?: () => void }) => {
                         </AreaChart>
                       </ResponsiveContainer>
                    </div>
-                </div>
-             </div>
-          ) : activeSection === 'team' ? (
+                    </div>
+                 </div>
+              </div>
+            )}
+            {activeSection === 'team' && (
              <div style={{ padding: '1rem' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem' }}>
                   <div>
@@ -273,9 +275,11 @@ const BusinessDashboard = ({ onLogout }: { onLogout?: () => void }) => {
                     </div>
                 </div>
              </div>
-          ) : activeSection === 'settings' ? (
-           <SettingsView />
-         ) : activeSection === 'accounts' ? (
+            )}
+            {activeSection === 'settings' && (
+             <SettingsView />
+            )}
+            {activeSection === 'accounts' && (
            <div style={{ padding: '1rem' }}>
               <h2 style={{ fontSize: '1.8rem', fontWeight: 700, marginBottom: '2rem' }}>Global Virtual Accounts</h2>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))', gap: '2rem' }}>
@@ -300,7 +304,8 @@ const BusinessDashboard = ({ onLogout }: { onLogout?: () => void }) => {
                 ))}
               </div>
            </div>
-         ) : activeSection === 'payroll' ? (
+            )}
+            {activeSection === 'payroll' && (
             <div style={{ padding: '1rem', textAlign: 'center' }}>
               <Users size={80} color="var(--primary)" style={{ opacity: 0.2, marginBottom: '2rem' }} />
               <h2 style={{ fontSize: '1.8rem', fontWeight: 800, marginBottom: '1rem' }}>Payroll Engine</h2>
@@ -324,7 +329,8 @@ const BusinessDashboard = ({ onLogout }: { onLogout?: () => void }) => {
                 {userData?.kycStatus === 'VERIFIED' ? 'Initialize Payroll Run' : 'Verify Account to Access Payroll'}
               </button>
             </div>
-         ) : activeSection === 'payouts' ? (
+            )}
+            {activeSection === 'payouts' && (
             <div style={{ padding: '1rem' }}>
               <h2 style={{ fontSize: '1.8rem', fontWeight: 700, marginBottom: '2rem' }}>Bulk Payouts</h2>
               <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border)', borderRadius: '24px', padding: '3rem', textAlign: 'center' }}>
@@ -371,7 +377,8 @@ const BusinessDashboard = ({ onLogout }: { onLogout?: () => void }) => {
                 </div>
               </div>
             </div>
-         ) : activeSection === 'analytics' ? (
+            )}
+            {activeSection === 'flow' && (
             <div style={{ padding: '1rem' }}>
               <h2 style={{ fontSize: '1.8rem', fontWeight: 700, marginBottom: '2rem' }}>Flow Analytics</h2>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1.5rem', marginBottom: '2rem' }}>
@@ -383,7 +390,8 @@ const BusinessDashboard = ({ onLogout }: { onLogout?: () => void }) => {
                 [Interactive Flow Chart Coming Soon]
               </div>
             </div>
-         ) : activeSection === 'tax' ? (
+            )}
+            {activeSection === 'tax' && (
             <div style={{ padding: '1rem' }}>
               <h2 style={{ fontSize: '1.8rem', fontWeight: 700, marginBottom: '2rem' }}>Tax Compliance</h2>
               <div style={{ display: 'grid', gap: '1.5rem' }}>
@@ -405,7 +413,8 @@ const BusinessDashboard = ({ onLogout }: { onLogout?: () => void }) => {
                 ))}
               </div>
             </div>
-         ) : activeSection === 'help' ? (
+            )}
+            {activeSection === 'help' && (
             <div style={{ padding: '1rem', textAlign: 'center', maxWidth: '600px', margin: '0 auto' }}>
               <HelpCircle size={80} color="var(--secondary)" style={{ marginBottom: '2rem' }} />
               <h2 style={{ fontSize: '2rem', fontWeight: 800, marginBottom: '1rem' }}>Business Support Center</h2>
@@ -421,8 +430,9 @@ const BusinessDashboard = ({ onLogout }: { onLogout?: () => void }) => {
                 </div>
               </div>
             </div>
-         ) : (
-           <>
+            )}
+            {activeSection === 'dashboard' && (
+            <>
             {/* Header */}
             <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3rem' }}>
               <div>
@@ -551,7 +561,7 @@ const BusinessDashboard = ({ onLogout }: { onLogout?: () => void }) => {
                  )}
               </div>
             </section>
-           </>
+            </>
          )}
       </main>
       </div>

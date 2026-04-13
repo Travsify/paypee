@@ -182,9 +182,10 @@ const IndividualDashboard = ({ onLogout }: { onLogout: () => void }) => {
         {activeSection === 'vaults' && <VaultsDashboard />}
         {activeSection === 'bills' && <BillsDashboard />}
         {activeSection === 'ai' && <AiAdvisor />}
-        {activeSection === 'settings' ? (
+        {activeSection === 'settings' && (
             <SettingsView />
-          ) : activeSection === 'wallets' ? (
+        )}
+        {activeSection === 'wallets' && (
             <div style={{ padding: '1rem' }}>
               <h2 style={{ fontSize: '1.8rem', fontWeight: 700, marginBottom: '2rem' }}>My Wallets</h2>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.5rem' }}>
@@ -200,7 +201,8 @@ const IndividualDashboard = ({ onLogout }: { onLogout: () => void }) => {
                 </motion.div>
               </div>
             </div>
-          ) : activeSection === 'cards' ? (
+            )}
+            {activeSection === 'cards' && (
              <div style={{ padding: '1rem' }}>
                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
                  <h2 style={{ fontSize: '1.8rem', fontWeight: 700 }}>Virtual Cards</h2>
@@ -288,7 +290,8 @@ const IndividualDashboard = ({ onLogout }: { onLogout: () => void }) => {
                  ))}
                </div>
              </div>
-          ) : activeSection === 'transfers' ? (
+            )}
+            {activeSection === 'transfers' && (
             <div style={{ padding: '1rem', maxWidth: '800px' }}>
                <h2 style={{ fontSize: '1.8rem', fontWeight: 700, marginBottom: '2rem' }}>Transfer Funds</h2>
                <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border)', borderRadius: '24px', padding: '2.5rem' }}>
@@ -334,7 +337,8 @@ const IndividualDashboard = ({ onLogout }: { onLogout: () => void }) => {
                    </motion.button>
                </div>
             </div>
-          ) : activeSection === 'security' ? (
+            )}
+            {activeSection === 'security' && (
              <div style={{ padding: '1rem' }}>
                <h2 style={{ fontSize: '1.8rem', fontWeight: 700, marginBottom: '2rem' }}>Security & Privacy</h2>
                <div style={{ display: 'grid', gap: '1.5rem' }}>
@@ -358,7 +362,8 @@ const IndividualDashboard = ({ onLogout }: { onLogout: () => void }) => {
                  ))}
                </div>
              </div>
-          ) : (
+            )}
+            {activeSection === 'overview' && (
              <>
                <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3rem' }}>
                  <div>
@@ -436,7 +441,7 @@ const IndividualDashboard = ({ onLogout }: { onLogout: () => void }) => {
                  </section>
                </div>
              </>
-          )}
+            )}
       </main>
       </div>
       <PayoutModal 
