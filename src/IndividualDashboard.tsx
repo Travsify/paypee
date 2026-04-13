@@ -422,17 +422,37 @@ const IndividualDashboard = ({ onLogout }: { onLogout: () => void }) => {
                </header>
 
                <div style={{ display: 'flex', gap: '2rem', marginBottom: '3rem', overflowX: 'auto', paddingBottom: '1rem' }}>
-                 <BalanceCard currency="USD" symbol="$" amount={getWalletBalance()} gradient="linear-gradient(135deg, #6366f1 0%, #a855f7 100%)" />
-                 {userData?.wallets?.filter((w: any) => w.currency !== 'USD').map((w: any) => (
-                    <BalanceCard key={w.id} currency={w.currency} symbol={w.currency === 'NGN' ? '₦' : w.currency} amount={parseFloat(w.balance).toFixed(2)} gradient="linear-gradient(135deg, #1e293b 0%, #334155 100%)" />
-                 ))}
+                  {userData?.wallets && userData.wallets.length > 0 ? (
+                    userData.wallets.map((w: any) => {
+                      const gradients: Record<string, string> = {
+                        USD: "linear-gradient(135deg, #6366f1 0%, #a855f7 100%)",
+                        EUR: "linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)",
+                        GBP: "linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%)",
+                        NGN: "linear-gradient(135deg, #10b981 0%, #059669 100%)"
+                      };
+                      const symbols: Record<string, string> = { USD: '$', EUR: '€', GBP: '£', NGN: '₦' };
+                      return (
+                        <BalanceCard 
+                          key={w.id} 
+                          currency={w.currency} 
+                          symbol={symbols[w.currency] || w.currency} 
+                          amount={parseFloat(w.balance).toFixed(2)} 
+                          gradient={gradients[w.currency] || "linear-gradient(135deg, #1e293b 0%, #334155 100%)"} 
+                        />
+                      );
+                    })
+                  ) : (
+                    <div style={{ padding: '2rem', background: 'rgba(255,255,255,0.02)', border: '1px dashed var(--border)', borderRadius: '24px', width: '100%', textAlign: 'center', color: 'var(--text-muted)' }}>
+                      No active accounts. Go to the Accounts tab to generate one.
+                    </div>
+                  )}
                </div>
 
                <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 2fr) minmax(0, 1fr)', gap: '3rem' }}>
                  <section>
                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
                      <h2 style={{ fontSize: '1.25rem', fontWeight: 700 }}>Recent Activity</h2>
-                     <button style={{ color: 'var(--primary)', background: 'transparent', border: 'none', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.4rem', cursor: 'pointer' }}>View All <ChevronRight size={16} /></button>
+                     <button onClick={() => alert('Viewing all transactions (WIP)')} style={{ color: 'var(--primary)', background: 'transparent', border: 'none', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.4rem', cursor: 'pointer' }}>View All <ChevronRight size={16} /></button>
                    </div>
                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                      {transactions.map((tx, i) => (
@@ -474,7 +494,7 @@ const IndividualDashboard = ({ onLogout }: { onLogout: () => void }) => {
                            <ChevronRight size={18} color="var(--text-muted)" />
                         </motion.div>
                       ))}
-                      <button style={{ width: '100%', padding: '1rem', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border)', borderRadius: '16px', color: '#fff', fontSize: '0.9rem', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
+                      <button onClick={() => setActiveSection('cards')} style={{ width: '100%', padding: '1rem', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border)', borderRadius: '16px', color: '#fff', fontSize: '0.9rem', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
                          <Plus size={18} /> Add Card
                       </button>
                    </div>
