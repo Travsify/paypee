@@ -391,6 +391,45 @@ app.post('/api/webhooks/bitnob', async (req: Request, res: Response) => {
   }
 });
 
+// ==========================================
+// Automated Verification (KYC/KYB)
+// ==========================================
+
+app.post('/api/verify/identity', authenticateToken, async (req: any, res: any): Promise<any> => {
+  try {
+    const { idType, idNumber, businessRcNumber } = req.body;
+    const userId = req.user.userId;
+
+    // This is where we call Prembly (Identitypass) or SmileID
+    // Integration Hook: 
+    // const verificationRes = await axios.post('https://api.prembly.com/verify', { idNumber, idType }, { headers });
+    
+    console.log(`Starting automated verification for User ${userId}...`);
+    
+    // MOCKING AUTOMATED SUCCESS for demonstration
+    // In production, flip user to VERIFIED only if external API returns 'verified'
+    const isSuccess = true; 
+
+    if (isSuccess) {
+      await prisma.user.update({
+        where: { id: userId },
+        data: { kycStatus: 'VERIFIED' }
+      });
+
+      return res.status(200).json({ 
+        message: 'Verification successful! Your account is now fully unlocked.',
+        status: 'VERIFIED'
+      });
+    } else {
+      return res.status(400).json({ error: 'Verification failed. Please check your details and try again.' });
+    }
+
+  } catch (error) {
+    console.error('Verification error:', error);
+    res.status(500).json({ error: 'Automated verification system is currently offline.' });
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`🚀 Paypee Core API running on http://localhost:${PORT}`);
 });

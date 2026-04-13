@@ -24,13 +24,39 @@ const VerificationGate: React.FC<VerificationGateProps> = ({ kycStatus, accountT
 
   if (kycStatus === 'VERIFIED') return null;
 
-  const handleVerify = () => {
+  const handleVerify = async () => {
     setLoading(true);
-    // Simulate API call
-    setTimeout(() => {
+    const token = localStorage.getItem('paypee_token');
+    
+    try {
+      const response = await fetch('https://paypee-api.onrender.com/api/verify/identity', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          idType: accountType === 'INDIVIDUAL' ? 'NIN' : 'CAC',
+          idNumber: 'AUTO_VERIFY' // Demo placeholder
+        })
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setSubmitted(true);
+        // Refresh page after a delay to show VERIFIED status
+        setTimeout(() => {
+          window.location.reload();
+        }, 3000);
+      } else {
+        alert(data.error || 'Verification failed');
+      }
+    } catch (err) {
+      alert('Network error during verification');
+    } finally {
       setLoading(false);
-      setSubmitted(true);
-    }, 2000);
+    }
   };
 
   return (
