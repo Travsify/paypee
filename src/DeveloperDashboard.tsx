@@ -109,8 +109,8 @@ const DeveloperDashboard = ({ onLogout }: { onLogout?: () => void }) => {
     const headers = { 'Authorization': `Bearer ${token}` };
 
     Promise.all([
-      fetch('http://localhost:5000/api/users/me', { headers }).then(res => res.json()),
-      fetch('http://localhost:5000/api/keys', { headers }).then(res => res.json())
+      fetch('https://paypee-api.onrender.com/api/users/me', { headers }).then(res => res.json()),
+      fetch('https://paypee-api.onrender.com/api/keys', { headers }).then(res => res.json())
     ]).then(([uData, keysData]) => {
       if(!uData.error) setUserData(uData);
       if(Array.isArray(keysData)) setApiKeys(keysData);

@@ -120,9 +120,9 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
     const headers = { 'Authorization': `Bearer ${token}` };
 
     Promise.all([
-      fetch('http://localhost:5000/api/users/me', { headers }).then(res => res.json()),
-      fetch('http://localhost:5000/api/transactions', { headers }).then(res => res.json()),
-      fetch('http://localhost:5000/api/cards', { headers }).then(res => res.json())
+      fetch('https://paypee-api.onrender.com/api/users/me', { headers }).then(res => res.json()),
+      fetch('https://paypee-api.onrender.com/api/transactions', { headers }).then(res => res.json()),
+      fetch('https://paypee-api.onrender.com/api/cards', { headers }).then(res => res.json())
     ]).then(([uData, txData, cardData]) => {
       if(!uData.error) setUserData(uData);
       if(Array.isArray(txData)) setTransactions(txData);
