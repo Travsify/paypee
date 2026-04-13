@@ -15,16 +15,27 @@ export class IbanService {
     });
 
     if (existingWallet) {
+        let details = (existingWallet.metadata as any);
+        if (!details) {
+           console.log(`🔧 Patching missing metadata for Wallet ${existingWallet.id}...`);
+           const iban = (prefixes[currency] || 'PP00') + Math.random().toString().slice(2, 14);
+           details = {
+               accountHolder: "Paypee / TechStream Ltd",
+               iban: iban,
+               bic: 'PAYPBEBB',
+               bankName: 'Paypee Global Clearing',
+               address: "123 Fintech Lane, Brussels, Belgium"
+           };
+           await prisma.wallet.update({
+               where: { id: existingWallet.id },
+               data: { metadata: details }
+           });
+        }
         return {
             walletId: existingWallet.id,
             currency,
             isExisting: true,
-            accountDetails: {
-                accountHolder: "Paypee / TechStream Ltd",
-                iban: "EXISTING_ACCOUNT_" + existingWallet.id.slice(0, 8),
-                bic: 'PAYPBEBB',
-                bankName: 'Paypee Global Clearing'
-            }
+            accountDetails: details
         };
     }
 
@@ -48,6 +59,13 @@ export class IbanService {
         userId,
         currency: currency as Currency,
         balance: 0.00,
+        metadata: {
+           accountHolder: "Paypee / TechStream Ltd",
+           iban: iban,
+           bic: bic,
+           bankName: bankName,
+           address: "123 Fintech Lane, Brussels, Belgium"
+        }
       }
     });
 
