@@ -204,13 +204,13 @@ const DeveloperDashboard = ({ onLogout }: { onLogout?: () => void }) => {
 
         <nav style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
           <SidebarItem icon={LayoutDashboard} label="Overview" active={activeSection === 'overview'} onClick={() => navigate('overview')} />
-          <SidebarItem icon={Wallet} label="Accounts" active={activeSection === 'wallets'} onClick={() => navigate('wallets')} />
-          <SidebarItem icon={History} label="Transactions" active={activeSection === 'history'} onClick={() => navigate('history')} />
-          <SidebarItem icon={Key} label="API Keys" active={activeSection === 'keys'} onClick={() => navigate('keys')} />
-          <SidebarItem icon={Webhook} label="Webhooks" active={activeSection === 'webhooks'} onClick={() => navigate('webhooks')} />
-          <SidebarItem icon={Activity} label="Traffic Logs" active={activeSection === 'logs'} onClick={() => navigate('logs')} />
-          <SidebarItem icon={Bot} label="AI Advisor" active={activeSection === 'ai'} onClick={() => navigate('ai')} />
-          <SidebarItem icon={FileJson} label="API Docs" active={activeSection === 'docs'} onClick={() => navigate('docs')} />
+          <SidebarItem icon={Wallet} label="My Wallets" active={activeSection === 'wallets'} onClick={() => navigate('wallets')} />
+          <SidebarItem icon={History} label="Recent Activity" active={activeSection === 'history'} onClick={() => navigate('history')} />
+          <SidebarItem icon={Key} label="Connection Keys" active={activeSection === 'keys'} onClick={() => navigate('keys')} />
+          <SidebarItem icon={Webhook} label="Instant Alerts" active={activeSection === 'webhooks'} onClick={() => navigate('webhooks')} />
+          <SidebarItem icon={Activity} label="System Traffic" active={activeSection === 'logs'} onClick={() => navigate('logs')} />
+          <SidebarItem icon={Bot} label="AI Helper" active={activeSection === 'ai'} onClick={() => navigate('ai')} />
+          <SidebarItem icon={FileJson} label="How to Build" active={activeSection === 'docs'} onClick={() => navigate('docs')} />
           <SidebarItem icon={ShieldCheck} label="Security" active={activeSection === 'security'} onClick={() => navigate('security')} />
           <SidebarItem icon={HelpCircle} label="Support" active={activeSection === 'support'} onClick={() => navigate('support')} />
         </nav>
@@ -253,13 +253,13 @@ const DeveloperDashboard = ({ onLogout }: { onLogout?: () => void }) => {
                   return (
                     <div key={w.id} style={{ padding: '2rem', borderRadius: '24px', background: 'linear-gradient(135deg, #0f172a 0%, #020617 100%)', border: '1px solid rgba(255,255,255,0.1)', position: 'relative' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem' }}>
-                        <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', fontWeight: 800, letterSpacing: '2px' }}>{w.currency} SETTLEMENT RAIL</div>
-                        <div style={{ background: 'rgba(99, 102, 241, 0.1)', color: 'var(--primary)', padding: '0.3rem 0.6rem', borderRadius: '8px', fontSize: '0.6rem', fontWeight: 800 }}>LIVE_NODE</div>
+                        <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 800, letterSpacing: '1px' }}>{w.currency} WALLET</div>
+                        <div style={{ background: 'rgba(99, 102, 241, 0.1)', color: 'var(--primary)', padding: '0.3rem 0.6rem', borderRadius: '8px', fontSize: '0.6rem', fontWeight: 800 }}>ACTIVE</div>
                       </div>
                       <div style={{ fontSize: '2rem', fontWeight: 900, marginBottom: '2rem' }}>{w.currency === 'USD' ? '$' : w.currency === 'NGN' ? '₦' : w.currency === 'EUR' ? '€' : '£'}{parseFloat(w.balance).toFixed(2)}</div>
                       <div style={{ background: 'rgba(0,0,0,0.3)', padding: '1rem', borderRadius: '14px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                         <div style={{ fontSize: '0.55rem', opacity: 0.5, textTransform: 'uppercase', marginBottom: '0.4rem', fontWeight: 800 }}>Account Reference</div>
-                         <div style={{ fontSize: '0.75rem', fontWeight: 800, fontFamily: 'monospace', color: '#6366f1' }}>{details.iban || details.accountNumber || details.account_number || details.address || 'PROVISIONING...'}</div>
+                         <div style={{ fontSize: '0.65rem', opacity: 0.6, textTransform: 'uppercase', marginBottom: '0.4rem', fontWeight: 800 }}>Account Number</div>
+                         <div style={{ fontSize: '0.85rem', fontWeight: 800, fontFamily: 'monospace', color: '#6366f1' }}>{details.iban || details.accountNumber || details.account_number || details.address || 'GENERATING...'}</div>
                       </div>
                     </div>
                   );

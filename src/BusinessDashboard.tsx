@@ -199,15 +199,15 @@ const BusinessDashboard = ({ onLogout }: { onLogout?: () => void }) => {
         </div>
 
         <div style={{ flex: 1, overflowY: 'auto', paddingRight: '0.5rem', margin: '0 -0.5rem' }}>
-           <SidebarItem icon={LayoutDashboard} label="Treasury Dashboard" active={activeSection === 'dashboard'} onClick={() => navigate('dashboard')} />
-           <SidebarItem icon={Wallet} label="Accounts" active={activeSection === 'wallets'} onClick={() => navigate('wallets')} />
-           <SidebarItem icon={BarChart3} label="Analytics" active={activeSection === 'analytics'} onClick={() => navigate('analytics')} />
-           <SidebarItem icon={Users} label="Payroll Engine" active={activeSection === 'payroll'} onClick={() => navigate('payroll')} />
-           <SidebarItem icon={Send} label="Bulk Payouts" active={activeSection === 'payouts'} onClick={() => navigate('payouts')} />
-           <SidebarItem icon={Lock} label="Global Vaults" active={activeSection === 'vaults'} onClick={() => navigate('vaults')} />
-           <SidebarItem icon={Zap} label="Utility Payments" active={activeSection === 'bills'} onClick={() => navigate('bills')} />
-           <SidebarItem icon={Bot} label="AI Advisor" active={activeSection === 'ai'} onClick={() => navigate('ai')} />
-           <SidebarItem icon={FileText} label="Tax Reports" active={activeSection === 'tax'} onClick={() => navigate('tax')} />
+           <SidebarItem icon={LayoutDashboard} label="Overview" active={activeSection === 'dashboard'} onClick={() => navigate('dashboard')} />
+           <SidebarItem icon={Wallet} label="My Wallets" active={activeSection === 'wallets'} onClick={() => navigate('wallets')} />
+           <SidebarItem icon={BarChart3} label="Money Stats" active={activeSection === 'analytics'} onClick={() => navigate('analytics')} />
+           <SidebarItem icon={Users} label="Pay Employees" active={activeSection === 'payroll'} onClick={() => navigate('payroll')} />
+           <SidebarItem icon={Send} label="Send to Many" active={activeSection === 'payouts'} onClick={() => navigate('payouts')} />
+           <SidebarItem icon={Lock} label="Safe Box" active={activeSection === 'vaults'} onClick={() => navigate('vaults')} />
+           <SidebarItem icon={Zap} label="Pay Bills" active={activeSection === 'bills'} onClick={() => navigate('bills')} />
+           <SidebarItem icon={Bot} label="AI Helper" active={activeSection === 'ai'} onClick={() => navigate('ai')} />
+           <SidebarItem icon={FileText} label="Tax Help" active={activeSection === 'tax'} onClick={() => navigate('tax')} />
         </div>
 
         <div>
@@ -248,14 +248,14 @@ const BusinessDashboard = ({ onLogout }: { onLogout?: () => void }) => {
                   return (
                     <div key={w.id} style={{ padding: '2rem', borderRadius: '24px', background: 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)', border: '1px solid rgba(255,255,255,0.1)', position: 'relative', overflow: 'hidden' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                        <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginBottom: '1.5rem', fontWeight: 800, letterSpacing: '1px' }}>{w.currency} TREASURY DEPLOYMENT</div>
-                        <div style={{ background: 'rgba(16, 185, 129, 0.1)', color: '#10b981', padding: '0.3rem 0.6rem', borderRadius: '8px', fontSize: '0.65rem', fontWeight: 800 }}>ON-CHAIN</div>
+                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '1.5rem', fontWeight: 800, letterSpacing: '1px' }}>{w.currency} BUSINESS WALLET</div>
+                        <div style={{ background: 'rgba(16, 185, 129, 0.1)', color: '#10b981', padding: '0.3rem 0.6rem', borderRadius: '8px', fontSize: '0.65rem', fontWeight: 800 }}>ACTIVE</div>
                       </div>
                       <div style={{ fontSize: '2.5rem', fontWeight: 900, marginBottom: '2rem' }}>{w.currency === 'USD' ? '$' : w.currency === 'NGN' ? '₦' : w.currency === 'EUR' ? '€' : '£'}{parseFloat(w.balance).toFixed(2)}</div>
                       <div style={{ padding: '1.25rem', background: 'rgba(255,255,255,0.03)', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                         <div style={{ fontSize: '0.6rem', opacity: 0.5, textTransform: 'uppercase', marginBottom: '0.4rem', fontWeight: 800 }}>Fincra Settlement ID</div>
-                         <div style={{ fontSize: '0.8rem', fontWeight: 800, fontFamily: 'monospace' }}>{details.iban || details.accountNumber || details.account_number || details.address || 'PENDING...'}</div>
-                         <div style={{ fontSize: '0.7rem', opacity: 0.7, marginTop: '0.3rem' }}>{details.bankName || details.bank_name || 'Integrated Network Hub'}</div>
+                         <div style={{ fontSize: '0.65rem', opacity: 0.6, textTransform: 'uppercase', marginBottom: '0.4rem', fontWeight: 800 }}>Bank Account Details</div>
+                         <div style={{ fontSize: '0.85rem', fontWeight: 800, fontFamily: 'monospace' }}>{details.iban || details.accountNumber || details.account_number || details.address || 'PENDING...'}</div>
+                         <div style={{ fontSize: '0.75rem', opacity: 0.9, marginTop: '0.3rem', fontWeight: 600 }}>{details.bankName || details.bank_name || 'Integrated Bank Network'}</div>
                       </div>
                     </div>
                   );
