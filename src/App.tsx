@@ -198,8 +198,8 @@ const App = () => {
       </header>
 
       <main>
-        {landingView === 'main' && <LandingV2 onAuth={() => setView('auth')} />}
-        {false && (
+        {false && <LandingV2 onAuth={() => setView('auth')} />}
+        {landingView === 'main' && (
           <>
             {/* Old Landing Content */}
             <section className="hero container perspective-3d" style={{ paddingTop: '5rem', paddingBottom: '4rem' }}>
