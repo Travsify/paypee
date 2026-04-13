@@ -71,14 +71,20 @@ const App = () => {
     );
   }
 
+  const handleLogout = () => {
+    localStorage.removeItem('paypee_token');
+    localStorage.removeItem('paypee_user');
+    setView('landing');
+  };
+
   if (view === 'individual') {
-    return <IndividualDashboard onLogout={() => setView('landing')} />;
+    return <IndividualDashboard onLogout={handleLogout} />;
   }
   if (view === 'business') {
-    return <BusinessDashboard onLogout={() => setView('landing')} />;
+    return <BusinessDashboard onLogout={handleLogout} />;
   }
   if (view === 'developer') {
-    return <DeveloperDashboard onLogout={() => setView('landing')} />;
+    return <DeveloperDashboard onLogout={handleLogout} />;
   }
 
   const containerVariants = {

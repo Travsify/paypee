@@ -24,15 +24,43 @@ const Auth = ({ onComplete, onBack }: AuthProps) => {
   const [isLogin, setIsLogin] = useState(true);
   const [accountType, setAccountType] = useState<'individual' | 'business' | 'developer'>('individual');
   const [loading, setLoading] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [errorMsg, setErrorMsg] = useState('');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    // Simulate auth lag
-    setTimeout(() => {
-      setLoading(false);
+    setErrorMsg('');
+
+    try {
+      const endpoint = isLogin ? '/api/auth/login' : '/api/auth/register';
+      const body = isLogin 
+        ? JSON.stringify({ email, password })
+        : JSON.stringify({ email, password, role: accountType.toUpperCase() });
+
+      const res = await fetch(`http://localhost:5000${endpoint}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || 'Authentication failed');
+      }
+
+      // Store JWT token locally
+      localStorage.setItem('paypee_token', data.token);
+      localStorage.setItem('paypee_user', JSON.stringify(data.user));
+
       onComplete(accountType);
-    }, 1500);
+    } catch (err: any) {
+      setErrorMsg(err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const signupBenefits = {
@@ -158,12 +186,17 @@ const Auth = ({ onComplete, onBack }: AuthProps) => {
           <p style={{ color: 'var(--text-muted)' }}>
             {isLogin ? "Don't have an account?" : "Already have an account?"} 
             <button 
-              onClick={() => setIsLogin(!isLogin)}
+              onClick={() => { setIsLogin(!isLogin); setErrorMsg(''); }}
               style={{ background: 'transparent', border: 'none', color: 'var(--primary)', fontWeight: 700, cursor: 'pointer', marginLeft: '0.5rem' }}
             >
               {isLogin ? 'Create Account' : 'Login'}
             </button>
           </p>
+          {errorMsg && (
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ background: 'rgba(244, 63, 94, 0.1)', color: '#f43f5e', padding: '0.75rem', borderRadius: '8px', border: '1px solid rgba(244, 63, 94, 0.2)', fontSize: '0.9rem', marginTop: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <Zap size={16} /> {errorMsg}
+            </motion.div>
+          )}
         </div>
 
         <div style={{ display: 'flex', background: 'rgba(255,255,255,0.05)', padding: '0.3rem', borderRadius: '12px', marginBottom: '2.5rem', border: '1px solid var(--border)' }}>
@@ -205,6 +238,8 @@ const Auth = ({ onComplete, onBack }: AuthProps) => {
               <input 
                 type="email" 
                 required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 placeholder="sarah@example.com"
                 style={{ width: '100%', background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border)', padding: '1rem 1rem 1rem 3rem', borderRadius: '12px', color: '#fff', outline: 'none' }}
               />
@@ -221,6 +256,8 @@ const Auth = ({ onComplete, onBack }: AuthProps) => {
               <input 
                 type="password" 
                 required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••••••"
                 style={{ width: '100%', background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border)', padding: '1rem 1rem 1rem 3rem', borderRadius: '12px', color: '#fff', outline: 'none' }}
               />

@@ -1,0 +1,113 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum AccountRole {
+  INDIVIDUAL
+  BUSINESS
+  DEVELOPER
+}
+
+enum KycStatus {
+  PENDING
+  VERIFIED
+  REJECTED
+}
+
+enum Currency {
+  USD
+  EUR
+  GBP
+  NGN
+}
+
+enum TransactionType {
+  DEPOSIT
+  WITHDRAWAL
+  TRANSFER
+  PAYOUT
+  CONVERSION
+}
+
+enum TransactionStatus {
+  PENDING
+  COMPLETED
+  FAILED
+}
+
+model User {
+  id           String       @id @default(uuid())
+  email        String       @unique
+  passwordHash String
+  role         AccountRole
+  kycStatus    KycStatus    @default(PENDING)
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  wallets      Wallet[]
+  cards        VirtualCard[]
+  transactions Transaction[]
+  apiKeys      ApiKey[]
+}
+
+model Wallet {
+  id           String   @id @default(uuid())
+  userId       String
+  currency     Currency
+  balance      Decimal  @default(0.00)
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  user         User     @relation(fields: [userId], references: [id])
+  cards        VirtualCard[]
+  transactions Transaction[]
+}
+
+model VirtualCard {
+  id           String   @id @default(uuid())
+  userId       String
+  walletId     String
+  cardNumber   String   @unique
+  expiry       String
+  cvv          String
+  status       String   @default("ACTIVE") // ACTIVE, FROZEN, CANCELLED
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  user         User     @relation(fields: [userId], references: [id])
+  wallet       Wallet   @relation(fields: [walletId], references: [id])
+}
+
+model Transaction {
+  id           String            @id @default(uuid())
+  userId       String
+  walletId     String
+  type         TransactionType
+  amount       Decimal
+  currency     Currency
+  status       TransactionStatus @default(PENDING)
+  reference    String            @unique
+  metadata     Json?
+  createdAt    DateTime          @default(now())
+
+  user         User              @relation(fields: [userId], references: [id])
+  wallet       Wallet            @relation(fields: [walletId], references: [id])
+}
+
+model ApiKey {
+  id           String   @id @default(uuid())
+  userId       String
+  key          String   @unique
+  secretHash   String
+  isLive       Boolean  @default(false)
+  createdAt    DateTime @default(now())
+
+  user         User     @relation(fields: [userId], references: [id])
+}
