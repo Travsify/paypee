@@ -211,35 +211,65 @@ const App = () => {
     }
   };
 
+  const MobileBottomNav = () => (
+    <div className="mobile-only" style={{ display: 'none', position: 'fixed', bottom: 0, left: 0, right: 0, background: 'rgba(2, 6, 23, 0.95)', backdropFilter: 'blur(20px)', borderTop: '1px solid var(--border)', padding: '0.75rem 1rem', justifyContent: 'space-around', alignItems: 'center', zIndex: 1000 }}>
+       <button onClick={() => { setView('landing'); setLandingView('main'); }} style={{ background: 'transparent', border: 'none', color: landingView === 'main' ? 'var(--primary)' : 'var(--text-muted)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.25rem', fontSize: '0.6rem', fontWeight: 800 }}>
+          <Layers size={20} /> HOME
+       </button>
+       <button onClick={() => { setView('landing'); setLandingView('individual'); }} style={{ background: 'transparent', border: 'none', color: landingView === 'individual' ? 'var(--primary)' : 'var(--text-muted)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.25rem', fontSize: '0.6rem', fontWeight: 800 }}>
+          <Users size={20} /> PERSONAL
+       </button>
+       <button onClick={() => { setView('landing'); setLandingView('business'); }} style={{ background: 'transparent', border: 'none', color: landingView === 'business' ? 'var(--primary)' : 'var(--text-muted)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.25rem', fontSize: '0.6rem', fontWeight: 800 }}>
+          <Building2 size={20} /> BUSINESS
+       </button>
+       <button onClick={() => { setView('landing'); setLandingView('developer'); }} style={{ background: 'transparent', border: 'none', color: landingView === 'developer' ? 'var(--primary)' : 'var(--text-muted)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.25rem', fontSize: '0.6rem', fontWeight: 800 }}>
+          <Terminal size={20} /> DEV
+       </button>
+    </div>
+  );
+
   return (
     <div className="app-shell">
-      <header>
-        <div className="container" style={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center' }}>
+      <header style={{ position: 'sticky', top: 0, zIndex: 1000, background: 'rgba(2, 6, 23, 0.8)', backdropFilter: 'blur(10px)', borderBottom: '1px solid var(--border)' }}>
+        <div className="container" style={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center', height: '72px' }}>
           <motion.button 
             onClick={() => { setView('landing'); setLandingView('main'); }} 
             className="logo"
             initial={{ x: -20, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
-            style={{ background: 'transparent', border: 'none', cursor: 'pointer', padding: 0 }}
+            style={{ background: 'transparent', border: 'none', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '1.25rem', fontWeight: 900 }}
           >
-            <img src="/logo.png" alt="Paypee Logo" style={{ height: '32px', filter: 'drop-shadow(0 0 10px rgba(99, 102, 241, 0.4))' }} />
+            <img src="/logo.png" alt="Paypee Logo" style={{ height: '32px' }} />
             Paypee
           </motion.button>
-          <nav>
-            <ul style={{ display: 'flex', gap: '2.5rem', listStyle: 'none', margin: 0, padding: 0 }}>
-              <li><button onClick={() => { setView('landing'); setLandingView('individual'); }} style={{ background: 'transparent', border: 'none', color: landingView === 'individual' ? '#fff' : 'var(--text-muted)', fontSize: '0.95rem', cursor: 'pointer', fontWeight: landingView === 'individual' ? 700 : 500, transition: 'color 0.2s' }}>Individuals</button></li>
-              <li><button onClick={() => { setView('landing'); setLandingView('business'); }} style={{ background: 'transparent', border: 'none', color: landingView === 'business' ? '#fff' : 'var(--text-muted)', fontSize: '0.95rem', cursor: 'pointer', fontWeight: landingView === 'business' ? 700 : 500, transition: 'color 0.2s' }}>Businesses</button></li>
-              <li><button onClick={() => { setView('landing'); setLandingView('developer'); }} style={{ background: 'transparent', border: 'none', color: landingView === 'developer' ? '#fff' : 'var(--text-muted)', fontSize: '0.95rem', cursor: 'pointer', fontWeight: landingView === 'developer' ? 700 : 500, transition: 'color 0.2s' }}>Developers</button></li>
-            </ul>
-          </nav>
-          <motion.div 
-            style={{ display: 'flex', gap: '1rem' }}
-            initial={{ x: 20, opacity: 0 }}
-            animate={{ x: 0, opacity: 1 }}
-          >
-            <button className="btn btn-outline" onClick={() => setView('auth')}>Login</button>
-            <button className="btn btn-primary" onClick={() => setView('auth')}>Get Started</button>
-          </motion.div>
+          
+          <div className="desktop-only" style={{ display: 'flex', gap: '3rem' }}>
+             <button onClick={() => { setView('landing'); setLandingView('individual'); }} style={{ background: 'transparent', border: 'none', color: landingView === 'individual' ? '#fff' : 'var(--text-muted)', fontSize: '0.9rem', cursor: 'pointer', fontWeight: 700 }}>Individuals</button>
+             <button onClick={() => { setView('landing'); setLandingView('business'); }} style={{ background: 'transparent', border: 'none', color: landingView === 'business' ? '#fff' : 'var(--text-muted)', fontSize: '0.9rem', cursor: 'pointer', fontWeight: 700 }}>Businesses</button>
+             <button onClick={() => { setView('landing'); setLandingView('developer'); }} style={{ background: 'transparent', border: 'none', color: landingView === 'developer' ? '#fff' : 'var(--text-muted)', fontSize: '0.9rem', cursor: 'pointer', fontWeight: 700 }}>Developers</button>
+          </div>
+
+          <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+            <button className="desktop-only btn btn-outline" onClick={() => setView('auth')}>Login</button>
+            <button className="btn btn-primary" onClick={() => setView('auth')} style={{ padding: '0.5rem 1.25rem', fontSize: '0.85rem' }}>Get Started</button>
+            <button 
+              className="mobile-only" 
+              style={{ background: 'transparent', border: 'none', color: '#fff', padding: '0.5rem' }}
+              onClick={() => {
+                const nav = document.getElementById('mobile-menu');
+                if (nav) nav.style.display = nav.style.display === 'flex' ? 'none' : 'flex';
+              }}
+            >
+               <Layers size={24} />
+            </button>
+          </div>
+        </div>
+        
+        <div id="mobile-menu" className="mobile-menu-wrapper" style={{ display: 'none' }}>
+           <button className="mobile-menu-item" onClick={() => { setView('landing'); setLandingView('individual'); document.getElementById('mobile-menu')!.style.display = 'none'; }}>Individuals</button>
+           <button className="mobile-menu-item" onClick={() => { setView('landing'); setLandingView('business'); document.getElementById('mobile-menu')!.style.display = 'none'; }}>Businesses</button>
+           <button className="mobile-menu-item" onClick={() => { setView('landing'); setLandingView('developer'); document.getElementById('mobile-menu')!.style.display = 'none'; }}>Developers</button>
+           <button className="mobile-menu-item" style={{ marginTop: 'auto', background: 'var(--primary)', color: '#fff' }} onClick={() => setView('auth')}>Dashboard Login</button>
         </div>
       </header>
 
@@ -746,8 +776,10 @@ const App = () => {
         {landingView === 'legal_terms' && <LegalPage view="terms" onBack={() => setLandingView('main')} />}
         {landingView === 'legal_pci' && <LegalPage view="pci" onBack={() => setLandingView('main')} />}
       </main>
+      
+      <MobileBottomNav />
 
-      <footer style={{ padding: '6rem 0 3rem', borderTop: '1px solid var(--border)' }}>
+      <footer style={{ padding: '6rem 0 3rem', borderTop: '1px solid var(--border)', marginBottom: '5rem' }}>
         <div className="container">
           <div className="info-row" style={{ alignItems: 'flex-start' }}>
             <div style={{ flex: 1.5 }}>
