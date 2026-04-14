@@ -32,8 +32,9 @@ interface Notification {
 const VerificationGate: React.FC<VerificationGateProps> = ({ kycStatus: initialStatus, accountType, onStatusChange }) => {
   const [kycStatus, setKycStatus] = useState(initialStatus);
   const [showModal, setShowModal] = useState(false);
+  const [kycStep, setKycStep] = useState(1);
   const [loading, setLoading] = useState(false);
-  const [idType, setIdType] = useState(accountType === 'BUSINESS' ? 'CAC' : 'NIN');
+  const [idType, setIdType] = useState(accountType === 'BUSINESS' ? 'CAC' : 'BVN');
   const [idNumber, setIdNumber] = useState('');
   const [error, setError] = useState('');
   const [notifications, setNotifications] = useState<Notification[]>([]);
@@ -73,17 +74,20 @@ const VerificationGate: React.FC<VerificationGateProps> = ({ kycStatus: initialS
     setUnreadCount(0);
   };
 
-  const handleVerify = async () => {
+  const handleNextStep = () => {
     setError('');
     if (!idNumber.trim()) { setError('Please enter your ID number.'); return; }
-    if ((idType === 'NIN' || idType === 'BVN') && idNumber.trim().length !== 11) {
-      setError(`${idType} must be exactly 11 digits.`); return;
+    if (idType === 'BVN' && idNumber.trim().length !== 11) {
+      setError('BVN must be exactly 11 digits.'); return;
     }
     if (idType === 'CAC' && idNumber.trim().length < 5) {
       setError('Please enter a valid CAC/RC number.'); return;
     }
+    setKycStep(2);
+  };
 
-    setLoading(true);
+  const handleVerify = async () => {
+    setError('');
     try {
       const res = await fetch('https://paypee-api.onrender.com/api/verify/identity', {
         method: 'POST',
@@ -118,8 +122,7 @@ const VerificationGate: React.FC<VerificationGateProps> = ({ kycStatus: initialS
   const idTypeOptions = accountType === 'BUSINESS'
     ? [{ value: 'CAC', label: 'CAC / RC Number', desc: 'Corporate Affairs Commission registration' }]
     : [
-        { value: 'NIN', label: 'National ID (NIN)', desc: '11-digit National Identification Number' },
-        { value: 'BVN', label: 'Bank Verification (BVN)', desc: '11-digit Bank Verification Number' },
+        { value: 'BVN', label: 'Bank Verification (BVN)', desc: '11-digit Bank Verification Number (Fincra Requirement)' },
       ];
 
   const statusConfig = {
@@ -197,7 +200,7 @@ const VerificationGate: React.FC<VerificationGateProps> = ({ kycStatus: initialS
           {/* Action Button */}
           {(kycStatus === 'PENDING' || kycStatus === 'REJECTED') && (
             <button
-              onClick={() => { setShowModal(true); setError(''); setIdNumber(''); }}
+              onClick={() => { setShowModal(true); setKycStep(1); setError(''); setIdNumber(''); }}
               style={{ background: cfg?.color, border: 'none', color: '#fff', padding: '0.4rem 1.2rem', borderRadius: '8px', fontSize: '0.85rem', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.4rem' }}
             >
               {kycStatus === 'REJECTED' ? 'Retry Verification' : 'Verify Now'} <ChevronRight size={14} />
@@ -226,86 +229,117 @@ const VerificationGate: React.FC<VerificationGateProps> = ({ kycStatus: initialS
               {/* Header */}
               <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
                 <div style={{ width: 72, height: 72, background: 'rgba(99,102,241,0.1)', borderRadius: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#6366f1', margin: '0 auto 1.25rem' }}>
-                  {accountType === 'BUSINESS' ? <Building2 size={36} /> : <User size={36} />}
+                  {kycStep === 2 ? <User size={36} /> : accountType === 'BUSINESS' ? <Building2 size={36} /> : <User size={36} />}
                 </div>
                 <h2 style={{ fontSize: '1.6rem', fontWeight: 800, marginBottom: '0.4rem' }}>
-                  {kycStatus === 'REJECTED' ? 'Retry Verification' : accountType === 'BUSINESS' ? 'Business Verification' : 'Identity Verification'}
+                  {kycStep === 2 ? 'Liveness Face Match' : kycStatus === 'REJECTED' ? 'Retry Verification' : accountType === 'BUSINESS' ? 'Business Verification' : 'Identity Verification'}
                 </h2>
                 <p style={{ color: '#64748b', fontSize: '0.9rem', lineHeight: 1.5 }}>
-                  {kycStatus === 'REJECTED' 
+                  {kycStep === 2 
+                    ? `Prembly IdentityPass requires a live selfie to match against your ${idType} profile.`
+                    : kycStatus === 'REJECTED' 
                     ? 'Your previous attempt failed. Please check your ID number carefully and try again.'
                     : `Verify your ${accountType === 'BUSINESS' ? 'business registration' : 'identity'} to unlock global transfers, card issuance, and all Paypee features.`
                   }
                 </p>
               </div>
 
-              {/* ID Type Selector */}
-              <div style={{ marginBottom: '1.25rem' }}>
-                <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 800, color: '#475569', letterSpacing: '1.5px', marginBottom: '0.75rem' }}>
-                  VERIFICATION TYPE
-                </label>
-                <div style={{ display: 'grid', gap: '0.6rem' }}>
-                  {idTypeOptions.map(opt => (
-                    <div
-                      key={opt.value}
-                      onClick={() => setIdType(opt.value)}
-                      style={{ background: idType === opt.value ? 'rgba(99,102,241,0.1)' : 'rgba(255,255,255,0.02)', border: `2px solid ${idType === opt.value ? '#6366f1' : '#1e293b'}`, borderRadius: '14px', padding: '0.9rem 1.1rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '1rem', transition: 'all 0.2s' }}
-                    >
-                      <div style={{ width: 18, height: 18, borderRadius: '50%', border: idType === opt.value ? '5px solid #6366f1' : '2px solid #475569', transition: 'all 0.2s', flexShrink: 0 }} />
-                      <div>
-                        <div style={{ fontWeight: 700, fontSize: '0.9rem' }}>{opt.label}</div>
-                        <div style={{ fontSize: '0.75rem', color: '#64748b' }}>{opt.desc}</div>
-                      </div>
+              {kycStep === 1 ? (
+                <>
+                  {/* ID Type Selector */}
+                  <div style={{ marginBottom: '1.25rem' }}>
+                    <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 800, color: '#475569', letterSpacing: '1.5px', marginBottom: '0.75rem' }}>
+                      VERIFICATION TYPE
+                    </label>
+                    <div style={{ display: 'grid', gap: '0.6rem' }}>
+                      {idTypeOptions.map(opt => (
+                        <div
+                          key={opt.value}
+                          onClick={() => setIdType(opt.value)}
+                          style={{ background: idType === opt.value ? 'rgba(99,102,241,0.1)' : 'rgba(255,255,255,0.02)', border: `2px solid ${idType === opt.value ? '#6366f1' : '#1e293b'}`, borderRadius: '14px', padding: '0.9rem 1.1rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '1rem', transition: 'all 0.2s' }}
+                        >
+                          <div style={{ width: 18, height: 18, borderRadius: '50%', border: idType === opt.value ? '5px solid #6366f1' : '2px solid #475569', transition: 'all 0.2s', flexShrink: 0 }} />
+                          <div>
+                            <div style={{ fontWeight: 700, fontSize: '0.9rem' }}>{opt.label}</div>
+                            <div style={{ fontSize: '0.75rem', color: '#64748b' }}>{opt.desc}</div>
+                          </div>
+                        </div>
+                      ))}
                     </div>
-                  ))}
-                </div>
-              </div>
+                  </div>
 
-              {/* ID Number Input */}
-              <div style={{ marginBottom: '1.5rem' }}>
-                <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 800, color: '#475569', letterSpacing: '1.5px', marginBottom: '0.6rem' }}>
-                  {idType === 'NIN' ? 'NIN NUMBER' : idType === 'BVN' ? 'BVN NUMBER' : 'CAC / RC NUMBER'}
-                </label>
-                <input
-                  type="text"
-                  value={idNumber}
-                  onChange={e => { setIdNumber(e.target.value); setError(''); }}
-                  placeholder={idType === 'CAC' ? 'e.g. RC123456 or BN123456' : 'Enter 11-digit number'}
-                  maxLength={idType === 'CAC' ? 20 : 11}
-                  style={{ width: '100%', background: 'rgba(255,255,255,0.03)', border: `2px solid ${error ? '#f43f5e' : '#1e293b'}`, borderRadius: '12px', padding: '0.9rem 1.1rem', color: '#fff', fontSize: '1rem', fontWeight: 600, letterSpacing: '2px', outline: 'none', boxSizing: 'border-box', transition: 'border 0.2s' }}
-                  onFocus={e => { if (!error) e.target.style.borderColor = '#6366f1'; }}
-                  onBlur={e => { if (!error) e.target.style.borderColor = '#1e293b'; }}
-                />
-              </div>
+                  {/* ID Number Input */}
+                  <div style={{ marginBottom: '1.5rem' }}>
+                    <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 800, color: '#475569', letterSpacing: '1.5px', marginBottom: '0.6rem' }}>
+                      {idType === 'NIN' ? 'NIN NUMBER' : idType === 'BVN' ? 'BVN NUMBER' : 'CAC / RC NUMBER'}
+                    </label>
+                    <input
+                      type="text"
+                      value={idNumber}
+                      onChange={e => { setIdNumber(e.target.value); setError(''); }}
+                      placeholder={idType === 'CAC' ? 'e.g. RC123456 or BN123456' : 'Enter 11-digit number'}
+                      maxLength={idType === 'CAC' ? 20 : 11}
+                      style={{ width: '100%', background: 'rgba(255,255,255,0.03)', border: `2px solid ${error ? '#f43f5e' : '#1e293b'}`, borderRadius: '12px', padding: '0.9rem 1.1rem', color: '#fff', fontSize: '1rem', fontWeight: 600, letterSpacing: '2px', outline: 'none', boxSizing: 'border-box', transition: 'border 0.2s' }}
+                      onFocus={e => { if (!error) e.target.style.borderColor = '#6366f1'; }}
+                      onBlur={e => { if (!error) e.target.style.borderColor = '#1e293b'; }}
+                    />
+                  </div>
 
-              {/* Error */}
-              <AnimatePresence>
-                {error && (
-                  <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
-                    style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', background: 'rgba(244,63,94,0.1)', border: '1px solid rgba(244,63,94,0.3)', borderRadius: '10px', padding: '0.8rem 1rem', marginBottom: '1.25rem', color: '#f43f5e', fontSize: '0.85rem', fontWeight: 600 }}
+                  {/* Error */}
+                  <AnimatePresence>
+                    {error && (
+                      <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
+                        style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', background: 'rgba(244,63,94,0.1)', border: '1px solid rgba(244,63,94,0.3)', borderRadius: '10px', padding: '0.8rem 1rem', marginBottom: '1.25rem', color: '#f43f5e', fontSize: '0.85rem', fontWeight: 600 }}
+                      >
+                        <AlertCircle size={16} /> {error}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+
+                  {/* Security note */}
+                  <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid #1e293b', borderRadius: '10px', padding: '0.9rem', marginBottom: '1.5rem', display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}>
+                    <ShieldAlert size={15} color="#475569" style={{ marginTop: '0.1rem', flexShrink: 0 }} />
+                    <span style={{ fontSize: '0.75rem', color: '#475569', lineHeight: 1.5 }}>
+                      Your ID is verified live through Prembly's secure infrastructure and never stored raw.
+                    </span>
+                  </div>
+
+                  {/* Submit */}
+                  <motion.button
+                    whileTap={{ scale: 0.98 }}
+                    onClick={handleNextStep}
+                    disabled={!idNumber.trim()}
+                    style={{ width: '100%', background: (!idNumber.trim()) ? '#1e293b' : '#6366f1', color: (!idNumber.trim()) ? '#475569' : '#fff', border: 'none', padding: '1.1rem', borderRadius: '14px', fontSize: '1rem', fontWeight: 700, cursor: (!idNumber.trim()) ? 'not-allowed' : 'pointer', transition: 'all 0.3s', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
                   >
-                    <AlertCircle size={16} /> {error}
-                  </motion.div>
-                )}
-              </AnimatePresence>
-
-              {/* Security note */}
-              <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid #1e293b', borderRadius: '10px', padding: '0.9rem', marginBottom: '1.5rem', display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}>
-                <ShieldAlert size={15} color="#475569" style={{ marginTop: '0.1rem', flexShrink: 0 }} />
-                <span style={{ fontSize: '0.75rem', color: '#475569', lineHeight: 1.5 }}>
-                  Your ID is verified live through Prembly's secure infrastructure and never stored raw. Results are instant.
-                </span>
-              </div>
-
-              {/* Submit */}
-              <motion.button
-                whileTap={{ scale: 0.98 }}
-                onClick={handleVerify}
-                disabled={loading || !idNumber.trim()}
-                style={{ width: '100%', background: (!idNumber.trim() || loading) ? '#1e293b' : '#6366f1', color: (!idNumber.trim() || loading) ? '#475569' : '#fff', border: 'none', padding: '1.1rem', borderRadius: '14px', fontSize: '1rem', fontWeight: 700, cursor: (!idNumber.trim() || loading) ? 'not-allowed' : 'pointer', transition: 'all 0.3s', boxShadow: idNumber.trim() ? '0 15px 30px -10px rgba(99,102,241,0.5)' : 'none' }}
-              >
-                {loading ? 'Verifying...' : 'Submit for Verification'}
-              </motion.button>
+                    Continue <ChevronRight size={18} />
+                  </motion.button>
+                </>
+              ) : (
+                <>
+                  <div style={{ background: '#1e293b', borderRadius: '24px', height: '240px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', marginBottom: '2rem', border: '2px dashed #475569', position: 'relative', overflow: 'hidden' }}>
+                     {!loading ? (
+                       <>
+                         <div style={{ width: 120, height: 160, border: '4px solid #6366f1', borderRadius: '50% 50% 40% 40%', marginBottom: '1rem', opacity: 0.8 }} />
+                         <span style={{ color: '#94a3b8', fontSize: '0.85rem', fontWeight: 700, letterSpacing: '1px' }}>CENTER YOUR FACE IN OVAL</span>
+                       </>
+                     ) : (
+                       <div style={{ position: 'absolute', inset: 0, background: 'rgba(99,102,241,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: '1rem' }}>
+                         <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1, ease: 'linear' }} style={{ color: '#fff' }}><RefreshCcw size={40} /></motion.div>
+                         <span style={{ color: '#fff', fontWeight: 800, letterSpacing: '1px' }}>ANALYZING BIOMETRICS...</span>
+                       </div>
+                     )}
+                  </div>
+                  
+                  <motion.button
+                    whileTap={{ scale: 0.98 }}
+                    onClick={handleVerify}
+                    disabled={loading}
+                    style={{ width: '100%', background: loading ? '#1e293b' : '#10b981', color: loading ? '#475569' : '#fff', border: 'none', padding: '1.1rem', borderRadius: '14px', fontSize: '1rem', fontWeight: 700, cursor: loading ? 'not-allowed' : 'pointer', transition: 'all 0.3s' }}
+                  >
+                    {loading ? 'Processing Match...' : 'Capture Face & Verify'}
+                  </motion.button>
+                </>
+              )}
             </motion.div>
           </div>
         )}
