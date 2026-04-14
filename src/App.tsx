@@ -254,7 +254,7 @@ const App = () => {
             <button className="btn btn-primary" onClick={() => setView('auth')} style={{ padding: '0.5rem 1.25rem', fontSize: '0.85rem' }}>Get Started</button>
             <button 
               className="mobile-only" 
-              style={{ display: 'none', background: 'transparent', border: 'none', color: '#fff', padding: '0.5rem', cursor: 'pointer' }}
+              style={{ background: 'transparent', border: 'none', color: '#fff', padding: '0.5rem', cursor: 'pointer' }}
               id="hamburger-btn"
               onClick={() => {
                 const nav = document.getElementById('mobile-menu');
