@@ -234,7 +234,7 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
 
           {activeSection === 'wallets' && (
             <div style={{ padding: '0' }}>
-               <h2 style={{ fontSize: '1.8rem', fontWeight: 800, marginBottom: '2rem' }}>My Strategic Wallets</h2>
+               <h2 style={{ fontSize: '1.8rem', fontWeight: 800, marginBottom: '2rem' }}>My Bank Accounts</h2>
                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                   {userData?.wallets?.map((w: any) => {
                     const symbols: Record<string, string> = { USD: '$', EUR: '€', GBP: '£', NGN: '₦' };
@@ -258,7 +258,7 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
                     <div style={{ width: 48, height: 48, borderRadius: '16px', background: 'rgba(99,102,241,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                        <Plus size={24} color="var(--primary)" />
                     </div>
-                    <span style={{ fontWeight: 800, color: 'var(--text-muted)' }}>Provision New Liquidity Rail</span>
+                    <span style={{ fontWeight: 800, color: 'var(--text-muted)' }}>Create Bank Account</span>
                   </motion.div>
                </div>
             </div>
@@ -338,7 +338,7 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '4rem' }}>
                     <section>
                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-                         <h2 style={{ fontSize: '1.4rem', fontWeight: 900 }}>Smart Wallets</h2>
+                         <h2 style={{ fontSize: '1.4rem', fontWeight: 900 }}>Bank Accounts</h2>
                          <button onClick={fetchUserData} style={{ color: 'var(--primary)', background: 'transparent', border: 'none', fontWeight: 800, fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>REFRESH STATUS <RefreshCcw size={14} /></button>
                        </div>
                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
@@ -364,7 +364,7 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
                             <div style={{ width: 48, height: 48, borderRadius: '16px', background: 'rgba(99,102,241,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                <Plus size={24} color="var(--primary)" />
                             </div>
-                            <span style={{ fontWeight: 800, color: 'var(--text-muted)' }}>Provision New Liquidity Node</span>
+                            <span style={{ fontWeight: 800, color: 'var(--text-muted)' }}>Create Bank Account</span>
                           </motion.div>
                        </div>
                     </section>

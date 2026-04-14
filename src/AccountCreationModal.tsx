@@ -84,25 +84,8 @@ const AccountCreationModal: React.FC<AccountCreationModalProps> = ({
   const [selectedIndex, setSelectedIndex] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Wheel selection logic
-  const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
-    const container = e.currentTarget;
-    const scrollY = container.scrollTop;
-    const itemHeight = 120; // approximate height of a card
-    const newIndex = Math.round(scrollY / itemHeight);
-    if (newIndex >= 0 && newIndex < filteredCurrencies.length) {
-      setSelectedIndex(newIndex);
-    }
-  };
-
   const selectItem = (index: number) => {
-    if (containerRef.current) {
-      containerRef.current.scrollTo({
-        top: index * 120,
-        behavior: 'smooth'
-      });
-      setSelectedIndex(index);
-    }
+    setSelectedIndex(index);
   };
 
   if (!isOpen) return null;
@@ -162,7 +145,7 @@ const AccountCreationModal: React.FC<AccountCreationModalProps> = ({
                   <div>
                     <h2 style={{ fontSize: '2rem', fontWeight: 900, marginBottom: '1rem', color: '#fff' }}>
                       {currentCurrency.name} <br />
-                      <span style={{ color: currentCurrency.color }}>Node</span>
+                      <span style={{ color: currentCurrency.color }}>Account</span>
                     </h2>
                     <p style={{ color: 'var(--text-muted)', fontSize: '1rem', lineHeight: 1.6 }}>{currentCurrency.desc}</p>
                   </div>
@@ -198,82 +181,55 @@ const AccountCreationModal: React.FC<AccountCreationModalProps> = ({
           background: 'rgba(0,0,0,0.2)'
         }}>
            <div style={{ padding: '3rem 3rem 1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', zIndex: 10 }}>
-              <h3 style={{ fontSize: '1.4rem', fontWeight: 800, letterSpacing: '-0.02em' }}>Available Rails</h3>
+              <h3 style={{ fontSize: '1.4rem', fontWeight: 800, letterSpacing: '-0.02em' }}>Select Currency</h3>
               <button onClick={onClose} style={{ background: 'rgba(255,255,255,0.05)', border: 'none', borderRadius: '50%', width: 32, height: 32, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}><X size={18} /></button>
            </div>
 
-           <div style={{ position: 'relative', flex: 1, overflow: 'hidden' }}>
-              {/* Overlay Gradients */}
-              <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '100px', background: 'linear-gradient(180deg, #0a1122 0%, transparent 100%)', zIndex: 5, pointerEvents: 'none' }} />
-              <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '100px', background: 'linear-gradient(0deg, #0a1122 0%, transparent 100%)', zIndex: 5, pointerEvents: 'none' }} />
-
-              <div 
-                ref={containerRef}
-                onScroll={handleScroll}
-                style={{ 
-                  height: '100%', 
-                  overflowY: 'auto', 
-                  padding: '100px 3rem 300px',
-                  scrollSnapType: 'y mandatory',
-                  msOverflowStyle: 'none',
-                  scrollbarWidth: 'none'
-                }}
-                className="no-scrollbar"
-              >
-                {filteredCurrencies.length > 0 ? filteredCurrencies.map((c, idx) => (
-                  <motion.div
-                    key={c.code}
-                    onClick={() => selectItem(idx)}
-                    animate={{ 
-                      scale: selectedIndex === idx ? 1 : 0.85,
-                      opacity: selectedIndex === idx ? 1 : 0.4,
-                      x: selectedIndex === idx ? 0 : 20
-                    }}
-                    style={{ 
-                      height: '120px', 
-                      scrollSnapAlign: 'center',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '1.5rem',
-                      cursor: 'pointer',
-                      marginBottom: '1rem'
-                    }}
-                  >
-                    <div style={{ 
-                      width: '64px', 
-                      height: '64px', 
-                      borderRadius: '20px', 
-                      background: selectedIndex === idx ? c.color : 'rgba(255,255,255,0.05)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontSize: '2rem',
-                      transition: 'background 0.3s'
-                    }}>
-                      {c.icon}
-                    </div>
-                    <div>
-                      <div style={{ fontSize: '1.5rem', fontWeight: 900 }}>{c.code}</div>
-                      <div style={{ fontSize: '0.9rem', color: 'var(--text-muted)', fontWeight: 600 }}>{c.name}</div>
-                    </div>
-                  </motion.div>
-                )) : (
-                  <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-muted)' }}>
-                    All available rails are currently active.
+           <div style={{ flex: 1, overflowY: 'auto', padding: '0 3rem 2rem' }}>
+              <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem', fontSize: '0.9rem', lineHeight: 1.5 }}>
+                Select a currency to create a new bank account. <br/>
+                <span style={{ color: 'var(--primary)' }}>Note: Fincra requires your BVN for NGN accounts. Standard KYC applies to USD/EUR/GBP.</span>
+              </p>
+              {filteredCurrencies.length > 0 ? filteredCurrencies.map((c, idx) => (
+                <div
+                  key={c.code}
+                  onClick={() => selectItem(idx)}
+                  style={{ 
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '1.5rem',
+                    cursor: 'pointer',
+                    padding: '1rem 1.5rem',
+                    borderRadius: '20px',
+                    background: selectedIndex === idx ? 'rgba(99, 102, 241, 0.1)' : 'rgba(255,255,255,0.02)',
+                    border: selectedIndex === idx ? `1px solid ${c.color}` : '1px solid rgba(255,255,255,0.05)',
+                    marginBottom: '1rem',
+                    transition: 'all 0.2s'
+                  }}
+                >
+                  <div style={{ 
+                    width: '48px', 
+                    height: '48px', 
+                    borderRadius: '16px', 
+                    background: c.color + '22',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '1.5rem'
+                  }}>
+                    {c.icon}
                   </div>
-                )}
-              </div>
-
-              {/* Selector Indicator */}
-              <div style={{ 
-                position: 'absolute', 
-                top: 'calc(100px + 60px)', 
-                left: '2rem', 
-                right: '2rem', 
-                height: '1px', 
-                background: 'rgba(255,255,255,0.1)', 
-                pointerEvents: 'none' 
-              }} />
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontSize: '1.2rem', fontWeight: 800 }}>{c.code}</div>
+                    <div style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>{c.name}</div>
+                  </div>
+                  {selectedIndex === idx && <Check size={20} color={c.color} />}
+                </div>
+              )) : (
+                <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-muted)' }}>
+                  You have created accounts for all available currencies.
+                </div>
+              )}
            </div>
 
            <div style={{ padding: '2rem 3rem 3rem', background: '#0a0f1e', borderTop: '1px solid rgba(255,255,255,0.05)', zIndex: 10 }}>
@@ -305,11 +261,11 @@ const AccountCreationModal: React.FC<AccountCreationModalProps> = ({
                 {isProcessing ? (
                   <>
                     <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1, ease: 'linear' }}><RefreshCcw size={20} /></motion.div>
-                    PROVISION_NODE_ACTIVE...
+                    Creating Account...
                   </>
                 ) : (
                   <>
-                    Provision {currentCurrency?.code || 'Rail'} <ChevronRight size={20} />
+                    Create {currentCurrency?.code || ''} Bank Account <ChevronRight size={20} />
                   </>
                 )}
               </button>
