@@ -230,7 +230,7 @@ const App = () => {
 
   return (
     <div className="app-shell">
-      <header style={{ position: 'sticky', top: 0, zIndex: 1000, background: 'rgba(2, 6, 23, 0.8)', backdropFilter: 'blur(10px)', borderBottom: '1px solid var(--border)' }}>
+      <header style={{ position: 'sticky', top: 0, zIndex: 2000, background: 'rgba(2, 6, 23, 0.98)', backdropFilter: 'blur(10px)', borderBottom: '1px solid var(--border)' }}>
         <div className="container" style={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center', height: '72px' }}>
           <motion.button 
             onClick={() => { setView('landing'); setLandingView('main'); }} 
@@ -254,13 +254,14 @@ const App = () => {
             <button className="btn btn-primary" onClick={() => setView('auth')} style={{ padding: '0.5rem 1.25rem', fontSize: '0.85rem' }}>Get Started</button>
             <button 
               className="mobile-only" 
-              style={{ background: 'transparent', border: 'none', color: '#fff', padding: '0.5rem' }}
+              style={{ display: 'none', background: 'transparent', border: 'none', color: '#fff', padding: '0.5rem', cursor: 'pointer' }}
+              id="hamburger-btn"
               onClick={() => {
                 const nav = document.getElementById('mobile-menu');
                 if (nav) nav.style.display = nav.style.display === 'flex' ? 'none' : 'flex';
               }}
             >
-               <Layers size={24} />
+               <Layers size={26} color="var(--primary)" />
             </button>
           </div>
         </div>
