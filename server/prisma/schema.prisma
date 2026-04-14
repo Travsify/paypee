@@ -43,6 +43,8 @@ enum Currency {
   EUR
   GBP
   BTC
+  USDT
+  USDC
 }
 
 model User {

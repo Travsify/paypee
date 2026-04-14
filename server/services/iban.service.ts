@@ -16,7 +16,9 @@ export class IbanService {
       CNY: 'CN38',
       USD: 'US11',
       NGN: 'NG55',
-      BTC: 'BC11'
+      BTC: 'BC11',
+      USDT: 'TS11',
+      USDC: 'CS11'
     };
 
     // 1. Check if the user already has a wallet in this currency

@@ -70,6 +70,24 @@ const allCurrencies = [
     icon: '₿', 
     color: '#f59e0b',
     benefits: ['24/7 Liquidity', 'Permissionless', 'Hedge against inflation']
+  },
+  { 
+    code: 'USDT', 
+    name: 'Tether (USDT)', 
+    region: 'Global Rail', 
+    desc: 'Stablecoin pegged to the US Dollar for instant crypto transfers.', 
+    icon: '₮', 
+    color: '#26a17b',
+    benefits: ['Instant settlement', 'Zero volatility', 'Global reach']
+  },
+  { 
+    code: 'USDC', 
+    name: 'USD Coin (USDC)', 
+    region: 'Global Rail', 
+    desc: 'Fully backed digital dollar for borderless payments.', 
+    icon: '💲', 
+    color: '#2775ca',
+    benefits: ['1:1 USD backed', 'High liquidity', 'Regulated']
   }
 ];
 
@@ -113,7 +131,6 @@ const AccountCreationModal: React.FC<AccountCreationModalProps> = ({
           background: '#0a0f1e', 
           border: '1px solid rgba(255,255,255,0.1)', 
           borderRadius: '40px', 
-          overflow: 'hidden',
           boxShadow: '0 50px 100px -20px rgba(0,0,0,0.5)'
         }}
       >
