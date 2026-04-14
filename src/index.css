@@ -757,13 +757,15 @@ input:focus {
 
   header {
     display: flex !important;
-    height: 72px !important;
+    height: 80px !important;
     visibility: visible !important;
     opacity: 1 !important;
-    background: rgba(2, 6, 23, 1) !important;
-    position: sticky !important;
+    background: #020617 !important;
+    position: fixed !important;
     top: 0 !important;
-    z-index: 2000 !important;
+    left: 0 !important;
+    right: 0 !important;
+    z-index: 5000 !important;
     border-bottom: 1px solid var(--border) !important;
   }
 
@@ -817,7 +819,7 @@ input:focus {
   }
 
   .hero {
-    padding-top: 3rem !important;
+    padding-top: 6rem !important;
     text-align: center;
   }
 
@@ -861,12 +863,13 @@ input:focus {
   }
 
   .logo-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 2rem;
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 1.5rem !important;
   }
 
   .grid {
-    grid-template-columns: 1fr !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 1.25rem !important;
   }
 
   .card {
@@ -887,15 +890,19 @@ input:focus {
   }
 
   .toggle-container {
-    flex-direction: column;
+    flex-direction: row !important;
     width: 100%;
-    max-width: none;
-    border-radius: 20px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    padding: 0.5rem !important;
+    border-radius: 99px !important;
   }
 
   .toggle-btn {
-    width: 100%;
-    text-align: center;
+    width: auto !important;
+    white-space: nowrap;
+    font-size: 0.8rem !important;
+    padding: 0.6rem 1.2rem !important;
   }
 
   .dashboard-aside {
@@ -914,6 +921,7 @@ input:focus {
 
   .dashboard-main {
     padding: 1.25rem !important;
+    padding-top: 100px !important;
   }
 
   .dashboard-header {
@@ -924,8 +932,8 @@ input:focus {
   }
 
   .balance-card-grid {
-    grid-template-columns: 1fr !important;
-    gap: 1.5rem !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 1rem !important;
   }
 
   .dashboard-header {
