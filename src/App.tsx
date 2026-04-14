@@ -249,19 +249,19 @@ const App = () => {
              <button onClick={() => { setView('landing'); setLandingView('developer'); }} style={{ background: 'transparent', border: 'none', color: landingView === 'developer' ? '#fff' : 'var(--text-muted)', fontSize: '0.9rem', cursor: 'pointer', fontWeight: 700 }}>Developers</button>
           </div>
 
-          <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-            <button className="desktop-only btn btn-outline" onClick={() => setView('auth')}>Login</button>
-            <button className="btn btn-primary" onClick={() => setView('auth')} style={{ padding: '0.5rem 1.25rem', fontSize: '0.85rem' }}>Get Started</button>
+          <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+            <button className="btn btn-outline" onClick={() => setView('auth')} style={{ padding: '0.5rem 1rem', fontSize: '0.75rem', display: 'flex' }}>Login</button>
+            <button className="btn btn-primary" onClick={() => setView('auth')} style={{ padding: '0.5rem 1rem', fontSize: '0.75rem', display: 'flex' }}>Get Started</button>
             <button 
               className="mobile-only" 
-              style={{ background: 'transparent', border: 'none', color: '#fff', padding: '0.5rem', cursor: 'pointer' }}
+              style={{ background: 'transparent', border: 'none', color: '#fff', padding: '0.3rem', cursor: 'pointer' }}
               id="hamburger-btn"
               onClick={() => {
                 const nav = document.getElementById('mobile-menu');
                 if (nav) nav.style.display = nav.style.display === 'flex' ? 'none' : 'flex';
               }}
             >
-               <Layers size={26} color="var(--primary)" />
+               <Layers size={22} color="var(--primary)" />
             </button>
           </div>
         </div>
