@@ -15,7 +15,7 @@ const getHeaders = () => ({
 /**
  * Creates a Virtual Account (IBAN/NUBAN) via Fincra
  */
-export const issueVirtualAccount = async (businessName: string, currency: string) => {
+export const issueVirtualAccount = async (businessName: string, currency: string, bvn?: string) => {
   try {
     const response = await fetch(`${FINCRA_BASE_URL}/virtual-accounts/requests`, {
       method: 'POST',
@@ -23,7 +23,7 @@ export const issueVirtualAccount = async (businessName: string, currency: string
       body: JSON.stringify({
         currency: currency,
         accountType: 'virtual',
-        bvn: process.env.TEST_BVN || '12345678901',
+        bvn: bvn || process.env.TEST_BVN || '12345678901',
         name: businessName,
       })
     });

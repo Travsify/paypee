@@ -7,7 +7,7 @@ export class IbanService {
   /**
    * Provisions a new virtual global account for a user.
    */
-  static async provisionGlobalAccount(userId: string, currency: string, userName?: string) {
+  static async provisionGlobalAccount(userId: string, currency: string, userName?: string, bvn?: string) {
     console.log(`🌍 Provisioning ${currency} account for User ${userId}...`);
 
     const prefixes: Record<string, string> = {
@@ -41,7 +41,7 @@ export class IbanService {
     if (currency === 'NGN') {
        try {
           console.log(`🇳🇬 Calling Fincra for real NGN rails...`);
-          const fincraData = await issueVirtualAccount(userName || "Valued Customer", 'NGN');
+          const fincraData = await issueVirtualAccount(userName || "Valued Customer", 'NGN', bvn);
           details = {
              accountHolder: fincraData.accountName || userName || "Paypee Local Node",
              iban: fincraData.accountNumber,
