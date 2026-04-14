@@ -29,7 +29,7 @@ export const issueVirtualAccount = async (businessName: string, currency: string
     });
     
     const data = await response.json();
-    if (!response.ok) throw new Error(data.message || 'Fincra Account Creation Failed');
+    if (!response.ok) throw new Error(data.message || 'Banking partner account creation failed');
     return data.data; // Returns accountNumber, bankName, etc.
   } catch (error) {
     console.error('[FINCRA] Virtual Account Error:', error);
@@ -54,7 +54,7 @@ export const issueVirtualCard = async (userId: string, currency: string) => {
     });
 
     const data = await response.json();
-    if (!response.ok) throw new Error(data.message || 'Fincra Card Creation Failed');
+    if (!response.ok) throw new Error(data.message || 'Banking partner card creation failed');
     return data.data; // Returns cardNumber, cvv, expiry
   } catch (error) {
     console.error('[FINCRA] Card Issue Error:', error);
@@ -84,7 +84,7 @@ export const processFiatPayout = async (amount: number, currency: string, destin
     });
 
     const data = await response.json();
-    if (!response.ok) throw new Error(data.message || 'Fincra Payout Failed');
+    if (!response.ok) throw new Error(data.message || 'Banking partner payout failed');
     return data.data;
   } catch (error) {
     console.error('[FINCRA] Payout Error:', error);

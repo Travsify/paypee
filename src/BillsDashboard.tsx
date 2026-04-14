@@ -139,7 +139,7 @@ const BillsDashboard = () => {
           <div style={{ color: 'var(--primary)' }}><ShieldCheck size={32} /></div>
           <div>
              <div style={{ fontWeight: 800, fontSize: '0.9rem', marginBottom: '0.2rem' }}>Verified Settlement</div>
-             <p style={{ color: '#64748b', fontSize: '0.8rem', margin: 0 }}>All bill payments are finalized in real-time via Fincra's primary financial grid.</p>
+             <p style={{ color: '#64748b', fontSize: '0.8rem', margin: 0 }}>All bill payments are finalized in real-time via our primary financial grid.</p>
           </div>
        </div>
     </div>

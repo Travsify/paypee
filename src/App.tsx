@@ -413,8 +413,8 @@ const App = () => {
                 <p style={{ fontSize: '0.8rem', letterSpacing: '2px', fontWeight: 700 }}>POWERING OUR NETWORK</p>
              </div>
              <div className="logo-grid">
-                <div className="logo-item"><Globe size={24} /> FINCRA</div>
-                <div className="logo-item"><Zap size={24} /> BITNOB</div>
+                <div className="logo-item"><Globe size={24} /> CLEARING</div>
+                <div className="logo-item"><Zap size={24} /> LIQUIDITY</div>
                 <div className="logo-item"><ShieldCheck size={24} /> CENTRAL BANK</div>
                 <div className="logo-item"><Building2 size={24} /> STELLAR</div>
                 <div className="logo-item"><Lock size={24} /> FIREBLOCKS</div>

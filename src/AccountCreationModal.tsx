@@ -255,7 +255,7 @@ const AccountCreationModal: React.FC<AccountCreationModalProps> = ({
                            </div>
                            <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', lineHeight: 1.5 }}>
                              {currentCurrency.code === 'NGN' 
-                               ? 'Fincra requires your BVN for NGN virtual account generation.' 
+                               ? 'Central bank regulations require your BVN for NGN virtual account generation.' 
                                : `Standard KYC limits apply to this ${currentCurrency.code} account. Ensure your identity verification is fully approved.`}
                            </p>
                          </div>
@@ -268,7 +268,7 @@ const AccountCreationModal: React.FC<AccountCreationModalProps> = ({
                                 value={bvn} 
                                 onChange={e => setBvn(e.target.value)} 
                                 maxLength={11}
-                                placeholder="Required by Fincra" 
+                                placeholder="Required by regulations" 
                                 style={{ width: '100%', padding: '1rem', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '14px', color: '#fff', fontSize: '1rem', outline: 'none', transition: 'border 0.2s', boxSizing: 'border-box' }}
                                 onFocus={e => e.target.style.borderColor = '#10b981'}
                                 onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.1)'}
