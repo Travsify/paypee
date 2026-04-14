@@ -222,9 +222,12 @@ const BusinessDashboard = ({ onLogout }: { onLogout?: () => void }) => {
               <Wallet size={20} />
               <div style={{ fontSize: '10px', marginTop: '4px', fontWeight: 600 }}>Assets</div>
            </div>
-           <div onClick={() => setIsAccountModalOpen(true)} style={{ textAlign: 'center', background: 'var(--primary)', padding: '10px', borderRadius: '50%', marginTop: '-30px', boxShadow: '0 4px 15px rgba(99, 102, 241, 0.4)' }}>
-              <Plus size={24} color="#fff" />
-           </div>
+           <div onClick={() => {
+              if (!isVerified) { alert('You must complete Identity Verification before provisioning a treasury account.'); }
+              else { setIsAccountModalOpen(true); }
+            }} style={{ textAlign: 'center', background: isVerified ? 'var(--primary)' : 'rgba(255,255,255,0.1)', padding: '10px', borderRadius: '50%', marginTop: '-30px', boxShadow: isVerified ? '0 4px 15px rgba(99, 102, 241, 0.4)' : 'none' }}>
+               {isVerified ? <Plus size={24} color="#fff" /> : <Lock size={24} color="var(--text-muted)" />}
+            </div>
            <div onClick={() => navigate('analytics')} style={{ textAlign: 'center', color: activeSection === 'analytics' ? 'var(--primary)' : 'var(--text-muted)' }}>
               <BarChart3 size={20} />
               <div style={{ fontSize: '10px', marginTop: '4px', fontWeight: 600 }}>Stats</div>
@@ -277,9 +280,12 @@ const BusinessDashboard = ({ onLogout }: { onLogout?: () => void }) => {
                     );
                   })}
                   <motion.div 
-                     whileHover={{ scale: 1.02, y: -5 }}
-                     onClick={() => setIsAccountModalOpen(true)}
-                     style={{ border: '2px dashed var(--border)', borderRadius: '24px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '2rem', cursor: 'pointer', minHeight: '200px' }}
+                     whileHover={isVerified ? { scale: 1.02, y: -5 } : {}}
+                      onClick={() => {
+                        if (!isVerified) { alert('You must complete Identity Verification before provisioning a treasury account.'); }
+                        else { setIsAccountModalOpen(true); }
+                      }}
+                      style={{ border: '2px dashed var(--border)', borderRadius: '24px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '2rem', cursor: isVerified ? 'pointer' : 'not-allowed', minHeight: '200px', opacity: isVerified ? 1 : 0.5 }}
                   >
                      <Plus size={40} color="var(--primary)" style={{ opacity: 0.3, marginBottom: '1rem' }} />
                      <span style={{ fontWeight: 800, color: 'var(--text-muted)' }}>Deploy Treasury Rail</span>
@@ -301,7 +307,13 @@ const BusinessDashboard = ({ onLogout }: { onLogout?: () => void }) => {
                 </div>
                 <div className="dashboard-header-right" style={{ display: 'flex', gap: '1rem' }}>
                   <button style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid var(--border)', padding: '0.75rem 1.25rem', borderRadius: '12px', fontWeight: 700, cursor: 'pointer' }} onClick={fetchUserData}><RefreshCcw size={18} /></button>
-                  <button style={{ background: 'var(--primary)', color: '#fff', border: 'none', padding: '0.75rem 1.5rem', borderRadius: '12px', fontWeight: 700, cursor: 'pointer' }} onClick={() => setIsAccountModalOpen(true)}>Generate Rail</button>
+                  <button style={{ background: isVerified ? 'var(--primary)' : 'rgba(255,255,255,0.05)', color: isVerified ? '#fff' : '#64748b', border: 'none', padding: '0.75rem 1.5rem', borderRadius: '12px', fontWeight: 700, cursor: isVerified ? 'pointer' : 'not-allowed' }} onClick={() => {
+                    if (!isVerified) {
+                      alert('You must complete Identity Verification before provisioning a treasury account.');
+                    } else {
+                      setIsAccountModalOpen(true);
+                    }
+                  }}>Generate Rail</button>
                 </div>
               </header>
 
@@ -362,10 +374,13 @@ const BusinessDashboard = ({ onLogout }: { onLogout?: () => void }) => {
                         </div>
                       ))}
                       <motion.button 
-                        whileTap={{ scale: 0.98 }}
-                        onClick={() => setIsAccountModalOpen(true)}
-                        style={{ width: '100%', padding: '1rem', border: '2px dashed var(--border)', background: 'transparent', borderRadius: '20px', color: 'var(--text-muted)', fontWeight: 700, cursor: 'pointer' }}
-                      >+ Add Rail</motion.button>
+                        whileTap={isVerified ? { scale: 0.98 } : {}}
+                         onClick={() => {
+                           if (!isVerified) { alert('You must complete Identity Verification before provisioning a treasury account.'); }
+                           else { setIsAccountModalOpen(true); }
+                         }}
+                         style={{ width: '100%', padding: '1rem', border: '2px dashed var(--border)', background: 'transparent', borderRadius: '20px', color: isVerified ? 'var(--text-muted)' : '#64748b', fontWeight: 700, cursor: isVerified ? 'pointer' : 'not-allowed', opacity: isVerified ? 1 : 0.5 }}
+                       >{isVerified ? '+ Add Rail' : '🔒 Verification Required'}</motion.button>
                     </div>
                  </div>
               </div>

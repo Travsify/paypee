@@ -778,6 +778,14 @@ app.post('/api/accounts/provision', authenticateToken, async (req: any, res: any
       return res.status(400).json({ error: 'Unsupported currency for account generation.' });
     }
     const user = await prisma.user.findUnique({ where: { id: req.user.userId } });
+
+    // ── KYC GATE: Only VERIFIED users may provision new accounts ──
+    if (!user || user.kycStatus !== 'VERIFIED') {
+      return res.status(403).json({ 
+        error: 'Identity verification required. Please complete KYC/KYB before provisioning a bank account.' 
+      });
+    }
+
     const name = user?.businessName || `${user?.firstName} ${user?.lastName}`;
     const account = await IbanService.provisionGlobalAccount(req.user.userId, currency, name);
     res.status(201).json(account);

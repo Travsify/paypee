@@ -243,8 +243,11 @@ const DeveloperDashboard = ({ onLogout }: { onLogout?: () => void }) => {
               <Wallet size={20} />
               <div style={{ fontSize: '10px', marginTop: '4px', fontWeight: 600 }}>Assets</div>
            </div>
-           <div onClick={() => setIsAccountModalOpen(true)} style={{ textAlign: 'center', background: 'var(--primary)', padding: '10px', borderRadius: '50%', marginTop: '-30px', boxShadow: '0 4px 15px rgba(99, 102, 241, 0.4)' }}>
-              <Plus size={24} color="#fff" />
+           <div onClick={() => {
+              if (!isVerified) { alert('You must complete Identity Verification before provisioning a staging account.'); }
+              else { setIsAccountModalOpen(true); }
+            }} style={{ textAlign: 'center', background: 'var(--primary)', padding: '10px', borderRadius: '50%', marginTop: '-30px', boxShadow: '0 4px 15px rgba(99, 102, 241, 0.4)' }}>
+              {isVerified ? <Plus size={24} color="#fff" /> : <Lock size={24} color="var(--text-muted)" />}
            </div>
            <div onClick={() => navigate('traffic')} style={{ textAlign: 'center', color: activeSection === 'traffic' ? 'var(--primary)' : 'var(--text-muted)' }}>
               <Activity size={20} />
@@ -292,9 +295,12 @@ const DeveloperDashboard = ({ onLogout }: { onLogout?: () => void }) => {
                       );
                    })}
                    <motion.div 
-                     whileHover={{ scale: 1.02, y: -5 }}
-                     onClick={() => setIsAccountModalOpen(true)}
-                     style={{ border: '2px dashed var(--border)', borderRadius: '24px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '2rem', cursor: 'pointer', minHeight: '200px' }}
+                     whileHover={isVerified ? { scale: 1.02, y: -5 } : {}}
+                      onClick={() => {
+                        if (!isVerified) { alert('You must complete Identity Verification before provisioning a staging account.'); }
+                        else { setIsAccountModalOpen(true); }
+                      }}
+                      style={{ border: '2px dashed var(--border)', borderRadius: '24px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '2rem', cursor: isVerified ? 'pointer' : 'not-allowed', minHeight: '200px', opacity: isVerified ? 1 : 0.5 }}
                   >
                      <Plus size={40} color="var(--primary)" style={{ opacity: 0.3, marginBottom: '1rem' }} />
                      <span style={{ fontWeight: 800, color: 'var(--text-muted)' }}>Get New Staging Account</span>
@@ -383,7 +389,10 @@ const DeveloperDashboard = ({ onLogout }: { onLogout?: () => void }) => {
                    <section>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
                          <h2 style={{ fontSize: '1.25rem', fontWeight: 800 }}>Staging Wallets</h2>
-                         <button onClick={() => setIsAccountModalOpen(true)} style={{ background: 'transparent', border: 'none', color: 'var(--primary)', fontWeight: 700, cursor: 'pointer' }}>+ NEW RAIL</button>
+                         <button onClick={() => {
+                           if (!isVerified) { alert('You must complete Identity Verification before provisioning a staging account.'); }
+                           else { setIsAccountModalOpen(true); }
+                         }} style={{ background: 'transparent', border: 'none', color: isVerified ? 'var(--primary)' : '#64748b', fontWeight: 700, cursor: isVerified ? 'pointer' : 'not-allowed' }}>{isVerified ? '+ NEW RAIL' : '🔒 VERIFY FIRST'}</button>
                       </div>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                          {userData?.wallets?.slice(0, 3).map((w: any) => (
