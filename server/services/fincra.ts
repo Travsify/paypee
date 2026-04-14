@@ -5,7 +5,9 @@ const FINCRA_BASE_URL = process.env.FINCRA_ENV === 'live'
   ? 'https://api.fincra.com/core' 
   : 'https://sandboxapi.fincra.com/core';
 
-const FINCRA_SECRET_KEY = process.env.FINCRA_SECRET_KEY || '';
+const FINCRA_SECRET_KEY = (process.env.FINCRA_SECRET_KEY || '').replace(/"/g, '');
+const FINCRA_BUSINESS_ID = (process.env.FINCRA_BUSINESS_ID || '').replace(/"/g, '') || 
+                           (process.env.FINCRA_PUB_KEY ? Buffer.from(process.env.FINCRA_PUB_KEY.split('_')[1] || '', 'base64').toString().split(':')[0] : '');
 
 const getHeaders = () => ({
   'api-key': FINCRA_SECRET_KEY,
@@ -29,6 +31,7 @@ export const issueVirtualAccount = async (businessName: string, currency: string
         accountType: 'virtual',
         bvn: bvn || process.env.TEST_BVN || '12345678901',
         name: businessName,
+        business: FINCRA_BUSINESS_ID
       })
     });
     
@@ -78,7 +81,7 @@ export const processFiatPayout = async (amount: number, currency: string, destin
             sourceCurrency: currency,
             destinationCurrency: currency,
             amount: amount,
-            business: process.env.FINCRA_BUSINESS_ID,
+            business: FINCRA_BUSINESS_ID,
             beneficiary: {
                 firstName: 'Recipient',
                 accountNumber: destinationAccount.number,
