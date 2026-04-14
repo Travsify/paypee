@@ -20,7 +20,16 @@
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
 }
 
+html, body {
+  width: 100%;
+  overflow-x: hidden;
+  background: var(--bg-color);
+  -webkit-text-size-adjust: 100%;
+}
+
 .app-shell {
+  width: 100%;
+  overflow-x: hidden !important;
   background-image: radial-gradient(circle at 2px 2px, rgba(255, 255, 255, 0.05) 1px, transparent 0);
   background-size: 40px 40px;
   min-height: 100vh;
@@ -263,7 +272,7 @@ h1 span {
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 2rem;
 }
 
@@ -875,7 +884,27 @@ input:focus {
 
   .grid {
     grid-template-columns: 1fr !important;
+    gap: 1.5rem !important;
+    width: 100% !important;
+  }
+
+  footer .container > div:first-child {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
     gap: 2rem !important;
+    text-align: left !important;
+  }
+
+  footer .container > div:last-child {
+    flex-direction: column !important;
+    gap: 1.5rem !important;
+    align-items: flex-start !important;
+  }
+
+  footer .container > div:last-child div {
+    flex-direction: column !important;
+    gap: 1rem !important;
+    align-items: flex-start !important;
   }
 
   .card {
