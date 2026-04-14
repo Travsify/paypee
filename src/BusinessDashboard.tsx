@@ -296,7 +296,7 @@ const BusinessDashboard = ({ onLogout }: { onLogout?: () => void }) => {
 
           {activeSection === 'dashboard' && (
             <>
-              <header className="dashboard-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3rem' }}>
+              <div className="dashboard-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3rem' }}>
                 <div>
                   <div className="mobile-only" style={{ display: 'none', color: 'var(--primary)', fontWeight: 900, fontSize: '0.7rem', letterSpacing: '2px', marginBottom: '0.5rem' }}>BUSINESS OPERATIONS</div>
                   <h1 style={{ fontSize: '2.5rem', fontWeight: 900, marginBottom: '0.5rem', letterSpacing: '-0.02em' }}>Treasury Control</h1>
@@ -315,7 +315,7 @@ const BusinessDashboard = ({ onLogout }: { onLogout?: () => void }) => {
                     }
                   }}>Generate Rail</button>
                 </div>
-              </header>
+              </div>
 
               <div className="balance-card-slider no-scrollbar" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '2rem', marginBottom: '3.5rem' }}>
                  <MetricCard label="Total Treasury" value={`$${(userData?.wallets?.reduce((acc: any, w: any) => acc + (w.currency === 'USD' ? parseFloat(w.balance) : 0), 0) || 0).toLocaleString()}`} trend="+12.4%" icon={TrendingUp} color="#10b981" />

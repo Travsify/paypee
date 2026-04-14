@@ -311,7 +311,7 @@ const DeveloperDashboard = ({ onLogout }: { onLogout?: () => void }) => {
 
           {activeSection === 'overview' && (
             <>
-              <header className="dashboard-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3rem' }}>
+              <div className="dashboard-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3rem' }}>
                 <div>
                   <div className="mobile-only" style={{ display: 'none', color: 'var(--primary)', fontWeight: 900, fontSize: '0.7rem', letterSpacing: '2px', marginBottom: '0.5rem' }}>DEVELOPER CONSOLE</div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '0.5rem', flexWrap: 'wrap' }}>
@@ -329,7 +329,7 @@ const DeveloperDashboard = ({ onLogout }: { onLogout?: () => void }) => {
                       <button onClick={() => setMode('live')} style={{ padding: '0.5rem 1rem', borderRadius: '10px', border: 'none', background: mode === 'live' ? 'var(--primary)' : 'transparent', color: mode === 'live' ? '#fff' : 'var(--text-muted)', fontWeight: 700, cursor: 'pointer', fontSize: '0.8rem' }}>LIVE CORE</button>
                    </div>
                 </div>
-              </header>
+              </div>
 
               <div className="dashboard-grid-2" style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1.2fr) minmax(0, 0.8fr)', gap: '3rem' }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '3rem' }}>
