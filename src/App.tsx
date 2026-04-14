@@ -212,18 +212,18 @@ const App = () => {
   };
 
   const MobileBottomNav = () => (
-    <div className="mobile-only" style={{ display: 'none', position: 'fixed', bottom: 0, left: 0, right: 0, background: 'rgba(2, 6, 23, 0.95)', backdropFilter: 'blur(20px)', borderTop: '1px solid var(--border)', padding: '0.75rem 1rem', justifyContent: 'space-around', alignItems: 'center', zIndex: 1000 }}>
-       <button onClick={() => { setView('landing'); setLandingView('main'); }} style={{ background: 'transparent', border: 'none', color: landingView === 'main' ? 'var(--primary)' : 'var(--text-muted)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.25rem', fontSize: '0.6rem', fontWeight: 800 }}>
-          <Layers size={20} /> HOME
+    <div className="mobile-bottom-nav mobile-only">
+       <button onClick={() => { setView('landing'); setLandingView('main'); }} style={{ background: 'transparent', border: 'none', color: landingView === 'main' ? 'var(--primary)' : 'var(--text-muted)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.4rem', fontSize: '0.7rem', fontWeight: 800 }}>
+          <Layers size={22} /> <span>HOME</span>
        </button>
-       <button onClick={() => { setView('landing'); setLandingView('individual'); }} style={{ background: 'transparent', border: 'none', color: landingView === 'individual' ? 'var(--primary)' : 'var(--text-muted)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.25rem', fontSize: '0.6rem', fontWeight: 800 }}>
-          <Users size={20} /> PERSONAL
+       <button onClick={() => { setView('landing'); setLandingView('individual'); }} style={{ background: 'transparent', border: 'none', color: landingView === 'individual' ? 'var(--primary)' : 'var(--text-muted)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.4rem', fontSize: '0.7rem', fontWeight: 800 }}>
+          <Users size={22} /> <span>PERSONAL</span>
        </button>
-       <button onClick={() => { setView('landing'); setLandingView('business'); }} style={{ background: 'transparent', border: 'none', color: landingView === 'business' ? 'var(--primary)' : 'var(--text-muted)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.25rem', fontSize: '0.6rem', fontWeight: 800 }}>
-          <Building2 size={20} /> BUSINESS
+       <button onClick={() => { setView('landing'); setLandingView('business'); }} style={{ background: 'transparent', border: 'none', color: landingView === 'business' ? 'var(--primary)' : 'var(--text-muted)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.4rem', fontSize: '0.7rem', fontWeight: 800 }}>
+          <Building2 size={22} /> <span>BUSINESS</span>
        </button>
-       <button onClick={() => { setView('landing'); setLandingView('developer'); }} style={{ background: 'transparent', border: 'none', color: landingView === 'developer' ? 'var(--primary)' : 'var(--text-muted)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.25rem', fontSize: '0.6rem', fontWeight: 800 }}>
-          <Terminal size={20} /> DEV
+       <button onClick={() => { setView('landing'); setLandingView('developer'); }} style={{ background: 'transparent', border: 'none', color: landingView === 'developer' ? 'var(--primary)' : 'var(--text-muted)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.4rem', fontSize: '0.7rem', fontWeight: 800 }}>
+          <Terminal size={22} /> <span>DEV</span>
        </button>
     </div>
   );
