@@ -61,7 +61,10 @@ const WalletRailItem: React.FC<WalletRailItemProps> = ({ currency, balance, symb
 
   const accNo = details?.iban || details?.accountNumber || details?.account_number || details?.virtual_account_number || details?.address || details?.nuban || details?.data?.account_number;
   const bankName = details?.bankName || details?.bank_name || details?.bank || details?.provider || 'Global Liquidity Provider';
-  const accountName = details?.accountInformation?.accountName || details?.accountName || details?.accountHolder || userName;
+  let accountName = details?.accountInformation?.accountName || details?.accountName || details?.accountHolder;
+  if (!accountName || accountName === "Valued Customer" || accountName.includes("Paypee") || accountName.includes("TechStream")) {
+    accountName = userName || "Valued Customer";
+  }
 
   const colorMap: Record<string, string> = {
     USD: '#3b82f6',
@@ -115,10 +118,10 @@ const WalletRailItem: React.FC<WalletRailItemProps> = ({ currency, balance, symb
           </div>
         </div>
         
-        <div style={{ textAlign: 'right', display: 'flex', alignItems: 'center', gap: '2rem' }}>
+        <div style={{ textAlign: 'right', display: 'flex', alignItems: 'center', gap: '1rem' }}>
           <div>
             <div style={{ fontSize: '1.2rem', fontWeight: 900 }}>{symbol}{balance}</div>
-            <div style={{ fontSize: '0.7rem', color: '#10b981', fontWeight: 800, letterSpacing: '1px' }}>SYNCING_LIVE</div>
+            <div className="desktop-only" style={{ fontSize: '0.7rem', color: '#10b981', fontWeight: 800, letterSpacing: '1px' }}>SYNCING_LIVE</div>
           </div>
           {isExpanded ? <ChevronUp size={20} color="var(--text-muted)" /> : <ChevronDown size={20} color="var(--text-muted)" />}
         </div>
@@ -134,15 +137,15 @@ const WalletRailItem: React.FC<WalletRailItemProps> = ({ currency, balance, symb
             style={{ overflow: 'hidden' }}
           >
             <div style={{ padding: '0 1.5rem 2rem', borderTop: '1px solid rgba(255,255,255,0.03)', marginTop: '0.5rem' }}>
-               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginTop: '1.5rem' }}>
+               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '1rem', marginTop: '1.5rem' }}>
                   <CopyValue label="Account Name" value={accountName} />
                   <CopyValue label="Account Number" value={accNo || 'GENERATING...'} />
                   <CopyValue label="Bank / Provider" value={bankName} />
-                  <div style={{ display: 'flex', gap: '1rem' }}>
-                     <button style={{ flex: 1, background: 'var(--primary)', color: '#fff', border: 'none', borderRadius: '12px', padding: '0.75rem', fontWeight: 700, fontSize: '0.85rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
+                  <div style={{ display: 'flex', gap: '0.5rem' }}>
+                     <button onClick={(e) => e.stopPropagation()} style={{ flex: 1, background: 'var(--primary)', color: '#fff', border: 'none', borderRadius: '12px', padding: '0.75rem', fontWeight: 700, fontSize: '0.85rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
                         <ArrowUpRight size={16} /> Send
                      </button>
-                     <button style={{ flex: 1, background: 'rgba(255,255,255,0.05)', color: '#fff', border: '1px solid var(--border)', borderRadius: '12px', padding: '0.75rem', fontWeight: 700, fontSize: '0.85rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
+                     <button onClick={(e) => e.stopPropagation()} style={{ flex: 1, background: 'rgba(255,255,255,0.05)', color: '#fff', border: '1px solid var(--border)', borderRadius: '12px', padding: '0.75rem', fontWeight: 700, fontSize: '0.85rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
                         <ArrowDownLeft size={16} /> Add
                      </button>
                      <button 
