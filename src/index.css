@@ -995,6 +995,24 @@ input:focus {
   .desktop-only {
     display: none !important;
   }
+  .auth-shell {
+    flex-direction: column !important;
+  }
+
+  .auth-form-container {
+    padding: 3rem 1.5rem !important;
+    max-width: none !important;
+    width: 100% !important;
+    justify-content: flex-start !important;
+    padding-top: 5rem !important;
+  }
+
+  .auth-form-container button[style*="top: 2rem"] {
+    position: fixed !important;
+    top: 1rem !important;
+    right: 1rem !important;
+    z-index: 100;
+  }
 }
 
 @media (min-width: 769px) {

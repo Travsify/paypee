@@ -103,9 +103,9 @@ const Auth = ({ onComplete, onBack }: AuthProps) => {
   };
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', background: '#020617', color: '#fff' }}>
+    <div className="auth-shell" style={{ display: 'flex', minHeight: '100vh', background: '#020617', color: '#fff' }}>
       {/* Left Side: Value Proposition */}
-      <div style={{ 
+      <div className="desktop-only" style={{ 
         flex: 1, 
         background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%)',
         padding: '4rem',
@@ -176,7 +176,7 @@ const Auth = ({ onComplete, onBack }: AuthProps) => {
       </div>
 
       {/* Right Side: Auth Form */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: '4rem', maxWidth: '600px', margin: '0 auto', justifyContent: 'center' }}>
+      <div className="auth-form-container" style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: '4rem', maxWidth: '600px', margin: '0 auto', justifyContent: 'center', position: 'relative' }}>
         <button 
           onClick={onBack}
           style={{ position: 'absolute', top: '2rem', right: '2rem', background: 'transparent', border: 'none', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}
@@ -202,7 +202,7 @@ const Auth = ({ onComplete, onBack }: AuthProps) => {
           )}
         </div>
 
-        <div style={{ display: 'flex', background: 'rgba(255,255,255,0.05)', padding: '0.3rem', borderRadius: '12px', marginBottom: '2.5rem', border: '1px solid var(--border)' }}>
+        <div style={{ display: 'flex', background: 'rgba(255,255,255,0.05)', padding: '0.3rem', borderRadius: '12px', marginBottom: '2.5rem', border: '1px solid var(--border)', flexWrap: 'nowrap' }}>
           {[
             { id: 'individual', icon: User, label: 'Individual' },
             { id: 'business', icon: Building2, label: 'Business' },
