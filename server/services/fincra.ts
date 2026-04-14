@@ -17,7 +17,11 @@ const getHeaders = () => ({
  */
 export const issueVirtualAccount = async (businessName: string, currency: string, bvn?: string) => {
   try {
-    const response = await fetch(`${FINCRA_BASE_URL}/virtual-accounts/requests`, {
+    const FINCRA_VIRTUAL_URL = process.env.FINCRA_ENV === 'live'
+       ? 'https://api.fincra.com/profile/virtual-accounts/requests'
+       : 'https://sandboxapi.fincra.com/profile/virtual-accounts/requests';
+
+    const response = await fetch(FINCRA_VIRTUAL_URL, {
       method: 'POST',
       headers: getHeaders(),
       body: JSON.stringify({
