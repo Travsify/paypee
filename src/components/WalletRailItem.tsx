@@ -59,8 +59,8 @@ const CopyValue = ({ value, label }: { value: string; label: string }) => {
 const WalletRailItem: React.FC<WalletRailItemProps> = ({ currency, balance, symbol, details, userName, onDelete }) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
-  const accNo = details?.iban || details?.accountNumber || details?.account_number || details?.virtual_account_number || details?.address || details?.nuban || details?.data?.account_number;
-  const bankName = details?.bankName || details?.bank_name || details?.bank || details?.provider || 'Global Liquidity Provider';
+  const accNo = details?.iban || details?.accountNumber || details?.account_number || details?.virtual_account_number || details?.address || details?.nuban || details?.accountInformation?.accountNumber || details?.data?.account_number;
+  const bankName = details?.accountInformation?.bankName || details?.bankName || details?.bank_name || details?.bank || details?.provider || 'Providus Bank';
   let accountName = details?.accountInformation?.accountName || details?.accountName || details?.accountHolder;
   if (!accountName || accountName === "Valued Customer" || accountName.includes("Paypee") || accountName.includes("TechStream")) {
     accountName = userName || "Valued Customer";
@@ -121,7 +121,7 @@ const WalletRailItem: React.FC<WalletRailItemProps> = ({ currency, balance, symb
         <div style={{ textAlign: 'right', display: 'flex', alignItems: 'center', gap: '1rem' }}>
           <div>
             <div style={{ fontSize: '1.2rem', fontWeight: 900 }}>{symbol}{balance}</div>
-            <div className="desktop-only" style={{ fontSize: '0.7rem', color: '#10b981', fontWeight: 800, letterSpacing: '1px' }}>SYNCING_LIVE</div>
+            <div className="desktop-only" style={{ fontSize: '0.7rem', color: '#10b981', fontWeight: 800, letterSpacing: '1px' }}>LIVE</div>
           </div>
           {isExpanded ? <ChevronUp size={20} color="var(--text-muted)" /> : <ChevronDown size={20} color="var(--text-muted)" />}
         </div>
@@ -141,12 +141,12 @@ const WalletRailItem: React.FC<WalletRailItemProps> = ({ currency, balance, symb
                   <CopyValue label="Account Name" value={accountName} />
                   <CopyValue label="Account Number" value={accNo || 'GENERATING...'} />
                   <CopyValue label="Bank / Provider" value={bankName} />
-                  <div style={{ display: 'flex', gap: '0.5rem' }}>
-                     <button onClick={(e) => e.stopPropagation()} style={{ flex: 1, background: 'var(--primary)', color: '#fff', border: 'none', borderRadius: '12px', padding: '0.75rem', fontWeight: 700, fontSize: '0.85rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
+                  <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                     <button onClick={(e) => e.stopPropagation()} style={{ flex: 1, minWidth: '100px', background: 'var(--primary)', color: '#fff', border: 'none', borderRadius: '12px', padding: '0.75rem', fontWeight: 700, fontSize: '0.85rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
                         <ArrowUpRight size={16} /> Send
                      </button>
-                     <button onClick={(e) => e.stopPropagation()} style={{ flex: 1, background: 'rgba(255,255,255,0.05)', color: '#fff', border: '1px solid var(--border)', borderRadius: '12px', padding: '0.75rem', fontWeight: 700, fontSize: '0.85rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
-                        <ArrowDownLeft size={16} /> Add
+                     <button onClick={(e) => e.stopPropagation()} style={{ flex: 1, minWidth: '100px', background: 'rgba(255,255,255,0.05)', color: '#fff', border: '1px solid var(--border)', borderRadius: '12px', padding: '0.75rem', fontWeight: 700, fontSize: '0.85rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
+                        <ArrowDownLeft size={16} /> Top up
                      </button>
                      <button 
                         onClick={(e) => {
@@ -155,9 +155,9 @@ const WalletRailItem: React.FC<WalletRailItemProps> = ({ currency, balance, symb
                             if (confirm('Terminate this liquidity rail?')) onDelete(walletId);
                           }
                         }}
-                        style={{ width: '45px', background: 'rgba(244, 63, 94, 0.1)', color: '#f43f5e', border: 'none', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                        style={{ flex: 1, minWidth: '100px', background: 'rgba(244, 63, 94, 0.1)', color: '#f43f5e', border: '1px solid rgba(244, 63, 94, 0.2)', borderRadius: '12px', padding: '0.75rem', fontWeight: 700, fontSize: '0.85rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
                       >
-                       <Trash2 size={18} />
+                       <Trash2 size={16} /> Delete
                      </button>
                   </div>
                </div>
