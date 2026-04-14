@@ -162,8 +162,10 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
         accountType="INDIVIDUAL"
         onStatusChange={(status) => setUserData((prev: any) => ({ ...prev, kycStatus: status }))}
       />
-      <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
-        <aside style={{ width: '280px', borderRight: '1px solid var(--border)', background: '#0a0f1e', padding: '2rem 1.5rem', display: 'flex', flexDirection: 'column' }}>
+      
+      <div style={{ display: 'flex', flex: 1, overflow: 'hidden', position: 'relative' }}>
+        {/* Sidebar - Hidden on Mobile */}
+        <aside className="dashboard-aside" style={{ width: '280px', borderRight: '1px solid var(--border)', background: '#0a0f1e', padding: '2rem 1.5rem', display: 'flex', flexDirection: 'column' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0 0.5rem', marginBottom: '3rem' }}>
             <div style={{ width: 32, height: 32, background: 'var(--primary)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                <Zap size={20} color="#fff" strokeWidth={3} />
@@ -189,7 +191,30 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
           </div>
         </aside>
 
-        <main style={{ flex: 1, overflowY: 'auto', padding: '3rem 4rem' }}>
+        {/* Mobile Navigation Bar */}
+        <div className="mobile-nav">
+           <div onClick={() => navigate('overview')} style={{ textAlign: 'center', color: activeSection === 'overview' ? 'var(--primary)' : 'var(--text-muted)' }}>
+              <LayoutDashboard size={20} />
+              <div style={{ fontSize: '10px', marginTop: '4px', fontWeight: 600 }}>Home</div>
+           </div>
+           <div onClick={() => navigate('wallets')} style={{ textAlign: 'center', color: activeSection === 'wallets' ? 'var(--primary)' : 'var(--text-muted)' }}>
+              <Wallet size={20} />
+              <div style={{ fontSize: '10px', marginTop: '4px', fontWeight: 600 }}>Wallets</div>
+           </div>
+           <div onClick={() => setIsPayoutOpen(true)} style={{ textAlign: 'center', background: 'var(--primary)', padding: '10px', borderRadius: '50%', marginTop: '-30px', boxShadow: '0 4px 15px rgba(99, 102, 241, 0.4)' }}>
+              <Send size={24} color="#fff" />
+           </div>
+           <div onClick={() => navigate('cards')} style={{ textAlign: 'center', color: activeSection === 'cards' ? 'var(--primary)' : 'var(--text-muted)' }}>
+              <CreditCard size={20} />
+              <div style={{ fontSize: '10px', marginTop: '4px', fontWeight: 600 }}>Cards</div>
+           </div>
+           <div onClick={() => navigate('ai')} style={{ textAlign: 'center', color: activeSection === 'ai' ? 'var(--primary)' : 'var(--text-muted)' }}>
+              <Bot size={20} />
+              <div style={{ fontSize: '10px', marginTop: '4px', fontWeight: 600 }}>AI</div>
+           </div>
+        </div>
+
+        <main className="dashboard-main" style={{ flex: 1, overflowY: 'auto', padding: '3rem 4rem', paddingBottom: '100px' }}>
           {activeSection === 'kyc_blocked' && (
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '70vh', textAlign: 'center', gap: '1.5rem' }}>
               <div style={{ width: 80, height: 80, background: 'rgba(99,102,241,0.1)', borderRadius: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#6366f1' }}>
@@ -209,7 +234,7 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
           {activeSection === 'wallets' && (
             <div style={{ padding: '0' }}>
                <h2 style={{ fontSize: '1.8rem', fontWeight: 800, marginBottom: '2rem' }}>My Strategic Wallets</h2>
-               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '2rem' }}>
+               <div className="balance-card-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '2rem' }}>
                   {userData?.wallets?.map((w: any) => {
                     const gradients: Record<string, string> = {
                       USD: "linear-gradient(135deg, #6366f1 0%, #a855f7 100%)",
@@ -246,7 +271,7 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
 
           {activeSection === 'cards' && (
              <div style={{ padding: '0' }}>
-               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+               <div className="dashboard-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
                  <h2 style={{ fontSize: '1.8rem', fontWeight: 800 }}>Card Issuing Node</h2>
                  <button style={{ background: isVerified ? 'var(--primary)' : 'rgba(255,255,255,0.05)', color: isVerified ? '#fff' : '#64748b', border: 'none', padding: '0.8rem 1.5rem', borderRadius: '14px', fontWeight: 700, cursor: isVerified ? 'pointer' : 'not-allowed', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                    <Plus size={20} /> Issue Secure Card
@@ -261,7 +286,7 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
                               <Zap color="#fff" size={28} />
                               <span style={{ fontSize: '0.7rem', fontWeight: 800, letterSpacing: '2px' }}>PLATINUM_CORE</span>
                            </div>
-                           <div style={{ fontSize: '1.5rem', fontWeight: 700, letterSpacing: '4px', fontFamily: 'monospace' }}>**** **** **** {card.cardNumber.slice(-4)}</div>
+                           <div style={{ fontSize: 'calc(1rem + 1vw)', fontWeight: 700, letterSpacing: '4px', fontFamily: 'monospace' }}>**** **** **** {card.cardNumber.slice(-4)}</div>
                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', fontSize: '0.8rem' }}>
                               <div>
                                  <div style={{ opacity: 0.5, fontSize: '0.6rem', marginBottom: '0.2rem' }}>CARD HOLDER</div>
@@ -281,7 +306,7 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
                     ))}
                  </div>
                ) : (
-                 <div style={{ padding: '4rem', background: 'rgba(255,255,255,0.02)', border: '2px dashed var(--border)', borderRadius: '32px', textAlign: 'center' }}>
+                 <div style={{ padding: '4rem 1.5rem', background: 'rgba(255,255,255,0.02)', border: '2px dashed var(--border)', borderRadius: '32px', textAlign: 'center' }}>
                     <CreditCard size={60} color="var(--primary)" style={{ opacity: 0.2, marginBottom: '1.5rem' }} />
                     <h3 style={{ fontSize: '1.25rem', fontWeight: 800, marginBottom: '0.5rem' }}>No Virtual Cards Active</h3>
                     <p style={{ color: 'var(--text-muted)', marginBottom: '2rem' }}>Issue a virtual USD or NGN card for global online payments.</p>
@@ -293,10 +318,10 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
 
           {activeSection === 'overview' && (
              <>
-               <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3rem' }}>
+               <header className="dashboard-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3rem' }}>
                  <div>
                    <h1 style={{ fontSize: '2.5rem', fontWeight: 900, marginBottom: '0.5rem', letterSpacing: '-0.02em' }}>Good Morning, {userData?.firstName || 'User'}</h1>
-                   <div style={{ display: 'flex', gap: '2rem', marginTop: '1rem' }}>
+                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: '2rem', marginTop: '1rem' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 700 }}>
                          <div style={{ width: 8, height: 8, background: '#10b981', borderRadius: '50%', boxShadow: '0 0 10px #10b981' }} />
                          NETWORK_SYNC_ACTIVE
@@ -307,20 +332,21 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
                       </div>
                    </div>
                  </div>
-                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '0.75rem 1.5rem', background: 'rgba(255,255,255,0.03)', borderRadius: '24px', border: '1px solid var(--border)' }}>
+                 <div className="dashboard-header-right" style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '0.75rem 1.5rem', background: 'rgba(255,255,255,0.03)', borderRadius: '24px', border: '1px solid var(--border)' }}>
                     <div style={{ width: 40, height: 40, background: 'var(--primary)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><User size={22} color="#fff" /></div>
                     <div style={{ fontWeight: 800, fontSize: '0.95rem' }}>{userData?.firstName || 'User'}</div>
                  </div>
                </header>
 
-               <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1.3fr) minmax(0, 0.7fr)', gap: '4rem' }}>
+               <div className="dashboard-grid-2" style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1.3fr) minmax(0, 0.7fr)', gap: '4rem' }}>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '4rem' }}>
                     <section>
                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
                          <h2 style={{ fontSize: '1.4rem', fontWeight: 900 }}>Smart Wallets</h2>
                          <button onClick={fetchUserData} style={{ color: 'var(--primary)', background: 'transparent', border: 'none', fontWeight: 800, fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>REFRESH STATUS <RefreshCcw size={14} /></button>
                        </div>
-                       <div style={{ display: 'flex', gap: '2rem', overflowX: 'auto', paddingBottom: '1rem', scrollbarWidth: 'none' }}>
+                       <div style={{ display: 'flex', gap: '1.5rem', overflowX: 'auto', paddingBottom: '1rem', scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+                          <style>{`.no-scrollbar::-webkit-scrollbar { display: none; }`}</style>
                           {userData?.wallets?.map((w: any) => {
                             const gradients: Record<string, string> = {
                               USD: "linear-gradient(135deg, #6366f1 0%, #a855f7 100%)",
@@ -346,7 +372,7 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
                           <motion.div 
                             whileHover={{ y: -5 }}
                             onClick={() => setIsAccountModalOpen(true)}
-                            style={{ border: '2px dashed var(--border)', borderRadius: '24px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '2rem', cursor: 'pointer', minWidth: '320px', minHeight: '200px' }}
+                            style={{ border: '2px dashed var(--border)', borderRadius: '24px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '2rem', cursor: 'pointer', minWidth: '300px', minHeight: '180px' }}
                           >
                             <Plus size={40} color="var(--primary)" style={{ opacity: 0.3, marginBottom: '1rem' }} />
                             <span style={{ fontWeight: 800, color: 'var(--text-muted)' }}>Get My Account</span>
@@ -362,16 +388,16 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
                       <div style={{ background: '#0a0f1e', border: '1px solid var(--border)', borderRadius: '32px', overflow: 'hidden' }}>
                         {transactions.length > 0 ? (
                           transactions.slice(0, 5).map((tx, i) => (
-                             <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1.5rem 2.5rem', borderBottom: i === 4 ? 'none' : '1px solid rgba(255,255,255,0.03)' }}>
-                                <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
+                             <div key={i} style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', padding: '1.5rem 2rem', borderBottom: i === transactions.slice(0, 5).length - 1 ? 'none' : '1px solid rgba(255,255,255,0.03)', gap: '1rem' }}>
+                                <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
                                    <div style={{ width: 44, height: 44, background: 'rgba(255,255,255,0.03)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: tx.type === 'DEPOSIT' ? '#10b981' : '#f43f5e' }}>{tx.type === 'DEPOSIT' ? <ArrowDownLeft /> : <ArrowUpRight />}</div>
                                    <div>
-                                      <div style={{ fontWeight: 700, fontSize: '1rem' }}>{tx.desc}</div>
+                                      <div style={{ fontWeight: 700, fontSize: '0.95rem' }}>{tx.desc}</div>
                                       <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{new Date(tx.createdAt).toLocaleDateString()}</div>
                                    </div>
                                 </div>
-                                <div style={{ textAlign: 'right' }}>
-                                   <div style={{ fontWeight: 900, fontSize: '1.1rem' }}>{tx.currency} {tx.amount}</div>
+                                <div style={{ textAlign: 'right', flex: '1 0 auto' }}>
+                                   <div style={{ fontWeight: 900, fontSize: '1.1rem' }}>{tx.currency} {parseFloat(tx.amount).toFixed(2)}</div>
                                    <div style={{ fontSize: '0.7rem', color: '#10b981', fontWeight: 800 }}>COMPLETED</div>
                                 </div>
                              </div>
@@ -422,24 +448,28 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
           )}
 
           {activeSection === 'history' && (
-            <div style={{ padding: '1rem' }}>
+            <div style={{ padding: '0' }}>
               <h2 style={{ fontSize: '1.8rem', fontWeight: 800, marginBottom: '2rem' }}>Full Network History</h2>
               <div style={{ background: '#0a0f1e', border: '1px solid var(--border)', borderRadius: '32px', overflow: 'hidden' }}>
-                 {transactions.map((tx, i) => (
-                   <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1.5rem 2.5rem', borderBottom: '1px solid rgba(255,255,255,0.03)' }}>
-                      <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
-                         <div style={{ width: 44, height: 44, background: 'rgba(255,255,255,0.03)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: tx.type === 'DEPOSIT' ? '#10b981' : '#f43f5e' }}>{tx.type === 'DEPOSIT' ? <ArrowDownLeft /> : <ArrowUpRight />}</div>
-                         <div>
-                            <div style={{ fontWeight: 700 }}>{tx.desc}</div>
-                            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{new Date(tx.createdAt).toLocaleString()}</div>
+                 {transactions.length > 0 ? (
+                    transactions.map((tx, i) => (
+                      <div key={i} style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', padding: '1.5rem 2rem', borderBottom: '1px solid rgba(255,255,255,0.03)', gap: '1rem' }}>
+                         <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
+                            <div style={{ width: 44, height: 44, background: 'rgba(255,255,255,0.03)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: tx.type === 'DEPOSIT' ? '#10b981' : '#f43f5e' }}>{tx.type === 'DEPOSIT' ? <ArrowDownLeft /> : <ArrowUpRight />}</div>
+                            <div>
+                               <div style={{ fontWeight: 700, fontSize: '1rem' }}>{tx.desc}</div>
+                               <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{new Date(tx.createdAt).toLocaleString()}</div>
+                            </div>
+                         </div>
+                         <div style={{ textAlign: 'right', flex: '1 0 auto' }}>
+                           <div style={{ fontWeight: 900, fontSize: '1.1rem' }}>{tx.currency} {parseFloat(tx.amount).toFixed(2)}</div>
+                           <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontFamily: 'monospace' }}>{tx.reference}</div>
                          </div>
                       </div>
-                      <div style={{ textAlign: 'right' }}>
-                        <div style={{ fontWeight: 900, fontSize: '1.1rem' }}>{tx.currency} {tx.amount}</div>
-                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>ID: {tx.reference}</div>
-                      </div>
-                   </div>
-                 ))}
+                    ))
+                 ) : (
+                    <div style={{ padding: '4rem', textAlign: 'center', color: 'var(--text-muted)' }}>No transactions found.</div>
+                 )}
               </div>
             </div>
           )}

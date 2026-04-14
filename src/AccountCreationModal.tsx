@@ -12,7 +12,9 @@ import {
   TrendingUp,
   Clock,
   ChevronUp,
-  ChevronDown
+  ChevronDown,
+  RefreshCcw,
+  Lock
 } from 'lucide-react';
 
 interface AccountCreationModalProps {

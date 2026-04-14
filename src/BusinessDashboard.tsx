@@ -176,176 +176,202 @@ const BusinessDashboard = ({ onLogout }: { onLogout?: () => void }) => {
   };
 
   return (
-    <div style={{ display: 'flex', height: '100vh', background: '#020617', color: '#fff', overflow: 'hidden' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', background: '#020617', color: '#fff', overflow: 'hidden' }}>
       <VerificationGate 
         kycStatus={userData?.kycStatus || 'PENDING'} 
         accountType="BUSINESS"
         onStatusChange={(status) => setUserData((prev: any) => ({ ...prev, kycStatus: status }))}
       />
       
-      <aside style={{ width: '280px', borderRight: '1px solid var(--border)', background: '#0a0f1e', padding: '2rem 1.5rem', display: 'flex', flexDirection: 'column' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0 0.5rem', marginBottom: '3rem' }}>
-          <div style={{ width: 32, height: 32, background: 'var(--primary)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-             <Zap size={20} color="#fff" strokeWidth={3} />
+      <div style={{ display: 'flex', flex: 1, overflow: 'hidden', position: 'relative' }}>
+        {/* Sidebar - Hidden on Mobile */}
+        <aside className="dashboard-aside" style={{ width: '280px', borderRight: '1px solid var(--border)', background: '#0a0f1e', padding: '2rem 1.5rem', display: 'flex', flexDirection: 'column' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0 0.5rem', marginBottom: '3rem' }}>
+            <div style={{ width: 32, height: 32, background: 'var(--primary)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+               <Zap size={20} color="#fff" strokeWidth={3} />
+            </div>
+            <span style={{ fontSize: '1.25rem', fontWeight: 900, letterSpacing: '-0.02em' }}>Paypee <span style={{ color: 'var(--primary)', fontSize: '0.6rem', verticalAlign: 'top', marginLeft: '2px' }}>BIZ</span></span>
           </div>
-          <span style={{ fontSize: '1.25rem', fontWeight: 900, letterSpacing: '-0.02em' }}>Paypee <span style={{ color: 'var(--primary)', fontSize: '0.6rem', verticalAlign: 'top', marginLeft: '2px' }}>BIZ</span></span>
-        </div>
-        
-        <div style={{ flex: 1, overflowY: 'auto' }}>
-           <SidebarItem icon={LayoutDashboard} label="Treasury Hub" active={activeSection === 'dashboard'} onClick={() => navigate('dashboard')} />
-           <SidebarItem icon={Wallet} label="Corporate Wallets" active={activeSection === 'wallets'} onClick={() => navigate('wallets')} />
-           <SidebarItem icon={Send} label="Bulk Payouts" active={activeSection === 'payouts'} onClick={() => navigate('payouts')} />
-           <SidebarItem icon={Layers} label="Sub-Accounts" active={activeSection === 'subs'} onClick={() => navigate('subs')} />
-           <SidebarItem icon={Zap} label="Business Bills" active={activeSection === 'bills'} onClick={() => navigate('bills')} />
-           <SidebarItem icon={Lock} label="Corporate Vaults" active={activeSection === 'vaults'} onClick={() => navigate('vaults')} />
-           <SidebarItem icon={BarChart3} label="Global Analytics" active={activeSection === 'analytics'} onClick={() => navigate('analytics')} />
-           <SidebarItem icon={Users} label="Team Access" active={activeSection === 'team'} onClick={() => navigate('team')} />
-           <SidebarItem icon={Bot} label="Business AI" active={activeSection === 'ai'} onClick={() => navigate('ai')} />
-        </div>
-
-        <div style={{ borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '1.5rem', marginTop: '1.5rem' }}>
-          <SidebarItem icon={Settings} label="Settings" active={activeSection === 'settings'} onClick={() => navigate('settings')} />
-          <SidebarItem icon={HelpCircle} label="Help & Support" onClick={() => navigate('help')} />
-          <SidebarItem icon={LogOut} label="Log Out" onClick={onLogout} />
-        </div>
-      </aside>
-
-      <main style={{ flex: 1, overflowY: 'auto', padding: '3rem 4rem' }}>
-        {activeSection === 'verification_required' && (
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', textAlign: 'center' }}>
-            <div style={{ width: 80, height: 80, background: 'rgba(99,102,241,0.1)', borderRadius: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary)', marginBottom: '2rem' }}><Building2 size={40} /></div>
-            <h2 style={{ fontSize: '2rem', fontWeight: 800, marginBottom: '1rem' }}>Business Verification Required</h2>
-            <p style={{ color: 'var(--text-muted)', maxWidth: '450px', lineHeight: 1.6, marginBottom: '2.5rem' }}>Your business profile needs to be verified before you can access advanced treasury features, wholesale liquidity, and bulk payouts.</p>
-            <button onClick={() => setActiveSection('dashboard')} style={{ background: 'var(--primary)', color: '#fff', border: 'none', padding: '1.2rem 3rem', borderRadius: '16px', fontWeight: 700, cursor: 'pointer' }}>Complete Verification</button>
+          
+          <div style={{ flex: 1, overflowY: 'auto' }}>
+             <SidebarItem icon={LayoutDashboard} label="Treasury Hub" active={activeSection === 'dashboard'} onClick={() => navigate('dashboard')} />
+             <SidebarItem icon={Wallet} label="Corporate Wallets" active={activeSection === 'wallets'} onClick={() => navigate('wallets')} />
+             <SidebarItem icon={Send} label="Bulk Payouts" active={activeSection === 'payouts'} onClick={() => navigate('payouts')} />
+             <SidebarItem icon={Layers} label="Sub-Accounts" active={activeSection === 'subs'} onClick={() => navigate('subs')} />
+             <SidebarItem icon={Zap} label="Business Bills" active={activeSection === 'bills'} onClick={() => navigate('bills')} />
+             <SidebarItem icon={Lock} label="Corporate Vaults" active={activeSection === 'vaults'} onClick={() => navigate('vaults')} />
+             <SidebarItem icon={BarChart3} label="Global Analytics" active={activeSection === 'analytics'} onClick={() => navigate('analytics')} />
+             <SidebarItem icon={Users} label="Team Access" active={activeSection === 'team'} onClick={() => navigate('team')} />
+             <SidebarItem icon={Bot} label="Business AI" active={activeSection === 'ai'} onClick={() => navigate('ai')} />
           </div>
-        )}
 
-        {activeSection === 'settings' && <SettingsView />}
-        {activeSection === 'ai' && <AiAdvisor transactions={transactions} userName={userData?.businessName} />}
-        {activeSection === 'vaults' && <VaultsDashboard />}
-        {activeSection === 'bills' && <BillsDashboard />}
+          <div style={{ borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '1.5rem', marginTop: '1.5rem' }}>
+            <SidebarItem icon={Settings} label="Settings" active={activeSection === 'settings'} onClick={() => navigate('settings')} />
+            <SidebarItem icon={HelpCircle} label="Help & Support" onClick={() => navigate('help')} />
+            <SidebarItem icon={LogOut} label="Log Out" onClick={onLogout} />
+          </div>
+        </aside>
 
-        {activeSection === 'wallets' && (
-           <div style={{ animation: 'fadeIn 0.5s ease-out' }}>
-             <h2 style={{ fontSize: '1.8rem', fontWeight: 800, marginBottom: '2rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}><Wallet size={28} color="var(--primary)" /> Corporate Treasury Nodes</h2>
-             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '2rem' }}>
-                {userData?.wallets?.map((w: any) => {
-                  const symbols: any = { USD: '$', EUR: '€', NGN: '₦', GBP: '£', BTC: '₿' };
-                  const gradients: any = {
-                    USD: "linear-gradient(135deg, #6366f1 0%, #a855f7 100%)",
-                    NGN: "linear-gradient(135deg, #10b981 0%, #059669 100%)",
-                    EUR: "linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)",
-                    BTC: "linear-gradient(135deg, #f59e0b 0%, #d97706 100%)"
-                  };
-                  return (
-                    <BalanceCard 
-                      key={w.id}
-                      currency={w.currency}
-                      symbol={symbols[w.currency] || w.currency}
-                      amount={parseFloat(w.balance).toFixed(2)}
-                      gradient={gradients[w.currency] || "linear-gradient(135deg, #1e293b 0%, #0f172a 100%)"}
-                      details={w.metadata ? (typeof w.metadata === 'string' ? JSON.parse(w.metadata) : w.metadata) : {}}
-                      userName={userData?.businessName}
-                      type="BUSINESS"
-                      onDelete={deleteAccount}
-                    />
-                  );
-                })}
-                <motion.div 
-                   whileHover={{ scale: 1.02, y: -5 }}
-                   onClick={() => setIsAccountModalOpen(true)}
-                   style={{ border: '2px dashed var(--border)', borderRadius: '24px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '2rem', cursor: 'pointer', minHeight: '200px' }}
-                >
-                   <Plus size={40} color="var(--primary)" style={{ opacity: 0.3, marginBottom: '1rem' }} />
-                   <span style={{ fontWeight: 800, color: 'var(--text-muted)' }}>Deploy Treasury Rail</span>
-                </motion.div>
-             </div>
+        {/* Mobile Navigation Bar */}
+        <div className="mobile-nav">
+           <div onClick={() => navigate('dashboard')} style={{ textAlign: 'center', color: activeSection === 'dashboard' ? 'var(--primary)' : 'var(--text-muted)' }}>
+              <LayoutDashboard size={20} />
+              <div style={{ fontSize: '10px', marginTop: '4px', fontWeight: 600 }}>Hub</div>
            </div>
-        )}
+           <div onClick={() => navigate('wallets')} style={{ textAlign: 'center', color: activeSection === 'wallets' ? 'var(--primary)' : 'var(--text-muted)' }}>
+              <Wallet size={20} />
+              <div style={{ fontSize: '10px', marginTop: '4px', fontWeight: 600 }}>Assets</div>
+           </div>
+           <div onClick={() => setIsAccountModalOpen(true)} style={{ textAlign: 'center', background: 'var(--primary)', padding: '10px', borderRadius: '50%', marginTop: '-30px', boxShadow: '0 4px 15px rgba(99, 102, 241, 0.4)' }}>
+              <Plus size={24} color="#fff" />
+           </div>
+           <div onClick={() => navigate('analytics')} style={{ textAlign: 'center', color: activeSection === 'analytics' ? 'var(--primary)' : 'var(--text-muted)' }}>
+              <BarChart3 size={20} />
+              <div style={{ fontSize: '10px', marginTop: '4px', fontWeight: 600 }}>Stats</div>
+           </div>
+           <div onClick={() => navigate('ai')} style={{ textAlign: 'center', color: activeSection === 'ai' ? 'var(--primary)' : 'var(--text-muted)' }}>
+              <Bot size={20} />
+              <div style={{ fontSize: '10px', marginTop: '4px', fontWeight: 600 }}>BizAI</div>
+           </div>
+        </div>
 
-        {activeSection === 'dashboard' && (
-          <>
-            <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3rem' }}>
-              <div>
-                <h1 style={{ fontSize: '2.5rem', fontWeight: 900, marginBottom: '0.5rem', letterSpacing: '-0.02em' }}>Treasury Control</h1>
-                <div style={{ display: 'flex', gap: '2rem' }}>
-                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.8rem', color: '#10b981', fontWeight: 800 }}><div style={{ width: 6, height: 6, background: '#10b981', borderRadius: '50%' }} /> LIQUIDITY_RAILS_ACTIVE</div>
-                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 800 }}><Building2 size={16} /> {userData?.businessName || 'Enterprise Node'}</div>
+        <main className="dashboard-main" style={{ flex: 1, overflowY: 'auto', padding: '3rem 4rem', paddingBottom: '100px' }}>
+          {activeSection === 'verification_required' && (
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', textAlign: 'center', minHeight: '60vh' }}>
+              <div style={{ width: 80, height: 80, background: 'rgba(99,102,241,0.1)', borderRadius: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary)', marginBottom: '2rem' }}><Building2 size={40} /></div>
+              <h2 style={{ fontSize: '1.8rem', fontWeight: 800, marginBottom: '1rem' }}>Business Verification Required</h2>
+              <p style={{ color: 'var(--text-muted)', maxWidth: '450px', lineHeight: 1.6, marginBottom: '2.5rem' }}>Your business profile needs to be verified before you can access advanced treasury features, wholesale liquidity, and bulk payouts.</p>
+              <button onClick={() => setActiveSection('dashboard')} style={{ background: 'var(--primary)', color: '#fff', border: 'none', padding: '1.2rem 3rem', borderRadius: '16px', fontWeight: 700, cursor: 'pointer' }}>Complete Verification</button>
+            </div>
+          )}
+
+          {activeSection === 'settings' && <SettingsView />}
+          {activeSection === 'ai' && <AiAdvisor transactions={transactions} userName={userData?.businessName} />}
+          {activeSection === 'vaults' && <VaultsDashboard />}
+          {activeSection === 'bills' && <BillsDashboard />}
+
+          {activeSection === 'wallets' && (
+             <div style={{ animation: 'fadeIn 0.5s ease-out' }}>
+               <h2 style={{ fontSize: '1.8rem', fontWeight: 800, marginBottom: '2rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}><Wallet size={28} color="var(--primary)" /> Corporate Treasury Nodes</h2>
+               <div className="balance-card-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '2rem' }}>
+                  {userData?.wallets?.map((w: any) => {
+                    const symbols: any = { USD: '$', EUR: '€', NGN: '₦', GBP: '£', BTC: '₿' };
+                    const gradients: any = {
+                      USD: "linear-gradient(135deg, #6366f1 0%, #a855f7 100%)",
+                      NGN: "linear-gradient(135deg, #10b981 0%, #059669 100%)",
+                      EUR: "linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)",
+                      BTC: "linear-gradient(135deg, #f59e0b 0%, #d97706 100%)"
+                    };
+                    return (
+                      <BalanceCard 
+                        key={w.id}
+                        currency={w.currency}
+                        symbol={symbols[w.currency] || w.currency}
+                        amount={parseFloat(w.balance).toFixed(2)}
+                        gradient={gradients[w.currency] || "linear-gradient(135deg, #1e293b 0%, #0f172a 100%)"}
+                        details={w.metadata ? (typeof w.metadata === 'string' ? JSON.parse(w.metadata) : w.metadata) : {}}
+                        userName={userData?.businessName}
+                        type="BUSINESS"
+                        onDelete={deleteAccount}
+                      />
+                    );
+                  })}
+                  <motion.div 
+                     whileHover={{ scale: 1.02, y: -5 }}
+                     onClick={() => setIsAccountModalOpen(true)}
+                     style={{ border: '2px dashed var(--border)', borderRadius: '24px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '2rem', cursor: 'pointer', minHeight: '200px' }}
+                  >
+                     <Plus size={40} color="var(--primary)" style={{ opacity: 0.3, marginBottom: '1rem' }} />
+                     <span style={{ fontWeight: 800, color: 'var(--text-muted)' }}>Deploy Treasury Rail</span>
+                  </motion.div>
+               </div>
+             </div>
+          )}
+
+          {activeSection === 'dashboard' && (
+            <>
+              <header className="dashboard-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3rem' }}>
+                <div>
+                  <h1 style={{ fontSize: '2.5rem', fontWeight: 900, marginBottom: '0.5rem', letterSpacing: '-0.02em' }}>Treasury Control</h1>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '2rem' }}>
+                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.8rem', color: '#10b981', fontWeight: 800 }}><div style={{ width: 6, height: 6, background: '#10b981', borderRadius: '50%' }} /> LIQUIDITY_RAILS_ACTIVE</div>
+                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 800 }}><Building2 size={16} /> {userData?.businessName || 'Enterprise Node'}</div>
+                  </div>
                 </div>
+                <div className="dashboard-header-right" style={{ display: 'flex', gap: '1rem' }}>
+                  <button style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid var(--border)', padding: '0.75rem 1.25rem', borderRadius: '12px', fontWeight: 700, cursor: 'pointer' }} onClick={fetchUserData}><RefreshCcw size={18} /></button>
+                  <button style={{ background: 'var(--primary)', color: '#fff', border: 'none', padding: '0.75rem 1.5rem', borderRadius: '12px', fontWeight: 700, cursor: 'pointer' }} onClick={() => setIsAccountModalOpen(true)}>Generate Rail</button>
+                </div>
+              </header>
+
+              <div className="balance-card-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '2rem', marginBottom: '3.5rem' }}>
+                 <MetricCard label="Total Treasury" value={`$${(userData?.wallets?.reduce((acc: any, w: any) => acc + (w.currency === 'USD' ? parseFloat(w.balance) : 0), 0) || 0).toLocaleString()}`} trend="+12.4%" icon={TrendingUp} color="#10b981" />
+                 <MetricCard label="Global Transfers" value="1.2k" trend="+85%" icon={Send} color="var(--primary)" />
+                 <MetricCard label="Sub-Accounts" value="12" trend="Active" icon={Layers} color="var(--secondary)" />
+                 <MetricCard label="Settlement Health" value="100%" trend="Optimized" icon={ShieldCheck} color="#10b981" />
               </div>
-              <div style={{ display: 'flex', gap: '1rem' }}>
-                <button style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid var(--border)', padding: '0.75rem 1.25rem', borderRadius: '12px', fontWeight: 700, cursor: 'pointer' }} onClick={fetchUserData}><RefreshCcw size={18} /></button>
-                <button style={{ background: 'var(--primary)', color: '#fff', border: 'none', padding: '0.75rem 1.5rem', borderRadius: '12px', fontWeight: 700, cursor: 'pointer' }} onClick={() => setIsAccountModalOpen(true)}>Generate Rail</button>
-              </div>
-            </header>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '2rem', marginBottom: '3.5rem' }}>
-               <MetricCard label="Total Treasury" value={`$${(userData?.wallets?.reduce((acc: any, w: any) => acc + (w.currency === 'USD' ? parseFloat(w.balance) : 0), 0) || 0).toLocaleString()}`} trend="+12.4%" icon={TrendingUp} color="#10b981" />
-               <MetricCard label="Global Transfers" value="1.2k" trend="+85%" icon={Send} color="var(--primary)" />
-               <MetricCard label="Sub-Accounts" value="12" trend="Active" icon={Layers} color="var(--secondary)" />
-               <MetricCard label="Settlement Health" value="100%" trend="Optimized" icon={ShieldCheck} color="#10b981" />
-            </div>
-
-            <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1.4fr) minmax(0, 0.6fr)', gap: '3rem' }}>
-               <div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-                    <h2 style={{ fontSize: '1.4rem', fontWeight: 800 }}>Cash-Flow Velocity</h2>
-                    <div style={{ display: 'flex', gap: '0.5rem' }}>
-                       {['1D', '1W', '1M', '1Y'].map(p => (<button key={p} style={{ background: p === '1M' ? 'var(--primary)' : 'rgba(255,255,255,0.03)', border: 'none', padding: '0.4rem 0.8rem', borderRadius: '8px', fontSize: '0.7rem', fontWeight: 800, cursor: 'pointer' }}>{p}</button>))}
-                    </div>
-                  </div>
-                  <div style={{ height: '350px', background: 'rgba(255,255,255,0.01)', border: '1px solid var(--border)', borderRadius: '32px', padding: '2rem' }}>
-                    <ResponsiveContainer width="100%" height="100%">
-                       <AreaChart data={[
-                         { name: 'Mon', income: 4000, expense: 2400 },
-                         { name: 'Tue', income: 3000, expense: 1398 },
-                         { name: 'Wed', income: 2000, expense: 9800 },
-                         { name: 'Thu', income: 2780, expense: 3908 },
-                         { name: 'Fri', income: 1890, expense: 4800 },
-                         { name: 'Sat', income: 2390, expense: 3800 },
-                         { name: 'Sun', income: 3490, expense: 4300 },
-                       ]}>
-                         <defs>
-                           <linearGradient id="colorIncome" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="var(--primary)" stopOpacity={0.3}/><stop offset="95%" stopColor="var(--primary)" stopOpacity={0}/></linearGradient>
-                         </defs>
-                         <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.05)" />
-                         <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#64748b' }} dy={10} />
-                         <YAxis hide />
-                         <Tooltip contentStyle={{ background: '#0a1122', border: '1px solid #1e293b', borderRadius: '12px' }} />
-                         <Area type="monotone" dataKey="income" stroke="var(--primary)" strokeWidth={3} fillOpacity={1} fill="url(#colorIncome)" />
-                       </AreaChart>
-                    </ResponsiveContainer>
-                  </div>
-               </div>
-
-               <div>
-                  <h2 style={{ fontSize: '1.4rem', fontWeight: 800, marginBottom: '2rem' }}>Active Node Status</h2>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-                    {userData?.wallets?.map((w: any) => (
-                      <div key={w.id} style={{ padding: '1.25rem', background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border)', borderRadius: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                         <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-                            <div style={{ width: 44, height: 44, background: 'rgba(255,255,255,0.05)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem' }}>
-                               {w.currency === 'USD' ? '🇺🇸' : w.currency === 'NGN' ? '🇳🇬' : w.currency === 'EUR' ? '🇪🇺' : '🌐'}
-                            </div>
-                            <div>
-                               <div style={{ fontWeight: 800, fontSize: '0.95rem' }}>{w.currency} Treasury Rail</div>
-                               <div style={{ fontSize: '0.7rem', color: '#10b981', fontWeight: 700 }}>SYNCHRONIZED</div>
-                            </div>
-                         </div>
-                         <ChevronRight size={18} opacity={0.3} />
+              <div className="dashboard-grid-2" style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1.4fr) minmax(0, 0.6fr)', gap: '3rem' }}>
+                 <div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+                      <h2 style={{ fontSize: '1.4rem', fontWeight: 800 }}>Cash-Flow Velocity</h2>
+                      <div className="desktop-only" style={{ display: 'flex', gap: '0.5rem' }}>
+                         {['1D', '1W', '1M', '1Y'].map(p => (<button key={p} style={{ background: p === '1M' ? 'var(--primary)' : 'rgba(255,255,255,0.03)', border: 'none', padding: '0.4rem 0.8rem', borderRadius: '8px', fontSize: '0.7rem', fontWeight: 800, cursor: 'pointer' }}>{p}</button>))}
                       </div>
-                    ))}
-                    <motion.button 
-                      whileTap={{ scale: 0.98 }}
-                      onClick={() => setIsAccountModalOpen(true)}
-                      style={{ width: '100%', padding: '1rem', border: '2px dashed var(--border)', background: 'transparent', borderRadius: '20px', color: 'var(--text-muted)', fontWeight: 700, cursor: 'pointer' }}
-                    >+ Add Rail</motion.button>
-                  </div>
-               </div>
-            </div>
-          </>
-        )}
-      </main>
+                    </div>
+                    <div style={{ height: '350px', background: 'rgba(255,255,255,0.01)', border: '1px solid var(--border)', borderRadius: '32px', padding: '2rem 1.5rem' }}>
+                      <ResponsiveContainer width="100%" height="100%">
+                         <AreaChart data={[
+                           { name: 'Mon', income: 4000, expense: 2400 },
+                           { name: 'Tue', income: 3000, expense: 1398 },
+                           { name: 'Wed', income: 2000, expense: 9800 },
+                           { name: 'Thu', income: 2780, expense: 3908 },
+                           { name: 'Fri', income: 1890, expense: 4800 },
+                           { name: 'Sat', income: 2390, expense: 3800 },
+                           { name: 'Sun', income: 3490, expense: 4300 },
+                         ]}>
+                           <defs>
+                             <linearGradient id="colorIncome" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="var(--primary)" stopOpacity={0.3}/><stop offset="95%" stopColor="var(--primary)" stopOpacity={0}/></linearGradient>
+                           </defs>
+                           <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.05)" />
+                           <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#64748b' }} dy={10} />
+                           <YAxis hide />
+                           <Tooltip contentStyle={{ background: '#0a1122', border: '1px solid #1e293b', borderRadius: '12px' }} />
+                           <Area type="monotone" dataKey="income" stroke="var(--primary)" strokeWidth={3} fillOpacity={1} fill="url(#colorIncome)" />
+                         </AreaChart>
+                      </ResponsiveContainer>
+                    </div>
+                 </div>
+
+                 <div>
+                    <h2 style={{ fontSize: '1.4rem', fontWeight: 800, marginBottom: '2rem' }}>Active Node Status</h2>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+                      {userData?.wallets?.map((w: any) => (
+                        <div key={w.id} style={{ padding: '1.25rem', background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border)', borderRadius: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                           <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                              <div style={{ width: 44, height: 44, background: 'rgba(255,255,255,0.05)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem' }}>
+                                 {w.currency === 'USD' ? '🇺🇸' : w.currency === 'NGN' ? '🇳🇬' : w.currency === 'EUR' ? '🇪🇺' : '🌐'}
+                              </div>
+                              <div style={{ flex: 1 }}>
+                                 <div style={{ fontWeight: 800, fontSize: '0.9rem' }}>{w.currency} Rail</div>
+                                 <div style={{ fontSize: '0.65rem', color: '#10b981', fontWeight: 700 }}>SYNCHRONIZED</div>
+                              </div>
+                           </div>
+                           <ChevronRight size={18} opacity={0.3} />
+                        </div>
+                      ))}
+                      <motion.button 
+                        whileTap={{ scale: 0.98 }}
+                        onClick={() => setIsAccountModalOpen(true)}
+                        style={{ width: '100%', padding: '1rem', border: '2px dashed var(--border)', background: 'transparent', borderRadius: '20px', color: 'var(--text-muted)', fontWeight: 700, cursor: 'pointer' }}
+                      >+ Add Rail</motion.button>
+                    </div>
+                 </div>
+              </div>
+            </>
+          )}
+        </main>
+      </div>
 
       <AccountCreationModal 
         isOpen={isAccountModalOpen} 
