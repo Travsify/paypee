@@ -35,6 +35,7 @@ import AiAdvisor from './AiAdvisor';
 import PayoutModal from './PayoutModal';
 
 import BalanceCard from './components/BalanceCard';
+import WalletRailItem from './components/WalletRailItem';
 import AccountCreationModal from './AccountCreationModal';
 
 const SidebarItem = ({ icon: Icon, label, active = false, onClick }: { icon: any, label: string, active?: boolean, onClick?: () => void }) => (
@@ -234,36 +235,30 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
           {activeSection === 'wallets' && (
             <div style={{ padding: '0' }}>
                <h2 style={{ fontSize: '1.8rem', fontWeight: 800, marginBottom: '2rem' }}>My Strategic Wallets</h2>
-               <div className="balance-card-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '2rem' }}>
+               <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                   {userData?.wallets?.map((w: any) => {
-                    const gradients: Record<string, string> = {
-                      USD: "linear-gradient(135deg, #6366f1 0%, #a855f7 100%)",
-                      EUR: "linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)",
-                      GBP: "linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%)",
-                      NGN: "linear-gradient(135deg, #10b981 0%, #059669 100%)"
-                    };
                     const symbols: Record<string, string> = { USD: '$', EUR: '€', GBP: '£', NGN: '₦' };
                     return (
-                      <BalanceCard 
+                      <WalletRailItem 
                         key={w.id}
                         currency={w.currency}
                         symbol={symbols[w.currency] || w.currency}
-                        amount={parseFloat(w.balance).toFixed(2)}
-                        gradient={gradients[w.currency] || "linear-gradient(135deg, #1e293b 0%, #0f172a 100%)"}
+                        balance={parseFloat(w.balance).toFixed(2)}
                         details={w.metadata ? (typeof w.metadata === 'string' ? JSON.parse(w.metadata) : w.metadata) : {}}
                         userName={`${userData?.firstName} ${userData?.lastName}`}
-                        type="INDIVIDUAL"
                         onDelete={deleteAccount}
                       />
                     );
                   })}
                   <motion.div 
-                    whileHover={{ scale: 1.02, y: -5 }}
+                    whileHover={{ scale: 1.01, x: 5 }}
                     onClick={() => setIsAccountModalOpen(true)}
-                    style={{ border: '2px dashed var(--border)', borderRadius: '24px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '2rem', cursor: 'pointer', minHeight: '200px' }}
+                    style={{ border: '2px dashed var(--border)', borderRadius: '24px', display: 'flex', alignItems: 'center', gap: '1.5rem', padding: '1.25rem 1.5rem', cursor: 'pointer', background: 'rgba(255,255,255,0.02)' }}
                   >
-                    <Plus size={40} color="var(--primary)" style={{ opacity: 0.5, marginBottom: '1rem' }} />
-                    <span style={{ fontWeight: 800, color: 'var(--text-muted)' }}>Provision New Rail</span>
+                    <div style={{ width: 48, height: 48, borderRadius: '16px', background: 'rgba(99,102,241,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                       <Plus size={24} color="var(--primary)" />
+                    </div>
+                    <span style={{ fontWeight: 800, color: 'var(--text-muted)' }}>Provision New Liquidity Rail</span>
                   </motion.div>
                </div>
             </div>
@@ -346,37 +341,30 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
                          <h2 style={{ fontSize: '1.4rem', fontWeight: 900 }}>Smart Wallets</h2>
                          <button onClick={fetchUserData} style={{ color: 'var(--primary)', background: 'transparent', border: 'none', fontWeight: 800, fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>REFRESH STATUS <RefreshCcw size={14} /></button>
                        </div>
-                       <div className="balance-card-slider no-scrollbar" style={{ display: 'flex', gap: '1.5rem', overflowX: 'auto', paddingBottom: '1rem', scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
-                          <style>{`.no-scrollbar::-webkit-scrollbar { display: none; }`}</style>
-                          {userData?.wallets?.map((w: any) => {
-                            const gradients: Record<string, string> = {
-                              USD: "linear-gradient(135deg, #6366f1 0%, #a855f7 100%)",
-                              EUR: "linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)",
-                              GBP: "linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%)",
-                              NGN: "linear-gradient(135deg, #10b981 0%, #059669 100%)"
-                            };
+                       <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                          {userData?.wallets?.slice(0, 3).map((w: any) => {
                             const symbols: Record<string, string> = { USD: '$', EUR: '€', GBP: '£', NGN: '₦' };
                             return (
-                              <BalanceCard 
-                                key={w.id}
-                                currency={w.currency}
-                                symbol={symbols[w.currency] || w.currency}
-                                amount={parseFloat(w.balance).toFixed(2)}
-                                gradient={gradients[w.currency] || "linear-gradient(135deg, #1e293b 0%, #0f172a 100%)"}
-                                details={w.metadata ? (typeof w.metadata === 'string' ? JSON.parse(w.metadata) : w.metadata) : {}}
-                                userName={`${userData?.firstName} ${userData?.lastName}`}
-                                type="INDIVIDUAL"
-                                onDelete={deleteAccount}
-                              />
+                               <WalletRailItem 
+                                  key={w.id}
+                                  currency={w.currency}
+                                  symbol={symbols[w.currency] || w.currency}
+                                  balance={parseFloat(w.balance).toFixed(2)}
+                                  details={w.metadata ? (typeof w.metadata === 'string' ? JSON.parse(w.metadata) : w.metadata) : {}}
+                                  userName={`${userData?.firstName} ${userData?.lastName}`}
+                                  onDelete={deleteAccount}
+                                />
                             );
                           })}
                           <motion.div 
-                            whileHover={{ y: -5 }}
+                            whileHover={{ scale: 1.01, x: 5 }}
                             onClick={() => setIsAccountModalOpen(true)}
-                            style={{ border: '2px dashed var(--border)', borderRadius: '24px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '2rem', cursor: 'pointer', minWidth: '300px', minHeight: '180px' }}
+                            style={{ border: '2px dashed var(--border)', borderRadius: '24px', display: 'flex', alignItems: 'center', gap: '1.5rem', padding: '1.25rem 1.5rem', cursor: 'pointer', background: 'rgba(255,255,255,0.02)' }}
                           >
-                            <Plus size={40} color="var(--primary)" style={{ opacity: 0.3, marginBottom: '1rem' }} />
-                            <span style={{ fontWeight: 800, color: 'var(--text-muted)' }}>Get My Account</span>
+                            <div style={{ width: 48, height: 48, borderRadius: '16px', background: 'rgba(99,102,241,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                               <Plus size={24} color="var(--primary)" />
+                            </div>
+                            <span style={{ fontWeight: 800, color: 'var(--text-muted)' }}>Provision New Liquidity Node</span>
                           </motion.div>
                        </div>
                     </section>
