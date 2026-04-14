@@ -35,46 +35,26 @@ export class IbanService {
         };
     }
 
-    // 2. Provision external details
+    // 2. Provision external details from API
     let details: any = null;
 
-    if (currency === 'NGN') {
+    if (['NGN', 'EUR', 'GBP', 'USD'].includes(currency)) {
        try {
-          console.log(`🇳🇬 Calling Fincra for real NGN rails...`);
-          const fincraData = await issueVirtualAccount(userName || "Valued Customer", 'NGN', bvn);
+          console.log(`🏦 Calling API for real ${currency} rails...`);
+          const apiData = await issueVirtualAccount(userName || "Valued Customer", currency, bvn);
           details = {
-             accountHolder: fincraData.accountName || userName || "Paypee Local Node",
-             iban: fincraData.accountNumber,
-             bic: fincraData.bankCode || '0000',
-             bankName: fincraData.bankName || 'Paypee Clearing',
-             address: "Lagos, Nigeria"
+             accountHolder: apiData.accountName || userName || "API Verified Customer",
+             iban: apiData.accountNumber,
+             bic: apiData.bankCode || '0000',
+             bankName: apiData.bankName || 'Partner Bank',
+             address: "Verified Address"
           };
        } catch (err: any) {
-          console.error(`❌ Fincra NGN Provisioning failed:`, err);
-          // If authorization fails or there's a strict block, gracefully fallback to simulated rails so the user flow isn't blocked.
-          if (err.message.includes('Unauthorized') || err.message.includes('failed')) {
-             console.warn("⚠️ Fincra API Unavailable or Unauthorized. Falling back to mocked NGN synthetic rail.");
-             details = {
-                 accountHolder: userName || "Paypee Local Node",
-                 iban: "9" + Math.random().toString().slice(2, 11), // 10 digit NUBAN
-                 bic: '090110',
-                 bankName: 'VFD Microfinance Bank (Simulated)',
-                 address: "Lagos, Nigeria"
-             };
-          } else {
-             throw err; 
-          }
+          console.error(`❌ API ${currency} Provisioning failed:`, err.message);
+          throw err; 
        }
     } else {
-       // Mock for other rails for now
-       const iban = (prefixes[currency] || 'PP00') + Math.random().toString().slice(2, 14);
-       details = {
-           accountHolder: userName || "Paypee / TechStream Ltd",
-           iban: iban,
-           bic: 'PAYPBEBB',
-           bankName: 'Paypee Global Clearing',
-           address: "123 Fintech Lane, Brussels, Belgium"
-       };
+       throw new Error(`API Virtual Account provisioning is not yet supported for ${currency}. Please contact support.`);
     }
 
     // 3. Create or update the wallet

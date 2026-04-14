@@ -11,29 +11,23 @@ export class BillsService {
   static async getProviders(category: string) {
     console.log(`📡 Fetching billers for category: ${category}...`);
     
-    // In production, you would hit Fincra's bills endpoint
-    // For this build, we return the high-fidelity provider list for Nigeria
-    const mockProviders: Record<string, any[]> = {
-       AIRTIME: [
-          { id: '1', name: 'MTN Nigeria', fee: 0, icon: 'Zap' },
-          { id: '2', name: 'Airtel Nigeria', fee: 0, icon: 'Zap' },
-          { id: '3', name: 'Glo Nigeria', fee: 0, icon: 'Zap' }
-       ],
-       UTILITY: [
-          { id: '10', name: 'EKEDC (Lagos)', fee: 100, icon: 'Activity' },
-          { id: '11', name: 'IKEDC (Lagos)', fee: 100, icon: 'Activity' }
-       ],
-       CABLE: [
-          { id: '20', name: 'DSTV Nigeria', fee: 100, icon: 'Tv' },
-          { id: '21', name: 'GOTV Nigeria', fee: 100, icon: 'Tv' }
-       ],
-       BETTING: [
-          { id: '30', name: 'Bet9ja', fee: 50, icon: 'Trophy' },
-          { id: '31', name: 'SportyBet', fee: 50, icon: 'Trophy' }
-       ]
-    };
+    try {
+      const fincraUrl = process.env.FINCRA_ENV === 'live' 
+        ? 'https://api.fincra.com/core/bills/categories' 
+        : 'https://sandboxapi.fincra.com/core/bills/categories';
 
-    return mockProviders[category.toUpperCase()] || [];
+      const response = await axios.get(fincraUrl, {
+        headers: {
+          'api-key': FINCRA_SECRET_KEY,
+          'Content-Type': 'application/json'
+        }
+      });
+      // Extract providers depending on Fincra's exact schema
+      return response.data.data || [];
+    } catch (err: any) {
+      console.error(`❌ API Failed to fetch bill providers for ${category}:`, err.response?.data || err.message);
+      throw new Error(`Failed to fetch live bill providers from API.`);
+    }
   }
 
   /**
