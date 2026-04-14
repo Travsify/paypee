@@ -307,6 +307,7 @@ const DeveloperDashboard = ({ onLogout }: { onLogout?: () => void }) => {
             <>
               <header className="dashboard-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3rem' }}>
                 <div>
+                  <div className="mobile-only" style={{ display: 'none', color: 'var(--primary)', fontWeight: 900, fontSize: '0.7rem', letterSpacing: '2px', marginBottom: '0.5rem' }}>DEVELOPER CONSOLE</div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '0.5rem', flexWrap: 'wrap' }}>
                      <h1 style={{ fontSize: '2.5rem', fontWeight: 900, letterSpacing: '-0.02em' }}>Developer Matrix</h1>
                      <div style={{ padding: '0.3rem 0.8rem', background: 'rgba(99, 102, 241, 0.1)', color: 'var(--primary)', borderRadius: '8px', fontSize: '0.7rem', fontWeight: 800, letterSpacing: '1px' }}>V2.1.0_LATEST</div>
@@ -364,7 +365,7 @@ const DeveloperDashboard = ({ onLogout }: { onLogout?: () => void }) => {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '3rem' }}>
                    <section>
                       <h2 style={{ fontSize: '1.25rem', fontWeight: 800, marginBottom: '1.5rem' }}>Integration Hub</h2>
-                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: '1rem' }}>
+                      <div className="balance-card-slider no-scrollbar" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: '1rem' }}>
                          {[
                            { icon: <BookOpen />, label: "Read Docs", color: "var(--primary)" },
                            { icon: <Webhook />, label: "Webhooks", color: "var(--secondary)" },
