@@ -20,6 +20,8 @@ interface WalletRailItemProps {
   details: any;
   userName: string;
   onDelete?: (id: string) => void;
+  onSend?: () => void;
+  onTopUp?: () => void;
 }
 
 const CopyValue = ({ value, label }: { value: string; label: string }) => {
@@ -56,7 +58,7 @@ const CopyValue = ({ value, label }: { value: string; label: string }) => {
   );
 };
 
-const WalletRailItem: React.FC<WalletRailItemProps> = ({ currency, balance, symbol, details, userName, onDelete }) => {
+const WalletRailItem: React.FC<WalletRailItemProps> = ({ currency, balance, symbol, details, userName, onDelete, onSend, onTopUp }) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
   const accNo = details?.iban || details?.accountNumber || details?.account_number || details?.virtual_account_number || details?.address || details?.nuban || details?.accountInformation?.accountNumber || details?.data?.account_number;
@@ -142,10 +144,10 @@ const WalletRailItem: React.FC<WalletRailItemProps> = ({ currency, balance, symb
                   <CopyValue label="Account Number" value={accNo || 'GENERATING...'} />
                   <CopyValue label="Bank / Provider" value={bankName} />
                   <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-                     <button onClick={(e) => e.stopPropagation()} style={{ flex: 1, minWidth: '100px', background: 'var(--primary)', color: '#fff', border: 'none', borderRadius: '12px', padding: '0.75rem', fontWeight: 700, fontSize: '0.85rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
+                     <button onClick={(e) => { e.stopPropagation(); if (onSend) onSend(); }} style={{ flex: 1, minWidth: '100px', background: 'var(--primary)', color: '#fff', border: 'none', borderRadius: '12px', padding: '0.75rem', fontWeight: 700, fontSize: '0.85rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
                         <ArrowUpRight size={16} /> Send
                      </button>
-                     <button onClick={(e) => e.stopPropagation()} style={{ flex: 1, minWidth: '100px', background: 'rgba(255,255,255,0.05)', color: '#fff', border: '1px solid var(--border)', borderRadius: '12px', padding: '0.75rem', fontWeight: 700, fontSize: '0.85rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
+                     <button onClick={(e) => { e.stopPropagation(); if (onTopUp) onTopUp(); }} style={{ flex: 1, minWidth: '100px', background: 'rgba(255,255,255,0.05)', color: '#fff', border: '1px solid var(--border)', borderRadius: '12px', padding: '0.75rem', fontWeight: 700, fontSize: '0.85rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
                         <ArrowDownLeft size={16} /> Top up
                      </button>
                      <button 
