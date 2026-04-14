@@ -105,6 +105,7 @@ const AccountCreationModal: React.FC<AccountCreationModalProps> = ({
       <motion.div 
         initial={{ scale: 0.9, opacity: 0, y: 40 }}
         animate={{ scale: 1, opacity: 1, y: 0 }}
+        className="account-modal-body"
         style={{ 
           position: 'relative', 
           width: '100%', 
@@ -113,18 +114,14 @@ const AccountCreationModal: React.FC<AccountCreationModalProps> = ({
           border: '1px solid rgba(255,255,255,0.1)', 
           borderRadius: '40px', 
           overflow: 'hidden',
-          display: 'grid',
-          gridTemplateColumns: 'minmax(0, 1.2fr) minmax(0, 1.8fr)',
-          height: '650px',
           boxShadow: '0 50px 100px -20px rgba(0,0,0,0.5)'
         }}
       >
         {/* Left Side: Dynamic Info */}
-        <div style={{ 
+        <div className="account-modal-left" style={{ 
           background: 'linear-gradient(180deg, rgba(99, 102, 241, 0.15) 0%, transparent 100%)', 
           padding: '4rem 3rem', 
           borderRight: '1px solid rgba(255,255,255,0.05)', 
-          display: 'flex', 
           flexDirection: 'column', 
           gap: '2.5rem',
           position: 'relative'
@@ -179,14 +176,15 @@ const AccountCreationModal: React.FC<AccountCreationModalProps> = ({
           display: 'flex', 
           flexDirection: 'column', 
           position: 'relative',
-          background: 'rgba(0,0,0,0.2)'
+          background: 'rgba(0,0,0,0.2)',
+          height: '100%'
         }}>
-           <div style={{ padding: '3rem 3rem 1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', zIndex: 10 }}>
+           <div className="account-modal-content-padding" style={{ padding: '3rem 3rem 1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', zIndex: 10 }}>
               <h3 style={{ fontSize: '1.4rem', fontWeight: 800, letterSpacing: '-0.02em' }}>Select Currency</h3>
               <button onClick={onClose} style={{ background: 'rgba(255,255,255,0.05)', border: 'none', borderRadius: '50%', width: 32, height: 32, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}><X size={18} /></button>
            </div>
 
-           <div style={{ flex: 1, overflowY: 'auto', padding: '0 3rem 2rem' }}>
+           <div className="account-modal-content-padding" style={{ flex: 1, overflowY: 'auto', padding: '0 3rem 2rem' }}>
               <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem', fontSize: '0.9rem', lineHeight: 1.5 }}>
                 Select a currency to create a new bank account. <br/>
                 <span style={{ color: 'var(--primary)' }}>Note: Fincra requires your BVN for NGN accounts. Standard KYC applies to USD/EUR/GBP.</span>
@@ -233,7 +231,7 @@ const AccountCreationModal: React.FC<AccountCreationModalProps> = ({
               )}
            </div>
 
-           <div style={{ padding: '2rem 3rem 3rem', background: '#0a0f1e', borderTop: '1px solid rgba(255,255,255,0.05)', zIndex: 10 }}>
+           <div className="account-modal-btn-container" style={{ padding: '2rem 3rem 3rem', background: '#0a0f1e', borderTop: '1px solid rgba(255,255,255,0.05)', zIndex: 10 }}>
               <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 <ShieldCheck size={14} color="var(--primary)" />
                 Direct Tier-1 Provisioning Enabled
