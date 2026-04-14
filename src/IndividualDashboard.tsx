@@ -97,7 +97,7 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
     fetchUserData();
   }, []);
 
-  const generateAccount = async (currency: string) => {
+  const generateAccount = async (currency: string, bvn?: string) => {
     setIsGenerating(true);
     try {
       const response = await fetch('https://paypee-api.onrender.com/api/accounts/provision', {
@@ -106,7 +106,7 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${localStorage.getItem('paypee_token')}`
         },
-        body: JSON.stringify({ currency: currency.toUpperCase() })
+        body: JSON.stringify({ currency: currency.toUpperCase(), bvn })
       });
       if (response.ok) {
         setIsAccountModalOpen(false);
@@ -230,8 +230,6 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
           {activeSection === 'ai' && <AiAdvisor transactions={transactions} userName={userData?.firstName} />}
           {activeSection === 'settings' && <SettingsView />}
           {activeSection === 'vaults' && <VaultsDashboard />}
-          {activeSection === 'bills' && <BillsDashboard />}
-
           {activeSection === 'wallets' && (
             <div style={{ padding: '0' }}>
                <h2 style={{ fontSize: '1.8rem', fontWeight: 800, marginBottom: '2rem' }}>My Bank Accounts</h2>
@@ -246,7 +244,9 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
                         balance={parseFloat(w.balance).toFixed(2)}
                         details={w.metadata ? (typeof w.metadata === 'string' ? JSON.parse(w.metadata) : w.metadata) : {}}
                         userName={`${userData?.firstName} ${userData?.lastName}`}
-                        onDelete={deleteAccount}
+                        onDelete={() => deleteAccount(w.id)}
+                        onSend={() => setIsPayoutOpen(true)}
+                        onTopUp={() => alert(`To top up your ${w.currency} wallet, please initiate a transfer to your provisioned account number.`)}
                       />
                     );
                   })}

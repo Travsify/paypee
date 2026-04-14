@@ -34,7 +34,7 @@ const VerificationGate: React.FC<VerificationGateProps> = ({ kycStatus: initialS
   const [showModal, setShowModal] = useState(false);
   const [kycStep, setKycStep] = useState(1);
   const [loading, setLoading] = useState(false);
-  const [idType, setIdType] = useState(accountType === 'BUSINESS' ? 'CAC' : 'BVN');
+  const [idType, setIdType] = useState(accountType === 'BUSINESS' ? 'CAC' : 'NIN');
   const [idNumber, setIdNumber] = useState('');
   const [error, setError] = useState('');
   const [notifications, setNotifications] = useState<Notification[]>([]);
@@ -77,8 +77,8 @@ const VerificationGate: React.FC<VerificationGateProps> = ({ kycStatus: initialS
   const handleNextStep = () => {
     setError('');
     if (!idNumber.trim()) { setError('Please enter your ID number.'); return; }
-    if (idType === 'BVN' && idNumber.trim().length !== 11) {
-      setError('BVN must be exactly 11 digits.'); return;
+    if (idType === 'NIN' && idNumber.trim().length !== 11) {
+      setError('NIN must be exactly 11 digits.'); return;
     }
     if (idType === 'CAC' && idNumber.trim().length < 5) {
       setError('Please enter a valid CAC/RC number.'); return;
@@ -122,7 +122,10 @@ const VerificationGate: React.FC<VerificationGateProps> = ({ kycStatus: initialS
   const idTypeOptions = accountType === 'BUSINESS'
     ? [{ value: 'CAC', label: 'CAC / RC Number', desc: 'Corporate Affairs Commission registration' }]
     : [
-        { value: 'BVN', label: 'Bank Verification (BVN)', desc: '11-digit Bank Verification Number (Fincra Requirement)' },
+        { value: 'NIN', label: 'National ID (NIN)', desc: '11-digit National Identification Number' },
+        { value: 'PASSPORT', label: 'International Passport', desc: 'Valid Nigerian Passport Number' },
+        { value: 'DRIVERS_LICENSE', label: 'Driver\'s License', desc: 'Valid Nigerian Driver\'s License' },
+        { value: 'VOTERS_CARD', label: 'Voter\'s Card (VIN)', desc: 'Valid Voter Identification Number' }
       ];
 
   const statusConfig = {
@@ -271,14 +274,14 @@ const VerificationGate: React.FC<VerificationGateProps> = ({ kycStatus: initialS
                   {/* ID Number Input */}
                   <div style={{ marginBottom: '1.5rem' }}>
                     <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 800, color: '#475569', letterSpacing: '1.5px', marginBottom: '0.6rem' }}>
-                      {idType === 'NIN' ? 'NIN NUMBER' : idType === 'BVN' ? 'BVN NUMBER' : 'CAC / RC NUMBER'}
+                      {idType === 'NIN' ? 'NIN NUMBER' : idType === 'CAC' ? 'CAC / RC NUMBER' : 'ID NUMBER'}
                     </label>
                     <input
                       type="text"
                       value={idNumber}
                       onChange={e => { setIdNumber(e.target.value); setError(''); }}
-                      placeholder={idType === 'CAC' ? 'e.g. RC123456 or BN123456' : 'Enter 11-digit number'}
-                      maxLength={idType === 'CAC' ? 20 : 11}
+                      placeholder={idType === 'CAC' ? 'e.g. RC123456 or BN123456' : idType === 'NIN' ? 'Enter 11-digit NIN' : 'Enter your ID number'}
+                      maxLength={20}
                       style={{ width: '100%', background: 'rgba(255,255,255,0.03)', border: `2px solid ${error ? '#f43f5e' : '#1e293b'}`, borderRadius: '12px', padding: '0.9rem 1.1rem', color: '#fff', fontSize: '1rem', fontWeight: 600, letterSpacing: '2px', outline: 'none', boxSizing: 'border-box', transition: 'border 0.2s' }}
                       onFocus={e => { if (!error) e.target.style.borderColor = '#6366f1'; }}
                       onBlur={e => { if (!error) e.target.style.borderColor = '#1e293b'; }}

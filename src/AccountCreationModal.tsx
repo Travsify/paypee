@@ -20,7 +20,7 @@ import {
 interface AccountCreationModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSelect: (currency: string) => void;
+  onSelect: (currency: string, bvn?: string) => void;
   isProcessing: boolean;
   existingCurrencies?: string[];
 }
@@ -82,6 +82,7 @@ const AccountCreationModal: React.FC<AccountCreationModalProps> = ({
 }) => {
   const filteredCurrencies = allCurrencies.filter(c => !existingCurrencies.includes(c.code));
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const [bvn, setBvn] = useState('');
   const containerRef = useRef<HTMLDivElement>(null);
 
   const selectItem = (index: number) => {
@@ -237,10 +238,28 @@ const AccountCreationModal: React.FC<AccountCreationModalProps> = ({
                 <ShieldCheck size={14} color="var(--primary)" />
                 Direct Tier-1 Provisioning Enabled
               </p>
+
+              <AnimatePresence>
+                {currentCurrency?.code === 'NGN' && (
+                   <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} style={{ overflow: 'hidden', marginBottom: '1.5rem' }}>
+                     <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: '#475569', letterSpacing: '1px', marginBottom: '0.5rem' }}>ENTER 11-DIGIT BVN</label>
+                     <input 
+                       type="text" 
+                       value={bvn} 
+                       onChange={e => setBvn(e.target.value)} 
+                       maxLength={11}
+                       placeholder="Required by Fincra" 
+                       style={{ width: '100%', padding: '1rem', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '14px', color: '#fff', fontSize: '1rem', outline: 'none', transition: 'border 0.2s', boxSizing: 'border-box' }}
+                       onFocus={e => e.target.style.borderColor = '#10b981'}
+                       onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.1)'}
+                     />
+                   </motion.div>
+                )}
+              </AnimatePresence>
               
               <button 
-                disabled={isProcessing || filteredCurrencies.length === 0}
-                onClick={() => currentCurrency && onSelect(currentCurrency.code)}
+                disabled={isProcessing || filteredCurrencies.length === 0 || (currentCurrency?.code === 'NGN' && bvn.length !== 11)}
+                onClick={() => currentCurrency && onSelect(currentCurrency.code, currentCurrency.code === 'NGN' ? bvn : undefined)}
                 style={{ 
                   width: '100%', 
                   padding: '1.4rem', 
