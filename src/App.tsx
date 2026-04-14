@@ -249,29 +249,12 @@ const App = () => {
              <button onClick={() => { setView('landing'); setLandingView('developer'); }} style={{ background: 'transparent', border: 'none', color: landingView === 'developer' ? '#fff' : 'var(--text-muted)', fontSize: '0.9rem', cursor: 'pointer', fontWeight: 700 }}>Developers</button>
           </div>
 
-          <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
-            <button className="btn btn-outline" onClick={() => setView('auth')} style={{ padding: '0.5rem 1rem', fontSize: '0.75rem', display: 'flex' }}>Login</button>
-            <button className="btn btn-primary" onClick={() => setView('auth')} style={{ padding: '0.5rem 1rem', fontSize: '0.75rem', display: 'flex' }}>Get Started</button>
-            <button 
-              className="mobile-only" 
-              style={{ background: 'transparent', border: 'none', color: '#fff', padding: '0.3rem', cursor: 'pointer' }}
-              id="hamburger-btn"
-              onClick={() => {
-                const nav = document.getElementById('mobile-menu');
-                if (nav) nav.style.display = nav.style.display === 'flex' ? 'none' : 'flex';
-              }}
-            >
-               <Layers size={22} color="var(--primary)" />
-            </button>
+          <div style={{ display: 'flex', gap: '0.6rem', alignItems: 'center' }}>
+            <button className="btn btn-outline" onClick={() => setView('auth')} style={{ padding: '0.5rem 0.8rem', fontSize: '0.75rem' }}>Login</button>
+            <button className="btn btn-primary" onClick={() => setView('auth')} style={{ padding: '0.5rem 0.8rem', fontSize: '0.75rem' }}>Get Started</button>
           </div>
         </div>
         
-        <div id="mobile-menu" className="mobile-menu-wrapper" style={{ display: 'none' }}>
-           <button className="mobile-menu-item" onClick={() => { setView('landing'); setLandingView('individual'); document.getElementById('mobile-menu')!.style.display = 'none'; }}>Individuals</button>
-           <button className="mobile-menu-item" onClick={() => { setView('landing'); setLandingView('business'); document.getElementById('mobile-menu')!.style.display = 'none'; }}>Businesses</button>
-           <button className="mobile-menu-item" onClick={() => { setView('landing'); setLandingView('developer'); document.getElementById('mobile-menu')!.style.display = 'none'; }}>Developers</button>
-           <button className="mobile-menu-item" style={{ marginTop: 'auto', background: 'var(--primary)', color: '#fff' }} onClick={() => setView('auth')}>Dashboard Login</button>
-        </div>
       </header>
 
       <main>
