@@ -251,14 +251,33 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
                     );
                   })}
                   <motion.div 
-                    whileHover={{ scale: 1.01, x: 5 }}
-                    onClick={() => setIsAccountModalOpen(true)}
-                    style={{ border: '2px dashed var(--border)', borderRadius: '24px', display: 'flex', alignItems: 'center', gap: '1.5rem', padding: '1.25rem 1.5rem', cursor: 'pointer', background: 'rgba(255,255,255,0.02)' }}
+                    whileHover={isVerified ? { scale: 1.01, x: 5 } : {}}
+                    onClick={() => {
+                      if (!isVerified) {
+                        alert("You must complete Identity Verification before provisioning a bank account.");
+                      } else {
+                        setIsAccountModalOpen(true);
+                      }
+                    }}
+                    style={{ 
+                      border: '2px dashed var(--border)', 
+                      borderRadius: '24px', 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      gap: '1.5rem', 
+                      padding: '1.25rem 1.5rem', 
+                      cursor: isVerified ? 'pointer' : 'not-allowed', 
+                      background: 'rgba(255,255,255,0.02)',
+                      opacity: isVerified ? 1 : 0.5 
+                    }}
                   >
-                    <div style={{ width: 48, height: 48, borderRadius: '16px', background: 'rgba(99,102,241,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                       <Plus size={24} color="var(--primary)" />
+                    <div style={{ width: 48, height: 48, borderRadius: '16px', background: isVerified ? 'rgba(99,102,241,0.1)' : 'rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                       {isVerified ? <Plus size={24} color="var(--primary)" /> : <Lock size={20} color="var(--text-muted)" />}
                     </div>
-                    <span style={{ fontWeight: 800, color: 'var(--text-muted)' }}>Create Bank Account</span>
+                    <div>
+                      <span style={{ fontWeight: 800, color: isVerified ? 'var(--text-muted)' : '#64748b', display: 'block' }}>Create Bank Account</span>
+                      {!isVerified && <span style={{ fontSize: '0.75rem', color: '#f43f5e', fontWeight: 600 }}>Verification Required</span>}
+                    </div>
                   </motion.div>
                </div>
             </div>
