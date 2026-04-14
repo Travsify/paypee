@@ -36,10 +36,15 @@ const VerificationGate: React.FC<VerificationGateProps> = ({ kycStatus: initialS
   const [loading, setLoading] = useState(false);
   const [idType, setIdType] = useState(accountType === 'BUSINESS' ? 'CAC' : 'NIN');
   const [idNumber, setIdNumber] = useState('');
+  const [faceImage, setFaceImage] = useState<string | null>(null);
   const [error, setError] = useState('');
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [showNotifications, setShowNotifications] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
+
+  const videoRef = React.useRef<HTMLVideoElement>(null);
+  const canvasRef = React.useRef<HTMLCanvasElement>(null);
+  const [stream, setStream] = useState<MediaStream | null>(null);
 
   const token = localStorage.getItem('paypee_token');
   const headers = { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
@@ -58,6 +63,37 @@ const VerificationGate: React.FC<VerificationGateProps> = ({ kycStatus: initialS
       }
     } catch (_) {}
   }, [token, kycStatus, onStatusChange]);
+
+  useEffect(() => {
+    if (kycStep === 2 && !faceImage && !loading) {
+      navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } })
+        .then(s => {
+          setStream(s);
+          if (videoRef.current) {
+            videoRef.current.srcObject = s;
+          }
+        })
+        .catch(err => {
+           console.error(err);
+           setError('Camera permission is required for biometric liveness match.');
+        });
+    }
+    return () => {
+      if (stream) stream.getTracks().forEach(t => t.stop());
+    };
+  }, [kycStep, faceImage, loading]);
+
+  const captureFace = () => {
+    if (videoRef.current && canvasRef.current) {
+      const ctx = canvasRef.current.getContext('2d');
+      if (ctx) {
+        ctx.drawImage(videoRef.current, 0, 0, 240, 320);
+        const dataUrl = canvasRef.current.toDataURL('image/jpeg', 0.8);
+        setFaceImage(dataUrl);
+        if (stream) stream.getTracks().forEach(t => t.stop());
+      }
+    }
+  };
 
   // Poll every 10s while PROCESSING
   useEffect(() => {
@@ -88,11 +124,15 @@ const VerificationGate: React.FC<VerificationGateProps> = ({ kycStatus: initialS
 
   const handleVerify = async () => {
     setError('');
+    if (!faceImage) { setError('Please capture a selfie to proceed.'); return; }
+    setLoading(true);
     try {
+      if (stream) stream.getTracks().forEach(t => t.stop());
+
       const res = await fetch('https://paypee-api.onrender.com/api/verify/identity', {
         method: 'POST',
         headers,
-        body: JSON.stringify({ idType, idNumber: idNumber.trim() })
+        body: JSON.stringify({ idType, idNumber: idNumber.trim(), faceImage })
       });
       const data = await res.json();
 
@@ -319,11 +359,15 @@ const VerificationGate: React.FC<VerificationGateProps> = ({ kycStatus: initialS
                 </>
               ) : (
                 <>
-                  <div style={{ background: '#1e293b', borderRadius: '24px', height: '240px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', marginBottom: '2rem', border: '2px dashed #475569', position: 'relative', overflow: 'hidden' }}>
-                     {!loading ? (
+                  <div style={{ background: '#1e293b', borderRadius: '24px', height: '280px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', marginBottom: '1.5rem', border: '2px dashed #475569', position: 'relative', overflow: 'hidden' }}>
+                     {faceImage ? (
+                       <img src={faceImage} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="Captured Selfie" />
+                     ) : !loading ? (
                        <>
-                         <div style={{ width: 120, height: 160, border: '4px solid #6366f1', borderRadius: '50% 50% 40% 40%', marginBottom: '1rem', opacity: 0.8 }} />
-                         <span style={{ color: '#94a3b8', fontSize: '0.85rem', fontWeight: 700, letterSpacing: '1px' }}>CENTER YOUR FACE IN OVAL</span>
+                         <video ref={videoRef} autoPlay playsInline muted style={{ width: '100%', height: '100%', objectFit: 'cover', transform: 'scaleX(-1)' }} />
+                         <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                           <div style={{ width: 140, height: 180, border: '4px solid #10b981', borderRadius: '50% 50% 40% 40%', opacity: 0.9, boxShadow: '0 0 0 1000px rgba(0,0,0,0.4)' }} />
+                         </div>
                        </>
                      ) : (
                        <div style={{ position: 'absolute', inset: 0, background: 'rgba(99,102,241,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: '1rem' }}>
@@ -331,16 +375,37 @@ const VerificationGate: React.FC<VerificationGateProps> = ({ kycStatus: initialS
                          <span style={{ color: '#fff', fontWeight: 800, letterSpacing: '1px' }}>ANALYZING BIOMETRICS...</span>
                        </div>
                      )}
+                     <canvas ref={canvasRef} width="240" height="320" style={{ display: 'none' }} />
                   </div>
                   
-                  <motion.button
-                    whileTap={{ scale: 0.98 }}
-                    onClick={handleVerify}
-                    disabled={loading}
-                    style={{ width: '100%', background: loading ? '#1e293b' : '#10b981', color: loading ? '#475569' : '#fff', border: 'none', padding: '1.1rem', borderRadius: '14px', fontSize: '1rem', fontWeight: 700, cursor: loading ? 'not-allowed' : 'pointer', transition: 'all 0.3s' }}
-                  >
-                    {loading ? 'Processing Match...' : 'Capture Face & Verify'}
-                  </motion.button>
+                  {!faceImage ? (
+                     <motion.button
+                       whileTap={{ scale: 0.98 }}
+                       onClick={captureFace}
+                       style={{ width: '100%', background: '#f59e0b', color: '#fff', border: 'none', padding: '1.1rem', borderRadius: '14px', fontSize: '1rem', fontWeight: 700, cursor: 'pointer', transition: 'all 0.3s', marginBottom: '0.5rem' }}
+                     >
+                       Take Snapshot
+                     </motion.button>
+                  ) : (
+                     <div style={{ display: 'flex', gap: '1rem' }}>
+                       <motion.button
+                         whileTap={{ scale: 0.98 }}
+                         onClick={() => setFaceImage(null)}
+                         disabled={loading}
+                         style={{ flex: '1', background: 'rgba(255,255,255,0.05)', color: '#fff', border: '1px solid #475569', padding: '1.1rem', borderRadius: '14px', fontSize: '1rem', fontWeight: 700, cursor: loading ? 'not-allowed' : 'pointer', letterSpacing: '-0.3px' }}
+                       >
+                         Retake
+                       </motion.button>
+                       <motion.button
+                         whileTap={{ scale: 0.98 }}
+                         onClick={handleVerify}
+                         disabled={loading}
+                         style={{ flex: '2', background: loading ? '#1e293b' : '#6366f1', color: loading ? '#475569' : '#fff', border: 'none', padding: '1.1rem', borderRadius: '14px', fontSize: '1rem', fontWeight: 700, cursor: loading ? 'not-allowed' : 'pointer', transition: 'all 0.3s', boxShadow: loading ? 'none' : '0 10px 30px -10px rgba(99,102,241,0.5)' }}
+                       >
+                         {loading ? 'Processing...' : 'Submit & Verify'}
+                       </motion.button>
+                     </div>
+                  )}
                 </>
               )}
             </motion.div>
