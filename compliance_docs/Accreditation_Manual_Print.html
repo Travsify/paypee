@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Paypee Accreditation Documents</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --text: #1e293b;
+            --muted: #64748b;
+            --border: #e2e8f0;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            line-height: 1.6;
+            color: var(--text);
+            max-width: 850px;
+            margin: 0 auto;
+            padding: 40px;
+            background: #f8fafc;
+        }
+        .page {
+            background: white;
+            padding: 60px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            border-radius: 8px;
+            margin-bottom: 40px;
+            position: relative;
+            overflow: hidden;
+        }
+        .page::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 4px;
+            background: var(--primary);
+        }
+        h1 { font-weight: 800; font-size: 2.2rem; color: #0f172a; margin-top: 0; }
+        h2 { font-weight: 800; font-size: 1.5rem; color: var(--primary); margin-top: 2rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
+        h3 { font-weight: 700; font-size: 1.1rem; color: #334155; margin-top: 1.5rem; }
+        p { margin-bottom: 1rem; }
+        .header-meta {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 3rem;
+            padding: 1.5rem;
+            background: #f1f5f9;
+            border-radius: 12px;
+            font-size: 0.9rem;
+        }
+        .header-meta div span { font-weight: 800; color: var(--muted); text-transform: uppercase; font-size: 0.7rem; letter-spacing: 0.05em; display: block; }
+        .header-meta div b { font-size: 1rem; color: #0f172a; }
+        hr { border: 0; border-top: 1px solid var(--border); margin: 3rem 0; }
+        ul { padding-left: 1.5rem; margin-bottom: 1.5rem; }
+        li { margin-bottom: 0.5rem; }
+        .footer { text-align: center; font-size: 0.8rem; color: var(--muted); margin-top: 2rem; }
+        
+        @media print {
+            body { background: white; padding: 0; }
+            .page { box-shadow: none; margin: 0; padding: 40px; page-break-after: always; }
+            .no-print { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="no-print" style="text-align: right; margin-bottom: 2rem;">
+        <button onclick="window.print()" style="background: var(--primary); color: white; border: none; padding: 0.8rem 1.5rem; borderRadius: 8px; fontWeight: 700; cursor: pointer; boxShadow: 0 4px 10px rgba(99,102,241,0.3);">Print to PDF</button>
+    </div>
+
+    <!-- DOCUMENT 1 -->
+    <div class="page">
+        <div class="header-meta">
+            <div><span>Entity</span><b>Pickpadi Global Inclusive Limited</b></div>
+            <div><span>RC Number</span><b>8229347</b></div>
+            <div><span>Compliance Officer</span><b>Patrick Achua</b></div>
+            <div><span>Date</span><b>April 15, 2026</b></div>
+        </div>
+
+        <h1>1. Intended Use & Crypto Integration</h1>
+        <p>Paypee is a next-generation financial operating system designed to bridge the gap between traditional fiat currencies and digital assets for African businesses and individuals.</p>
+
+        <h2>Intended Use of Services</h2>
+        <p>Paypee intends to use the services provided by <b>Bitnob</b> and <b>Quidax</b> to enhance its institutional liquidity and settle cross-border transactions efficiently. Our use case focuses on:</p>
+        <ul>
+            <li><b>Cross-Border Remittance:</b> Utilizing stablecoin liquidity to settle transactions between Nigeria and global markets instantly.</li>
+            <li><b>Treasury Management:</b> Holding and managing corporate assets in USD-pegged stablecoins to mitigate local currency volatility.</li>
+            <li><b>Virtual Card Funding:</b> Providing a mechanism for users to fund their USD virtual cards using crypto-to-fiat conversion layers.</li>
+        </ul>
+
+        <h2>Crypto Functionalities</h2>
+        <ul>
+            <li><b>Stablecoin Settlement:</b> Conversion between NGN and USDT/USDC for institutional settlement.</li>
+            <li><b>Bitcoin Lightning:</b> Leveraging Bitnob infrastructure for global micro-payments.</li>
+            <li><b>MPC Custody:</b> High-security digital asset management through regulated partners.</li>
+        </ul>
+    </div>
+
+    <!-- DOCUMENT 2 -->
+    <div class="page">
+        <h1>2. User Journey Overview</h1>
+        
+        <h2>Stage 1: Onboarding</h2>
+        <p>Users undergo a 3-layer verification process:</p>
+        <ul>
+            <li><b>Email & Phone:</b> Initial contact point verification.</li>
+            <li><b>Identity Verification:</b> Automated query against NIN/Passport/CAC databases via <b>Prembly</b>.</li>
+            <li><b>Biometric Match:</b> Real-time facial liveness capture compared against ID data.</li>
+        </ul>
+
+        <h2>Stage 2: Funding & Infrastructure</h2>
+        <p>Upon verification, users are issued a dedicated NGN virtual account via <b>Fincra</b>. Funds can be added via traditional bank transfers or international receipts.</p>
+
+        <h2>Stage 3: Transactions</h2>
+        <p>Users access the multi-currency dashboard to perform FX swaps, issue USD virtual cards, and initiate global payouts to 20+ countries.</p>
+    </div>
+
+    <!-- DOCUMENT 3 -->
+    <div class="page">
+        <h1>3. Service Delivery Strategy</h1>
+        <h2>Operational Posture</h2>
+        <p>Paypee is currently in a <b>Controlled Beta</b> phase (Stealth Mode). We onboard users through:</p>
+        <ul>
+            <li><b>Directed Invitation:</b> Vetted partners and institutional clients.</li>
+            <li><b>API-First Delivery:</b> Infrastructure-as-a-Service for B2B developers.</li>
+            <li><b>Private Dashboard:</b> Secure web-based React interface accessible via authenticated partner portals.</li>
+        </ul>
+        <p>This approach ensure 100% compliance during the initial launch phase before full public scaling in Q3 2026.</p>
+    </div>
+
+    <!-- DOCUMENT 4 -->
+    <div class="page">
+        <h1>4. AML/CFT Policy Summary</h1>
+        <p>Paypee complies with CBN AML/CFT Regulations 2022 and FATF recommendations.</p>
+        
+        <h2>Key Controls</h2>
+        <ul>
+            <li><b>Sanctions Screening:</b> Every transaction is screened against OFAC, UN, and local PEP lists.</li>
+            <li><b>Transaction Monitoring:</b> Automated detection of velocity spikes and structuring attempts.</li>
+            <li><b>Reporting:</b> Suspicious Transaction Reports (STR) are filed with the NFIU within 24 hours.</li>
+            <li><b>Compliance Officer:</b> Patrick Achua.</li>
+        </ul>
+    </div>
+
+    <!-- DOCUMENT 5 -->
+    <div class="page">
+        <h1>5. Support & Disputes</h1>
+        <h2>Customer Success</h2>
+        <p>Paypee provides 24/7 support via in-app live chat and email (support@paypee.co).</p>
+
+        <h2>Resolution Protocols</h2>
+        <ul>
+            <li><b>Failed Transfers:</b> Reconciled automatically on T+1 basis.</li>
+            <li><b>Card Chargebacks:</b> Handled via Visa/Mastercard scheme rules through our partner, Bridgecard.</li>
+            <li><b>Escalation:</b> Level 3 issues (compliance/security) are resolved within 48 hours.</li>
+        </ul>
+
+        <div class="footer">
+            &copy; 2026 Pickpadi Global Inclusive Limited. All Rights Reserved.
+        </div>
+    </div>
+
+</body>
+</html>

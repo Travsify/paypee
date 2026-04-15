@@ -11,7 +11,7 @@ export class Paypee {
     this.apiKey = apiKey;
     this.baseUrl = options?.isSandbox 
       ? 'https://paypee-api-sandbox.onrender.com/api' 
-      : 'https://paypee-api.onrender.com/api';
+      : 'https://paypee-api-kmhv.onrender.com/api';
   }
 
   private async request(path: string, method: string = 'GET', body?: any) {

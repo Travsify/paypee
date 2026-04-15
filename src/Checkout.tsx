@@ -17,7 +17,7 @@ const Checkout = ({ slug, onBack }: { slug: string, onBack: () => void }) => {
   const [paid, setPaid] = useState(false);
 
   useEffect(() => {
-    fetch(`https://paypee-api.onrender.com/api/pub/payment-links/${slug}`)
+    fetch(`https://paypee-api-kmhv.onrender.com/api/pub/payment-links/${slug}`)
       .then(res => res.json())
       .then(data => {
         setLink(data);

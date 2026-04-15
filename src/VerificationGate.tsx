@@ -51,7 +51,7 @@ const VerificationGate: React.FC<VerificationGateProps> = ({ kycStatus: initialS
 
   const fetchStatus = useCallback(async () => {
     try {
-      const res = await fetch('https://paypee-api.onrender.com/api/verify/status', { headers: { 'Authorization': `Bearer ${token}` } });
+      const res = await fetch('https://paypee-api-kmhv.onrender.com/api/verify/status', { headers: { 'Authorization': `Bearer ${token}` } });
       const data = await res.json();
       if (data.kycStatus && data.kycStatus !== kycStatus) {
         setKycStatus(data.kycStatus);
@@ -105,7 +105,7 @@ const VerificationGate: React.FC<VerificationGateProps> = ({ kycStatus: initialS
   }, [kycStatus, fetchStatus]);
 
   const handleMarkRead = async () => {
-    await fetch('https://paypee-api.onrender.com/api/notifications/read', { method: 'POST', headers });
+    await fetch('https://paypee-api-kmhv.onrender.com/api/notifications/read', { method: 'POST', headers });
     setNotifications(prev => prev.map(n => ({ ...n, read: true })));
     setUnreadCount(0);
   };
@@ -129,7 +129,7 @@ const VerificationGate: React.FC<VerificationGateProps> = ({ kycStatus: initialS
     try {
       if (stream) stream.getTracks().forEach(t => t.stop());
 
-      const res = await fetch('https://paypee-api.onrender.com/api/verify/identity', {
+      const res = await fetch('https://paypee-api-kmhv.onrender.com/api/verify/identity', {
         method: 'POST',
         headers,
         body: JSON.stringify({ idType, idNumber: idNumber.trim(), faceImage })

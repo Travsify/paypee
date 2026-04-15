@@ -102,8 +102,8 @@ const BusinessDashboard = ({ onLogout }: { onLogout?: () => void }) => {
 
     try {
       const [uData, txData] = await Promise.all([
-        fetch('https://paypee-api.onrender.com/api/users/me', { headers }).then(res => res.json()),
-        fetch('https://paypee-api.onrender.com/api/transactions', { headers }).then(res => res.json())
+        fetch('https://paypee-api-kmhv.onrender.com/api/users/me', { headers }).then(res => res.json()),
+        fetch('https://paypee-api-kmhv.onrender.com/api/transactions', { headers }).then(res => res.json())
       ]);
       if(!uData.error) setUserData(uData);
       if(Array.isArray(txData)) setTransactions(txData);
@@ -119,7 +119,7 @@ const BusinessDashboard = ({ onLogout }: { onLogout?: () => void }) => {
   const generateAccount = async (currency: string) => {
     setIsGenerating(true);
     try {
-      const response = await fetch('https://paypee-api.onrender.com/api/accounts/provision', {
+      const response = await fetch('https://paypee-api-kmhv.onrender.com/api/accounts/provision', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -143,7 +143,7 @@ const BusinessDashboard = ({ onLogout }: { onLogout?: () => void }) => {
 
   const deleteAccount = async (id: string) => {
      try {
-        const response = await fetch(`https://paypee-api.onrender.com/api/accounts/${id}`, {
+        const response = await fetch(`https://paypee-api-kmhv.onrender.com/api/accounts/${id}`, {
            method: 'DELETE',
            headers: {
               'Authorization': `Bearer ${localStorage.getItem('paypee_token')}`
