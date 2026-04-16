@@ -123,21 +123,33 @@ const VerificationGate: React.FC<VerificationGateProps> = ({ kycStatus: initialS
   };
 
   const handleVerify = async () => {
+    console.log('[FRONTEND DEBUG] 🎬 Verification button clicked!');
     setError('');
-    if (!faceImage) { setError('Please capture a selfie to proceed.'); return; }
+    if (!faceImage) { 
+      console.warn('[FRONTEND DEBUG] ❌ No selfie captured yet.');
+      setError('Please capture a selfie to proceed.'); 
+      return; 
+    }
+
     setLoading(true);
+    const token = localStorage.getItem('token');
+    console.log('[FRONTEND DEBUG] 🔑 Auth Token exists?', !!token);
     
     try {
-      if (stream) stream.getTracks().forEach(t => t.stop());
+      if (stream) {
+        console.log('[FRONTEND DEBUG] 🎥 Stopping camera stream...');
+        stream.getTracks().forEach(t => t.stop());
+      }
 
-      // 🖼️ COMPRESSION STEP: Resize high-res selfies to save bandwidth and avoid timeout
+      console.log('[FRONTEND DEBUG] 🖼️ Compressing image...');
+      // 🖼️ COMPRESSION STEP: Resize high-res selfies
       const compressedImage = await new Promise<string>((resolve) => {
         const img = new Image();
         img.onload = () => {
           const canvas = document.createElement('canvas');
           let width = img.width;
           let height = img.height;
-          const MAX_WIDTH = 800; // Optimal for biometric matching
+          const MAX_WIDTH = 800;
           
           if (width > MAX_WIDTH) {
             height *= MAX_WIDTH / width;
@@ -148,19 +160,29 @@ const VerificationGate: React.FC<VerificationGateProps> = ({ kycStatus: initialS
           canvas.height = height;
           const ctx = canvas.getContext('2d');
           ctx?.drawImage(img, 0, 0, width, height);
-          resolve(canvas.toDataURL('image/jpeg', 0.7)); // 70% quality JPEG
+          resolve(canvas.toDataURL('image/jpeg', 0.7));
         };
         img.src = faceImage;
       });
 
+      console.log('[FRONTEND DEBUG] 🚀 Sending FETCH request to Render...');
+      console.log('[FRONTEND DEBUG] Payload size:', compressedImage.length);
+
       const res = await fetch('https://paypee-api-kmhv.onrender.com/api/verify/identity', {
         method: 'POST',
-        headers,
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
         body: JSON.stringify({ idType, idNumber: idNumber.trim(), faceImage: compressedImage })
       });
+
+      console.log('[FRONTEND DEBUG] 🛰️ Server Response Received. Status:', res.status);
       const data = await res.json();
+      console.log('[FRONTEND DEBUG] Server Response Data:', data);
 
       if (res.ok) {
+        console.log('[FRONTEND DEBUG] ✅ Verification Successful!');
         setKycStatus(data.status);
         if (onStatusChange) onStatusChange(data.status);
         if (data.status === 'VERIFIED') {
@@ -169,16 +191,19 @@ const VerificationGate: React.FC<VerificationGateProps> = ({ kycStatus: initialS
         setShowModal(false);
         await fetchStatus();
       } else {
+        console.warn('[FRONTEND DEBUG] ❌ Server rejected verification:', data.error);
         setError(data.error || 'Verification failed. Please check your details.');
         if (data.status === 'REJECTED') {
           setKycStatus('REJECTED');
           await fetchStatus();
         }
       }
-    } catch (_) {
-      setError('Network error (request too large or service timeout). Please try again with a better connection.');
+    } catch (err: any) {
+      console.error('[FRONTEND DEBUG] 💥 Browser Network Error:', err.message);
+      setError(`Network error: ${err.message}. If you are on a slow connection, please try again.`);
     } finally {
       setLoading(false);
+      console.log('[FRONTEND DEBUG] 🏁 Verification attempt finished.');
     }
   };
 
