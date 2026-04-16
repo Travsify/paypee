@@ -1,3 +1,5 @@
+import axios from 'axios';
+import { HttpsProxyAgent } from 'https-proxy-agent';
 import dotenv from 'dotenv';
 dotenv.config();
 
@@ -9,9 +11,18 @@ const FINCRA_SECRET_KEY = (process.env.FINCRA_SECRET_KEY || '').replace(/"/g, ''
 const FINCRA_BUSINESS_ID = (process.env.FINCRA_BUSINESS_ID || '').replace(/"/g, '') || 
                            (process.env.FINCRA_PUB_KEY ? Buffer.from(process.env.FINCRA_PUB_KEY.split('_')[1] || '', 'base64').toString().split(':')[0] : '');
 
-const getHeaders = () => ({
-  'api-key': FINCRA_SECRET_KEY,
-  'Content-Type': 'application/json'
+// 🛡️ PROXY CONFIGURATION
+// Use this to route Fincra requests through a whitelisted VPS IP
+const PROXY_URL = process.env.FINCRA_PROXY_URL; // e.g. http://74.220.48.248:3128
+const proxyAgent = PROXY_URL ? new HttpsProxyAgent(PROXY_URL) : undefined;
+
+const fincraClient = axios.create({
+  headers: {
+    'api-key': FINCRA_SECRET_KEY,
+    'Content-Type': 'application/json'
+  },
+  httpsAgent: proxyAgent,
+  proxy: false // Disable axios internal proxy logic to use the agent
 });
 
 /**
@@ -19,34 +30,25 @@ const getHeaders = () => ({
  */
 export const issueVirtualAccount = async (businessName: string, currency: string, bvn?: string) => {
   try {
-    const FINCRA_VIRTUAL_URL = process.env.FINCRA_ENV === 'live'
+    const endpoint = process.env.FINCRA_ENV === 'live'
        ? 'https://api.fincra.com/profile/virtual-accounts/requests'
        : 'https://sandboxapi.fincra.com/profile/virtual-accounts/requests';
 
-    const response = await fetch(FINCRA_VIRTUAL_URL, {
-      method: 'POST',
-      headers: getHeaders(),
-      body: JSON.stringify({
-        currency: currency,
-        accountType: 'virtual',
-        bvn: bvn || process.env.TEST_BVN || '12345678901',
-        name: businessName,
-        business: FINCRA_BUSINESS_ID
-      })
+    console.log(`[FINCRA] Provisioning account for ${businessName}... ${PROXY_URL ? '(via Proxy)' : '(Directly)'}`);
+
+    const response = await fincraClient.post(endpoint, {
+      currency: currency,
+      accountType: 'virtual',
+      bvn: bvn || process.env.TEST_BVN || '12345678901',
+      name: businessName,
+      business: FINCRA_BUSINESS_ID
     });
     
-    const data = await response.json();
-    console.log('[FINCRA DEBUG] Response Status:', response.status);
-    console.log('[FINCRA DEBUG] Response Data:', JSON.stringify(data));
-
-    if (!response.ok) {
-      const errorMessage = data.message || data.error || 'Banking partner account creation failed';
-      throw new Error(errorMessage);
-    }
-    return data.data; 
-  } catch (error) {
-    console.error('[FINCRA] Virtual Account Error:', error);
-    throw error;
+    return response.data.data;
+  } catch (error: any) {
+    const errorData = error.response?.data;
+    console.error('[FINCRA] Virtual Account Error:', errorData || error.message);
+    throw new Error(errorData?.message || 'Banking partner account creation failed. Possible IP whitelist issue.');
   }
 };
 
@@ -55,23 +57,17 @@ export const issueVirtualAccount = async (businessName: string, currency: string
  */
 export const issueVirtualCard = async (userId: string, currency: string) => {
   try {
-    const response = await fetch(`${FINCRA_BASE_URL}/cards/issue`, {
-      method: 'POST',
-      headers: getHeaders(),
-      body: JSON.stringify({
-        currency: currency,
-        cardType: 'virtual',
-        brand: 'mastercard',
-        reference: `card_${userId}_${Date.now()}`
-      })
+    const response = await fincraClient.post(`${FINCRA_BASE_URL}/cards/issue`, {
+      currency: currency,
+      cardType: 'virtual',
+      brand: 'mastercard',
+      reference: `card_${userId}_${Date.now()}`
     });
 
-    const data = await response.json();
-    if (!response.ok) throw new Error(data.message || 'Banking partner card creation failed');
-    return data.data; // Returns cardNumber, cvv, expiry
-  } catch (error) {
-    console.error('[FINCRA] Card Issue Error:', error);
-    throw error;
+    return response.data.data;
+  } catch (error: any) {
+    console.error('[FINCRA] Card Issue Error:', error.response?.data || error.message);
+    throw new Error(error.response?.data?.message || 'Banking partner card creation failed');
   }
 };
 
@@ -80,27 +76,21 @@ export const issueVirtualCard = async (userId: string, currency: string) => {
  */
 export const processFiatPayout = async (amount: number, currency: string, destinationAccount: any) => {
   try {
-    const response = await fetch(`${FINCRA_BASE_URL}/disbursements/payouts`, {
-        method: 'POST',
-        headers: getHeaders(),
-        body: JSON.stringify({
-            sourceCurrency: currency,
-            destinationCurrency: currency,
-            amount: amount,
-            business: FINCRA_BUSINESS_ID,
-            beneficiary: {
-                firstName: 'Recipient',
-                accountNumber: destinationAccount.number,
-                bankCode: destinationAccount.bankCode
-            }
-        })
+    const response = await fincraClient.post(`${FINCRA_BASE_URL}/disbursements/payouts`, {
+        sourceCurrency: currency,
+        destinationCurrency: currency,
+        amount: amount,
+        business: FINCRA_BUSINESS_ID,
+        beneficiary: {
+            firstName: 'Recipient',
+            accountNumber: destinationAccount.number,
+            bankCode: destinationAccount.bankCode
+        }
     });
 
-    const data = await response.json();
-    if (!response.ok) throw new Error(data.message || 'Banking partner payout failed');
-    return data.data;
-  } catch (error) {
-    console.error('[FINCRA] Payout Error:', error);
-    throw error;
+    return response.data.data;
+  } catch (error: any) {
+    console.error('[FINCRA] Payout Error:', error.response?.data || error.message);
+    throw new Error(error.response?.data?.message || 'Banking partner payout failed');
   }
 };
