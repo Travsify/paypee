@@ -34,8 +34,8 @@ export const issueVirtualAccount = async (businessName: string, currency: string
        ? 'https://api.fincra.com/profile/virtual-accounts/requests'
        : 'https://sandboxapi.fincra.com/profile/virtual-accounts/requests';
 
-    console.log(`[FINCRA DEBUG] Using Business ID: ${FINCRA_BUSINESS_ID.substring(0, 5)}...`);
-    console.log(`[FINCRA DEBUG] Using Secret Key: ${FINCRA_SECRET_KEY.substring(0, 5)}...`);
+    console.log(`[FINCRA DEBUG] Using Business ID: ${(FINCRA_BUSINESS_ID || 'MISSING').substring(0, 5)}...`);
+    console.log(`[FINCRA DEBUG] Using Secret Key: ${(FINCRA_SECRET_KEY || 'MISSING').substring(0, 5)}...`);
     console.log(`[FINCRA] Provisioning account for ${businessName}...`);
 
     const response = await fincraClient.post(endpoint, {
