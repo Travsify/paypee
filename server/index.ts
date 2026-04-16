@@ -602,7 +602,7 @@ app.post('/api/notifications/read', authenticateToken, async (req: any, res: any
 // Submit KYC Verification (LIVE — No demo mode)
 app.post('/api/verify/identity', authenticateToken, async (req: any, res: any): Promise<any> => {
   try {
-    const { idType, idNumber } = req.body;
+    const { idType, idNumber, faceImage } = req.body;
     const userId = req.user.userId;
 
     const PREMBLY_SECRET_KEY = process.env.PREMBLY_SECRET_KEY;
@@ -632,42 +632,40 @@ app.post('/api/verify/identity', authenticateToken, async (req: any, res: any): 
     });
 
     await createNotification(userId, '🔄 Verification In Progress', 
-      `We have received your ${idType} submission and are verifying your identity with our compliance partner. This usually takes under 60 seconds.`,
+      `We have received your ${idType} submission and are performing a biometric face match. This usually takes 30-60 seconds.`,
       'INFO'
     );
-
-    await sendEmail(user.email, 'Paypee: Your Verification is Processing', `
-      <div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:2rem;background:#0a0f1e;color:#fff;border-radius:16px">
-        <h2 style="color:#6366f1">Verification In Progress</h2>
-        <p>Hi ${user.firstName || 'there'},</p>
-        <p>We've received your <strong>${idType}</strong> verification submission and are checking it through our secure identity infrastructure.</p>
-        <p style="color:#94a3b8">This process usually completes in under 60 seconds. You will receive another email once the review is complete.</p>
-        <p style="margin-top:2rem;color:#475569;font-size:0.8rem">Paypee Technologies — Secure Global Payments</p>
-      </div>
-    `);
 
     // Call Prembly
     let endpoint = '';
     let payload: Record<string, string> = {};
 
-    if (idType === 'NIN') {
+    // Logic: If faceImage is provided, use the Face Match endpoints
+    if (faceImage && (idType === 'NIN' || idType === 'BVN')) {
+       endpoint = 'https://api.prembly.com/identitypass/verification/face-match';
+       payload = {
+         image: faceImage.replace(/^data:image\/\w+;base64,/, ''), // Strip base64 prefix
+         number: idNumber,
+         id_type: idType // Prembly uses id_type for face match
+       };
+    } else if (idType === 'NIN') {
       endpoint = 'https://api.prembly.com/identitypass/verification/nin';
-      payload = { number_nin: idNumber, number: idNumber }; // Fallback for various API versions
+      payload = { number_nin: idNumber, number: idNumber }; 
     } else if (idType === 'BVN') {
       endpoint = 'https://api.prembly.com/identitypass/verification/bvn';
       payload = { number_bvn: idNumber, number: idNumber, bvn: idNumber }; 
     } else if (idType === 'CAC') {
       endpoint = 'https://api.prembly.com/identitypass/verification/cac';
-      payload = { rc_number: idNumber, company_type: 'rc' }; // Prembly often requires company_type
+      payload = { rc_number: idNumber, company_type: 'rc' };
     } else {
       await prisma.user.update({ where: { id: userId }, data: { kycStatus: 'PENDING' } });
-      return res.status(400).json({ error: 'Unsupported ID Type. Use NIN, BVN, or CAC.' });
+      return res.status(400).json({ error: 'Unsupported verification combination.' });
     }
 
-    console.log(`[KYC] Calling Prembly for user ${userId} (${idType})...`);
+    console.log(`[KYC] Calling Prembly ${faceImage ? '(FACE MATCH)' : ''} for user ${userId}...`);
 
     let premblySuccess = false;
-    let failureReason = 'Invalid details provided. Please check your ID number and try again.';
+    let failureReason = 'Individual verification failed. Please ensure your face is well-lit and matches your ID.';
 
     try {
       const response = await axios.post(endpoint, payload, {
@@ -675,63 +673,40 @@ app.post('/api/verify/identity', authenticateToken, async (req: any, res: any): 
           'x-api-key': PREMBLY_SECRET_KEY,
           'Content-Type': 'application/json'
         },
-        timeout: 30000
+        timeout: 60000 // Increased to 60s for biometric processing
       });
 
-      premblySuccess = response.data.status === 'success' || response.data.response_code === '00';
+      // Handle different Prembly response formats
+      const data = response.data;
+      premblySuccess = data.status === 'success' || data.response_code === '00' || data.data?.status === 'MATCH';
+      
       if (!premblySuccess) {
-        failureReason = response.data.message || failureReason;
+        failureReason = data.message || data.data?.message || failureReason;
       }
     } catch (premblyError: any) {
       console.error('[KYC] Prembly call failed:', premblyError.response?.data || premblyError.message);
-      failureReason = 'Verification service error. Please try again or contact support.';
+      
+      // If server error, don't auto-reject so user can retry
+      await prisma.user.update({ where: { id: userId }, data: { kycStatus: 'PENDING' } });
+      return res.status(503).json({ error: 'The verification server is busy. Please try again in a few moments.' });
     }
 
     if (premblySuccess) {
       await prisma.user.update({ where: { id: userId }, data: { kycStatus: 'VERIFIED' } });
 
       await createNotification(userId, '✅ Verification Approved!', 
-        'Your identity has been successfully verified. All Paypee features are now fully unlocked. Welcome aboard!',
+        'Your identity has been successfully verified via biometric match. Welcome to the future of banking!',
         'SUCCESS'
       );
 
-      await sendEmail(user.email, '✅ Paypee: Your Account is Verified!', `
-        <div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:2rem;background:#0a0f1e;color:#fff;border-radius:16px">
-          <h2 style="color:#10b981">🎉 Account Verified!</h2>
-          <p>Hi ${user.firstName || 'there'},</p>
-          <p>Great news! Your identity verification has been <strong style="color:#10b981">approved</strong>.</p>
-          <p>You now have full access to:</p>
-          <ul style="color:#94a3b8">
-            <li>Global Transfers & Payouts</li>
-            <li>Virtual Card Issuance</li>
-            <li>Smart Vaults & Treasury</li>
-            <li>Bill Payments & Utility Services</li>
-          </ul>
-          <a href="https://paypee.onrender.com" style="display:inline-block;margin-top:1.5rem;background:#6366f1;color:#fff;padding:0.8rem 2rem;border-radius:10px;text-decoration:none;font-weight:700">Go to Dashboard</a>
-          <p style="margin-top:2rem;color:#475569;font-size:0.8rem">Paypee Technologies — Secure Global Payments</p>
-        </div>
-      `);
-
-      return res.status(200).json({ status: 'VERIFIED', message: 'Your identity has been verified successfully!' });
+      return res.status(200).json({ status: 'VERIFIED', message: 'Verification successful!' });
     } else {
       await prisma.user.update({ where: { id: userId }, data: { kycStatus: 'REJECTED' } });
 
       await createNotification(userId, '❌ Verification Failed', 
-        `We could not verify your ${idType}. Reason: ${failureReason}. Please check your details and try again.`,
+        `Biometric match failed: ${failureReason}. Please ensure your ID number is correct and try again.`,
         'ERROR'
       );
-
-      await sendEmail(user.email, '❌ Paypee: Verification Unsuccessful', `
-        <div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:2rem;background:#0a0f1e;color:#fff;border-radius:16px">
-          <h2 style="color:#f43f5e">Verification Unsuccessful</h2>
-          <p>Hi ${user.firstName || 'there'},</p>
-          <p>Unfortunately, we were unable to verify your <strong>${idType}</strong>.</p>
-          <p style="color:#f87171"><strong>Reason:</strong> ${failureReason}</p>
-          <p>Please double-check your ID number and try again from your dashboard. If you continue to experience issues, please contact our support team.</p>
-          <a href="https://paypee.onrender.com" style="display:inline-block;margin-top:1.5rem;background:#6366f1;color:#fff;padding:0.8rem 2rem;border-radius:10px;text-decoration:none;font-weight:700">Try Again</a>
-          <p style="margin-top:2rem;color:#475569;font-size:0.8rem">Paypee Technologies — support@paypee.com</p>
-        </div>
-      `);
 
       return res.status(400).json({ 
         status: 'REJECTED', 
@@ -741,7 +716,7 @@ app.post('/api/verify/identity', authenticateToken, async (req: any, res: any): 
 
   } catch (error: any) {
     console.error('[KYC] Unexpected error:', error.message);
-    res.status(500).json({ error: 'An unexpected error occurred during verification. Please try again.' });
+    res.status(500).json({ error: 'An unexpected error occurred. Please try again.' });
   }
 });
 
