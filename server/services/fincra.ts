@@ -34,7 +34,9 @@ export const issueVirtualAccount = async (businessName: string, currency: string
        ? 'https://api.fincra.com/profile/virtual-accounts/requests'
        : 'https://sandboxapi.fincra.com/profile/virtual-accounts/requests';
 
-    console.log(`[FINCRA] Provisioning account for ${businessName}... ${PROXY_URL ? '(via Proxy)' : '(Directly)'}`);
+    console.log(`[FINCRA DEBUG] Using Business ID: ${FINCRA_BUSINESS_ID.substring(0, 5)}...`);
+    console.log(`[FINCRA DEBUG] Using Secret Key: ${FINCRA_SECRET_KEY.substring(0, 5)}...`);
+    console.log(`[FINCRA] Provisioning account for ${businessName}...`);
 
     const response = await fincraClient.post(endpoint, {
       currency: currency,
@@ -46,9 +48,9 @@ export const issueVirtualAccount = async (businessName: string, currency: string
     
     return response.data.data;
   } catch (error: any) {
+    console.error('[FINCRA DEBUG] Full Axios Error:', error.response?.data || error.message);
     const errorData = error.response?.data;
-    console.error('[FINCRA] Virtual Account Error:', errorData || error.message);
-    throw new Error(errorData?.message || 'Banking partner account creation failed. Possible IP whitelist issue.');
+    throw new Error(errorData?.message || 'Banking partner account creation failed. Please check your credentials.');
   }
 };
 
