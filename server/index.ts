@@ -606,9 +606,14 @@ app.post('/api/verify/identity', authenticateToken, async (req: any, res: any): 
     const { idType, idNumber, faceImage } = req.body;
     const userId = req.user.userId;
 
+    console.log(`[KYC DEBUG] 🏁 Starting verification for user: ${userId}`);
+    console.log(`[KYC DEBUG] ID Type: ${idType}, ID Number: ${idNumber}`);
+    console.log(`[KYC DEBUG] Image received? ${!!faceImage} (Size: ${faceImage?.length || 0} chars)`);
+
     const PREMBLY_SECRET_KEY = process.env.PREMBLY_SECRET_KEY;
 
     if (!PREMBLY_SECRET_KEY) {
+      console.error('[KYC DEBUG] ❌ PREMBLY_SECRET_KEY is MISSING from environment variables!');
       return res.status(503).json({ 
         error: 'Verification service is temporarily unavailable. Please try again later or contact support.' 
       });
@@ -619,6 +624,7 @@ app.post('/api/verify/identity', authenticateToken, async (req: any, res: any): 
     }
 
     // Fetch user
+    console.log('[KYC DEBUG] 🔍 Checking user in database...');
     const user = await prisma.user.findUnique({ where: { id: userId } });
     if (!user) return res.status(404).json({ error: 'User not found.' });
 
@@ -627,6 +633,7 @@ app.post('/api/verify/identity', authenticateToken, async (req: any, res: any): 
     }
 
     // Set status to PROCESSING immediately
+    console.log('[KYC DEBUG] 💾 Updating user status to PROCESSING...');
     await prisma.user.update({
       where: { id: userId },
       data: { kycStatus: 'PROCESSING' }
@@ -641,13 +648,12 @@ app.post('/api/verify/identity', authenticateToken, async (req: any, res: any): 
     let endpoint = '';
     let payload: Record<string, string> = {};
 
-    // Logic: If faceImage is provided, use the Face Match endpoints
     if (faceImage && (idType === 'NIN' || idType === 'BVN')) {
        endpoint = 'https://api.prembly.com/identitypass/verification/face-match';
        payload = {
-         image: faceImage.replace(/^data:image\/\w+;base64,/, ''), // Strip base64 prefix
+         image: faceImage.replace(/^data:image\/\w+;base64,/, ''),
          number: idNumber,
-         id_type: idType // Prembly uses id_type for face match
+         id_type: idType
        };
     } else if (idType === 'NIN') {
       endpoint = 'https://api.prembly.com/identitypass/verification/nin';
@@ -658,26 +664,26 @@ app.post('/api/verify/identity', authenticateToken, async (req: any, res: any): 
     } else if (idType === 'CAC') {
       endpoint = 'https://api.prembly.com/identitypass/verification/cac';
       payload = { rc_number: idNumber, company_type: 'rc' };
-    } else {
-      await prisma.user.update({ where: { id: userId }, data: { kycStatus: 'PENDING' } });
-      return res.status(400).json({ error: 'Unsupported verification combination.' });
     }
 
-    console.log(`[KYC] Calling Prembly ${faceImage ? '(FACE MATCH)' : ''} for user ${userId}...`);
+    console.log(`[KYC DEBUG] 📞 Calling Prembly Endpoint: ${endpoint}...`);
 
     let premblySuccess = false;
-    let failureReason = 'Individual verification failed. Please ensure your face is well-lit and matches your ID.';
+    let failureReason = 'Biometric match failed. Please ensure your face is well-lit and matches your ID photo.';
 
     try {
+      const startTime = Date.now();
       const response = await axios.post(endpoint, payload, {
         headers: {
           'x-api-key': PREMBLY_SECRET_KEY,
           'Content-Type': 'application/json'
         },
-        timeout: 60000 // Increased to 60s for biometric processing
+        timeout: 60000 
       });
 
-      // Handle different Prembly response formats
+      console.log(`[KYC DEBUG] ✅ Prembly responded in ${Date.now() - startTime}ms`);
+      console.log(`[KYC DEBUG] Data:`, JSON.stringify(response.data).substring(0, 100));
+
       const data = response.data;
       premblySuccess = data.status === 'success' || data.response_code === '00' || data.data?.status === 'MATCH';
       
@@ -685,29 +691,26 @@ app.post('/api/verify/identity', authenticateToken, async (req: any, res: any): 
         failureReason = data.message || data.data?.message || failureReason;
       }
     } catch (premblyError: any) {
-      console.error('[KYC] Prembly call failed:', premblyError.response?.data || premblyError.message);
+      console.error('[KYC DEBUG] ❌ Prembly call failed after attempt!');
+      console.error('Error Details:', premblyError.response?.data || premblyError.message);
       
-      // If server error, don't auto-reject so user can retry
       await prisma.user.update({ where: { id: userId }, data: { kycStatus: 'PENDING' } });
-      return res.status(503).json({ error: 'The verification server is busy. Please try again in a few moments.' });
+      return res.status(503).json({ error: 'Verification service timeout. Please try again with a better photo.' });
     }
 
     if (premblySuccess) {
+      console.log('[KYC DEBUG] 🎉 Verification SUCCESS! Updating database...');
       await prisma.user.update({ where: { id: userId }, data: { kycStatus: 'VERIFIED' } });
 
       await createNotification(userId, '✅ Verification Approved!', 
-        'Your identity has been successfully verified via biometric match. Welcome to the future of banking!',
+        'Your identity has been successfully verified via biometric match.',
         'SUCCESS'
       );
 
       return res.status(200).json({ status: 'VERIFIED', message: 'Verification successful!' });
     } else {
+      console.log(`[KYC DEBUG] ⚠️ Verification REJECTED. Reason: ${failureReason}`);
       await prisma.user.update({ where: { id: userId }, data: { kycStatus: 'REJECTED' } });
-
-      await createNotification(userId, '❌ Verification Failed', 
-        `Biometric match failed: ${failureReason}. Please ensure your ID number is correct and try again.`,
-        'ERROR'
-      );
 
       return res.status(400).json({ 
         status: 'REJECTED', 
@@ -716,8 +719,8 @@ app.post('/api/verify/identity', authenticateToken, async (req: any, res: any): 
     }
 
   } catch (error: any) {
-    console.error('[KYC] Unexpected error:', error.message);
-    res.status(500).json({ error: 'An unexpected error occurred. Please try again.' });
+    console.error('[KYC DEBUG] 💥 CRITICAL ERROR:', error.message);
+    res.status(500).json({ error: 'An unexpected system error occurred.' });
   }
 });
 
