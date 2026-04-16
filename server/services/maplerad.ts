@@ -21,26 +21,25 @@ const mapleradClient = axios.create({
  */
 export const createCustomer = async (firstName: string, lastName: string, email: string) => {
   try {
-    console.log(`[MAPLERAD DEBUG] Calling /customers for ${email}`);
-    console.log(`[MAPLERAD DEBUG] Using Secret Key: ${(MAPLERAD_SECRET_KEY || 'NOT SET').substring(0, 8)}...`);
-    console.log(`[MAPLERAD DEBUG] Environment: ${process.env.MAPLERAD_ENV || 'DEFAULT (Sandbox)'}`);
+    console.log(`[MAPLERAD DEBUG] Calling ${MAPLERAD_BASE_URL}/customers for ${email}`);
+    console.log(`[MAPLERAD DEBUG] Header: Authorization: Bearer ${MAPLERAD_SECRET_KEY.substring(0, 8)}...`);
 
     const response = await mapleradClient.post('/customers', {
       first_name: firstName,
       last_name: lastName,
       email: email,
-      country: 'NG' // Default to Nigeria
+      country: 'NG'
     });
-    return response.data.data; // Returns customer object including id
+    return response.data.data;
   } catch (error: any) {
+    if (error.response) {
+        console.error('[MAPLERAD DEBUG] Full Error Response:', JSON.stringify(error.response.data));
+    }
     if (error.response?.data?.message?.includes('already exists')) {
-        // If already exists, we should ideally fetch the customer.
-        // For simplicity in this gate, we fetch by email if needed, 
-        // but Maplerad usually returns the error with the existing data payload.
         return error.response.data.data; 
     }
     console.error('[MAPLERAD] Create Customer Error:', error.response?.data || error.message);
-    throw new Error(error.response?.data?.message || 'Failed to create Maplerad customer');
+    throw new Error(error.response?.data?.message || 'Failed to create Maplerad customer. Check keys/whitelisting.');
   }
 };
 
