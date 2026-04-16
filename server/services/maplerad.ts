@@ -6,7 +6,10 @@ const MAPLERAD_BASE_URL = process.env.MAPLERAD_ENV === 'live'
   ? 'https://api.maplerad.com/v1' 
   : 'https://sandbox.api.maplerad.com/v1';
 
-const MAPLERAD_SECRET_KEY = (process.env.MAPLERAD_SECRET_KEY || '').replace(/"/g, '');
+const MAPLERAD_SECRET_KEY = (process.env.MAPLERAD_SECRET_KEY || '').replace(/"/g, '').trim();
+
+console.log(`[MAPLERAD DEBUG] Secret Key starts with: ${MAPLERAD_SECRET_KEY.substring(0, 8)}...`);
+console.log(`[MAPLERAD DEBUG] Environment: ${process.env.MAPLERAD_ENV || 'not set'}`);
 
 const mapleradClient = axios.create({
   baseURL: MAPLERAD_BASE_URL,
