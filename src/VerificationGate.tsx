@@ -126,13 +126,37 @@ const VerificationGate: React.FC<VerificationGateProps> = ({ kycStatus: initialS
     setError('');
     if (!faceImage) { setError('Please capture a selfie to proceed.'); return; }
     setLoading(true);
+    
     try {
       if (stream) stream.getTracks().forEach(t => t.stop());
+
+      // 🖼️ COMPRESSION STEP: Resize high-res selfies to save bandwidth and avoid timeout
+      const compressedImage = await new Promise<string>((resolve) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          let width = img.width;
+          let height = img.height;
+          const MAX_WIDTH = 800; // Optimal for biometric matching
+          
+          if (width > MAX_WIDTH) {
+            height *= MAX_WIDTH / width;
+            width = MAX_WIDTH;
+          }
+          
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx?.drawImage(img, 0, 0, width, height);
+          resolve(canvas.toDataURL('image/jpeg', 0.7)); // 70% quality JPEG
+        };
+        img.src = faceImage;
+      });
 
       const res = await fetch('https://paypee-api-kmhv.onrender.com/api/verify/identity', {
         method: 'POST',
         headers,
-        body: JSON.stringify({ idType, idNumber: idNumber.trim(), faceImage })
+        body: JSON.stringify({ idType, idNumber: idNumber.trim(), faceImage: compressedImage })
       });
       const data = await res.json();
 
@@ -146,14 +170,13 @@ const VerificationGate: React.FC<VerificationGateProps> = ({ kycStatus: initialS
         await fetchStatus();
       } else {
         setError(data.error || 'Verification failed. Please check your details.');
-        // If rejected, update local status
         if (data.status === 'REJECTED') {
           setKycStatus('REJECTED');
           await fetchStatus();
         }
       }
     } catch (_) {
-      setError('Network error. Please check your connection.');
+      setError('Network error (request too large or service timeout). Please try again with a better connection.');
     } finally {
       setLoading(false);
     }
