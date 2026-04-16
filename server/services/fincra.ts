@@ -34,6 +34,13 @@ export const issueVirtualAccount = async (businessName: string, currency: string
        ? 'https://api.fincra.com/profile/virtual-accounts/requests'
        : 'https://sandboxapi.fincra.com/profile/virtual-accounts/requests';
 
+    try {
+      const ipCheck = await axios.get('https://api.ipify.org?format=json');
+      console.log(`[NETWORK DEBUG] My current Outbound IP is: ${ipCheck.data.ip}`);
+    } catch (ipErr) {
+      console.log('[NETWORK DEBUG] Could not determine outbound IP');
+    }
+
     console.log(`[FINCRA DEBUG] Using Business ID: ${(FINCRA_BUSINESS_ID || 'MISSING').substring(0, 5)}...`);
     console.log(`[FINCRA DEBUG] Using Secret Key: ${(FINCRA_SECRET_KEY || 'MISSING').substring(0, 5)}...`);
     console.log(`[FINCRA] Provisioning account for ${businessName}...`);
