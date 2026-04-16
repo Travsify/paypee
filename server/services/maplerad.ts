@@ -8,9 +8,6 @@ const MAPLERAD_BASE_URL = process.env.MAPLERAD_ENV === 'live'
 
 const MAPLERAD_SECRET_KEY = (process.env.MAPLERAD_SECRET_KEY || '').replace(/"/g, '').trim();
 
-console.log(`[MAPLERAD DEBUG] Secret Key starts with: ${MAPLERAD_SECRET_KEY.substring(0, 8)}...`);
-console.log(`[MAPLERAD DEBUG] Environment: ${process.env.MAPLERAD_ENV || 'not set'}`);
-
 const mapleradClient = axios.create({
   baseURL: MAPLERAD_BASE_URL,
   headers: {
@@ -24,6 +21,10 @@ const mapleradClient = axios.create({
  */
 export const createCustomer = async (firstName: string, lastName: string, email: string) => {
   try {
+    console.log(`[MAPLERAD DEBUG] Calling /customers for ${email}`);
+    console.log(`[MAPLERAD DEBUG] Using Secret Key: ${(MAPLERAD_SECRET_KEY || 'NOT SET').substring(0, 8)}...`);
+    console.log(`[MAPLERAD DEBUG] Environment: ${process.env.MAPLERAD_ENV || 'DEFAULT (Sandbox)'}`);
+
     const response = await mapleradClient.post('/customers', {
       first_name: firstName,
       last_name: lastName,
