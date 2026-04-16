@@ -36,8 +36,14 @@ export const issueVirtualAccount = async (businessName: string, currency: string
     });
     
     const data = await response.json();
-    if (!response.ok) throw new Error(data.message || 'Banking partner account creation failed');
-    return data.data; // Returns accountNumber, bankName, etc.
+    console.log('[FINCRA DEBUG] Response Status:', response.status);
+    console.log('[FINCRA DEBUG] Response Data:', JSON.stringify(data));
+
+    if (!response.ok) {
+      const errorMessage = data.message || data.error || 'Banking partner account creation failed';
+      throw new Error(errorMessage);
+    }
+    return data.data; 
   } catch (error) {
     console.error('[FINCRA] Virtual Account Error:', error);
     throw error;
