@@ -484,9 +484,7 @@ const App = () => {
                    transition={{ duration: 8, repeat: Infinity }}
                    style={{ position: 'absolute', left: '50%', top: '50%', transform: 'translate(-50%, -50%)', width: '600px', height: '600px', background: 'radial-gradient(circle, var(--primary) 0%, transparent 70%)', zIndex: 0, filter: 'blur(80px)' }} 
                 />
-             </div>
-          </div>
-        </section>
+
         
         {/* Logo Cloud Section - THE ONLY PLACE FOR PARTNER LOGOS */}
         <section className="logo-cloud">
@@ -810,10 +808,10 @@ const App = () => {
           </>
         )}
         
-        {landingView === 'individual' && <LandingIndividual onBack={() => setLandingView('main')} />}
-        {landingView === 'business' && <LandingBusiness onBack={() => setLandingView('main')} />}
-        {landingView === 'developer' && <LandingDeveloper onBack={() => setLandingView('main')} />}
-        {landingView.startsWith('legal_') && <LegalPage type={landingView.split('_')[1] as any} onBack={() => setLandingView('main')} />}
+        {landingView === 'individual' && <LandingIndividual onAuth={() => setLandingView('main')} />}
+        {landingView === 'business' && <LandingBusiness onAuth={() => setLandingView('main')} />}
+        {landingView === 'developer' && <LandingDeveloper onAuth={() => setLandingView('main')} />}
+        {landingView.startsWith('legal_') && <LegalPage view={landingView.split('_')[1] as any} onBack={() => setLandingView('main')} />}
       </main>
 
       <MobileBottomNav />

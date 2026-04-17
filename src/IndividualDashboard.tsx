@@ -46,7 +46,19 @@ const SidebarItem = ({ icon: Icon, label, active = false, onClick }: { icon: any
   </div>
 );
 
-const BalanceCard = ({ currency, amount, onSwap, onPayout, accountDetails }: { currency: string, amount: string, onSwap: () => void, onPayout: () => void, accountDetails?: any }) => {
+const BalanceCard = ({ currency, amount, onSwap, onPayout, accountDetails, symbol, gradient, details, userName, type, onDelete }: { 
+  currency: string, 
+  amount: string, 
+  onSwap?: () => void, 
+  onPayout?: () => void,
+  accountDetails?: any,
+  symbol?: string,
+  gradient?: string,
+  details?: any[],
+  userName?: string,
+  type?: string,
+  onDelete?: (id: string) => void
+}) => {
   const getGradient = (cur: string) => {
     const map: Record<string, string> = {
       USD: 'linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)',
