@@ -99,6 +99,10 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
 
   useEffect(() => {
     fetchUserData();
+    
+    // High-frequency polling for live balance updates (every 15s)
+    const interval = setInterval(fetchUserData, 15000);
+    return () => clearInterval(interval);
   }, []);
 
   const generateAccount = async (currency: string, bvn?: string, kycData?: any) => {

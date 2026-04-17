@@ -448,6 +448,17 @@ export const getMapleradPayStatus = async (reference: string) => {
   }
 };
 
+/**
+ * Verifies the signature of an incoming Maplerad webhook.
+ */
+export const verifyWebhookSignature = (signature: string, payload: any) => {
+  if (!signature || !MAPLERAD_SECRET_KEY) return false;
+  const crypto = require('crypto');
+  const hmac = crypto.createHmac('sha512', MAPLERAD_SECRET_KEY);
+  const expectedSignature = hmac.update(JSON.stringify(payload)).digest('hex');
+  return signature === expectedSignature;
+};
+
 export const SUPPORTED_FX_PAIRS = [
   { source: 'USD', target: 'NGN' },
   { source: 'NGN', target: 'USD' },

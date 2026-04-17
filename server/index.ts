@@ -4,7 +4,7 @@ import dotenv from 'dotenv';
 import { PrismaClient, AccountRole } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import { issueVirtualCard, processFiatPayout } from './services/fincra';
+import { issueVirtualCard, processFiatPayout, verifyWebhookSignature as verifyFincraSignature } from './services/fincra';
 import { processCryptoPayout, createLightningInvoice } from './services/bitnob';
 import { AiIntelligenceService } from './services/ai.service';
 import { IbanService } from './services/iban.service';
@@ -1433,6 +1433,131 @@ app.get('/api/fx/history', authenticateToken, async (req: any, res: any) => {
   } catch (error: any) {
     console.error('[FX] History Error:', error.message);
     res.status(500).json({ error: error.message || 'Failed to get FX history' });
+  }
+});
+
+// ==========================================
+// Webhook Handlers (Fincra & Maplerad)
+// ==========================================
+
+app.post('/api/webhooks/fincra', async (req: Request, res: Response) => {
+  try {
+    const signature = req.headers['fincra-signature'] as string;
+    if (!verifyFincraSignature(signature, req.body)) {
+      console.warn('[WEBHOOK] Invalid Fincra signature');
+      return res.status(401).send('Unauthorized');
+    }
+
+    const { event, data } = req.body;
+    console.log(`[WEBHOOK] Fincra Event: ${event}`);
+
+    if (event === 'virtual_account.payment') {
+      const { amount, currency, virtual_account_id, reference } = data;
+      
+      // Find wallet by virtual_account_id in metadata
+      const wallets = await prisma.wallet.findMany();
+      const wallet = wallets.find(w => {
+         const meta = w.metadata as any;
+         return meta && (meta.extRef === virtual_account_id || meta.iban === data.account_number);
+      });
+
+      if (wallet) {
+        await prisma.$transaction([
+          prisma.wallet.update({
+            where: { id: wallet.id },
+            data: { balance: { increment: amount } }
+          }),
+          prisma.transaction.create({
+            data: {
+              userId: wallet.userId,
+              walletId: wallet.id,
+              type: 'DEPOSIT',
+              amount: amount,
+              currency: currency,
+              status: 'COMPLETED',
+              reference: `FINCRA_${reference}`,
+              category: 'BANK_TRANSFER',
+              metadata: data
+            }
+          }),
+          prisma.notification.create({
+            data: {
+              userId: wallet.userId,
+              title: 'Payment Received',
+              message: `Your account has been credited with ${amount} ${currency}.`,
+              type: 'SUCCESS'
+            }
+          })
+        ]);
+        console.log(`[WEBHOOK] Successfully processed payment of ${amount} ${currency} for user ${wallet.userId}`);
+      }
+    }
+
+    res.status(200).send('OK');
+  } catch (error: any) {
+    console.error('[WEBHOOK ERROR] Fincra:', error.message);
+    res.status(500).send('Error');
+  }
+});
+
+app.post('/api/webhooks/maplerad', async (req: Request, res: Response) => {
+  try {
+    const signature = req.headers['maplerad-signature'] as string;
+    if (!Maplerad.verifyWebhookSignature(signature, req.body)) {
+      console.warn('[WEBHOOK] Invalid Maplerad signature');
+      return res.status(401).send('Unauthorized');
+    }
+
+    const { event, data } = req.body;
+    console.log(`[WEBHOOK] Maplerad Event: ${event}`);
+
+    if (event === 'collection.success') {
+      const { amount, currency, account_number, reference } = data;
+      const parsedAmount = amount / 100; // Maplerad uses minor units
+
+      // Find wallet by account_number in metadata
+      const wallets = await prisma.wallet.findMany();
+      const wallet = wallets.find(w => {
+         const meta = w.metadata as any;
+         return meta && (meta.iban === account_number || meta.account_number === account_number);
+      });
+
+      if (wallet) {
+        await prisma.$transaction([
+          prisma.wallet.update({
+            where: { id: wallet.id },
+            data: { balance: { increment: parsedAmount } }
+          }),
+          prisma.transaction.create({
+            data: {
+              userId: wallet.userId,
+              walletId: wallet.id,
+              type: 'DEPOSIT',
+              amount: parsedAmount,
+              currency: currency,
+              status: 'COMPLETED',
+              reference: `MAPLERAD_${reference}`,
+              category: 'BANK_TRANSFER',
+              metadata: data
+            }
+          }),
+          prisma.notification.create({
+            data: {
+              userId: wallet.userId,
+              title: 'Payment Received',
+              message: `Your account has been credited with ${parsedAmount} ${currency}.`,
+              type: 'SUCCESS'
+            }
+          })
+        ]);
+        console.log(`[WEBHOOK] Successfully processed payment of ${parsedAmount} ${currency} for user ${wallet.userId}`);
+      }
+    }
+
+    res.status(200).send('OK');
+  } catch (error: any) {
+    console.error('[WEBHOOK ERROR] Maplerad:', error.message);
+    res.status(500).send('Error');
   }
 });
 

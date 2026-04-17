@@ -98,26 +98,12 @@ const VerificationGate: React.FC<VerificationGateProps> = ({ kycStatus: initialS
   // Poll every 10s while PROCESSING
   useEffect(() => {
     fetchStatus();
-    
-    // Inject mock payment notification for demo if no notifications exist
-    if (notifications.length === 0) {
-      const mockPayment: Notification = {
-        id: 'mock-' + Math.random().toString(36).substr(2, 9),
-        title: 'Payment Received (Virtual Naira)',
-        message: 'Your virtual Naira account has been credited with ₦250,000.00 from TRAVSIFY LTD. Check your wallet for details.',
-        type: 'SUCCESS',
-        read: false,
-        createdAt: new Date().toISOString()
-      };
-      setNotifications([mockPayment]);
-      setUnreadCount(1);
-    }
 
     if (kycStatus === 'PROCESSING') {
       const interval = setInterval(fetchStatus, 10000);
       return () => clearInterval(interval);
     }
-  }, [kycStatus, fetchStatus, notifications.length]);
+  }, [kycStatus, fetchStatus]);
 
   const handleMarkRead = async () => {
     await fetch('https://paypee-api-kmhv.onrender.com/api/notifications/read', { method: 'POST', headers });

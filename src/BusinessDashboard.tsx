@@ -117,6 +117,8 @@ const BusinessDashboard = ({ onLogout }: { onLogout?: () => void }) => {
 
   React.useEffect(() => {
     fetchUserData();
+    const interval = setInterval(fetchUserData, 15000);
+    return () => clearInterval(interval);
   }, []);
 
   const generateAccount = async (currency: string) => {

@@ -103,3 +103,13 @@ export const processFiatPayout = async (amount: number, currency: string, destin
     throw new Error(error.response?.data?.message || 'Banking partner payout failed');
   }
 };
+/**
+ * Verifies the signature of an incoming Fincra webhook.
+ */
+export const verifyWebhookSignature = (signature: string, payload: any) => {
+  if (!signature || !FINCRA_SECRET_KEY) return false;
+  const crypto = require('crypto');
+  const hmac = crypto.createHmac('sha512', FINCRA_SECRET_KEY);
+  const expectedSignature = hmac.update(JSON.stringify(payload)).digest('hex');
+  return signature === expectedSignature;
+};
