@@ -33,6 +33,7 @@ import VaultsDashboard from './VaultsDashboard';
 import BillsDashboard from './BillsDashboard';
 import AiAdvisor from './AiAdvisor';
 import PayoutModal from './PayoutModal';
+import SwapModal from './SwapModal';
 
 import BalanceCard from './components/BalanceCard';
 import WalletRailItem from './components/WalletRailItem';
@@ -67,6 +68,7 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
   const [transactions, setTransactions] = useState<any[]>([]);
   const [cards, setCards] = useState<any[]>([]);
   const [isPayoutOpen, setIsPayoutOpen] = useState(false);
+  const [isSwapOpen, setIsSwapOpen] = useState(false);
   const [isAccountModalOpen, setIsAccountModalOpen] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
 
@@ -247,7 +249,7 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
                         onDelete={() => deleteAccount(w.id)}
                         onSend={() => setIsPayoutOpen(true)}
                         onTopUp={() => alert(`To top up your ${w.currency} wallet, please initiate a transfer to your provisioned account number.`)}
-                        onSwap={() => alert(`Maplerad FX Swap module initializing... You will soon be able to swap ${w.currency} to other balances here.`)}
+                        onSwap={() => setIsSwapOpen(true)}
                       />
                     );
                   })}
@@ -500,6 +502,12 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
         onSelect={generateAccount} 
         isProcessing={isGenerating} 
         existingCurrencies={userData?.wallets?.map((w: any) => w.currency) || []}
+      />
+      <SwapModal
+        isOpen={isSwapOpen}
+        onClose={() => setIsSwapOpen(false)}
+        onSuccess={fetchUserData}
+        wallets={userData?.wallets || []}
       />
     </div>
   );

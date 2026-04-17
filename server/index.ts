@@ -9,6 +9,7 @@ import { processCryptoPayout, createLightningInvoice } from './services/bitnob';
 import { AiIntelligenceService } from './services/ai.service';
 import { IbanService } from './services/iban.service';
 import { BillsService } from './services/bills.service';
+import * as Maplerad from './services/maplerad';
 
 dotenv.config();
 
@@ -809,6 +810,45 @@ app.post('/api/bills/pay', authenticateToken, async (req: any, res: any) => {
     res.status(201).json(transaction);
   } catch (error: any) {
     res.status(400).json({ error: error.message });
+  }
+});
+
+// ==========================================
+// FX Swap (Maplerad Foreign Exchange)
+// ==========================================
+
+app.post('/api/fx/quote', authenticateToken, async (req: any, res: any) => {
+  try {
+    const { sourceCurrency, targetCurrency, amount } = req.body;
+    if (!sourceCurrency || !targetCurrency || !amount) {
+      return res.status(400).json({ error: 'sourceCurrency, targetCurrency, and amount are required.' });
+    }
+    const quote = await Maplerad.generateFxQuote(sourceCurrency, targetCurrency, parseFloat(amount));
+    res.json(quote);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message || 'Failed to generate FX quote' });
+  }
+});
+
+app.post('/api/fx/swap', authenticateToken, async (req: any, res: any) => {
+  try {
+    const { quoteReference } = req.body;
+    if (!quoteReference) {
+      return res.status(400).json({ error: 'quoteReference is required.' });
+    }
+    const result = await Maplerad.executeFxSwap(quoteReference);
+    res.json(result);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message || 'Failed to execute FX swap' });
+  }
+});
+
+app.get('/api/fx/history', authenticateToken, async (req: any, res: any) => {
+  try {
+    const history = await Maplerad.getFxHistory();
+    res.json(history);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message || 'Failed to get FX history' });
   }
 });
 

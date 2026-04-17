@@ -185,3 +185,50 @@ export const processPayout = async (amount: number, currency: string, accountDet
     throw new Error(error.response?.data?.message || 'Payout failed via Maplerad');
   }
 };
+
+/**
+ * Generate an FX Quote (Step 1 of currency swap)
+ */
+export const generateFxQuote = async (sourceCurrency: string, targetCurrency: string, amount: number) => {
+  try {
+    console.log(`[MAPLERAD FX] Generating quote: ${amount} ${sourceCurrency} → ${targetCurrency}`);
+    const response = await mapleradClient.post('/fx/quote', {
+      source_currency: sourceCurrency,
+      target_currency: targetCurrency,
+      amount: Math.round(amount * 100)
+    });
+    return response.data.data;
+  } catch (error: any) {
+    console.error('[MAPLERAD FX] Quote Error:', error.response?.data || error.message);
+    throw new Error(error.response?.data?.message || 'Failed to generate FX quote');
+  }
+};
+
+/**
+ * Execute an FX Swap using a quote reference (Step 2 of currency swap)
+ */
+export const executeFxSwap = async (quoteReference: string) => {
+  try {
+    console.log(`[MAPLERAD FX] Executing swap with quote: ${quoteReference}`);
+    const response = await mapleradClient.post('/fx', {
+      quote_reference: quoteReference
+    });
+    return response.data.data;
+  } catch (error: any) {
+    console.error('[MAPLERAD FX] Swap Error:', error.response?.data || error.message);
+    throw new Error(error.response?.data?.message || 'Failed to execute FX swap');
+  }
+};
+
+/**
+ * Get FX History
+ */
+export const getFxHistory = async () => {
+  try {
+    const response = await mapleradClient.get('/fx');
+    return response.data.data;
+  } catch (error: any) {
+    console.error('[MAPLERAD FX] History Error:', error.response?.data || error.message);
+    throw new Error(error.response?.data?.message || 'Failed to get FX history');
+  }
+};
