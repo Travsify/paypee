@@ -59,9 +59,14 @@ const PayoutModal: React.FC<PayoutModalProps> = ({ isOpen, onClose, onSuccess, w
       if (wallets.length > 0) {
         setSelectedWalletId(wallets[0].id);
       }
-      fetchBanks();
     }
   }, [isOpen, wallets]);
+
+  useEffect(() => {
+    if (isOpen && targetCurrency) {
+      fetchBanks(targetCurrency);
+    }
+  }, [isOpen, targetCurrency]);
 
   const selectedWallet = wallets.find(w => w.id === selectedWalletId);
   const balance = selectedWallet ? parseFloat(selectedWallet.balance) : 0;
@@ -89,9 +94,9 @@ const PayoutModal: React.FC<PayoutModalProps> = ({ isOpen, onClose, onSuccess, w
     }
   }, [isOpen, sourceCurrency, targetCurrency]);
 
-  const fetchBanks = async () => {
+  const fetchBanks = async (currency: string) => {
     try {
-      const response = await fetch('https://paypee-api-kmhv.onrender.com/api/payouts/banks', {
+      const response = await fetch(`https://paypee-api-kmhv.onrender.com/api/payouts/banks?currency=${currency}`, {
         headers: { 'Authorization': `Bearer ${localStorage.getItem('paypee_token')}` }
       });
       const data = await response.json();

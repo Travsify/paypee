@@ -187,15 +187,23 @@ export const processPayout = async (amount: number, currency: string, accountDet
 };
 
 /**
- * Get Banks / Institutions
+ * Get Banks / Institutions / Mobile Money Providers
  */
-export const getBanks = async () => {
+export const getBanks = async (currency: string = 'NGN') => {
   try {
-    const response = await mapleradClient.get('/institutions');
+    const response = await mapleradClient.get(`/institutions?currency=${currency}`);
     return response.data.data;
   } catch (error: any) {
     console.error('[MAPLERAD] Get Banks Error:', error.response?.data || error.message);
-    // Return some default Nigerian banks if API fails
+    
+    // Fallbacks for common mobile money/banks if API fails
+    if (currency === 'KES') {
+      return [{ bank_code: 'MPESA', name: 'M-Pesa' }, { bank_code: 'AIRTEL', name: 'Airtel Money' }];
+    } else if (currency === 'GHS') {
+      return [{ bank_code: 'MTN', name: 'MTN Mobile Money' }, { bank_code: 'VODAFONE', name: 'Vodafone Cash' }, { bank_code: 'AIRTELTIGO', name: 'AirtelTigo Money' }];
+    }
+    
+    // Default Nigerian banks
     return [
       { bank_code: '044', name: 'Access Bank' },
       { bank_code: '058', name: 'GTBank' },

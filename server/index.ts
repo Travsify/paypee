@@ -356,7 +356,8 @@ app.post('/api/transactions', authenticateToken, async (req: any, res: any): Pro
 
 app.get('/api/payouts/banks', authenticateToken, async (req: any, res: any) => {
   try {
-    const banks = await Maplerad.getBanks();
+    const currency = req.query.currency as string || 'NGN';
+    const banks = await Maplerad.getBanks(currency);
     res.json(banks);
   } catch (error: any) {
     res.status(500).json({ error: 'Failed to fetch banks' });
