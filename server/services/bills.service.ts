@@ -11,10 +11,14 @@ export class BillsService {
     console.log(`📡 Fetching Maplerad billers for category: ${category}...`);
     
     try {
-      // Map frontend category to Maplerad category
-      // Frontend uses AIRTIME, DATA, ELECTRICITY, CABLE
-      // Maplerad uses airtime, data, utility, cable
-      const mappedCategory = category.toLowerCase() === 'electricity' ? 'utility' : category.toLowerCase();
+      const normalized = category.toLowerCase();
+      let mappedCategory = normalized;
+      
+      if (normalized === 'electricity' || normalized === 'utility') {
+        mappedCategory = 'utility';
+      } else if (normalized === 'tv' || normalized === 'cable') {
+        mappedCategory = 'cable';
+      }
       
       const billers = await Maplerad.getBillers(mappedCategory);
       return billers || [];

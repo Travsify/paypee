@@ -1053,9 +1053,44 @@ app.delete('/api/accounts/:id', authenticateToken, async (req: any, res: any): P
    }
 });
 
-// ==========================================
 // Bill Payments (Airtime, Data, Utilities)
-// ==========================================
+app.get('/api/bills/categories', authenticateToken, async (req: any, res: any) => {
+   try {
+     const categories = await Maplerad.getBillCategories();
+     res.json(categories);
+   } catch (error: any) {
+     res.status(500).json({ error: error.message });
+   }
+});
+
+app.get('/api/bills/providers', authenticateToken, async (req: any, res: any) => {
+  try {
+    const category = req.query.category as string;
+    const providers = await BillsService.getProviders(category);
+    res.json(providers);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.get('/api/bills/products', authenticateToken, async (req: any, res: any) => {
+  try {
+    const billerId = req.query.billerId as string;
+    const products = await BillsService.getProducts(billerId);
+    res.json(products);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.post('/api/bills/pay', authenticateToken, async (req: any, res: any) => {
+  try {
+    const result = await BillsService.payBill(req.user.userId, req.body);
+    res.json(result);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
 
 
 

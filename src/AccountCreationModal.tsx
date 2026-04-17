@@ -59,27 +59,19 @@ const AccountCreationModal: React.FC<AccountCreationModalProps> = ({
   const currentCurrency = selectedCurrency;
 
   return (
-    <div style={{ position: 'fixed', inset: 0, zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
+    <div className="paypee-modal-overlay">
       <motion.div 
         initial={{ opacity: 0 }} 
         animate={{ opacity: 1 }} 
         onClick={onClose}
-        style={{ position: 'absolute', inset: 0, background: 'rgba(2, 6, 23, 0.9)', backdropFilter: 'blur(12px)' }} 
+        style={{ position: 'absolute', inset: 0 }} 
       />
       
       <motion.div 
         initial={{ scale: 0.9, opacity: 0, y: 40 }}
         animate={{ scale: 1, opacity: 1, y: 0 }}
-        className="account-modal-body"
-        style={{ 
-          position: 'relative', 
-          width: '100%', 
-          maxWidth: '1000px', 
-          background: '#0a0f1e', 
-          border: '1px solid rgba(255,255,255,0.1)', 
-          borderRadius: '40px', 
-          boxShadow: '0 50px 100px -20px rgba(0,0,0,0.5)'
-        }}
+        className="paypee-modal-content"
+        style={{ maxWidth: '1000px', display: 'flex' }}
       >
         {/* Left Side: Dynamic Info */}
         <div className="account-modal-left" style={{ 
