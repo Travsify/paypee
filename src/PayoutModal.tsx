@@ -15,7 +15,7 @@ import {
 interface PayoutModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSuccess: () => void;
+  onComplete: () => void;
   wallets: any[];
 }
 
@@ -28,7 +28,7 @@ const TARGET_CURRENCIES = [
   { code: 'GHS', label: 'Ghana (GHS)' }
 ];
 
-const PayoutModal: React.FC<PayoutModalProps> = ({ isOpen, onClose, onSuccess, wallets }) => {
+const PayoutModal: React.FC<PayoutModalProps> = ({ isOpen, onClose, onComplete, wallets }) => {
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -138,7 +138,7 @@ const PayoutModal: React.FC<PayoutModalProps> = ({ isOpen, onClose, onSuccess, w
       }
 
       setStep(3);
-      onSuccess();
+      onComplete();
     } catch (err: any) {
       setError(err.message);
     } finally {

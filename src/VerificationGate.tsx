@@ -462,28 +462,8 @@ const VerificationGate: React.FC<VerificationGateProps> = ({ kycStatus: initialS
         )}
       </AnimatePresence>
 
-      {/* Full-screen blocker for PROCESSING */}
-      <AnimatePresence>
-        {kycStatus === 'PROCESSING' && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            style={{ position: 'fixed', inset: 0, background: 'rgba(2,6,23,0.85)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1500, flexDirection: 'column', gap: '1.5rem', padding: '2rem', textAlign: 'center' }}
-          >
-            <motion.div animate={{ rotate: 360 }} transition={{ duration: 2, repeat: Infinity, ease: 'linear' }} style={{ color: '#6366f1' }}>
-              <RefreshCcw size={52} />
-            </motion.div>
-            <h2 style={{ fontSize: '1.75rem', fontWeight: 800 }}>Verification In Progress</h2>
-            <p style={{ color: '#64748b', maxWidth: '400px' }}>
-              We're verifying your details with our compliance partner. Please wait — this usually takes under 60 seconds. Do not close this page.
-            </p>
-            <div style={{ background: 'rgba(99,102,241,0.1)', border: '1px solid rgba(99,102,241,0.2)', borderRadius: '14px', padding: '1rem 1.5rem', color: '#a5b4fc', fontSize: '0.85rem', fontWeight: 600 }}>
-              You'll be automatically redirected once approved.
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* Full-screen blocker removed to allow dashboard visibility during processing */}
+
     </>
   );
 };

@@ -212,6 +212,48 @@ app.get('/api/cards/:cardId/pin', authenticateToken, async (req: any, res: any):
    }
 });
 
+app.post('/api/cards/:cardId/fund', authenticateToken, async (req: any, res: any): Promise<any> => {
+   try {
+      const { cardId } = req.params;
+      const { amount, walletId } = req.body;
+      const userId = req.user.userId;
+
+      // 1. Validate Card & Wallet
+      const card = await prisma.virtualCard.findUnique({ where: { id: cardId } });
+      if (!card || card.userId !== userId) return res.status(404).json({ error: 'Card not found' });
+
+      const wallet = await prisma.wallet.findUnique({ where: { id: walletId } });
+      if (!wallet || wallet.userId !== userId || Number(wallet.balance) < amount) {
+         return res.status(400).json({ error: 'Insufficient funds or invalid wallet' });
+      }
+
+      // 2. Atomic Update
+      await prisma.$transaction([
+         prisma.wallet.update({
+            where: { id: walletId },
+            data: { balance: { decrement: amount } }
+         }),
+         prisma.transaction.create({
+            data: {
+               userId,
+               walletId,
+               type: 'CARD_PAYMENT',
+               amount,
+               currency: wallet.currency,
+               status: 'COMPLETED',
+               reference: `CARD_FUND_${Date.now()}`,
+               category: 'CARD',
+               desc: `Funded Card ending in ${card.cardNumber.slice(-4)}`
+            }
+         })
+      ]);
+
+      res.status(200).json({ message: 'Card funded successfully' });
+   } catch (error) {
+      res.status(500).json({ error: 'Failed to fund card' });
+   }
+});
+
 // ==========================================
 // Virtual Cards Routes
 // ==========================================
@@ -616,6 +658,111 @@ app.post('/api/payment-links', authenticateToken, async (req: any, res: any): Pr
      res.status(201).json(link);
   } catch (error) {
      res.status(500).json({ error: 'Failed to create payment link' });
+  }
+});
+
+app.get('/api/payment-links', authenticateToken, async (req: any, res: any): Promise<any> => {
+  try {
+    const links = await prisma.paymentLink.findMany({
+      where: { userId: req.user.userId },
+      orderBy: { createdAt: 'desc' }
+    });
+    res.json(links);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch payment links' });
+  }
+});
+
+// ==========================================
+// Vaults (Savings)
+// ==========================================
+
+app.get('/api/vaults', authenticateToken, async (req: any, res: any): Promise<any> => {
+  try {
+    const vaults = await prisma.vault.findMany({
+      where: { userId: req.user.userId },
+      orderBy: { createdAt: 'desc' }
+    });
+    res.json(vaults);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch vaults' });
+  }
+});
+
+app.post('/api/vaults', authenticateToken, async (req: any, res: any): Promise<any> => {
+  try {
+    const { name, amount, currency, walletId } = req.body;
+    
+    // Deduct from wallet
+    const wallet = await prisma.wallet.findUnique({ where: { id: walletId } });
+    if (!wallet || Number(wallet.balance) < amount) {
+      return res.status(400).json({ error: 'Insufficient funds in source wallet' });
+    }
+
+    const result = await prisma.$transaction([
+      prisma.wallet.update({
+        where: { id: walletId },
+        data: { balance: { decrement: amount } }
+      }),
+      prisma.vault.create({
+        data: {
+          userId: req.user.userId,
+          name,
+          balance: amount,
+          currency: currency || wallet.currency,
+          type: 'SAVINGS'
+        }
+      }),
+      prisma.transaction.create({
+        data: {
+          userId: req.user.userId,
+          walletId,
+          type: 'TRANSFER',
+          amount,
+          currency: wallet.currency,
+          status: 'COMPLETED',
+          reference: `VAULT_FUND_${Date.now()}`,
+          category: 'VAULT',
+          desc: `Funded Vault: ${name}`
+        }
+      })
+    ]);
+
+    res.status(201).json(result[1]);
+  } catch (error) {
+    console.error('Vault creation error:', error);
+    res.status(500).json({ error: 'Failed to create vault' });
+  }
+});
+
+// ==========================================
+// Bills & Utilities
+// ==========================================
+import { BillsService } from './services/bills.service';
+
+app.get('/api/bills/providers', authenticateToken, async (req: any, res: any): Promise<any> => {
+  try {
+    const { category } = req.query;
+    const providers = await BillsService.getProviders(category as string);
+    res.json(providers);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.post('/api/bills/pay', authenticateToken, async (req: any, res: any): Promise<any> => {
+  try {
+    const { walletId, amount, providerId, customerId, category } = req.body;
+    const transaction = await BillsService.payBill(req.user.userId, {
+      walletId,
+      amount,
+      providerId,
+      customerId,
+      category
+    });
+    res.status(200).json(transaction);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
   }
 });
 

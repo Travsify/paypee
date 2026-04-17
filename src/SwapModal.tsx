@@ -5,7 +5,7 @@ import { X, ArrowRightLeft, RefreshCcw, ChevronDown, AlertTriangle, CheckCircle2
 interface SwapModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSuccess: () => void;
+  onComplete: () => void;
   wallets: any[];
 }
 
@@ -18,7 +18,7 @@ const currencyConfig: Record<string, { symbol: string; icon: string; color: stri
 
 const API_BASE = 'https://paypee-api-kmhv.onrender.com';
 
-const SwapModal: React.FC<SwapModalProps> = ({ isOpen, onClose, onSuccess, wallets }) => {
+const SwapModal: React.FC<SwapModalProps> = ({ isOpen, onClose, onComplete, wallets }) => {
   const [fromCurrency, setFromCurrency] = useState('');
   const [toCurrency, setToCurrency] = useState('');
   const [amount, setAmount] = useState('');
@@ -115,7 +115,7 @@ const SwapModal: React.FC<SwapModalProps> = ({ isOpen, onClose, onSuccess, walle
       if (!res.ok) throw new Error(data.error || 'Swap failed');
       setQuote({ ...quote, ...data });
       setStep('success');
-      onSuccess();
+      onComplete();
     } catch (err: any) { setError(err.message); setStep('error'); }
     finally { setIsLoading(false); }
   };
