@@ -7,7 +7,7 @@ export class IbanService {
   /**
    * Provisions a new virtual global account for a user.
    */
-  static async provisionGlobalAccount(userId: string, currency: string, userName?: string, bvn?: string) {
+  static async provisionGlobalAccount(userId: string, currency: string, userName?: string, bvn?: string, kycData?: any) {
     console.log(`🌍 [MAPLERAD] Provisioning ${currency} account for User ${userId}...`);
 
     // 1. Fetch user to ensure we have email and names
@@ -43,9 +43,9 @@ export class IbanService {
           );
 
           // B. Upgrade Customer to Tier 1 KYC (Required for NGN Accounts)
-          if (bvn) {
-             console.log(`[MAPLERAD DEBUG] Upgrading Customer ${customer.id} to Tier 1 using provided BVN...`);
-             await Maplerad.upgradeCustomerTier1(customer.id, { bvn: bvn });
+          if (bvn || (kycData && kycData.bvn)) {
+             console.log(`[MAPLERAD DEBUG] Upgrading Customer ${customer.id} to Tier 1 using provided KYC data...`);
+             await Maplerad.upgradeCustomerTier1(customer.id, kycData || { bvn: bvn });
           } else {
              console.log(`[MAPLERAD WARNING] No BVN provided. Maplerad may block virtual account creation if customer is not Tier 1.`);
           }

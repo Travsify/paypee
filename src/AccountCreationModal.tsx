@@ -13,7 +13,7 @@ import {
 interface AccountCreationModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSelect: (currency: string, bvn?: string) => void;
+  onSelect: (currency: string, bvn?: string, kycData?: any) => void;
   isProcessing: boolean;
   existingCurrencies?: string[];
 }
@@ -38,14 +38,14 @@ const AccountCreationModal: React.FC<AccountCreationModalProps> = ({
   const filteredCurrencies = allCurrencies.filter(c => !existingCurrencies.includes(c.code));
   const [step, setStep] = useState(1);
   const [selectedCurrency, setSelectedCurrency] = useState<any>(null);
-  const [bvn, setBvn] = useState('');
+  const [kycData, setKycData] = useState({ bvn: '', dob: '', phoneNumber: '', street: '', city: '', state: '', postalCode: '' });
 
   // Reset state when opened or closed
   useEffect(() => {
     if (isOpen) {
       setStep(1);
       setSelectedCurrency(null);
-      setBvn('');
+      setKycData({ bvn: '', dob: '', phoneNumber: '', street: '', city: '', state: '', postalCode: '' });
     }
   }, [isOpen]);
 
@@ -260,19 +260,41 @@ const AccountCreationModal: React.FC<AccountCreationModalProps> = ({
                            </p>
                          </div>
 
-                         {currentCurrency.code === 'NGN' && (
-                            <div style={{ marginBottom: '2rem' }}>
-                              <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: '#475569', letterSpacing: '1px', marginBottom: '0.5rem' }}>ENTER 11-DIGIT BVN</label>
-                              <input 
-                                type="text" 
-                                value={bvn} 
-                                onChange={e => setBvn(e.target.value)} 
-                                maxLength={11}
-                                placeholder="Required by regulations" 
-                                style={{ width: '100%', padding: '1rem', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '14px', color: '#fff', fontSize: '1rem', outline: 'none', transition: 'border 0.2s', boxSizing: 'border-box' }}
-                                onFocus={e => e.target.style.borderColor = '#10b981'}
-                                onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.1)'}
-                              />
+                         {['NGN', 'USD', 'EUR', 'GBP'].includes(currentCurrency.code) && (
+                            <div style={{ marginBottom: '2rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                              <h4 style={{ fontSize: '0.8rem', color: 'var(--primary)', letterSpacing: '1px', textTransform: 'uppercase', marginBottom: '0.5rem' }}>Tier 1 KYC Requirements</h4>
+                              
+                              <div>
+                                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: '#475569', letterSpacing: '1px', marginBottom: '0.5rem' }}>ENTER 11-DIGIT BVN</label>
+                                <input type="text" value={kycData.bvn} onChange={e => setKycData({...kycData, bvn: e.target.value})} maxLength={11} placeholder="Required by regulations" style={{ width: '100%', padding: '0.8rem', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', color: '#fff', fontSize: '0.9rem', outline: 'none' }} />
+                              </div>
+
+                              <div style={{ display: 'flex', gap: '1rem' }}>
+                                <div style={{ flex: 1 }}>
+                                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: '#475569', letterSpacing: '1px', marginBottom: '0.5rem' }}>DATE OF BIRTH</label>
+                                  <input type="date" value={kycData.dob} onChange={e => setKycData({...kycData, dob: e.target.value})} style={{ width: '100%', padding: '0.8rem', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', color: '#fff', fontSize: '0.9rem', outline: 'none' }} />
+                                </div>
+                                <div style={{ flex: 1 }}>
+                                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: '#475569', letterSpacing: '1px', marginBottom: '0.5rem' }}>PHONE NUMBER</label>
+                                  <input type="tel" value={kycData.phoneNumber} onChange={e => setKycData({...kycData, phoneNumber: e.target.value})} placeholder="08012345678" style={{ width: '100%', padding: '0.8rem', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', color: '#fff', fontSize: '0.9rem', outline: 'none' }} />
+                                </div>
+                              </div>
+
+                              <div>
+                                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: '#475569', letterSpacing: '1px', marginBottom: '0.5rem' }}>STREET ADDRESS</label>
+                                <input type="text" value={kycData.street} onChange={e => setKycData({...kycData, street: e.target.value})} placeholder="123 Main Street" style={{ width: '100%', padding: '0.8rem', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', color: '#fff', fontSize: '0.9rem', outline: 'none' }} />
+                              </div>
+
+                              <div style={{ display: 'flex', gap: '1rem' }}>
+                                <div style={{ flex: 1 }}>
+                                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: '#475569', letterSpacing: '1px', marginBottom: '0.5rem' }}>CITY</label>
+                                  <input type="text" value={kycData.city} onChange={e => setKycData({...kycData, city: e.target.value})} placeholder="Lagos" style={{ width: '100%', padding: '0.8rem', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', color: '#fff', fontSize: '0.9rem', outline: 'none' }} />
+                                </div>
+                                <div style={{ flex: 1 }}>
+                                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: '#475569', letterSpacing: '1px', marginBottom: '0.5rem' }}>STATE</label>
+                                  <input type="text" value={kycData.state} onChange={e => setKycData({...kycData, state: e.target.value})} placeholder="Lagos" style={{ width: '100%', padding: '0.8rem', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', color: '#fff', fontSize: '0.9rem', outline: 'none' }} />
+                                </div>
+                              </div>
                             </div>
                          )}
 
@@ -283,19 +305,19 @@ const AccountCreationModal: React.FC<AccountCreationModalProps> = ({
                            </p>
                            
                            <button 
-                             disabled={isProcessing || (currentCurrency.code === 'NGN' && bvn.length !== 11)}
-                             onClick={() => onSelect(currentCurrency.code, currentCurrency.code === 'NGN' ? bvn : undefined)}
+                             disabled={isProcessing || (['NGN', 'USD', 'EUR', 'GBP'].includes(currentCurrency.code) && (kycData.bvn.length !== 11 || !kycData.dob || !kycData.street))}
+                             onClick={() => onSelect(currentCurrency.code, ['NGN', 'USD', 'EUR', 'GBP'].includes(currentCurrency.code) ? kycData.bvn : undefined, kycData)}
                              style={{ 
                                width: '100%', 
                                padding: '1.4rem', 
-                               background: isProcessing || (currentCurrency.code === 'NGN' && bvn.length !== 11) ? 'rgba(255,255,255,0.05)' : 'var(--primary)', 
-                               color: isProcessing || (currentCurrency.code === 'NGN' && bvn.length !== 11) ? '#64748b' : '#fff',
+                               background: isProcessing || (['NGN', 'USD', 'EUR', 'GBP'].includes(currentCurrency.code) && (kycData.bvn.length !== 11 || !kycData.dob || !kycData.street)) ? 'rgba(255,255,255,0.05)' : 'var(--primary)', 
+                               color: isProcessing || (['NGN', 'USD', 'EUR', 'GBP'].includes(currentCurrency.code) && (kycData.bvn.length !== 11 || !kycData.dob || !kycData.street)) ? '#64748b' : '#fff',
                                border: 'none', 
                                borderRadius: '24px', 
                                fontWeight: 900, 
                                fontSize: '1.1rem',
-                               cursor: isProcessing || (currentCurrency.code === 'NGN' && bvn.length !== 11) ? 'not-allowed' : 'pointer',
-                               boxShadow: (!isProcessing && !(currentCurrency.code === 'NGN' && bvn.length !== 11)) ? '0 20px 40px -10px rgba(99, 102, 241, 0.5)' : 'none',
+                               cursor: isProcessing || (['NGN', 'USD', 'EUR', 'GBP'].includes(currentCurrency.code) && (kycData.bvn.length !== 11 || !kycData.dob || !kycData.street)) ? 'not-allowed' : 'pointer',
+                               boxShadow: (!isProcessing && !(['NGN', 'USD', 'EUR', 'GBP'].includes(currentCurrency.code) && (kycData.bvn.length !== 11 || !kycData.dob || !kycData.street))) ? '0 20px 40px -10px rgba(99, 102, 241, 0.5)' : 'none',
                                display: 'flex',
                                alignItems: 'center',
                                justifyContent: 'center',

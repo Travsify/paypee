@@ -97,7 +97,7 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
     fetchUserData();
   }, []);
 
-  const generateAccount = async (currency: string, bvn?: string) => {
+  const generateAccount = async (currency: string, bvn?: string, kycData?: any) => {
     setIsGenerating(true);
     try {
       const response = await fetch('https://paypee-api-kmhv.onrender.com/api/accounts/provision', {
@@ -106,7 +106,7 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${localStorage.getItem('paypee_token')}`
         },
-        body: JSON.stringify({ currency: currency.toUpperCase(), bvn })
+        body: JSON.stringify({ currency: currency.toUpperCase(), bvn, kycData })
       });
       if (response.ok) {
         setIsAccountModalOpen(false);
