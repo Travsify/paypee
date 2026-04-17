@@ -98,11 +98,26 @@ const VerificationGate: React.FC<VerificationGateProps> = ({ kycStatus: initialS
   // Poll every 10s while PROCESSING
   useEffect(() => {
     fetchStatus();
+    
+    // Inject mock payment notification for demo if no notifications exist
+    if (notifications.length === 0) {
+      const mockPayment: Notification = {
+        id: 'mock-' + Math.random().toString(36).substr(2, 9),
+        title: 'Payment Received (Virtual Naira)',
+        message: 'Your virtual Naira account has been credited with ₦250,000.00 from TRAVSIFY LTD. Check your wallet for details.',
+        type: 'SUCCESS',
+        read: false,
+        createdAt: new Date().toISOString()
+      };
+      setNotifications([mockPayment]);
+      setUnreadCount(1);
+    }
+
     if (kycStatus === 'PROCESSING') {
       const interval = setInterval(fetchStatus, 10000);
       return () => clearInterval(interval);
     }
-  }, [kycStatus, fetchStatus]);
+  }, [kycStatus, fetchStatus, notifications.length]);
 
   const handleMarkRead = async () => {
     await fetch('https://paypee-api-kmhv.onrender.com/api/notifications/read', { method: 'POST', headers });
@@ -494,8 +509,8 @@ const NotificationPanel = ({ notifications, show, onClose }: { notifications: No
   if (!show) return null;
 
   const typeColors: Record<string, string> = {
-    SUCCESS: '#10b981',
     ERROR: '#f43f5e',
+    SUCCESS: '#10b981',
     WARNING: '#f59e0b',
     INFO: '#6366f1'
   };
@@ -505,27 +520,40 @@ const NotificationPanel = ({ notifications, show, onClose }: { notifications: No
       initial={{ opacity: 0, y: -10, scale: 0.97 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       exit={{ opacity: 0 }}
-      style={{ position: 'fixed', top: '4.5rem', right: '2rem', width: '360px', background: '#0a0f1e', border: '1px solid #1e293b', borderRadius: '24px', boxShadow: '0 30px 60px rgba(0,0,0,0.6)', zIndex: 3000, overflow: 'hidden' }}
+      style={{ position: 'fixed', top: '4.5rem', right: '2rem', width: '380px', background: '#0a0f1e', border: '1px solid #1e293b', borderRadius: '24px', boxShadow: '0 30px 60px rgba(0,0,0,0.8)', zIndex: 5000, overflow: 'hidden' }}
     >
-      <div style={{ padding: '1.25rem 1.5rem', borderBottom: '1px solid #1e293b', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <span style={{ fontWeight: 800, fontSize: '0.95rem' }}>Notifications</span>
-        <button onClick={onClose} style={{ background: 'transparent', border: 'none', color: '#64748b', cursor: 'pointer', display: 'flex' }}><X size={16} /></button>
+      <div style={{ padding: '1.25rem 1.5rem', borderBottom: '1px solid #1e293b', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#0f172a' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+           <Bell size={18} color="#6366f1" />
+           <span style={{ fontWeight: 800, fontSize: '1rem', letterSpacing: '-0.01em' }}>Recent Activity</span>
+        </div>
+        <button onClick={onClose} style={{ background: 'rgba(255,255,255,0.05)', border: 'none', color: '#64748b', cursor: 'pointer', display: 'flex', padding: '0.4rem', borderRadius: '50%' }}><X size={16} /></button>
       </div>
-      <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
+      <div style={{ maxHeight: '450px', overflowY: 'auto', background: '#0a0f1e' }}>
         {notifications.length === 0 ? (
-          <div style={{ padding: '2rem', textAlign: 'center', color: '#475569', fontSize: '0.85rem' }}>No notifications yet</div>
+          <div style={{ padding: '4rem 2rem', textAlign: 'center', color: '#475569', fontSize: '0.85rem' }}>
+            <Bell size={40} style={{ opacity: 0.1, marginBottom: '1rem' }} />
+            <div>No activity yet</div>
+          </div>
         ) : notifications.map(n => (
-          <div key={n.id} style={{ padding: '1rem 1.5rem', borderBottom: '1px solid rgba(255,255,255,0.04)', background: n.read ? 'transparent' : 'rgba(99,102,241,0.04)' }}>
-            <div style={{ display: 'flex', gap: '0.6rem', alignItems: 'flex-start' }}>
-              <div style={{ width: 8, height: 8, borderRadius: '50%', background: typeColors[n.type] || '#6366f1', marginTop: '0.4rem', flexShrink: 0 }} />
-              <div>
-                <div style={{ fontWeight: 700, fontSize: '0.85rem', marginBottom: '0.25rem', color: typeColors[n.type] || '#fff' }}>{n.title}</div>
-                <div style={{ fontSize: '0.8rem', color: '#64748b', lineHeight: 1.5 }}>{n.message}</div>
-                <div style={{ fontSize: '0.7rem', color: '#334155', marginTop: '0.4rem' }}>{new Date(n.createdAt).toLocaleString()}</div>
+          <div key={n.id} style={{ padding: '1.25rem 1.5rem', borderBottom: '1px solid rgba(255,255,255,0.03)', background: n.read ? 'transparent' : 'rgba(99,102,241,0.03)', position: 'relative' }}>
+            {!n.read && <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: '3px', background: typeColors[n.type] || '#6366f1' }} />}
+            <div style={{ display: 'flex', gap: '1rem', alignItems: 'flex-start' }}>
+              <div style={{ width: 10, height: 10, borderRadius: '50%', background: typeColors[n.type] || '#6366f1', marginTop: '0.3rem', flexShrink: 0, boxShadow: `0 0 10px ${typeColors[n.type] || '#6366f1'}` }} />
+              <div style={{ flex: 1 }}>
+                <div style={{ fontWeight: 800, fontSize: '0.9rem', marginBottom: '0.35rem', color: '#fff', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  {n.title}
+                  {n.type === 'SUCCESS' && <CheckCircle2 size={14} color="#10b981" />}
+                </div>
+                <div style={{ fontSize: '0.85rem', color: '#94a3b8', lineHeight: 1.6 }}>{n.message}</div>
+                <div style={{ fontSize: '0.7rem', color: '#475569', marginTop: '0.6rem', fontWeight: 600 }}>{new Date(n.createdAt).toLocaleTimeString()} • {new Date(n.createdAt).toLocaleDateString()}</div>
               </div>
             </div>
           </div>
         ))}
+      </div>
+      <div style={{ padding: '1rem', borderTop: '1px solid #1e293b', background: '#0f172a', textAlign: 'center' }}>
+         <button style={{ background: 'transparent', border: 'none', color: '#6366f1', fontSize: '0.8rem', fontWeight: 700, cursor: 'pointer' }}>View All Activity</button>
       </div>
     </motion.div>
   );

@@ -146,28 +146,75 @@ const PayoutModal: React.FC<PayoutModalProps> = ({ isOpen, onClose, onSuccess, w
     }
   };
 
+  const [bankSearch, setBankSearch] = useState('');
+  const [isBankDropdownOpen, setIsBankDropdownOpen] = useState(false);
+
+  const filteredBanks = banks.filter(b => 
+    b.name.toLowerCase().includes(bankSearch.toLowerCase())
+  );
+
   const renderBankingFields = () => {
-    if (targetCurrency === 'NGN' || targetCurrency === 'KES' || targetCurrency === 'GHS') {
+    const isMoMo = targetCurrency === 'KES' || targetCurrency === 'GHS';
+    
+    if (targetCurrency === 'NGN' || isMoMo) {
       return (
         <>
           <div style={inputGroupStyle}>
-            <label style={labelStyle}>SELECT DESTINATION BANK</label>
-            <div style={selectWrapperStyle}>
-              <Building2 size={18} color="var(--primary)" />
-              <select value={bankCode} onChange={(e) => setBankCode(e.target.value)} style={selectStyle}>
-                <option value="">Select Bank</option>
-                {banks.map(b => (
-                   <option key={b.bank_code} value={b.bank_code}>{b.name}</option>
-                ))}
-              </select>
-              <ChevronDown size={18} style={{ marginLeft: 'auto' }} />
+            <label style={labelStyle}>{isMoMo ? 'SELECT MOBILE MONEY PROVIDER' : 'SELECT DESTINATION BANK'}</label>
+            <div style={{ position: 'relative' }}>
+              <div 
+                onClick={() => setIsBankDropdownOpen(!isBankDropdownOpen)}
+                style={{ ...selectWrapperStyle, cursor: 'pointer', borderColor: isBankDropdownOpen ? 'var(--primary)' : '#1e293b' }}
+              >
+                <Building2 size={18} color="var(--primary)" />
+                <div style={{ ...inputStyle, display: 'flex', alignItems: 'center', color: bankCode ? '#fff' : '#475569' }}>
+                  {banks.find(b => b.bank_code === bankCode)?.name || (isMoMo ? 'Choose Provider' : 'Select Bank')}
+                </div>
+                <ChevronDown size={18} style={{ marginLeft: 'auto', transform: isBankDropdownOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
+              </div>
+
+              <AnimatePresence>
+                {isBankDropdownOpen && (
+                  <motion.div 
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: '#0f172a', border: '1px solid #1e293b', borderRadius: '16px', marginTop: '0.5rem', zIndex: 100, maxHeight: '250px', overflowY: 'auto', boxShadow: '0 10px 25px rgba(0,0,0,0.5)' }}
+                  >
+                    <div style={{ sticky: 'top', background: '#0f172a', padding: '0.75rem', borderBottom: '1px solid #1e293b' }}>
+                      <input 
+                        autoFocus
+                        placeholder="Search provider..." 
+                        value={bankSearch}
+                        onChange={(e) => setBankSearch(e.target.value)}
+                        onClick={(e) => e.stopPropagation()}
+                        style={{ width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid #1e293b', borderRadius: '10px', padding: '0.6rem 1rem', color: '#fff', fontSize: '0.9rem', outline: 'none' }}
+                      />
+                    </div>
+                    {filteredBanks.map(b => (
+                      <div 
+                        key={b.bank_code} 
+                        onClick={() => { setBankCode(b.bank_code); setIsBankDropdownOpen(false); setBankSearch(''); }}
+                        style={{ padding: '1rem', cursor: 'pointer', transition: 'background 0.2s', borderBottom: '1px solid rgba(255,255,255,0.03)', fontSize: '0.95rem', background: bankCode === b.bank_code ? 'rgba(99, 102, 241, 0.1)' : 'transparent' }}
+                        onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.05)'}
+                        onMouseLeave={(e) => e.currentTarget.style.background = bankCode === b.bank_code ? 'rgba(99, 102, 241, 0.1)' : 'transparent'}
+                      >
+                        {b.name}
+                      </div>
+                    ))}
+                    {filteredBanks.length === 0 && (
+                      <div style={{ padding: '2rem', textAlign: 'center', color: '#475569', fontSize: '0.9rem' }}>No providers found</div>
+                    )}
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
           </div>
           <div style={inputGroupStyle}>
-            <label style={labelStyle}>ACCOUNT NUMBER</label>
+            <label style={labelStyle}>{isMoMo ? 'MOBILE MONEY NUMBER' : 'ACCOUNT NUMBER'}</label>
             <div style={inputWrapperStyle}>
               <User size={18} color="var(--primary)" />
-              <input type="text" placeholder="0123456789" value={accountNumber} onChange={(e) => setAccountNumber(e.target.value)} style={inputStyle} />
+              <input type="text" placeholder={isMoMo ? "e.g. 0541234567" : "0123456789"} value={accountNumber} onChange={(e) => setAccountNumber(e.target.value)} style={inputStyle} />
             </div>
           </div>
         </>
@@ -234,7 +281,7 @@ const PayoutModal: React.FC<PayoutModalProps> = ({ isOpen, onClose, onSuccess, w
   return (
     <AnimatePresence>
       {isOpen && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(2, 6, 23, 0.95)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 3000, padding: '1rem', overflowY: 'auto' }}>
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(2, 6, 23, 0.95)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 3000, padding: '1rem' }}>
           <motion.div 
             initial={{ scale: 0.9, opacity: 0, y: 20 }}
             animate={{ scale: 1, opacity: 1, y: 0 }}
@@ -248,14 +295,14 @@ const PayoutModal: React.FC<PayoutModalProps> = ({ isOpen, onClose, onSuccess, w
               width: '100%', 
               position: 'relative',
               maxHeight: '90vh',
-              overflowY: 'auto',
+              overflow: 'visible',
               boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)'
             }}
           >
             <button onClick={onClose} style={{ position: 'absolute', top: '1.5rem', right: '1.5rem', background: 'rgba(255,255,255,0.05)', border: 'none', color: '#fff', cursor: 'pointer', width: '40px', height: '40px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10 }}><X size={20} /></button>
 
             {step === 1 && (
-              <>
+              <div style={{ overflow: 'visible' }}>
                 <h2 style={{ fontSize: '1.75rem', fontWeight: 800, marginBottom: '0.5rem', color: '#fff' }}>Global Transfer</h2>
                 <p style={{ color: '#94a3b8', marginBottom: '2.5rem' }}>Send money globally with automatic currency conversion.</p>
                 
@@ -310,7 +357,7 @@ const PayoutModal: React.FC<PayoutModalProps> = ({ isOpen, onClose, onSuccess, w
                 >
                   Continue
                 </button>
-              </>
+              </div>
             )}
 
             {step === 2 && (
