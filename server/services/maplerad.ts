@@ -73,9 +73,21 @@ export const createCustomer = async (firstName: string, lastName: string, email:
 export const upgradeCustomerTier1 = async (customerId: string, kycData: any) => {
   try {
     console.log(`[MAPLERAD DEBUG] Upgrading customer ${customerId} to Tier 1...`);
+    
+    // Maplerad expects DD-MM-YYYY, but HTML5 date input provides YYYY-MM-DD
+    let formattedDob = '01-01-1990';
+    if (kycData.dob) {
+      const parts = kycData.dob.split('-');
+      if (parts.length === 3) {
+        formattedDob = `${parts[2]}-${parts[1]}-${parts[0]}`; // Convert YYYY-MM-DD to DD-MM-YYYY
+      } else {
+        formattedDob = kycData.dob;
+      }
+    }
+
     const response = await mapleradClient.patch('/customers/upgrade/tier1', {
       customer_id: customerId,
-      dob: kycData.dob || '1990-01-01', // Must be YYYY-MM-DD
+      dob: formattedDob,
       identification_number: kycData.bvn, // The actual BVN
       address: {
         street: kycData.street || '123 Main Street',
