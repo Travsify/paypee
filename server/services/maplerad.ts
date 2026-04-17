@@ -28,6 +28,7 @@ const mapleradClient = axios.create({
  */
 export const createCustomer = async (firstName: string, lastName: string, email: string) => {
   try {
+    console.log(`[MAPLERAD DEBUG] Env: ${process.env.MAPLERAD_ENV || 'undefined'}, Proxy URL configured: ${!!PROXY_URL}`);
     console.log(`[MAPLERAD DEBUG] Calling ${MAPLERAD_BASE_URL}/customers for ${email}`);
     console.log(`[MAPLERAD DEBUG] Header: Authorization: Bearer ${MAPLERAD_SECRET_KEY.substring(0, 8)}...`);
 
