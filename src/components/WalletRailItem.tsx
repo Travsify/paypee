@@ -144,16 +144,28 @@ const WalletRailItem: React.FC<WalletRailItemProps> = ({ currency, balance, symb
                   <CopyValue label="Account Name" value={accountName} />
                   <CopyValue label="Account Number" value={accNo || 'GENERATING...'} />
                   <CopyValue label="Bank / Provider" value={bankName} />
-                  <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-                     <button onClick={(e) => { e.stopPropagation(); if (onSend) onSend(); }} style={{ flex: 1, minWidth: '100px', background: 'var(--primary)', color: '#fff', border: 'none', borderRadius: '12px', padding: '0.75rem', fontWeight: 700, fontSize: '0.85rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', cursor: 'pointer' }}>
-                        <ArrowUpRight size={16} /> Send
-                     </button>
-                     <button onClick={(e) => { e.stopPropagation(); if (onTopUp) onTopUp(); }} style={{ flex: 1, minWidth: '100px', background: 'rgba(255,255,255,0.05)', color: '#fff', border: '1px solid var(--border)', borderRadius: '12px', padding: '0.75rem', fontWeight: 700, fontSize: '0.85rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', cursor: 'pointer' }}>
-                        <ArrowDownLeft size={16} /> Top up
-                     </button>
-                     <button onClick={(e) => { e.stopPropagation(); if (onSwap) onSwap(); }} style={{ flex: 1, minWidth: '100px', background: 'rgba(245, 158, 11, 0.1)', color: '#f59e0b', border: '1px solid rgba(245, 158, 11, 0.2)', borderRadius: '12px', padding: '0.75rem', fontWeight: 700, fontSize: '0.85rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', cursor: 'pointer' }}>
-                        <ArrowRightLeft size={16} /> Swap
-                     </button>
+               </div>
+
+               <div style={{ display: 'flex', gap: '2rem', justifyContent: 'center', marginTop: '2rem', paddingTop: '1.5rem', borderTop: '1px dashed rgba(255,255,255,0.05)' }}>
+                  <div onClick={(e) => { e.stopPropagation(); if (onSend) onSend(); }} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+                     <div style={{ width: 48, height: 48, borderRadius: '50%', background: 'rgba(99, 102, 241, 0.1)', color: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s', border: '1px solid rgba(99, 102, 241, 0.2)' }} onMouseEnter={e => e.currentTarget.style.background = 'rgba(99, 102, 241, 0.2)'} onMouseLeave={e => e.currentTarget.style.background = 'rgba(99, 102, 241, 0.1)'}>
+                        <ArrowUpRight size={20} />
+                     </div>
+                     <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-main)' }}>Send</span>
+                  </div>
+
+                  <div onClick={(e) => { e.stopPropagation(); if (onTopUp) onTopUp(); }} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+                     <div style={{ width: 48, height: 48, borderRadius: '50%', background: 'rgba(16, 185, 129, 0.1)', color: '#10b981', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s', border: '1px solid rgba(16, 185, 129, 0.2)' }} onMouseEnter={e => e.currentTarget.style.background = 'rgba(16, 185, 129, 0.2)'} onMouseLeave={e => e.currentTarget.style.background = 'rgba(16, 185, 129, 0.1)'}>
+                        <ArrowDownLeft size={20} />
+                     </div>
+                     <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-main)' }}>Top Up</span>
+                  </div>
+
+                  <div onClick={(e) => { e.stopPropagation(); if (onSwap) onSwap(); }} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+                     <div style={{ width: 48, height: 48, borderRadius: '50%', background: 'rgba(245, 158, 11, 0.1)', color: '#f59e0b', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s', border: '1px solid rgba(245, 158, 11, 0.2)' }} onMouseEnter={e => e.currentTarget.style.background = 'rgba(245, 158, 11, 0.2)'} onMouseLeave={e => e.currentTarget.style.background = 'rgba(245, 158, 11, 0.1)'}>
+                        <ArrowRightLeft size={20} />
+                     </div>
+                     <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-main)' }}>Swap</span>
                   </div>
                </div>
                
