@@ -5,7 +5,6 @@ import dotenv from 'dotenv';
 import { PrismaClient, AccountRole } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import { issueVirtualCard, processFiatPayout, verifyWebhookSignature as verifyFincraSignature } from './services/fincra';
 import { processCryptoPayout, createLightningInvoice } from './services/bitnob';
 import { AiIntelligenceService } from './services/ai.service';
 import { IbanService } from './services/iban.service';
@@ -275,30 +274,19 @@ app.post('/api/cards', authenticateToken, async (req: any, res: any): Promise<an
   try {
     const { walletId } = req.body;
     
-    // In a real system, you would call a card issuer API like Stripe or Fincra here
-    // Attempt to issue real card via Fincra
-    let cardNumber = "4242" + Math.floor(Math.random() * 1000000000000).toString().padStart(12, '0');
-    let cvv = Math.floor(Math.random() * 900 + 100).toString();
-    let expiry = "12/28";
-
-    if (process.env.FINCRA_SECRET_KEY) {
-      try {
-        const fincraCard = await issueVirtualCard(req.user.userId, 'USD');
-        cardNumber = fincraCard.cardNumber || cardNumber;
-        cvv = fincraCard.cvv || cvv;
-        expiry = fincraCard.expiry || expiry;
-      } catch (err) {
-        console.warn('Fincra Card Error, falling back to simulation logic.', err);
-      }
-    }
+    // 1. Get or Create Maplerad Customer
+    const customer = await Maplerad.createCustomer(req.user.firstName || 'User', req.user.lastName || 'Paypee', req.user.email);
+    
+    // 2. Issue Card via Maplerad
+    const mCard = await Maplerad.issueVirtualCard(customer.id, 'USD', 5); // Default $5 initial fund for creation
 
     const card = await prisma.virtualCard.create({
       data: {
         userId: req.user.userId,
         walletId: walletId,
-        cardNumber,
-        expiry,
-        cvv,
+        cardNumber: mCard.card_number,
+        expiry: mCard.expiry,
+        cvv: mCard.cvv,
         status: "ACTIVE"
       }
     });
@@ -738,6 +726,15 @@ app.post('/api/vaults', authenticateToken, async (req: any, res: any): Promise<a
 
 // Bills & Utilities
 
+app.get('/api/bills/categories', authenticateToken, async (req: any, res: any) => {
+  try {
+    const categories = await Maplerad.getBillCategories();
+    res.json(categories);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch categories' });
+  }
+});
+
 app.get('/api/bills/providers', authenticateToken, async (req: any, res: any): Promise<any> => {
   try {
     const { category } = req.query;
@@ -748,13 +745,24 @@ app.get('/api/bills/providers', authenticateToken, async (req: any, res: any): P
   }
 });
 
+app.get('/api/bills/products', authenticateToken, async (req: any, res: any) => {
+  try {
+    const { billerId } = req.query;
+    const products = await BillsService.getProducts(billerId as string);
+    res.json(products);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch products' });
+  }
+});
+
 app.post('/api/bills/pay', authenticateToken, async (req: any, res: any): Promise<any> => {
   try {
-    const { walletId, amount, providerId, customerId, category } = req.body;
+    const { walletId, amount, providerId, productId, customerId, category } = req.body;
     const transaction = await BillsService.payBill(req.user.userId, {
       walletId,
       amount,
       providerId,
+      productId,
       customerId,
       category
     });
@@ -1049,81 +1057,7 @@ app.delete('/api/accounts/:id', authenticateToken, async (req: any, res: any): P
 // Bill Payments (Airtime, Data, Utilities)
 // ==========================================
 
-app.get('/api/bills/categories', authenticateToken, async (req: any, res: any) => {
-  try {
-    const categories = await Maplerad.getBillCategories();
-    res.json(categories);
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to fetch categories' });
-  }
-});
 
-app.get('/api/bills/billers', authenticateToken, async (req: any, res: any) => {
-  try {
-    const { category, country } = req.query;
-    const billers = await Maplerad.getBillers(category as string, country as string);
-    res.json(billers);
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to fetch billers' });
-  }
-});
-
-app.get('/api/bills/products', authenticateToken, async (req: any, res: any) => {
-  try {
-    const { billerId } = req.query;
-    const products = await Maplerad.getBillerProducts(billerId as string);
-    res.json(products);
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to fetch products' });
-  }
-});
-
-app.post('/api/bills/pay', authenticateToken, async (req: any, res: any) => {
-  try {
-    const { amount, sourceWalletId, billerId, productId, customerId, phoneNumber, meterNumber } = req.body;
-    
-    // 1. Verify wallet balance
-    const wallet = await prisma.wallet.findUnique({ where: { id: sourceWalletId } });
-    if (!wallet || parseFloat(wallet.balance.toString()) < amount) {
-      return res.status(400).json({ error: 'Insufficient wallet balance.' });
-    }
-
-    // 2. Process via Maplerad
-    const mapleradCustomer = await Maplerad.createCustomer(req.user.firstName || 'Paypee', req.user.lastName || 'User', req.user.email);
-    
-    const result = await Maplerad.payBill({
-      biller_id: billerId,
-      product_id: productId,
-      amount: amount,
-      customer_id: mapleradCustomer.id,
-      phone_number: phoneNumber,
-      meter_number: meterNumber
-    });
-
-    // 3. Deduct from wallet and record transaction
-    const ref = `BILL_${Date.now()}`;
-    await prisma.$transaction([
-      prisma.wallet.update({ where: { id: sourceWalletId }, data: { balance: { decrement: amount } } }),
-      prisma.transaction.create({
-        data: {
-          userId: req.user.userId,
-          walletId: sourceWalletId,
-          type: 'WITHDRAWAL',
-          amount: amount,
-          currency: wallet.currency,
-          status: 'COMPLETED',
-          reference: ref,
-          category: 'BILL_PAYMENT',
-          metadata: { billerId, productId, result }
-        }
-      })
-    ]);
-
-    res.status(201).json({ status: 'COMPLETED', reference: ref });
-  } catch (error: any) {
-    res.status(400).json({ error: error.message });
-  }
-});
 
 // ==========================================
 // Virtual Cards (Issuing)

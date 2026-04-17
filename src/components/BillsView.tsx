@@ -36,10 +36,15 @@ const BillsView = () => {
     { id: 'TV', name: 'Cable TV', icon: <Tv />, color: '#ef4444' }
   ];
 
+  const [products, setProducts] = useState<any[]>([]);
+  const [selectedProductId, setSelectedProductId] = useState('');
+
   const fetchProviders = async (cat: string) => {
     setLoading(true);
+    setProviders([]);
     try {
       const token = localStorage.getItem('paypee_token');
+      // Maplerad category mapping
       const res = await fetch(`https://paypee-api-kmhv.onrender.com/api/bills/providers?category=${cat}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -50,6 +55,20 @@ const BillsView = () => {
       setProviders([]);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchProducts = async (billerId: string) => {
+    try {
+      const token = localStorage.getItem('paypee_token');
+      const res = await fetch(`https://paypee-api-kmhv.onrender.com/api/bills/products?billerId=${billerId}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (Array.isArray(data)) setProducts(data);
+      else setProducts([]);
+    } catch (err) {
+      setProducts([]);
     }
   };
 
@@ -69,6 +88,15 @@ const BillsView = () => {
     fetchWallets();
   }, [activeCategory]);
 
+  useEffect(() => {
+    if (selectedProvider) {
+      fetchProducts(selectedProvider.id);
+    } else {
+      setProducts([]);
+      setSelectedProductId('');
+    }
+  }, [selectedProvider]);
+
   const handlePayBill = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
@@ -84,6 +112,7 @@ const BillsView = () => {
           walletId: selectedWalletId,
           amount: parseFloat(amount),
           providerId: selectedProvider.id,
+          productId: selectedProductId,
           customerId,
           category: activeCategory
         })
@@ -96,6 +125,7 @@ const BillsView = () => {
           setSelectedProvider(null);
           setAmount('');
           setCustomerId('');
+          setSelectedProductId('');
         }, 3000);
       } else {
         const error = await res.json();
@@ -222,6 +252,27 @@ const BillsView = () => {
                    ))}
                  </select>
                </div>
+
+               {products.length > 0 && (
+                 <div style={{ marginBottom: '1.5rem' }}>
+                   <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 800, color: 'var(--text-muted)', marginBottom: '0.75rem', letterSpacing: '1px' }}>SELECT PACKAGE / PRODUCT</label>
+                   <select 
+                     value={selectedProductId}
+                     onChange={(e) => {
+                       setSelectedProductId(e.target.value);
+                       const p = products.find(prod => prod.id === e.target.value);
+                       if (p && p.amount) setAmount(p.amount.toString());
+                     }}
+                     required
+                     style={{ width: '100%', background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border)', borderRadius: '12px', padding: '1rem', color: '#fff', outline: 'none' }}
+                   >
+                     <option value="">Select Product</option>
+                     {products.map(p => (
+                       <option key={p.id} value={p.id}>{p.name} {p.amount ? `- ₦${p.amount}` : ''}</option>
+                     ))}
+                   </select>
+                 </div>
+               )}
 
                <div style={{ marginBottom: '1.5rem' }}>
                  <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 800, color: 'var(--text-muted)', marginBottom: '0.75rem', letterSpacing: '1px' }}>{activeCategory === 'AIRTIME' ? 'PHONE NUMBER' : 'CUSTOMER / METER ID'}</label>

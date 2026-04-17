@@ -1,40 +1,46 @@
-import { PrismaClient, TransactionType } from '@prisma/client';
-import axios from 'axios';
+import { PrismaClient } from '@prisma/client';
+import * as Maplerad from './maplerad';
 
 const prisma = new PrismaClient();
-const FINCRA_SECRET_KEY = process.env.FINCRA_SECRET_KEY;
 
 export class BillsService {
   /**
-   * Fetches available bill providers from Fincra.
+   * Fetches available bill providers from Maplerad.
    */
   static async getProviders(category: string) {
-    console.log(`📡 Fetching billers for category: ${category}...`);
+    console.log(`📡 Fetching Maplerad billers for category: ${category}...`);
     
     try {
-      const fincraUrl = process.env.FINCRA_ENV === 'live' 
-        ? 'https://api.fincra.com/core/bills/categories' 
-        : 'https://sandboxapi.fincra.com/core/bills/categories';
-
-      const response = await axios.get(fincraUrl, {
-        headers: {
-          'api-key': FINCRA_SECRET_KEY,
-          'Content-Type': 'application/json'
-        }
-      });
-      // Extract providers depending on Fincra's exact schema
-      return response.data.data || [];
+      // Map frontend category to Maplerad category
+      // Frontend uses AIRTIME, DATA, ELECTRICITY, CABLE
+      // Maplerad uses airtime, data, utility, cable
+      const mappedCategory = category.toLowerCase() === 'electricity' ? 'utility' : category.toLowerCase();
+      
+      const billers = await Maplerad.getBillers(mappedCategory);
+      return billers || [];
     } catch (err: any) {
-      console.error(`❌ API Failed to fetch bill providers for ${category}:`, err.response?.data || err.message);
-      throw new Error(`Failed to fetch live bill providers from API.`);
+      console.error(`❌ Maplerad Failed to fetch bill providers for ${category}:`, err.message);
+      throw new Error(`Failed to fetch live bill providers.`);
     }
   }
 
   /**
-   * Executes a bill payment transaction.
+   * Fetches products for a specific biller.
    */
-  static async payBill(userId: string, data: { walletId: string, amount: number, providerId: string, customerId: string, category: string }) {
-    const { walletId, amount, providerId, customerId, category } = data;
+  static async getProducts(billerId: string) {
+    try {
+      return await Maplerad.getBillerProducts(billerId);
+    } catch (err: any) {
+      console.error(`❌ Maplerad Failed to fetch products for biller ${billerId}:`, err.message);
+      return [];
+    }
+  }
+
+  /**
+   * Executes a bill payment transaction via Maplerad.
+   */
+  static async payBill(userId: string, data: { walletId: string, amount: number, providerId: string, productId: string, customerId: string, category: string }) {
+    const { walletId, amount, providerId, productId, customerId, category } = data;
 
     return await prisma.$transaction(async (tx) => {
       // 1. Check wallet balance
@@ -54,7 +60,7 @@ export class BillsService {
         data: {
           userId,
           walletId,
-          type: 'WITHDRAWAL', // Bills are debits
+          type: 'WITHDRAWAL',
           amount,
           currency: wallet.currency,
           status: 'COMPLETED',
@@ -63,36 +69,25 @@ export class BillsService {
           metadata: {
              bill_type: category,
              provider_id: providerId,
+             product_id: productId,
              customer_identifier: customerId
           }
         }
       });
 
-      // 4. Trigger Fincra's /bills/pay endpoint
+      // 4. Trigger Maplerad's bill payment
       try {
-        const fincraUrl = process.env.FINCRA_ENV === 'live' 
-          ? 'https://api.fincra.com/core/bills/pay' 
-          : 'https://sandboxapi.fincra.com/core/bills/pay';
-
-        await axios.post(fincraUrl, {
-            amount: amount,
-            customer: customerId,
-            item_id: providerId,
-            bill_id: category === 'AIRTIME' ? '1' : '2', // Mapping depends on Fincra's catalog
-            reference: transaction.reference
-        }, {
-            headers: {
-                'api-key': process.env.FINCRA_SECRET_KEY,
-                'Content-Type': 'application/json'
-            }
+        await Maplerad.payBill({
+          biller_id: providerId,
+          product_id: productId,
+          amount: amount,
+          customer_id: customerId
         });
         
-        console.log(`✅ [FINCRA SETTLED]: User ${userId} airtime/bill finalized.`);
-      } catch (fincraErr: any) {
-        console.error('[FINCRA BILL ERROR]:', fincraErr.response?.data || fincraErr.message);
-        // In a real production app, you might want to reverse the wallet debit if this fails
-        // but often we mark it as PENDING and retry via a background job.
-        throw new Error('Fincra was unable to process this payment at this time.');
+        console.log(`✅ [MAPLERAD SETTLED]: User ${userId} ${category} finalized.`);
+      } catch (err: any) {
+        console.error('[MAPLERAD BILL ERROR]:', err.message);
+        throw new Error(err.message || 'Maplerad was unable to process this payment.');
       }
 
       return transaction;
