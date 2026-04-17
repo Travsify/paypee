@@ -98,7 +98,6 @@ const VerificationGate: React.FC<VerificationGateProps> = ({ kycStatus: initialS
   // Poll every 10s while PROCESSING
   useEffect(() => {
     fetchStatus();
-
     if (kycStatus === 'PROCESSING') {
       const interval = setInterval(fetchStatus, 10000);
       return () => clearInterval(interval);
@@ -307,17 +306,15 @@ const VerificationGate: React.FC<VerificationGateProps> = ({ kycStatus: initialS
       {/* KYC Modal */}
       <AnimatePresence>
         {showModal && (
-          <div className="paypee-modal-overlay">
+          <div style={{ position: 'fixed', inset: 0, background: 'rgba(2,6,23,0.95)', backdropFilter: 'blur(12px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2000, padding: '2rem' }}>
             <motion.div
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
-              className="paypee-modal-content"
-              style={{ maxWidth: '520px' }}
+              style={{ background: '#0a0f1e', border: '1px solid #1e293b', borderRadius: '32px', padding: '3rem', maxWidth: '520px', width: '100%', boxShadow: '0 40px 100px rgba(0,0,0,0.6)', position: 'relative', maxHeight: '90vh', overflowY: 'auto' }}
             >
-              <div style={{ padding: '2.5rem' }}>
-              <button onClick={() => setShowModal(false)} style={{ position: 'absolute', top: '1.5rem', right: '1.5rem', background: 'rgba(255,255,255,0.05)', border: '1px solid #1e293b', color: '#fff', cursor: 'pointer', borderRadius: '50%', width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10 }}>
-                <X size={20} />
+              <button onClick={() => setShowModal(false)} style={{ position: 'absolute', top: '1.5rem', right: '1.5rem', background: 'rgba(255,255,255,0.05)', border: '1px solid #1e293b', color: '#64748b', cursor: 'pointer', borderRadius: '8px', padding: '0.4rem', display: 'flex' }}>
+                <X size={18} />
               </button>
 
               {/* Header */}
@@ -459,14 +456,33 @@ const VerificationGate: React.FC<VerificationGateProps> = ({ kycStatus: initialS
                   )}
                 </>
               )}
-              </div>
             </motion.div>
           </div>
         )}
       </AnimatePresence>
 
-      {/* Full-screen blocker removed to allow dashboard visibility during processing */}
-
+      {/* Full-screen blocker for PROCESSING */}
+      <AnimatePresence>
+        {kycStatus === 'PROCESSING' && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            style={{ position: 'fixed', inset: 0, background: 'rgba(2,6,23,0.85)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1500, flexDirection: 'column', gap: '1.5rem', padding: '2rem', textAlign: 'center' }}
+          >
+            <motion.div animate={{ rotate: 360 }} transition={{ duration: 2, repeat: Infinity, ease: 'linear' }} style={{ color: '#6366f1' }}>
+              <RefreshCcw size={52} />
+            </motion.div>
+            <h2 style={{ fontSize: '1.75rem', fontWeight: 800 }}>Verification In Progress</h2>
+            <p style={{ color: '#64748b', maxWidth: '400px' }}>
+              We're verifying your details with our compliance partner. Please wait — this usually takes under 60 seconds. Do not close this page.
+            </p>
+            <div style={{ background: 'rgba(99,102,241,0.1)', border: '1px solid rgba(99,102,241,0.2)', borderRadius: '14px', padding: '1rem 1.5rem', color: '#a5b4fc', fontSize: '0.85rem', fontWeight: 600 }}>
+              You'll be automatically redirected once approved.
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </>
   );
 };
@@ -478,8 +494,8 @@ const NotificationPanel = ({ notifications, show, onClose }: { notifications: No
   if (!show) return null;
 
   const typeColors: Record<string, string> = {
-    ERROR: '#f43f5e',
     SUCCESS: '#10b981',
+    ERROR: '#f43f5e',
     WARNING: '#f59e0b',
     INFO: '#6366f1'
   };
@@ -489,40 +505,27 @@ const NotificationPanel = ({ notifications, show, onClose }: { notifications: No
       initial={{ opacity: 0, y: -10, scale: 0.97 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       exit={{ opacity: 0 }}
-      style={{ position: 'fixed', top: '4.5rem', right: '2rem', width: '380px', background: '#0a0f1e', border: '1px solid #1e293b', borderRadius: '24px', boxShadow: '0 30px 60px rgba(0,0,0,0.8)', zIndex: 5000, overflow: 'hidden' }}
+      style={{ position: 'fixed', top: '4rem', right: '2rem', width: '360px', background: '#0a0f1e', border: '1px solid #1e293b', borderRadius: '20px', boxShadow: '0 30px 60px rgba(0,0,0,0.6)', zIndex: 3000, overflow: 'hidden' }}
     >
-      <div style={{ padding: '1.25rem 1.5rem', borderBottom: '1px solid #1e293b', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#0f172a' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-           <Bell size={18} color="#6366f1" />
-           <span style={{ fontWeight: 800, fontSize: '1rem', letterSpacing: '-0.01em' }}>Recent Activity</span>
-        </div>
-        <button onClick={onClose} style={{ background: 'rgba(255,255,255,0.05)', border: 'none', color: '#64748b', cursor: 'pointer', display: 'flex', padding: '0.4rem', borderRadius: '50%' }}><X size={16} /></button>
+      <div style={{ padding: '1.25rem 1.5rem', borderBottom: '1px solid #1e293b', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <span style={{ fontWeight: 800, fontSize: '0.95rem' }}>Notifications</span>
+        <button onClick={onClose} style={{ background: 'transparent', border: 'none', color: '#64748b', cursor: 'pointer', display: 'flex' }}><X size={16} /></button>
       </div>
-      <div style={{ maxHeight: '450px', overflowY: 'auto', background: '#0a0f1e' }}>
+      <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
         {notifications.length === 0 ? (
-          <div style={{ padding: '4rem 2rem', textAlign: 'center', color: '#475569', fontSize: '0.85rem' }}>
-            <Bell size={40} style={{ opacity: 0.1, marginBottom: '1rem' }} />
-            <div>No activity yet</div>
-          </div>
+          <div style={{ padding: '2rem', textAlign: 'center', color: '#475569', fontSize: '0.85rem' }}>No notifications yet</div>
         ) : notifications.map(n => (
-          <div key={n.id} style={{ padding: '1.25rem 1.5rem', borderBottom: '1px solid rgba(255,255,255,0.03)', background: n.read ? 'transparent' : 'rgba(99,102,241,0.03)', position: 'relative' }}>
-            {!n.read && <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: '3px', background: typeColors[n.type] || '#6366f1' }} />}
-            <div style={{ display: 'flex', gap: '1rem', alignItems: 'flex-start' }}>
-              <div style={{ width: 10, height: 10, borderRadius: '50%', background: typeColors[n.type] || '#6366f1', marginTop: '0.3rem', flexShrink: 0, boxShadow: `0 0 10px ${typeColors[n.type] || '#6366f1'}` }} />
-              <div style={{ flex: 1 }}>
-                <div style={{ fontWeight: 800, fontSize: '0.9rem', marginBottom: '0.35rem', color: '#fff', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  {n.title}
-                  {n.type === 'SUCCESS' && <CheckCircle2 size={14} color="#10b981" />}
-                </div>
-                <div style={{ fontSize: '0.85rem', color: '#94a3b8', lineHeight: 1.6 }}>{n.message}</div>
-                <div style={{ fontSize: '0.7rem', color: '#475569', marginTop: '0.6rem', fontWeight: 600 }}>{new Date(n.createdAt).toLocaleTimeString()} • {new Date(n.createdAt).toLocaleDateString()}</div>
+          <div key={n.id} style={{ padding: '1rem 1.5rem', borderBottom: '1px solid rgba(255,255,255,0.04)', background: n.read ? 'transparent' : 'rgba(99,102,241,0.04)' }}>
+            <div style={{ display: 'flex', gap: '0.6rem', alignItems: 'flex-start' }}>
+              <div style={{ width: 8, height: 8, borderRadius: '50%', background: typeColors[n.type] || '#6366f1', marginTop: '0.4rem', flexShrink: 0 }} />
+              <div>
+                <div style={{ fontWeight: 700, fontSize: '0.85rem', marginBottom: '0.25rem', color: typeColors[n.type] || '#fff' }}>{n.title}</div>
+                <div style={{ fontSize: '0.8rem', color: '#64748b', lineHeight: 1.5 }}>{n.message}</div>
+                <div style={{ fontSize: '0.7rem', color: '#334155', marginTop: '0.4rem' }}>{new Date(n.createdAt).toLocaleString()}</div>
               </div>
             </div>
           </div>
         ))}
-      </div>
-      <div style={{ padding: '1rem', borderTop: '1px solid #1e293b', background: '#0f172a', textAlign: 'center' }}>
-         <button style={{ background: 'transparent', border: 'none', color: '#6366f1', fontSize: '0.8rem', fontWeight: 700, cursor: 'pointer' }}>View All Activity</button>
       </div>
     </motion.div>
   );

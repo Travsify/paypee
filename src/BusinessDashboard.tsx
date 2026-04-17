@@ -25,16 +25,13 @@ import {
   Bot,
   Wallet,
   Lock,
-  History,
-  CreditCard
+  History
 } from 'lucide-react';
 import SettingsView from './SettingsView';
 import VerificationGate from './VerificationGate';
 import AiAdvisor from './AiAdvisor';
 import VaultsDashboard from './VaultsDashboard';
 import BillsDashboard from './BillsDashboard';
-import CardsDashboard from './CardsDashboard';
-import CollectionsDashboard from './CollectionsDashboard';
 import AccountCreationModal from './AccountCreationModal';
 import BalanceCard from './components/BalanceCard';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart as ReBarChart, Bar, Cell } from 'recharts';
@@ -117,8 +114,6 @@ const BusinessDashboard = ({ onLogout }: { onLogout?: () => void }) => {
 
   React.useEffect(() => {
     fetchUserData();
-    const interval = setInterval(fetchUserData, 15000);
-    return () => clearInterval(interval);
   }, []);
 
   const generateAccount = async (currency: string) => {
@@ -204,8 +199,6 @@ const BusinessDashboard = ({ onLogout }: { onLogout?: () => void }) => {
              <SidebarItem icon={Send} label="Bulk Payouts" active={activeSection === 'payouts'} onClick={() => navigate('payouts')} />
              <SidebarItem icon={Layers} label="Sub-Accounts" active={activeSection === 'subs'} onClick={() => navigate('subs')} />
              <SidebarItem icon={Zap} label="Business Bills" active={activeSection === 'bills'} onClick={() => navigate('bills')} />
-             <SidebarItem icon={CreditCard} label="Corporate Cards" active={activeSection === 'cards'} onClick={() => navigate('cards')} />
-             <SidebarItem icon={ExternalLink} label="Payment Links" active={activeSection === 'collections'} onClick={() => navigate('collections')} />
              <SidebarItem icon={Lock} label="Corporate Vaults" active={activeSection === 'vaults'} onClick={() => navigate('vaults')} />
              <SidebarItem icon={BarChart3} label="Global Analytics" active={activeSection === 'analytics'} onClick={() => navigate('analytics')} />
              <SidebarItem icon={Users} label="Team Access" active={activeSection === 'team'} onClick={() => navigate('team')} />
@@ -259,8 +252,6 @@ const BusinessDashboard = ({ onLogout }: { onLogout?: () => void }) => {
           {activeSection === 'ai' && <AiAdvisor transactions={transactions} userName={userData?.businessName} />}
           {activeSection === 'vaults' && <VaultsDashboard />}
           {activeSection === 'bills' && <BillsDashboard />}
-          {activeSection === 'cards' && <CardsDashboard />}
-          {activeSection === 'collections' && <CollectionsDashboard />}
 
           {activeSection === 'wallets' && (
              <div style={{ animation: 'fadeIn 0.5s ease-out' }}>

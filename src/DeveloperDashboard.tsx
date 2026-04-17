@@ -31,15 +31,11 @@ import {
   Plus,
   History,
   Lock,
-  RefreshCcw,
-  CreditCard
+  RefreshCcw
 } from 'lucide-react';
 import SettingsView from './SettingsView';
 import VerificationGate from './VerificationGate';
 import AiAdvisor from './AiAdvisor';
-import BillsDashboard from './BillsDashboard';
-import CardsDashboard from './CardsDashboard';
-import CollectionsDashboard from './CollectionsDashboard';
 import AccountCreationModal from './AccountCreationModal';
 import BalanceCard from './components/BalanceCard';
 
@@ -145,8 +141,6 @@ const DeveloperDashboard = ({ onLogout }: { onLogout?: () => void }) => {
 
   React.useEffect(() => {
     fetchUserData();
-    const interval = setInterval(fetchUserData, 15000);
-    return () => clearInterval(interval);
   }, []);
 
   const generateAccount = async (currency: string) => {
@@ -226,8 +220,6 @@ const DeveloperDashboard = ({ onLogout }: { onLogout?: () => void }) => {
              <SidebarItem icon={LayoutDashboard} label="Network Matrix" active={activeSection === 'overview'} onClick={() => navigate('overview')} />
              <SidebarItem icon={Wallet} label="Test Wallets" active={activeSection === 'wallets'} onClick={() => navigate('wallets')} />
              <SidebarItem icon={Key} label="API Keys" active={activeSection === 'keys'} onClick={() => navigate('keys')} />
-             <SidebarItem icon={Link} label="Payment Links" active={activeSection === 'collections'} onClick={() => navigate('collections')} />
-             <SidebarItem icon={CreditCard} label="Virtual Cards" active={activeSection === 'cards'} onClick={() => navigate('cards')} />
              <SidebarItem icon={Webhook} label="Webhooks" active={activeSection === 'webhooks'} onClick={() => navigate('webhooks')} />
              <SidebarItem icon={Activity} label="System Traffic" active={activeSection === 'traffic'} onClick={() => navigate('traffic')} />
              <SidebarItem icon={Database} label="Treasury Logs" active={activeSection === 'logs'} onClick={() => navigate('logs')} />
@@ -276,11 +268,6 @@ const DeveloperDashboard = ({ onLogout }: { onLogout?: () => void }) => {
               <button onClick={() => navigate('overview')} style={{ background: 'var(--primary)', color: '#fff', border: 'none', padding: '1.2rem 3rem', borderRadius: '16px', fontWeight: 700, cursor: 'pointer' }}>Return to Matrix</button>
             </div>
           )}
-
-          {activeSection === 'settings' && <SettingsView />}
-          {activeSection === 'ai' && <AiAdvisor transactions={transactions} userName={userData?.firstName} />}
-          {activeSection === 'cards' && <CardsDashboard />}
-          {activeSection === 'collections' && <CollectionsDashboard />}
 
           {activeSection === 'wallets' && (
              <div style={{ animation: 'fadeIn 0.5s ease-out' }}>
