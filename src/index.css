@@ -38,7 +38,47 @@ body {
   overflow-x: hidden;
 }
 
-/* Base Components */
+/* Global Modal System */
+.paypee-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(2, 6, 23, 0.95);
+  backdrop-filter: blur(12px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 5000;
+  padding: 1.5rem;
+}
+
+.paypee-modal-content {
+  background: #0a0f1e;
+  border: 1px solid var(--border);
+  border-radius: 32px;
+  width: 100%;
+  max-width: 600px;
+  max-height: 85vh;
+  overflow-y: auto;
+  position: relative;
+  box-shadow: 0 40px 100px -20px rgba(0, 0, 0, 0.7);
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+
+.paypee-modal-content::-webkit-scrollbar {
+  width: 4px;
+}
+
+.paypee-modal-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.paypee-modal-content::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 10px;
+}
+
+/* Base Components & Transitions */
 .container {
   max-width: 1400px;
   margin: 0 auto;
@@ -92,6 +132,22 @@ h1, h2, h3, h4, h5, h6 {
   position: sticky;
   top: 0;
   z-index: 1000;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+
+.modern-sidebar::-webkit-scrollbar {
+  width: 4px;
+}
+
+.modern-sidebar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.modern-sidebar::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 10px;
 }
 
 .nav-link {

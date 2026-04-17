@@ -45,7 +45,7 @@ const SidebarItem = ({ icon: Icon, label, active = false, onClick }: { icon: any
   </div>
 );
 
-const BalanceCard = ({ currency, amount, onSwap, onPayout }: { currency: string, amount: string, onSwap: () => void, onPayout: () => void }) => {
+const BalanceCard = ({ currency, amount, onSwap, onPayout, accountDetails }: { currency: string, amount: string, onSwap: () => void, onPayout: () => void, accountDetails?: any }) => {
   const getGradient = (cur: string) => {
     const map: Record<string, string> = {
       USD: 'linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)',
@@ -54,6 +54,11 @@ const BalanceCard = ({ currency, amount, onSwap, onPayout }: { currency: string,
       GBP: 'linear-gradient(135deg, #7c2d12 0%, #ea580c 100%)'
     };
     return map[cur] || 'linear-gradient(135deg, #1e293b 0%, #334155 100%)';
+  };
+
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+    alert('Account details copied!');
   };
 
   return (
@@ -66,24 +71,36 @@ const BalanceCard = ({ currency, amount, onSwap, onPayout }: { currency: string,
         color: '#fff',
         boxShadow: '0 20px 40px -10px rgba(0,0,0,0.3)',
         position: 'relative',
-        overflow: 'hidden'
+        overflow: 'hidden',
+        minHeight: '300px',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'space-between'
       }}
     >
       <div style={{ position: 'absolute', top: '-10%', right: '-10%', width: '150px', height: '150px', background: 'rgba(255,255,255,0.1)', borderRadius: '50%', filter: 'blur(40px)' }} />
       <div style={{ position: 'relative', zIndex: 1 }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
           <div style={{ fontWeight: 800, letterSpacing: '2px', fontSize: '0.8rem', opacity: 0.8 }}>{currency} ACCOUNT</div>
           <div style={{ width: 40, height: 40, background: 'rgba(255,255,255,0.2)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <Wallet size={20} />
           </div>
         </div>
-        <div style={{ fontSize: '2.5rem', fontWeight: 900, marginBottom: '2rem', letterSpacing: '-1px' }}>
+        <div style={{ fontSize: '2.5rem', fontWeight: 900, marginBottom: '0.5rem', letterSpacing: '-1px' }}>
           {currency === 'USD' ? '$' : currency === 'EUR' ? '€' : currency === 'GBP' ? '£' : '₦'}{amount}
         </div>
-        <div style={{ display: 'flex', gap: '0.75rem' }}>
-          <button onClick={onSwap} style={{ flex: 1, background: 'rgba(255,255,255,0.2)', border: 'none', color: '#fff', padding: '0.75rem', borderRadius: '14px', fontWeight: 700, cursor: 'pointer', fontSize: '0.85rem' }}>Convert</button>
-          <button onClick={onPayout} style={{ flex: 1, background: '#fff', border: 'none', color: '#000', padding: '0.75rem', borderRadius: '14px', fontWeight: 700, cursor: 'pointer', fontSize: '0.85rem' }}>Withdraw</button>
-        </div>
+        
+        {accountDetails && (
+          <div style={{ background: 'rgba(0,0,0,0.2)', padding: '1rem', borderRadius: '16px', marginBottom: '1.5rem', cursor: 'pointer' }} onClick={() => copyToClipboard(accountDetails.iban)}>
+            <div style={{ fontSize: '0.65rem', fontWeight: 800, opacity: 0.6, marginBottom: '0.25rem', letterSpacing: '1px' }}>{accountDetails.bankName || 'VIRTUAL ACCOUNT'}</div>
+            <div style={{ fontSize: '1.1rem', fontWeight: 700, fontFamily: 'monospace' }}>{accountDetails.iban}</div>
+          </div>
+        )}
+      </div>
+
+      <div style={{ display: 'flex', gap: '0.75rem', position: 'relative', zIndex: 1 }}>
+        <button onClick={onSwap} style={{ flex: 1, background: 'rgba(255,255,255,0.2)', border: 'none', color: '#fff', padding: '0.85rem', borderRadius: '14px', fontWeight: 700, cursor: 'pointer', fontSize: '0.85rem' }}>Convert</button>
+        <button onClick={onPayout} style={{ flex: 1, background: '#fff', border: 'none', color: '#000', padding: '0.85rem', borderRadius: '14px', fontWeight: 700, cursor: 'pointer', fontSize: '0.85rem' }}>Withdraw</button>
       </div>
     </motion.div>
   );
@@ -226,6 +243,7 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
                       amount={parseFloat(w.balance).toFixed(2)}
                       onSwap={() => setIsSwapOpen(true)}
                       onPayout={() => setIsPayoutOpen(true)}
+                      accountDetails={w.metadata}
                     />
                   ))}
                   <motion.div 

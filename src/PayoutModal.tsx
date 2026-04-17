@@ -281,25 +281,15 @@ const PayoutModal: React.FC<PayoutModalProps> = ({ isOpen, onClose, onComplete, 
   return (
     <AnimatePresence>
       {isOpen && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(2, 6, 23, 0.95)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 3000, padding: '1rem' }}>
+        <div className="paypee-modal-overlay">
           <motion.div 
             initial={{ scale: 0.9, opacity: 0, y: 20 }}
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.9, opacity: 0, y: 20 }}
-            style={{ 
-              background: '#0a0f1e', 
-              border: '1px solid #1e293b', 
-              borderRadius: '32px', 
-              padding: '2.5rem', 
-              maxWidth: '500px', 
-              width: '100%', 
-              position: 'relative',
-              maxHeight: '90vh',
-              overflow: 'visible',
-              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)'
-            }}
+            className="paypee-modal-content"
           >
-            <button onClick={onClose} style={{ position: 'absolute', top: '1.5rem', right: '1.5rem', background: 'rgba(255,255,255,0.05)', border: 'none', color: '#fff', cursor: 'pointer', width: '40px', height: '40px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10 }}><X size={20} /></button>
+            <button onClick={onClose} style={{ position: 'sticky', top: '1.5rem', float: 'right', marginRight: '1.5rem', background: 'rgba(255,255,255,0.05)', border: 'none', color: '#fff', cursor: 'pointer', width: '40px', height: '40px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100 }}><X size={20} /></button>
+            <div style={{ padding: '2.5rem' }}>
 
             {step === 1 && (
               <div style={{ overflow: 'visible' }}>
@@ -430,6 +420,7 @@ const PayoutModal: React.FC<PayoutModalProps> = ({ isOpen, onClose, onComplete, 
                 </button>
               </div>
             )}
+            </div>
           </motion.div>
         </div>
       )}

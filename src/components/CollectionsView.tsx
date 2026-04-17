@@ -172,13 +172,16 @@ const CollectionsView = () => {
       {/* Modal */}
       <AnimatePresence>
         {isModalOpen && (
-          <div style={{ position: 'fixed', inset: 0, background: 'rgba(2,6,23,0.9)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 5000, padding: '1rem' }}>
+          <div className="paypee-modal-overlay">
             <motion.div 
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               exit={{ y: 20, opacity: 0 }}
-              style={{ background: '#0a0f1e', border: '1px solid #1e293b', borderRadius: '32px', padding: '2.5rem', width: '100%', maxWidth: '520px', boxShadow: '0 40px 100px rgba(0,0,0,0.6)' }}
+              className="paypee-modal-content"
+              style={{ maxWidth: '520px' }}
             >
+              <div style={{ padding: '2.5rem' }}>
+               <h3 style={{ fontSize: '1.5rem', fontWeight: 800, marginBottom: '2rem' }}>Create Payment Link</h3>
                <h3 style={{ fontSize: '1.5rem', fontWeight: 800, marginBottom: '2rem' }}>Create Payment Link</h3>
                <form onSubmit={handleCreateLink}>
                  <div style={{ marginBottom: '1.5rem' }}>

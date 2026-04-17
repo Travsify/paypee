@@ -73,6 +73,7 @@ const HistoryView = () => {
       case 'WITHDRAWAL': return <ArrowUpRight size={20} color="#ef4444" />;
       case 'TRANSFER': return <ArrowRightLeft size={20} color="var(--primary)" />;
       case 'CARD_PAYMENT': return <CreditCard size={20} color="#8b5cf6" />;
+      case 'BILLS': return <Zap size={20} color="#f59e0b" />;
       default: return <Activity size={20} />;
     }
   };
@@ -102,14 +103,14 @@ const HistoryView = () => {
           />
         </div>
 
-        <div style={{ display: 'flex', background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border)', borderRadius: '16px', padding: '0.4rem' }}>
-          {['ALL', 'DEPOSIT', 'WITHDRAWAL', 'TRANSFER'].map(type => (
+        <div style={{ display: 'flex', background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border)', borderRadius: '16px', padding: '0.4rem', flexWrap: 'wrap', gap: '0.25rem' }}>
+          {['ALL', 'DEPOSIT', 'WITHDRAWAL', 'TRANSFER', 'CARD_PAYMENT', 'BILLS'].map(type => (
             <button
               key={type}
               onClick={() => setFilterType(type)}
               style={{ padding: '0.6rem 1.2rem', background: filterType === type ? 'rgba(99, 102, 241, 0.1)' : 'transparent', border: 'none', borderRadius: '12px', color: filterType === type ? 'var(--primary)' : 'var(--text-muted)', fontWeight: 800, fontSize: '0.75rem', cursor: 'pointer', transition: 'all 0.2s' }}
             >
-              {type}
+              {type === 'CARD_PAYMENT' ? 'CARD' : type}
             </button>
           ))}
         </div>

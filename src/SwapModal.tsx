@@ -139,12 +139,12 @@ const SwapModal: React.FC<SwapModalProps> = ({ isOpen, onClose, onComplete, wall
 
   return (
     <AnimatePresence>
-      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-        onClick={handleClose}
-        style={{ position: 'fixed', inset: 0, background: 'rgba(2, 6, 23, 0.95)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999, padding: '1rem', overflowY: 'auto' }}>
+      <div className="paypee-modal-overlay" onClick={handleClose}>
         <motion.div initial={{ opacity: 0, scale: 0.9, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.9, y: 20 }}
           onClick={(e) => e.stopPropagation()}
-          style={{ background: '#0a0f1e', borderRadius: '32px', border: '1px solid #1e293b', width: '100%', maxWidth: '480px', position: 'relative', maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)' }}>
+          className="paypee-modal-content"
+          style={{ maxWidth: '480px' }}
+        >
 
           {/* Header */}
           <div style={{ padding: '2rem 2rem 1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -354,7 +354,7 @@ const SwapModal: React.FC<SwapModalProps> = ({ isOpen, onClose, onComplete, wall
             </AnimatePresence>
           </div>
         </motion.div>
-      </motion.div>
+      </div>
     </AnimatePresence>
   );
 };

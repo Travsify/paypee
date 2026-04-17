@@ -307,13 +307,15 @@ const VerificationGate: React.FC<VerificationGateProps> = ({ kycStatus: initialS
       {/* KYC Modal */}
       <AnimatePresence>
         {showModal && (
-          <div style={{ position: 'fixed', inset: 0, background: 'rgba(2,6,23,0.95)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2000, padding: '1rem', overflowY: 'auto' }}>
+          <div className="paypee-modal-overlay">
             <motion.div
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
-              style={{ background: '#0a0f1e', border: '1px solid #1e293b', borderRadius: '32px', padding: '2.5rem', maxWidth: '520px', width: '100%', boxShadow: '0 40px 100px rgba(0,0,0,0.6)', position: 'relative', maxHeight: '90vh', overflowY: 'auto' }}
+              className="paypee-modal-content"
+              style={{ maxWidth: '520px' }}
             >
+              <div style={{ padding: '2.5rem' }}>
               <button onClick={() => setShowModal(false)} style={{ position: 'absolute', top: '1.5rem', right: '1.5rem', background: 'rgba(255,255,255,0.05)', border: '1px solid #1e293b', color: '#fff', cursor: 'pointer', borderRadius: '50%', width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10 }}>
                 <X size={20} />
               </button>
@@ -457,6 +459,7 @@ const VerificationGate: React.FC<VerificationGateProps> = ({ kycStatus: initialS
                   )}
                 </>
               )}
+              </div>
             </motion.div>
           </div>
         )}
