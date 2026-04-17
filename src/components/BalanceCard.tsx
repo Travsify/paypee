@@ -114,37 +114,47 @@ const BalanceCard: React.FC<BalanceCardProps> = ({ currency, symbol, amount, gra
         {/* BACK: Account Details View */}
         <div style={{ 
           position: 'absolute', width: '100%', height: '100%', backfaceVisibility: 'hidden', transform: 'rotateY(180deg)',
-          padding: '1.5rem', borderRadius: '24px', background: '#ffffff', color: '#0f172a', 
+          padding: '1.25rem', borderRadius: '24px', background: '#ffffff', color: '#0f172a', 
           boxShadow: '0 20px 40px -10px rgba(0,0,0,0.3)', border: '1px solid #e2e8f0',
-          display: 'flex', flexDirection: 'column', gap: '0.8rem'
+          display: 'flex', flexDirection: 'column', gap: '0.6rem'
         }}>
-           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-             <div style={{ fontSize: '0.6rem', fontWeight: 800, color: 'var(--primary)', letterSpacing: '1px' }}>VIRTUAL SETTLEMENT NODE</div>
-             <ShieldCheck size={18} color="var(--primary)" />
+           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+             <div style={{ fontSize: '0.6rem', fontWeight: 800, color: 'var(--primary)', letterSpacing: '1.5px' }}>SETTLEMENT DETAILS</div>
+             <div 
+               onClick={(e) => {
+                 e.stopPropagation();
+                 const allInfo = `Bank: ${bank}\nAccount: ${accNo}\nName: ${accName}`;
+                 navigator.clipboard.writeText(allInfo);
+                 alert('Full account details copied to clipboard!');
+               }}
+               style={{ fontSize: '0.6rem', fontWeight: 800, color: 'var(--text-muted)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.3rem' }}
+             >
+               <Copy size={12} /> COPY ALL
+             </div>
            </div>
            
-           <div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.2rem' }}>
-                <div style={{ fontSize: '0.6rem', opacity: 0.5, fontWeight: 700, textTransform: 'uppercase' }}>Account Name</div>
+           <div style={{ background: 'rgba(99, 102, 241, 0.03)', padding: '0.75rem', borderRadius: '12px', border: '1px solid rgba(99, 102, 241, 0.1)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.25rem' }}>
+                <div style={{ fontSize: '0.55rem', opacity: 0.5, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Account Name</div>
                 <CopyButton text={accName} label="Account Name" />
               </div>
-              <div style={{ fontSize: '0.9rem', fontWeight: 800 }}>{accName}</div>
+              <div style={{ fontSize: '0.85rem', fontWeight: 800, color: '#1e293b' }}>{accName}</div>
            </div>
 
-           <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '1rem' }}>
-              <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.2rem' }}>
-                  <div style={{ fontSize: '0.6rem', opacity: 0.5, fontWeight: 700, textTransform: 'uppercase' }}>Account Number</div>
+           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+              <div style={{ background: 'rgba(0,0,0,0.02)', padding: '0.75rem', borderRadius: '12px', border: '1px solid rgba(0,0,0,0.05)' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.25rem' }}>
+                  <div style={{ fontSize: '0.55rem', opacity: 0.5, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Account Number</div>
                   <CopyButton text={accNo || ""} label="Account Number" />
                 </div>
-                <div style={{ fontSize: '0.95rem', fontWeight: 900, fontFamily: 'monospace' }}>{accNo || 'GENERATING...'}</div>
+                <div style={{ fontSize: '0.9rem', fontWeight: 900, fontFamily: 'monospace', letterSpacing: '1px' }}>{accNo || 'GENERATING...'}</div>
               </div>
-              <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.2rem' }}>
-                  <div style={{ fontSize: '0.6rem', opacity: 0.5, fontWeight: 700, textTransform: 'uppercase' }}>Bank Name</div>
+              <div style={{ background: 'rgba(0,0,0,0.02)', padding: '0.75rem', borderRadius: '12px', border: '1px solid rgba(0,0,0,0.05)' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.25rem' }}>
+                  <div style={{ fontSize: '0.55rem', opacity: 0.5, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Bank Name</div>
                   <CopyButton text={bank || ""} label="Bank Name" />
                 </div>
-                <div style={{ fontSize: '0.85rem', fontWeight: 800 }}>{bank || 'Provisioning...'}</div>
+                <div style={{ fontSize: '0.8rem', fontWeight: 800 }}>{bank || 'Provisioning...'}</div>
               </div>
            </div>
 

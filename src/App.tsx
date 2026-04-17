@@ -250,152 +250,234 @@ const App = () => {
           </div>
 
           <div style={{ display: 'flex', gap: '0.6rem', alignItems: 'center' }}>
-            <button className="btn btn-outline" onClick={() => setView('auth')} style={{ padding: '0.5rem 0.8rem', fontSize: '0.75rem' }}>Login</button>
-            <button className="btn btn-primary" onClick={() => setView('auth')} style={{ padding: '0.5rem 0.8rem', fontSize: '0.75rem' }}>Get Started</button>
+            <button className="btn btn-outline" onClick={() => setView('auth')} style={{ padding: '0.6rem 1.2rem', fontSize: '0.85rem' }}>Login</button>
+            <button className="btn btn-primary" onClick={() => setView('auth')} style={{ padding: '0.6rem 1.5rem', fontSize: '0.85rem' }}>Open Account</button>
           </div>
         </div>
-        
       </header>
 
       <main>
-        {false && <LandingV2 onAuth={() => setView('auth')} />}
         {landingView === 'main' && (
           <>
-            {/* Old Landing Content */}
-            <section className="hero container perspective-3d" style={{ paddingTop: '5rem', paddingBottom: '4rem' }}>
-          <div className="info-row" style={{ alignItems: 'center', textAlign: 'left', marginBottom: 0, gap: '2rem' }}>
-             <div className="hero-text-content">
-                <motion.div 
-                  className="badge"
-                  initial={{ x: -20, opacity: 0 }}
-                  animate={{ x: 0, opacity: 1 }}
-                  transition={{ delay: 0.2 }}
-                >
-                  <Sparkles size={14} style={{ marginRight: '0.5rem' }} /> NEXT-GEN FINANCIAL RAILS
-                </motion.div>
-                <motion.h1
-                  initial={{ y: 30, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  transition={{ duration: 0.8 }}
-                  style={{ textAlign: 'left', fontSize: '5rem', marginBottom: '1.5rem', lineHeight: 1.1 }}
-                >
-                  Global Finance. <br />
-                  <span style={{ color: 'var(--primary)', textShadow: '0 0 30px rgba(99, 102, 241, 0.3)' }}>Africa-Native.</span>
-                </motion.h1>
-                <motion.p
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.4 }}
-                  style={{ margin: '0 0 2.5rem 0', fontSize: '1.25rem', maxWidth: '540px', color: 'var(--text-muted)' }}
-                >
-                  The unified platform for cross-border 
-                  payments, automated treasury, and high-speed settlement for Individuals, Businesses, and Developers.
-                </motion.p>
-                <motion.div 
-                  className="hero-btns"
-                  initial={{ y: 20, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  transition={{ delay: 0.6 }}
-                  style={{ justifyContent: 'flex-start' }}
-                >
-                  <button className="btn btn-primary" onClick={() => setView('auth')} style={{ padding: '1.2rem 3rem', fontSize: '1.1rem' }}>
-                    Start Building <ArrowRight size={20} />
-                  </button>
-                  <button className="btn btn-outline" style={{ padding: '1.2rem 3rem', fontSize: '1.1rem' }}>
-                    API Reference
-                  </button>
-                </motion.div>
+            {/* Iconic Hero 3.0 */}
+            <section className="section-padding container">
+              <div className="info-row" style={{ alignItems: 'center' }}>
+                <div className="hero-text-content" style={{ textAlign: 'left' }}>
+                  <motion.div 
+                    className="badge"
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                  >
+                    <Sparkles size={14} /> THE NEW STANDARD FOR AFRICAN FINANCE
+                  </motion.div>
+                  <motion.h1
+                    initial={{ y: 30, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    style={{ fontSize: 'clamp(3rem, 8vw, 5.5rem)', marginBottom: '1.5rem', lineHeight: 1.05 }}
+                  >
+                    Move Money.<br />
+                    <span className="text-reveal">No Borders.</span>
+                  </motion.h1>
+                  <motion.p
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.2 }}
+                    style={{ fontSize: 'clamp(1rem, 2vw, 1.35rem)', color: 'var(--text-muted)', maxWidth: '600px', marginBottom: '3rem' }}
+                  >
+                    Paypee is the unified financial infrastructure for the next generation of global citizens. 
+                    Virtual cards, cross-border settlements, and institutional liquidity—all in one place.
+                  </motion.p>
+                  <motion.div 
+                    className="hero-btns"
+                    initial={{ y: 20, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    transition={{ delay: 0.4 }}
+                  >
+                    <button className="btn btn-primary" onClick={() => setView('auth')} style={{ padding: '1.2rem 2.5rem', fontSize: '1.1rem' }}>
+                      Get Started Now <ArrowRight size={20} />
+                    </button>
+                    <button className="btn btn-outline" style={{ padding: '1.2rem 2.5rem', fontSize: '1.1rem' }}>
+                      Documentation
+                    </button>
+                  </motion.div>
+                </div>
 
-                <motion.div 
-                  className="status-indicators"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 1 }}
-                  style={{ marginTop: '2.5rem', display: 'flex', gap: '2.5rem', color: 'var(--text-muted)', fontSize: '0.85rem' }}
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-                    <div style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--accent)', boxShadow: '0 0 12px var(--accent)' }} /> 
-                    System Status: Operational
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-                    <ShieldCheck size={16} color="var(--primary)" /> ISO 27001 Certified
-                  </div>
-                </motion.div>
-             </div>
+                <div className="hero-visual-content desktop-only" style={{ flex: 1, position: 'relative', height: '500px' }}>
+                   <motion.div 
+                     className="glass-card floating-element"
+                     style={{ position: 'absolute', right: 0, top: '10%', width: '380px', height: '240px', background: 'linear-gradient(135deg, #6366f1 0%, #a855f7 100%)', border: 'none' }}
+                   >
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3rem' }}>
+                         <Zap size={32} color="#fff" />
+                         <span style={{ fontSize: '0.8rem', fontWeight: 800, color: 'rgba(255,255,255,0.6)', letterSpacing: '2px' }}>VIRTUAL CARD</span>
+                      </div>
+                      <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#fff', letterSpacing: '4px', marginBottom: '2rem' }}>**** **** **** 8820</div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', color: '#fff' }}>
+                         <span style={{ fontWeight: 800 }}>ALEXANDER P.</span>
+                         <span style={{ opacity: 0.6 }}>12/28</span>
+                      </div>
+                   </motion.div>
+                   
+                   <motion.div 
+                     className="glass-card"
+                     style={{ position: 'absolute', left: '10%', bottom: '15%', padding: '1.5rem', width: '260px', zIndex: 10 }}
+                     initial={{ x: -20, opacity: 0 }}
+                     animate={{ x: 0, opacity: 1 }}
+                     transition={{ delay: 0.8 }}
+                   >
+                      <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                         <div style={{ background: 'rgba(16, 185, 129, 0.1)', color: 'var(--accent)', padding: '0.5rem', borderRadius: '12px' }}><CheckCircle2 size={18} /></div>
+                         <div>
+                            <div style={{ fontSize: '0.9rem', fontWeight: 800 }}>$1,450.00</div>
+                            <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Received from NY Branch</div>
+                         </div>
+                      </div>
+                   </motion.div>
+                </div>
+              </div>
+            </section>
 
-             <div className="hero-visual-content" style={{ position: 'relative', height: '550px' }}>
-                <motion.div 
-                  className="tilt-card" 
-                  initial={{ scale: 0.9, rotateX: 20, rotateY: -20, opacity: 0 }}
-                  animate={{ scale: 1, rotateX: 0, rotateY: 0, opacity: 1 }}
-                  transition={{ duration: 1.2, type: 'spring', damping: 15 }}
-                  style={{ 
-                    position: 'absolute', 
-                    right: '5%', 
-                    top: '15%', 
-                    width: '400px', 
-                    height: '250px', 
-                    background: 'linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)',
-                    borderRadius: '32px',
-                    boxShadow: '0 50px 100px -20px rgba(79, 70, 229, 0.5)',
-                    zIndex: 2,
-                    padding: '2rem',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    justifyContent: 'space-between',
-                    border: '1px solid rgba(255,255,255,0.15)'
-                  }}
-                >
-                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                       <div style={{ background: 'rgba(255,255,255,0.2)', borderRadius: '10px', padding: '0.6rem' }}>
-                          <Cpu size={32} color="#fff" />
-                       </div>
-                       <span style={{ fontWeight: 800, letterSpacing: '4px', fontSize: '0.85rem', opacity: 0.9, color: '#fff' }}>PAYPEE SECURE</span>
-                   </div>
-                   <div style={{ fontSize: '1.7rem', letterSpacing: '5px', fontWeight: 600, color: '#fff' }}>**** **** **** 0048</div>
-                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', color: '#fff' }}>
-                       <div>
-                          <div style={{ fontSize: '0.75rem', opacity: 0.7, textTransform: 'uppercase', marginBottom: '0.3rem' }}>Authorized Entity</div>
-                          <div style={{ fontWeight: 700, fontSize: '1.1rem' }}>PAYPEE TECHNOLOGIES</div>
-                       </div>
-                        <div style={{ textAlign: 'right' }}>
-                           <div style={{ fontSize: '0.8rem', opacity: 0.6, letterSpacing: '2px' }}>EXPIRES 12/30</div>
+            {/* Iconic Services Glance */}
+            <section className="section-padding" style={{ background: 'rgba(255,255,255,0.01)', borderTop: '1px solid var(--border)', borderBottom: '1px solid var(--border)' }}>
+               <div className="container">
+                  <div style={{ textAlign: 'center', marginBottom: '5rem' }}>
+                     <h2 style={{ fontSize: 'clamp(2.5rem, 5vw, 3.5rem)', marginBottom: '1rem' }}>Financial Superpowers.</h2>
+                     <p style={{ color: 'var(--text-muted)', fontSize: '1.2rem' }}>Every tool you need to navigate the global economy, at your fingertips.</p>
+                  </div>
+
+                  <div className="feature-grid">
+                     {[
+                        { title: "Virtual Cards", desc: "Instant USD & NGN cards for global subscriptions and ad spend.", icon: <CreditCard />, color: "#6366f1" },
+                        { title: "Global Accounts", desc: "Local NGN, USD, GBP, and EUR accounts for seamless collections.", icon: <Globe />, color: "#10b981" },
+                        { title: "FX Swaps", desc: "Convert between currencies at institutional rates in real-time.", icon: <Repeat />, color: "#f59e0b" },
+                        { title: "Mass Payouts", desc: "Disburse payments to thousands of bank accounts instantly.", icon: <Zap />, color: "#ec4899" },
+                        { title: "Bills & Utilities", desc: "Settle airtime, data, and power bills across African networks.", icon: <Activity />, color: "#8b5cf6" },
+                        { title: "Developer APIs", desc: "Embed financial logic into your apps with our robust SDKs.", icon: <Code2 />, color: "#3b82f6" }
+                     ].map((s, i) => (
+                        <motion.div 
+                           key={i}
+                           className="glass-card service-card"
+                           whileHover={{ y: -10 }}
+                        >
+                           <div className="icon-box" style={{ background: `${s.color}15`, color: s.color, borderColor: `${s.color}30` }}>
+                              {s.icon}
+                           </div>
+                           <h3>{s.title}</h3>
+                           <p>{s.desc}</p>
+                        </motion.div>
+                     ))}
+                  </div>
+               </div>
+            </section>
+
+            {/* Detailed Feature: Virtual Cards */}
+            <section className="section-padding container">
+               <div className="info-row" style={{ gap: '6rem' }}>
+                  <div className="desktop-only" style={{ flex: 1 }}>
+                     <div style={{ position: 'relative', width: '100%', height: '400px' }}>
+                        <div style={{ position: 'absolute', top: 0, left: 0, width: '320px', height: '200px', background: '#0a0f1e', border: '1px solid var(--border)', borderRadius: '24px', transform: 'rotate(-5deg)', zIndex: 1 }}></div>
+                        <div style={{ position: 'absolute', top: '40px', left: '60px', width: '320px', height: '200px', background: 'var(--primary)', borderRadius: '24px', transform: 'rotate(5deg)', zIndex: 2, boxShadow: '0 30px 60px rgba(99, 102, 241, 0.4)', display: 'flex', padding: '2rem', alignItems: 'flex-end' }}>
+                           <div style={{ color: '#fff', fontWeight: 800, fontSize: '1.2rem' }}>VIRTUAL POWER</div>
                         </div>
-                   </div>
-                   <div className="glow-overlay" />
-                </motion.div>
+                     </div>
+                  </div>
+                  <div style={{ flex: 1.2, textAlign: 'left' }}>
+                     <div style={{ color: 'var(--primary)', fontWeight: 800, fontSize: '0.9rem', marginBottom: '1rem', letterSpacing: '2px' }}>CARDS INFRASTRUCTURE</div>
+                     <h2 style={{ fontSize: '3rem', marginBottom: '1.5rem' }}>Virtual Cards for the<br />Modern Internet.</h2>
+                     <p style={{ color: 'var(--text-muted)', fontSize: '1.15rem', marginBottom: '2.5rem' }}>
+                        Issue USD and NGN virtual cards in seconds. Pay for AWS, Meta Ads, Netflix, and 
+                        millions of other merchants without the limitations of local bank limits.
+                     </p>
+                     <ul style={{ listStyle: 'none', padding: 0, display: 'grid', gap: '1rem' }}>
+                        {[
+                           "Zero maintenance fees",
+                           "Instant funding from your NGN wallet",
+                           "Advanced fraud protection & spend limits",
+                           "Real-time transaction tracking"
+                        ].map((li, i) => (
+                           <li key={i} style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', fontWeight: 700 }}>
+                              <CheckCircle2 size={20} color="var(--accent)" /> {li}
+                           </li>
+                        ))}
+                     </ul>
+                  </div>
+               </div>
+            </section>
 
-                <motion.div 
-                  className="float"
-                  initial={{ x: 30, opacity: 0 }}
-                  animate={{ x: 0, opacity: 1 }}
-                  transition={{ delay: 1.2 }}
-                  style={{ position: 'absolute', left: '0%', top: '5%', width: '240px', background: 'rgba(2, 6, 23, 0.8)', border: '1px solid var(--border)', borderRadius: '20px', padding: '1.25rem', backdropFilter: 'blur(30px)', zIndex: 4 }}
-                >
-                   <div style={{ display: 'flex', gap: '0.75rem', color: 'var(--accent)', alignItems: 'center' }}>
-                       <div style={{ background: 'rgba(16, 185, 129, 0.15)', padding: '0.5rem', borderRadius: '10px' }}>
-                          <CheckCircle2 size={18} />
-                       </div>
-                       <span style={{ fontSize: '0.9rem', fontWeight: 800 }}>+ $4,500.20</span>
-                   </div>
-                   <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '0.6rem' }}>Real-time Settlement Hub</div>
-                </motion.div>
+            {/* Detailed Feature: Global Collections */}
+            <section className="section-padding" style={{ background: 'rgba(255,255,255,0.01)' }}>
+               <div className="container">
+                  <div className="info-row" style={{ gap: '6rem', flexDirection: 'row-reverse' }}>
+                     <div className="desktop-only" style={{ flex: 1 }}>
+                        <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '32px', padding: '2rem' }}>
+                           <div style={{ fontSize: '0.8rem', fontWeight: 800, color: 'var(--text-muted)', marginBottom: '1.5rem', letterSpacing: '2px' }}>VIRTUAL SETTLEMENT GRID</div>
+                           {[
+                              { label: 'United States', code: 'USD', bank: 'Community Federal Savings' },
+                              { label: 'European Union', code: 'EUR', bank: 'Banking Circle' },
+                              { label: 'United Kingdom', code: 'GBP', bank: 'ClearBank' }
+                           ].map((acc, i) => (
+                              <div key={i} style={{ padding: '1.25rem', background: 'rgba(255,255,255,0.02)', borderRadius: '16px', marginBottom: '1rem', border: '1px solid rgba(255,255,255,0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                 <div>
+                                    <div style={{ fontWeight: 800, fontSize: '0.9rem' }}>{acc.label} Account</div>
+                                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{acc.bank}</div>
+                                 </div>
+                                 <div style={{ background: 'var(--primary)', color: '#fff', padding: '0.2rem 0.6rem', borderRadius: '6px', fontSize: '0.7rem', fontWeight: 800 }}>{acc.code}</div>
+                              </div>
+                           ))}
+                        </div>
+                     </div>
+                     <div style={{ flex: 1.2, textAlign: 'left' }}>
+                        <div style={{ color: 'var(--secondary)', fontWeight: 800, fontSize: '0.9rem', marginBottom: '1rem', letterSpacing: '2px' }}>COLLECTION RAILS</div>
+                        <h2 style={{ fontSize: '3rem', marginBottom: '1.5rem' }}>Collect Locally,<br />Settle Globally.</h2>
+                        <p style={{ color: 'var(--text-muted)', fontSize: '1.15rem', marginBottom: '2.5rem' }}>
+                           Get dedicated virtual bank accounts in USD, EUR, GBP, and NGN. 
+                           Receive payments from clients and marketplaces like Amazon, Upwork, and Remote instantly.
+                        </p>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
+                           <div>
+                              <div style={{ fontWeight: 800, fontSize: '1.2rem', color: '#fff', marginBottom: '0.5rem' }}>10+ Currencies</div>
+                              <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>Diverse liquidity pools for global business.</p>
+                           </div>
+                           <div>
+                              <div style={{ fontWeight: 800, fontSize: '1.2rem', color: '#fff', marginBottom: '0.5rem' }}>T+0 Settlement</div>
+                              <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>Instant availability for local NGN withdrawal.</p>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+            </section>
 
-                <motion.div 
-                  className="float"
-                  initial={{ x: -30, opacity: 0 }}
-                  animate={{ x: 0, opacity: 1 }}
-                  transition={{ delay: 1.4 }}
-                  style={{ position: 'absolute', right: '0%', bottom: '10%', width: '220px', background: 'rgba(2, 6, 23, 0.8)', border: '1px solid var(--border)', borderRadius: '20px', padding: '1.25rem', backdropFilter: 'blur(30px)', zIndex: 1 }}
-                >
-                   <div style={{ display: 'flex', gap: '0.75rem', color: 'var(--secondary)', alignItems: 'center' }}>
-                       <div style={{ background: 'rgba(245, 158, 11, 0.15)', padding: '0.5rem', borderRadius: '10px' }}>
-                          <Zap size={18} />
-                       </div>
-                       <span style={{ fontSize: '0.9rem', fontWeight: 800 }}>NGN Collection</span>
-                   </div>
-                   <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '0.6rem' }}>Paypee Virtual Account</div>
-                </motion.div>
+            {/* Developer Experience Area */}
+            <section className="section-padding container">
+               <div className="glass-card" style={{ padding: '4rem', display: 'grid', gridTemplateColumns: '1fr 1.2fr', gap: '4rem', alignItems: 'center', overflow: 'hidden' }}>
+                  <div style={{ textAlign: 'left' }}>
+                     <div style={{ display: 'inline-flex', gap: '0.5rem', alignItems: 'center', color: 'var(--accent)', fontWeight: 800, fontSize: '0.8rem', letterSpacing: '2px', marginBottom: '1.5rem' }}>
+                        <Terminal size={16} /> DEVELOPER FIRST
+                     </div>
+                     <h2 style={{ fontSize: '2.5rem', marginBottom: '1.5rem' }}>Built for the<br />10x Engineer.</h2>
+                     <p style={{ color: 'var(--text-muted)', marginBottom: '2rem' }}>
+                        Integrate enterprise-grade financial features with our unified API. 
+                        Comprehensive SDKs, clear documentation, and a robust sandbox.
+                     </p>
+                     <div style={{ display: 'flex', gap: '1rem' }}>
+                        <button className="btn btn-primary">Read Docs</button>
+                        <button className="btn btn-outline">API Status</button>
+                     </div>
+                  </div>
+                  <div className="desktop-only" style={{ background: '#000', borderRadius: '24px', padding: '2rem', border: '1px solid var(--border)', fontFamily: 'monospace', color: '#10b981', fontSize: '0.9rem' }}>
+                     <div style={{ opacity: 0.5, marginBottom: '1rem' }}>// Initialize Paypee SDK</div>
+                     <div><span style={{ color: '#6366f1' }}>import</span> Paypee <span style={{ color: '#6366f1' }}>from</span> <span style={{ color: '#f59e0b' }}>'@paypee/sdk'</span>;</div>
+                     <br />
+                     <div><span style={{ color: '#6366f1' }}>const</span> paypee = <span style={{ color: '#6366f1' }}>new</span> Paypee(<span style={{ color: '#f59e0b' }}>'sk_test_...'</span>);</div>
+                     <br />
+                     <div><span style={{ color: '#6366f1' }}>const</span> card = <span style={{ color: '#6366f1' }}>await</span> paypee.cards.create({`{`}</div>
+                     <div style={{ paddingLeft: '1.5rem' }}>currency: <span style={{ color: '#f59e0b' }}>'USD'</span>,</div>
+                     <div style={{ paddingLeft: '1.5rem' }}>type: <span style={{ color: '#f59e0b' }}>'VIRTUAL'</span></div>
+                     <div>{`}`});</div>
+                  </div>
+               </div>
+            </section>
 
                 <motion.div 
                    animate={{ scale: [1, 1.2, 1], opacity: [0.1, 0.2, 0.1] }}
@@ -714,104 +796,73 @@ const App = () => {
           </div>
         </section>
 
-        {/* Testimonials */}
-        <section className="section container">
-          <div className="section-header" style={{ marginBottom: '5rem' }}>
-             <div className="badge">PARTNER SUCCESS</div>
-             <h2>Built for Global Ambition</h2>
-          </div>
-          <div className="grid">
-            {[
-              { text: "Paypee has completely transformed international payroll for us across Africa.", author: "Sarah Chen", role: "CFO at TechStream", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah" },
-              { text: "We went from sandbox to live production in exactly 48 hours. The speed is unmatched.", author: "James Okoro", role: "Founder of ShopQuick", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=James" },
-              { text: "Finally, a fintech rail that understands the needs of modern global businesses.", author: "Elena Rossi", role: "CTO at Borderless", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Elena" }
-            ].map((t, i) => (
-              <motion.div key={i} className="testimonial-card" whileHover={{ y: -10 }}>
-                <div className="trust-badge"><ShieldCheck size={24} /></div>
-                <img src={t.avatar} alt={t.author} className="testimonial-avatar" />
-                <p className="testimonial-text">"{t.text}"</p>
-                <div className="author-info">
-                   <h5 style={{ margin: 0, color: '#fff' }}>{t.author}</h5>
-                   <p style={{ margin: 0, color: 'var(--text-muted)', fontSize: '0.75rem' }}>{t.role}</p>
-                </div>
-              </motion.div>
-            ))}
-          </div>
+        {/* Final CTA */}
+        <section className="section-padding container" style={{ textAlign: 'center' }}>
+          <h2 style={{ fontSize: 'clamp(2.5rem, 6vw, 4.5rem)', marginBottom: '1.5rem' }}>Ready to Scale?</h2>
+          <p style={{ color: 'var(--text-muted)', fontSize: '1.2rem', marginBottom: '3rem', maxWidth: '600px', margin: '0 auto 3rem' }}>
+            Join thousands of individuals and businesses building the future of finance with Paypee.
+          </p>
+          <button className="btn btn-primary" onClick={() => setView('auth')} style={{ padding: '1.5rem 4rem', fontSize: '1.5rem', borderRadius: '24px' }}>
+            Create Free Account
+          </button>
         </section>
 
-        {/* CTA Section */}
-        <section className="section container" style={{ textAlign: 'center', background: 'linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%)', borderRadius: '40px', padding: '6rem 2rem' }}>
-           <h2 style={{ fontSize: '3rem', color: '#fff' }}>The Future is Borderless.</h2>
-           <p style={{ color: 'rgba(255,255,255,0.8)', fontSize: '1.2rem', marginBottom: '3rem', maxWidth: '600px', margin: '0 auto 3rem' }}>
-             Join the thousands of developers building the next generation of African finance.
-           </p>
-           <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
-             <button className="btn" onClick={() => setView('auth')} style={{ background: '#fff', color: 'var(--primary)', padding: '1rem 2.5rem' }}>Get API Keys</button>
-             <button className="btn btn-outline" onClick={() => setView('auth')} style={{ borderColor: '#fff', color: '#fff', padding: '1rem 2.5rem' }}>Talk to Sales</button>
-           </div>
-         </section>
           </>
         )}
         
-        {landingView === 'individual' && <LandingIndividual onAuth={() => setView('auth')} />}
-        {landingView === 'business' && <LandingBusiness onAuth={() => setView('auth')} />}
-        {landingView === 'developer' && <LandingDeveloper onAuth={() => setView('auth')} />}
-        {landingView === 'legal_privacy' && <LegalPage view="privacy" onBack={() => setLandingView('main')} />}
-        {landingView === 'legal_terms' && <LegalPage view="terms" onBack={() => setLandingView('main')} />}
-        {landingView === 'legal_pci' && <LegalPage view="pci" onBack={() => setLandingView('main')} />}
+        {landingView === 'individual' && <LandingIndividual onBack={() => setLandingView('main')} />}
+        {landingView === 'business' && <LandingBusiness onBack={() => setLandingView('main')} />}
+        {landingView === 'developer' && <LandingDeveloper onBack={() => setLandingView('main')} />}
+        {landingView.startsWith('legal_') && <LegalPage type={landingView.split('_')[1] as any} onBack={() => setLandingView('main')} />}
       </main>
-      
+
       <MobileBottomNav />
 
-      <footer style={{ padding: '6rem 0 3rem', borderTop: '1px solid var(--border)', marginBottom: '5rem' }}>
+      {/* Modern Footer */}
+      <footer style={{ padding: '6rem 0 10rem', borderTop: '1px solid var(--border)', background: 'rgba(2, 6, 23, 0.5)' }}>
         <div className="container">
-          <div className="info-row" style={{ alignItems: 'flex-start' }}>
-            <div style={{ flex: 1.5 }}>
-              <div className="logo" style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                 <img src="/logo.png" alt="Paypee" style={{ height: '28px' }} />
-                 Paypee
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '4rem', marginBottom: '4rem' }}>
+            <div>
+              <div className="logo" style={{ marginBottom: '1.5rem' }}>
+                <img src="/logo.png" alt="" style={{ height: '32px' }} /> Paypee
               </div>
-              <p style={{ color: 'var(--text-muted)', maxWidth: '300px' }}>Global liquidity infrastructure connecting Africa to the world. Secure, fast, and unified.</p>
-              <div style={{ display: 'flex', gap: '1rem', marginTop: '2rem' }}>
-                <Twitter size={20} color="var(--text-muted)" />
-                <Github size={20} color="var(--text-muted)" />
-                <Linkedin size={20} color="var(--text-muted)" />
+              <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>
+                The financial operating system for the global African.
+              </p>
+            </div>
+            <div>
+              <h4 style={{ fontSize: '1rem', marginBottom: '1.5rem' }}>Products</h4>
+              <div style={{ display: 'grid', gap: '0.75rem', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
+                <span>Virtual Cards</span>
+                <span>Global Accounts</span>
+                <span>Payouts & Swaps</span>
+                <span>Utility Payments</span>
               </div>
             </div>
-            <div style={{ flex: 1 }}>
-              <h5 style={{ marginBottom: '1.5rem', color: '#fff' }}>Individuals</h5>
-              <ul style={{ listStyle: 'none', padding: 0, color: 'var(--text-muted)', lineHeight: 2.5, fontSize: '0.9rem' }}>
-                <li><button onClick={() => { setView('landing'); setLandingView('individual'); }} style={{ background: 'transparent', border: 'none', color: 'inherit', padding: 0, cursor: 'pointer' }}>Global Wallets</button></li>
-                <li><button onClick={() => { setView('landing'); setLandingView('individual'); }} style={{ background: 'transparent', border: 'none', color: 'inherit', padding: 0, cursor: 'pointer' }}>Virtual Cards</button></li>
-                <li><button onClick={() => { setView('landing'); setLandingView('individual'); }} style={{ background: 'transparent', border: 'none', color: 'inherit', padding: 0, cursor: 'pointer' }}>P2P Transfers</button></li>
-                <li><button onClick={() => { setView('landing'); setLandingView('individual'); }} style={{ background: 'transparent', border: 'none', color: 'inherit', padding: 0, cursor: 'pointer' }}>Bill Payments</button></li>
-              </ul>
+            <div>
+              <h4 style={{ fontSize: '1rem', marginBottom: '1.5rem' }}>Resources</h4>
+              <div style={{ display: 'grid', gap: '0.75rem', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
+                <span>Developer Docs</span>
+                <span>API Reference</span>
+                <span>System Status</span>
+                <span>Help Center</span>
+              </div>
             </div>
-            <div style={{ flex: 1 }}>
-              <h5 style={{ marginBottom: '1.5rem', color: '#fff' }}>Businesses</h5>
-              <ul style={{ listStyle: 'none', padding: 0, color: 'var(--text-muted)', lineHeight: 2.5, fontSize: '0.9rem' }}>
-                <li><button onClick={() => { setView('landing'); setLandingView('business'); }} style={{ background: 'transparent', border: 'none', color: 'inherit', padding: 0, cursor: 'pointer' }}>Treasury Ops</button></li>
-                <li><button onClick={() => { setView('landing'); setLandingView('business'); }} style={{ background: 'transparent', border: 'none', color: 'inherit', padding: 0, cursor: 'pointer' }}>Payroll Engine</button></li>
-                <li><button onClick={() => { setView('landing'); setLandingView('business'); }} style={{ background: 'transparent', border: 'none', color: 'inherit', padding: 0, cursor: 'pointer' }}>Payment Links</button></li>
-                <li><button onClick={() => { setView('landing'); setLandingView('business'); }} style={{ background: 'transparent', border: 'none', color: 'inherit', padding: 0, cursor: 'pointer' }}>Bulk Payouts</button></li>
-              </ul>
-            </div>
-            <div style={{ flex: 1 }}>
-              <h5 style={{ marginBottom: '1.5rem', color: '#fff' }}>Developers</h5>
-              <ul style={{ listStyle: 'none', padding: 0, color: 'var(--text-muted)', lineHeight: 2.5, fontSize: '0.9rem' }}>
-                <li><button onClick={() => { setView('landing'); setLandingView('developer'); }} style={{ background: 'transparent', border: 'none', color: 'inherit', padding: 0, cursor: 'pointer' }}>API Reference</button></li>
-                <li><button onClick={() => { setView('landing'); setLandingView('developer'); }} style={{ background: 'transparent', border: 'none', color: 'inherit', padding: 0, cursor: 'pointer' }}>SDK Libraries</button></li>
-                <li><button onClick={() => { setView('landing'); setLandingView('developer'); }} style={{ background: 'transparent', border: 'none', color: 'inherit', padding: 0, cursor: 'pointer' }}>System Status</button></li>
-                <li><button onClick={() => { setView('landing'); setLandingView('developer'); }} style={{ background: 'transparent', border: 'none', color: 'inherit', padding: 0, cursor: 'pointer' }}>Developer Forum</button></li>
-              </ul>
+            <div>
+              <h4 style={{ fontSize: '1rem', marginBottom: '1.5rem' }}>Legal</h4>
+              <div style={{ display: 'grid', gap: '0.75rem', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
+                <span onClick={() => setLandingView('legal_privacy')} style={{ cursor: 'pointer' }}>Privacy Policy</span>
+                <span onClick={() => setLandingView('legal_terms')} style={{ cursor: 'pointer' }}>Terms of Service</span>
+                <span onClick={() => setLandingView('legal_pci')} style={{ cursor: 'pointer' }}>Compliance</span>
+              </div>
             </div>
           </div>
-          <div style={{ marginTop: '4rem', fontSize: '0.8rem', color: 'var(--text-muted)', display: 'flex', justifyContent: 'space-between', borderTop: '1px solid var(--border)', paddingTop: '2rem' }}>
-            <span>© 2026 Paypee Technologies Ltd. All rights reserved.</span>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '2rem', borderTop: '1px solid rgba(255,255,255,0.05)', color: 'var(--text-muted)', fontSize: '0.8rem' }}>
+            <span>&copy; 2026 Paypee Technologies Ltd. All rights reserved.</span>
             <div style={{ display: 'flex', gap: '2rem' }}>
-              <button onClick={() => { setView('landing'); setLandingView('legal_privacy'); }} style={{ background: 'transparent', border: 'none', color: 'inherit', padding: 0, cursor: 'pointer' }}>Privacy Policy</button>
-              <button onClick={() => { setView('landing'); setLandingView('legal_terms'); }} style={{ background: 'transparent', border: 'none', color: 'inherit', padding: 0, cursor: 'pointer' }}>Terms of Service</button>
-              <button onClick={() => { setView('landing'); setLandingView('legal_pci'); }} style={{ background: 'transparent', border: 'none', color: 'inherit', padding: 0, cursor: 'pointer' }}>PCI DSS | ISO 27001</button>
+              <Twitter size={18} />
+              <Linkedin size={18} />
+              <Github size={18} />
             </div>
           </div>
         </div>
