@@ -43,8 +43,24 @@ export const createCustomer = async (firstName: string, lastName: string, email:
     if (error.response) {
         console.error('[MAPLERAD DEBUG] Full Error Response:', JSON.stringify(error.response.data));
     }
-    if (error.response?.data?.message?.includes('already exists')) {
-        return error.response.data.data; 
+    const errorMsg = error.response?.data?.message || '';
+    if (errorMsg.toLowerCase().includes('already exist') || errorMsg.toLowerCase().includes('already enrolled')) {
+        // If Maplerad returned the customer in the error response, use it
+        if (error.response?.data?.data?.id) {
+            return error.response.data.data; 
+        }
+        
+        // Otherwise, fetch the customer list to find their ID
+        console.log(`[MAPLERAD DEBUG] Customer already enrolled, fetching list to find ID for ${email}`);
+        try {
+            const listRes = await mapleradClient.get('/customers');
+            const customers = listRes.data?.data || [];
+            const existing = customers.find((c: any) => c.email === email);
+            if (existing) return existing;
+            console.log(`[MAPLERAD DEBUG] Could not find ${email} in the first page of customers.`);
+        } catch (fetchErr: any) {
+            console.error('[MAPLERAD] Failed to fetch existing customer list:', fetchErr.message);
+        }
     }
     console.error('[MAPLERAD] Create Customer Error:', error.response?.data || error.message);
     throw new Error(error.response?.data?.message || 'Failed to create Maplerad customer. Check keys/whitelisting.');
