@@ -306,15 +306,15 @@ const VerificationGate: React.FC<VerificationGateProps> = ({ kycStatus: initialS
       {/* KYC Modal */}
       <AnimatePresence>
         {showModal && (
-          <div style={{ position: 'fixed', inset: 0, background: 'rgba(2,6,23,0.95)', backdropFilter: 'blur(12px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2000, padding: '2rem' }}>
+          <div style={{ position: 'fixed', inset: 0, background: 'rgba(2,6,23,0.95)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2000, padding: '1rem', overflowY: 'auto' }}>
             <motion.div
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
-              style={{ background: '#0a0f1e', border: '1px solid #1e293b', borderRadius: '32px', padding: '3rem', maxWidth: '520px', width: '100%', boxShadow: '0 40px 100px rgba(0,0,0,0.6)', position: 'relative', maxHeight: '90vh', overflowY: 'auto' }}
+              style={{ background: '#0a0f1e', border: '1px solid #1e293b', borderRadius: '32px', padding: '2.5rem', maxWidth: '520px', width: '100%', boxShadow: '0 40px 100px rgba(0,0,0,0.6)', position: 'relative', maxHeight: '90vh', overflowY: 'auto' }}
             >
-              <button onClick={() => setShowModal(false)} style={{ position: 'absolute', top: '1.5rem', right: '1.5rem', background: 'rgba(255,255,255,0.05)', border: '1px solid #1e293b', color: '#64748b', cursor: 'pointer', borderRadius: '8px', padding: '0.4rem', display: 'flex' }}>
-                <X size={18} />
+              <button onClick={() => setShowModal(false)} style={{ position: 'absolute', top: '1.5rem', right: '1.5rem', background: 'rgba(255,255,255,0.05)', border: '1px solid #1e293b', color: '#fff', cursor: 'pointer', borderRadius: '50%', width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10 }}>
+                <X size={20} />
               </button>
 
               {/* Header */}
@@ -505,7 +505,7 @@ const NotificationPanel = ({ notifications, show, onClose }: { notifications: No
       initial={{ opacity: 0, y: -10, scale: 0.97 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       exit={{ opacity: 0 }}
-      style={{ position: 'fixed', top: '4rem', right: '2rem', width: '360px', background: '#0a0f1e', border: '1px solid #1e293b', borderRadius: '20px', boxShadow: '0 30px 60px rgba(0,0,0,0.6)', zIndex: 3000, overflow: 'hidden' }}
+      style={{ position: 'fixed', top: '4.5rem', right: '2rem', width: '360px', background: '#0a0f1e', border: '1px solid #1e293b', borderRadius: '24px', boxShadow: '0 30px 60px rgba(0,0,0,0.6)', zIndex: 3000, overflow: 'hidden' }}
     >
       <div style={{ padding: '1.25rem 1.5rem', borderBottom: '1px solid #1e293b', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <span style={{ fontWeight: 800, fontSize: '0.95rem' }}>Notifications</span>

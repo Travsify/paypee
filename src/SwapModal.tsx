@@ -135,31 +135,31 @@ const SwapModal: React.FC<SwapModalProps> = ({ isOpen, onClose, onSuccess, walle
   const fromConfig = currencyConfig[fromCurrency] || { symbol: '', icon: '💱', color: '#6366f1' };
   const toConfig = currencyConfig[toCurrency] || { symbol: '', icon: '💱', color: '#6366f1' };
 
-  const selectStyle: React.CSSProperties = { width: '100%', padding: '0.85rem 1rem', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', color: '#fff', fontSize: '0.95rem', outline: 'none', appearance: 'none', cursor: 'pointer' };
+  const selectStyle: React.CSSProperties = { width: '100%', padding: '0.85rem 1rem', background: '#0f172a', border: '1px solid #1e293b', borderRadius: '12px', color: '#fff', fontSize: '0.95rem', outline: 'none', appearance: 'none', cursor: 'pointer' };
 
   return (
     <AnimatePresence>
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
         onClick={handleClose}
-        style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999, padding: '1rem' }}>
+        style={{ position: 'fixed', inset: 0, background: 'rgba(2, 6, 23, 0.95)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999, padding: '1rem', overflowY: 'auto' }}>
         <motion.div initial={{ opacity: 0, scale: 0.9, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.9, y: 20 }}
           onClick={(e) => e.stopPropagation()}
-          style={{ background: '#0a0f1e', borderRadius: '32px', border: '1px solid var(--border)', width: '100%', maxWidth: '480px', overflow: 'hidden', maxHeight: '90vh', overflowY: 'auto' }}>
+          style={{ background: '#0a0f1e', borderRadius: '32px', border: '1px solid #1e293b', width: '100%', maxWidth: '480px', position: 'relative', maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)' }}>
 
           {/* Header */}
-          <div style={{ padding: '2rem 2rem 1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div style={{ padding: '2rem 2rem 1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-              <div style={{ width: 40, height: 40, borderRadius: '50%', background: 'rgba(245, 158, 11, 0.1)', border: '1px solid rgba(245, 158, 11, 0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <div style={{ width: 44, height: 44, borderRadius: '14px', background: 'rgba(245, 158, 11, 0.1)', border: '1px solid rgba(245, 158, 11, 0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <ArrowRightLeft size={20} color="#f59e0b" />
               </div>
-              <h3 style={{ fontSize: '1.2rem', fontWeight: 700 }}>Currency Swap</h3>
+              <h3 style={{ fontSize: '1.4rem', fontWeight: 800, color: '#fff' }}>Currency Swap</h3>
             </div>
-            <div style={{ display: 'flex', gap: '0.5rem' }}>
+            <div style={{ display: 'flex', gap: '0.75rem' }}>
               <button onClick={() => { if (step !== 'history') { fetchHistory(); setStep('history'); } else setStep('form'); }}
-                style={{ background: 'rgba(255,255,255,0.05)', border: 'none', borderRadius: '50%', width: 32, height: 32, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: step === 'history' ? '#f59e0b' : '#fff' }}>
-                <History size={16} />
+                style={{ background: 'rgba(255,255,255,0.05)', border: 'none', borderRadius: '12px', width: 40, height: 40, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: step === 'history' ? '#f59e0b' : '#fff', transition: 'all 0.2s' }}>
+                <History size={18} />
               </button>
-              <button onClick={handleClose} style={{ background: 'rgba(255,255,255,0.05)', border: 'none', borderRadius: '50%', width: 32, height: 32, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}><X size={18} /></button>
+              <button onClick={handleClose} style={{ background: 'rgba(255,255,255,0.05)', border: 'none', borderRadius: '12px', width: 40, height: 40, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}><X size={20} /></button>
             </div>
           </div>
 
@@ -214,7 +214,7 @@ const SwapModal: React.FC<SwapModalProps> = ({ isOpen, onClose, onSuccess, walle
                         <select value={fromCurrency} onChange={e => setFromCurrency(e.target.value)} style={selectStyle}>
                           <option value="" style={{ background: '#0a0f1e' }}>Select</option>
                           {availableCurrencies.map((c: string) => (
-                            <option key={c} value={c} style={{ background: '#0a0f1e' }}>{currencyConfig[c]?.icon} {c}</option>
+                            <option key={c} value={c} style={{ background: '#0a0f1e', color: '#fff' }}>{currencyConfig[c]?.icon} {c}</option>
                           ))}
                         </select>
                         <ChevronDown size={16} color="var(--text-muted)" style={{ position: 'absolute', right: '0.75rem', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />

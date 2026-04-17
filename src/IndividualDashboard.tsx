@@ -217,14 +217,14 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
            </div>
         </div>
 
-        <main className="dashboard-main" style={{ flex: 1, padding: '3rem 4rem', paddingBottom: '100px' }}>
+        <main className="dashboard-main" style={{ flex: 1, padding: '3rem 4rem', paddingBottom: '100px', overflowY: 'auto', maxHeight: '100vh', scrollbarWidth: 'none' }}>
           {activeSection === 'kyc_blocked' && (
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '70vh', textAlign: 'center', gap: '1.5rem' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '60vh', textAlign: 'center', gap: '1.5rem' }}>
               <div style={{ width: 80, height: 80, background: 'rgba(99,102,241,0.1)', borderRadius: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#6366f1' }}>
                 <ShieldCheck size={40} />
               </div>
               <h2 style={{ fontSize: '1.8rem', fontWeight: 800 }}>Account Verification Required</h2>
-              <p style={{ color: '#64748b', maxWidth: '420px', lineHeight: 1.7 }}>To maintain the highest security standards, please verify your identity to unlock all premium features including Wallets, Cards, and Transfers.</p>
+              <p style={{ color: '#94a3b8', maxWidth: '420px', lineHeight: 1.7 }}>To maintain the highest security standards, please verify your identity to unlock all premium features including Wallets, Cards, and Transfers.</p>
               <button onClick={() => navigate('overview')} style={{ background: 'var(--primary)', color: '#fff', border: 'none', padding: '1rem 2.5rem', borderRadius: '14px', fontWeight: 700, cursor: 'pointer' }}>Return to Overview</button>
             </div>
           )}

@@ -234,19 +234,30 @@ const PayoutModal: React.FC<PayoutModalProps> = ({ isOpen, onClose, onSuccess, w
   return (
     <AnimatePresence>
       {isOpen && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(2, 6, 23, 0.9)', backdropFilter: 'blur(10px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 3000, padding: '1rem' }}>
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(2, 6, 23, 0.95)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 3000, padding: '1rem', overflowY: 'auto' }}>
           <motion.div 
             initial={{ scale: 0.9, opacity: 0, y: 20 }}
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.9, opacity: 0, y: 20 }}
-            style={{ background: '#0a0f1e', border: '1px solid #1e293b', borderRadius: '32px', padding: '3rem', maxWidth: '500px', width: '100%', position: 'relative' }}
+            style={{ 
+              background: '#0a0f1e', 
+              border: '1px solid #1e293b', 
+              borderRadius: '32px', 
+              padding: '2.5rem', 
+              maxWidth: '500px', 
+              width: '100%', 
+              position: 'relative',
+              maxHeight: '90vh',
+              overflowY: 'auto',
+              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)'
+            }}
           >
-            <button onClick={onClose} style={{ position: 'absolute', top: '2rem', right: '2rem', background: 'transparent', border: 'none', color: '#64748b', cursor: 'pointer' }}><X size={24} /></button>
+            <button onClick={onClose} style={{ position: 'absolute', top: '1.5rem', right: '1.5rem', background: 'rgba(255,255,255,0.05)', border: 'none', color: '#fff', cursor: 'pointer', width: '40px', height: '40px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10 }}><X size={20} /></button>
 
             {step === 1 && (
               <>
-                <h2 style={{ fontSize: '1.75rem', fontWeight: 800, marginBottom: '0.5rem' }}>Global Transfer</h2>
-                <p style={{ color: '#64748b', marginBottom: '2.5rem' }}>Send money globally with automatic currency conversion.</p>
+                <h2 style={{ fontSize: '1.75rem', fontWeight: 800, marginBottom: '0.5rem', color: '#fff' }}>Global Transfer</h2>
+                <p style={{ color: '#94a3b8', marginBottom: '2.5rem' }}>Send money globally with automatic currency conversion.</p>
                 
                 {error && (
                   <div style={{ background: 'rgba(244, 63, 94, 0.1)', color: '#f43f5e', padding: '1rem', borderRadius: '12px', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', fontWeight: 600 }}>
@@ -259,10 +270,10 @@ const PayoutModal: React.FC<PayoutModalProps> = ({ isOpen, onClose, onSuccess, w
                     <div style={inputGroupStyle}>
                       <label style={labelStyle}>PAY FROM WALLET</label>
                       <div style={selectWrapperStyle}>
-                        <Wallet size={18} color="var(--primary)" />
+                        <Wallet size={18} color="#6366f1" />
                         <select value={selectedWalletId} onChange={(e) => setSelectedWalletId(e.target.value)} style={selectStyle}>
                           {wallets.map(w => (
-                            <option key={w.id} value={w.id}>
+                            <option key={w.id} value={w.id} style={{ background: '#0a0f1e', color: '#fff' }}>
                               {w.currency} Wallet
                             </option>
                           ))}
@@ -272,10 +283,10 @@ const PayoutModal: React.FC<PayoutModalProps> = ({ isOpen, onClose, onSuccess, w
                     <div style={inputGroupStyle}>
                       <label style={labelStyle}>DESTINATION</label>
                       <div style={selectWrapperStyle}>
-                        <Globe size={18} color="var(--primary)" />
+                        <Globe size={18} color="#6366f1" />
                         <select value={targetCurrency} onChange={(e) => setTargetCurrency(e.target.value)} style={selectStyle}>
                           {TARGET_CURRENCIES.map(c => (
-                            <option key={c.code} value={c.code}>{c.label}</option>
+                            <option key={c.code} value={c.code} style={{ background: '#0a0f1e', color: '#fff' }}>{c.label}</option>
                           ))}
                         </select>
                       </div>
@@ -283,8 +294,8 @@ const PayoutModal: React.FC<PayoutModalProps> = ({ isOpen, onClose, onSuccess, w
                   </div>
 
                   {sourceCurrency !== targetCurrency && exchangeRate && (
-                    <div style={{ background: 'rgba(99, 102, 241, 0.1)', padding: '0.75rem 1rem', borderRadius: '12px', fontSize: '0.85rem', color: '#818cf8', display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 600 }}>
-                      <span>Auto-Conversion Active:</span>
+                    <div style={{ background: 'rgba(99, 102, 241, 0.15)', padding: '0.75rem 1rem', borderRadius: '12px', fontSize: '0.85rem', color: '#a5b4fc', display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 600 }}>
+                      <span>Auto-Conversion:</span>
                       <span>1 {sourceCurrency} = {exchangeRate} {targetCurrency}</span>
                     </div>
                   )}
@@ -295,7 +306,7 @@ const PayoutModal: React.FC<PayoutModalProps> = ({ isOpen, onClose, onSuccess, w
                 <button 
                   onClick={() => setStep(2)}
                   disabled={!isStep1Valid()}
-                  style={{ width: '100%', background: 'var(--primary)', color: '#fff', border: 'none', padding: '1.2rem', borderRadius: '16px', fontSize: '1.1rem', fontWeight: 700, cursor: 'pointer', opacity: !isStep1Valid() ? 0.5 : 1 }}
+                  style={{ width: '100%', background: '#6366f1', color: '#fff', border: 'none', padding: '1.2rem', borderRadius: '16px', fontSize: '1.1rem', fontWeight: 700, cursor: 'pointer', opacity: !isStep1Valid() ? 0.5 : 1, transition: 'all 0.2s' }}
                 >
                   Continue
                 </button>
@@ -304,7 +315,7 @@ const PayoutModal: React.FC<PayoutModalProps> = ({ isOpen, onClose, onSuccess, w
 
             {step === 2 && (
               <>
-                <h2 style={{ fontSize: '1.75rem', fontWeight: 800, marginBottom: '2.5rem' }}>Transfer Amount</h2>
+                <h2 style={{ fontSize: '1.75rem', fontWeight: 800, marginBottom: '2.5rem', color: '#fff' }}>Transfer Amount</h2>
                 
                 {error && (
                   <div style={{ background: 'rgba(244, 63, 94, 0.1)', color: '#f43f5e', padding: '1rem', borderRadius: '12px', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', fontWeight: 600 }}>
@@ -324,23 +335,23 @@ const PayoutModal: React.FC<PayoutModalProps> = ({ isOpen, onClose, onSuccess, w
                       style={{ background: 'transparent', border: 'none', color: '#fff', outline: 'none', width: '200px', textAlign: 'center', fontSize: '3rem', fontWeight: 800 }}
                     />
                   </div>
-                  <p style={{ color: '#64748b', marginTop: '1rem' }}>Available Balance: {balance.toFixed(2)} {sourceCurrency}</p>
+                  <p style={{ color: '#94a3b8', marginTop: '1rem' }}>Available Balance: {balance.toFixed(2)} {sourceCurrency}</p>
                 </div>
 
                 <div style={{ background: 'rgba(255,255,255,0.02)', borderRadius: '20px', padding: '1.5rem', marginBottom: '2.5rem', border: '1px solid #1e293b' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
-                    <span style={{ color: '#64748b' }}>Transfer Fee</span>
-                    <span style={{ fontWeight: 600 }}>0.00 {sourceCurrency}</span>
+                    <span style={{ color: '#94a3b8' }}>Transfer Fee</span>
+                    <span style={{ fontWeight: 600, color: '#fff' }}>0.00 {sourceCurrency}</span>
                   </div>
                   {sourceCurrency !== targetCurrency && exchangeRate && (
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
-                      <span style={{ color: '#64748b' }}>Recipient Gets (~{exchangeRate})</span>
-                      <span style={{ fontWeight: 600 }}>{amount ? (parseFloat(amount) * exchangeRate).toFixed(2) : '0.00'} {targetCurrency}</span>
+                      <span style={{ color: '#94a3b8' }}>Recipient Gets (~{exchangeRate})</span>
+                      <span style={{ fontWeight: 600, color: '#6366f1' }}>{amount ? (parseFloat(amount) * exchangeRate).toFixed(2) : '0.00'} {targetCurrency}</span>
                     </div>
                   )}
                   <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px solid #1e293b', paddingTop: '1rem' }}>
-                    <span style={{ fontWeight: 700 }}>Total To Pay</span>
-                    <span style={{ fontWeight: 800, color: 'var(--primary)' }}>{amount ? parseFloat(amount).toFixed(2) : '0.00'} {sourceCurrency}</span>
+                    <span style={{ fontWeight: 700, color: '#fff' }}>Total To Pay</span>
+                    <span style={{ fontWeight: 800, color: '#6366f1' }}>{amount ? parseFloat(amount).toFixed(2) : '0.00'} {sourceCurrency}</span>
                   </div>
                 </div>
 
@@ -349,7 +360,7 @@ const PayoutModal: React.FC<PayoutModalProps> = ({ isOpen, onClose, onSuccess, w
                    <button 
                      onClick={handlePayout}
                      disabled={loading || !amount || parseFloat(amount) > balance}
-                     style={{ flex: 2, background: 'var(--primary)', color: '#fff', border: 'none', padding: '1.2rem', borderRadius: '16px', fontWeight: 700, cursor: 'pointer', opacity: (loading || !amount || parseFloat(amount) > balance) ? 0.5 : 1 }}
+                     style={{ flex: 2, background: '#6366f1', color: '#fff', border: 'none', padding: '1.2rem', borderRadius: '16px', fontWeight: 700, cursor: 'pointer', opacity: (loading || !amount || parseFloat(amount) > balance) ? 0.5 : 1 }}
                    >
                      {loading ? 'Processing...' : 'Send Money'}
                    </button>
@@ -362,11 +373,11 @@ const PayoutModal: React.FC<PayoutModalProps> = ({ isOpen, onClose, onSuccess, w
                 <div style={{ width: '100px', height: '100px', background: 'rgba(16, 185, 129, 0.1)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#10b981', margin: '0 auto 2rem' }}>
                    <CheckCircle2 size={50} />
                 </div>
-                <h2 style={{ fontSize: '2rem', fontWeight: 800, marginBottom: '1rem' }}>Transfer Successful!</h2>
-                <p style={{ color: '#64748b', marginBottom: '3rem' }}>Your transfer of {amount} {sourceCurrency} {sourceCurrency !== targetCurrency ? `(approx ${(parseFloat(amount) * (exchangeRate || 1)).toFixed(2)} ${targetCurrency}) ` : ''}is being processed.</p>
+                <h2 style={{ fontSize: '2rem', fontWeight: 800, marginBottom: '1rem', color: '#fff' }}>Transfer Successful!</h2>
+                <p style={{ color: '#94a3b8', marginBottom: '3rem' }}>Your transfer of {amount} {sourceCurrency} {sourceCurrency !== targetCurrency ? `(approx ${(parseFloat(amount) * (exchangeRate || 1)).toFixed(2)} ${targetCurrency}) ` : ''}is being processed.</p>
                 <button 
                   onClick={onClose}
-                  style={{ width: '100%', background: 'var(--primary)', color: '#fff', border: 'none', padding: '1.2rem', borderRadius: '16px', fontWeight: 700, cursor: 'pointer' }}
+                  style={{ width: '100%', background: '#6366f1', color: '#fff', border: 'none', padding: '1.2rem', borderRadius: '16px', fontWeight: 700, cursor: 'pointer' }}
                 >
                   Done
                 </button>
@@ -380,8 +391,8 @@ const PayoutModal: React.FC<PayoutModalProps> = ({ isOpen, onClose, onSuccess, w
 };
 
 const inputGroupStyle: React.CSSProperties = { display: 'flex', flexDirection: 'column', gap: '0.75rem' };
-const labelStyle: React.CSSProperties = { fontSize: '0.7rem', fontWeight: 800, color: '#64748b', letterSpacing: '0.1em' };
-const inputWrapperStyle: React.CSSProperties = { display: 'flex', alignItems: 'center', gap: '1rem', background: 'rgba(255,255,255,0.03)', border: '1px solid #1e293b', borderRadius: '16px', padding: '0 1.25rem', overflow: 'hidden' };
+const labelStyle: React.CSSProperties = { fontSize: '0.7rem', fontWeight: 800, color: '#94a3b8', letterSpacing: '0.1em' };
+const inputWrapperStyle: React.CSSProperties = { display: 'flex', alignItems: 'center', gap: '1rem', background: '#0f172a', border: '1px solid #1e293b', borderRadius: '16px', padding: '0 1.25rem', overflow: 'hidden' };
 const inputStyle: React.CSSProperties = { background: 'transparent', border: 'none', color: '#fff', padding: '1.25rem 0', width: '100%', outline: 'none', fontSize: '1rem' };
 const selectWrapperStyle: React.CSSProperties = { ...inputWrapperStyle };
 const selectStyle: React.CSSProperties = { ...inputStyle, appearance: 'none', cursor: 'pointer' };
