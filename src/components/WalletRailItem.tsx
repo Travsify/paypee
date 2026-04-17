@@ -59,7 +59,7 @@ const CopyValue = ({ value, label }: { value: string; label: string }) => {
   );
 };
 
-const WalletRailItem: React.FC<WalletRailItemProps> = ({ currency, balance, symbol, details, userName, onDelete, onSend, onTopUp }) => {
+const WalletRailItem: React.FC<WalletRailItemProps> = ({ currency, balance, symbol, details, userName, onDelete, onSend, onTopUp, onSwap }) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
   const accNo = details?.iban || details?.accountNumber || details?.account_number || details?.virtual_account_number || details?.address || details?.nuban || details?.accountInformation?.accountNumber || details?.data?.account_number;
