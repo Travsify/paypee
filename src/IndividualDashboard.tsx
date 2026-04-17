@@ -157,21 +157,21 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', background: '#020617', color: '#fff', overflow: 'hidden' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', background: '#020617', color: '#fff' }}>
       <VerificationGate 
         kycStatus={userData?.kycStatus || 'PENDING'} 
         accountType="INDIVIDUAL"
         onStatusChange={(status) => setUserData((prev: any) => ({ ...prev, kycStatus: status }))}
       />
       
-      <div style={{ display: 'flex', flex: 1, overflow: 'hidden', position: 'relative' }}>
+      <div style={{ display: 'flex', flex: 1, position: 'relative' }}>
         {/* Sidebar - Hidden on Mobile */}
         <aside className="dashboard-aside" style={{ width: '280px', borderRight: '1px solid var(--border)', background: '#0a0f1e', padding: '2rem 1.5rem', display: 'flex', flexDirection: 'column' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0 0.5rem', marginBottom: '3rem' }}>
             <div style={{ width: 32, height: 32, background: 'var(--primary)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                <Zap size={20} color="#fff" strokeWidth={3} />
             </div>
-            <span style={{ fontSize: '1.25rem', fontWeight: 900, letterSpacing: '-0.02em' }}>Paypee</span>
+            <span style={{ fontSize: '1.25rem', fontWeight: 700, letterSpacing: '-0.02em' }}>Paypee</span>
           </div>
           
           <div style={{ flex: 1, overflowY: 'auto' }}>
@@ -215,7 +215,7 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
            </div>
         </div>
 
-        <main className="dashboard-main" style={{ flex: 1, overflowY: 'auto', padding: '3rem 4rem', paddingBottom: '100px' }}>
+        <main className="dashboard-main" style={{ flex: 1, padding: '3rem 4rem', paddingBottom: '100px' }}>
           {activeSection === 'kyc_blocked' && (
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '70vh', textAlign: 'center', gap: '1.5rem' }}>
               <div style={{ width: 80, height: 80, background: 'rgba(99,102,241,0.1)', borderRadius: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#6366f1' }}>
@@ -232,7 +232,7 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
           {activeSection === 'vaults' && <VaultsDashboard />}
           {activeSection === 'wallets' && (
             <div style={{ padding: '0' }}>
-               <h2 style={{ fontSize: '1.8rem', fontWeight: 800, marginBottom: '2rem' }}>My Bank Accounts</h2>
+               <h2 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '2rem' }}>My Bank Accounts</h2>
                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                   {userData?.wallets?.map((w: any) => {
                     const symbols: Record<string, string> = { USD: '$', EUR: '€', GBP: '£', NGN: '₦' };
@@ -275,7 +275,7 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
                        {isVerified ? <Plus size={24} color="var(--primary)" /> : <Lock size={20} color="var(--text-muted)" />}
                     </div>
                     <div>
-                      <span style={{ fontWeight: 800, color: isVerified ? 'var(--text-muted)' : '#64748b', display: 'block' }}>Create Bank Account</span>
+                      <span style={{ fontWeight: 700, color: isVerified ? 'var(--text-muted)' : '#64748b', display: 'block' }}>Create Bank Account</span>
                       {!isVerified && <span style={{ fontSize: '0.75rem', color: '#f43f5e', fontWeight: 600 }}>Verification Required</span>}
                     </div>
                   </motion.div>
@@ -286,7 +286,7 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
           {activeSection === 'cards' && (
              <div style={{ padding: '0' }}>
                <div className="dashboard-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-                 <h2 style={{ fontSize: '1.8rem', fontWeight: 800 }}>Card Issuing Node</h2>
+                 <h2 style={{ fontSize: '1.5rem', fontWeight: 700 }}>Card Issuing Node</h2>
                  <button style={{ background: isVerified ? 'var(--primary)' : 'rgba(255,255,255,0.05)', color: isVerified ? '#fff' : '#64748b', border: 'none', padding: '0.8rem 1.5rem', borderRadius: '14px', fontWeight: 700, cursor: isVerified ? 'pointer' : 'not-allowed', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                    <Plus size={20} /> Issue Secure Card
                  </button>
@@ -335,7 +335,7 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
                <div className="dashboard-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3rem' }}>
                  <div>
                    <div className="mobile-only" style={{ display: 'none', color: 'var(--primary)', fontWeight: 900, fontSize: '0.7rem', letterSpacing: '2px', marginBottom: '0.5rem' }}>PERSONAL PROFILE</div>
-                   <h1 style={{ fontSize: '2.5rem', fontWeight: 900, marginBottom: '0.5rem', letterSpacing: '-0.02em' }}>Good Morning, {userData?.firstName || 'User'}</h1>
+                   <h1 style={{ fontSize: '2rem', fontWeight: 700, marginBottom: '0.5rem', letterSpacing: '-0.02em' }}>Good Morning, {userData?.firstName || 'User'}</h1>
                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '2rem', marginTop: '1rem' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 700 }}>
                          <div style={{ width: 8, height: 8, background: '#10b981', borderRadius: '50%', boxShadow: '0 0 10px #10b981' }} />
@@ -349,7 +349,7 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
                  </div>
                  <div className="dashboard-header-right" style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '0.75rem 1.5rem', background: 'rgba(255,255,255,0.03)', borderRadius: '24px', border: '1px solid var(--border)' }}>
                     <div style={{ width: 40, height: 40, background: 'var(--primary)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><User size={22} color="#fff" /></div>
-                    <div style={{ fontWeight: 800, fontSize: '0.95rem' }}>{userData?.firstName || 'User'}</div>
+                    <div style={{ fontWeight: 700, fontSize: '0.95rem' }}>{userData?.firstName || 'User'}</div>
                  </div>
                </div>
 
@@ -357,7 +357,7 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '4rem' }}>
                     <section>
                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-                         <h2 style={{ fontSize: '1.4rem', fontWeight: 900 }}>Bank Accounts</h2>
+                         <h2 style={{ fontSize: '1.25rem', fontWeight: 700 }}>Bank Accounts</h2>
                          <button onClick={fetchUserData} style={{ color: 'var(--primary)', background: 'transparent', border: 'none', fontWeight: 800, fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>REFRESH STATUS <RefreshCcw size={14} /></button>
                        </div>
                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
@@ -399,7 +399,7 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
 
                     <section>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-                         <h2 style={{ fontSize: '1.4rem', fontWeight: 900 }}>Network History</h2>
+                         <h2 style={{ fontSize: '1.25rem', fontWeight: 700 }}>Network History</h2>
                          <button onClick={() => navigate('history')} style={{ color: 'var(--primary)', background: 'transparent', border: 'none', fontWeight: 800, fontSize: '0.8rem', cursor: 'pointer' }}>VIEW ALL LEDGER</button>
                       </div>
                       <div style={{ background: '#0a0f1e', border: '1px solid var(--border)', borderRadius: '32px', overflow: 'hidden' }}>
@@ -428,7 +428,7 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
 
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '4rem' }}>
                     <section>
-                      <h2 style={{ fontSize: '1.4rem', fontWeight: 900, marginBottom: '2rem' }}>Quick Rails</h2>
+                      <h2 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '2rem' }}>Quick Rails</h2>
                       <div style={{ display: 'grid', gap: '1.25rem' }}>
                          {[
                            { icon: <Send size={20} />, label: "Initiate Payout", desc: "Send to bank or crypto", action: () => navigate('transfers') },
@@ -452,7 +452,7 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
                     </section>
 
                     <section>
-                       <h2 style={{ fontSize: '1.4rem', fontWeight: 900, marginBottom: '2rem' }}>Cards</h2>
+                       <h2 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '2rem' }}>Cards</h2>
                        <div style={{ padding: '2.5rem', borderRadius: '32px', background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border)', textAlign: 'center' }}>
                           <CreditCard size={48} color="var(--primary)" style={{ opacity: 0.2, marginBottom: '1.5rem' }} />
                           <h4 style={{ fontWeight: 800, marginBottom: '0.5rem' }}>Card Hub Empty</h4>
@@ -466,7 +466,7 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
 
           {activeSection === 'history' && (
             <div style={{ padding: '0' }}>
-              <h2 style={{ fontSize: '1.8rem', fontWeight: 800, marginBottom: '2rem' }}>Full Network History</h2>
+              <h2 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '2rem' }}>Full Network History</h2>
               <div style={{ background: '#0a0f1e', border: '1px solid var(--border)', borderRadius: '32px', overflow: 'hidden' }}>
                  {transactions.length > 0 ? (
                     transactions.map((tx, i) => (

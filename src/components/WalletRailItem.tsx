@@ -144,22 +144,11 @@ const WalletRailItem: React.FC<WalletRailItemProps> = ({ currency, balance, symb
                   <CopyValue label="Account Number" value={accNo || 'GENERATING...'} />
                   <CopyValue label="Bank / Provider" value={bankName} />
                   <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-                     <button onClick={(e) => { e.stopPropagation(); if (onSend) onSend(); }} style={{ flex: 1, minWidth: '100px', background: 'var(--primary)', color: '#fff', border: 'none', borderRadius: '12px', padding: '0.75rem', fontWeight: 700, fontSize: '0.85rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
+                     <button onClick={(e) => { e.stopPropagation(); if (onSend) onSend(); }} style={{ flex: 1, minWidth: '100px', background: 'var(--primary)', color: '#fff', border: 'none', borderRadius: '12px', padding: '0.75rem', fontWeight: 700, fontSize: '0.85rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', cursor: 'pointer' }}>
                         <ArrowUpRight size={16} /> Send
                      </button>
-                     <button onClick={(e) => { e.stopPropagation(); if (onTopUp) onTopUp(); }} style={{ flex: 1, minWidth: '100px', background: 'rgba(255,255,255,0.05)', color: '#fff', border: '1px solid var(--border)', borderRadius: '12px', padding: '0.75rem', fontWeight: 700, fontSize: '0.85rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
+                     <button onClick={(e) => { e.stopPropagation(); if (onTopUp) onTopUp(); }} style={{ flex: 1, minWidth: '100px', background: 'rgba(255,255,255,0.05)', color: '#fff', border: '1px solid var(--border)', borderRadius: '12px', padding: '0.75rem', fontWeight: 700, fontSize: '0.85rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', cursor: 'pointer' }}>
                         <ArrowDownLeft size={16} /> Top up
-                     </button>
-                     <button 
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          if (onDelete && walletId) {
-                            if (confirm('Terminate this liquidity rail?')) onDelete(walletId);
-                          }
-                        }}
-                        style={{ flex: 1, minWidth: '100px', background: 'rgba(244, 63, 94, 0.1)', color: '#f43f5e', border: '1px solid rgba(244, 63, 94, 0.2)', borderRadius: '12px', padding: '0.75rem', fontWeight: 700, fontSize: '0.85rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
-                      >
-                       <Trash2 size={16} /> Delete
                      </button>
                   </div>
                </div>
