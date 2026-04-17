@@ -62,8 +62,26 @@ export const issueVirtualAccount = async (customerId: string, currency: string) 
     });
     return response.data.data; // Returns account details (account_number, bank_name, etc.)
   } catch (error: any) {
+    const errorMsg = error.response?.data?.message || '';
+    if (errorMsg.toLowerCase().includes('already enrolled') || errorMsg.toLowerCase().includes('already exist')) {
+      try {
+        console.log(`[MAPLERAD DEBUG] Customer already enrolled, fetching existing virtual accounts for ${customerId}...`);
+        const existing = await mapleradClient.get(`/customers/${customerId}/virtual-account`);
+        const accounts = existing.data.data;
+        
+        if (Array.isArray(accounts)) {
+          const match = accounts.find((a: any) => a.currency === currency);
+          if (match) return match;
+          if (accounts.length > 0) return accounts[0];
+        }
+        return accounts;
+      } catch (fetchErr: any) {
+        console.error('[MAPLERAD] Failed to fetch existing account:', fetchErr.message);
+      }
+    }
+
     console.error('[MAPLERAD] Issue Account Error:', error.response?.data || error.message);
-    throw new Error(error.response?.data?.message || 'Failed to issue virtual account via Maplerad');
+    throw new Error(errorMsg || 'Failed to issue virtual account via Maplerad');
   }
 };
 
