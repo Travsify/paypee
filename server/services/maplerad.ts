@@ -232,3 +232,46 @@ export const getFxHistory = async () => {
     throw new Error(error.response?.data?.message || 'Failed to get FX history');
   }
 };
+
+/**
+ * Get live exchange rate between two currencies (lightweight — no binding quote)
+ */
+export const getExchangeRate = async (sourceCurrency: string, targetCurrency: string) => {
+  try {
+    console.log(`[MAPLERAD FX] Fetching rate: ${sourceCurrency} → ${targetCurrency}`);
+    // Use a small reference amount to get the rate without committing
+    const response = await mapleradClient.post('/fx/quote', {
+      source_currency: sourceCurrency,
+      target_currency: targetCurrency,
+      amount: 100 // 1.00 in minor units for rate calculation
+    });
+    const data = response.data.data;
+    return {
+      rate: data.rate,
+      sourceCurrency,
+      targetCurrency,
+      timestamp: new Date().toISOString()
+    };
+  } catch (error: any) {
+    console.error('[MAPLERAD FX] Rate Error:', error.response?.data || error.message);
+    throw new Error(error.response?.data?.message || 'Failed to fetch exchange rate');
+  }
+};
+
+/**
+ * Supported FX currency pairs
+ */
+export const SUPPORTED_FX_PAIRS = [
+  { source: 'USD', target: 'NGN' },
+  { source: 'NGN', target: 'USD' },
+  { source: 'EUR', target: 'NGN' },
+  { source: 'NGN', target: 'EUR' },
+  { source: 'GBP', target: 'NGN' },
+  { source: 'NGN', target: 'GBP' },
+  { source: 'USD', target: 'EUR' },
+  { source: 'EUR', target: 'USD' },
+  { source: 'USD', target: 'GBP' },
+  { source: 'GBP', target: 'USD' },
+  { source: 'EUR', target: 'GBP' },
+  { source: 'GBP', target: 'EUR' },
+];

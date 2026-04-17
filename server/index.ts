@@ -814,43 +814,361 @@ app.post('/api/bills/pay', authenticateToken, async (req: any, res: any) => {
 });
 
 // ==========================================
-// FX Swap (Maplerad Foreign Exchange)
+// FX Swap (Maplerad Foreign Exchange) — PRODUCTION
 // ==========================================
 
+// In-memory quote store (quotes expire after 30s on Maplerad)
+const pendingQuotes = new Map<string, {
+  userId: string;
+  sourceCurrency: string;
+  targetCurrency: string;
+  sourceAmount: number;
+  targetAmount: number;
+  rate: number;
+  reference: string;
+  expiresAt: number;
+}>();
+
+// Cleanup expired quotes every 60s
+setInterval(() => {
+  const now = Date.now();
+  for (const [ref, quote] of pendingQuotes) {
+    if (now > quote.expiresAt) pendingQuotes.delete(ref);
+  }
+}, 60000);
+
+/**
+ * GET /api/fx/rates — Fetch live exchange rate for display
+ */
+app.get('/api/fx/rates', authenticateToken, async (req: any, res: any) => {
+  try {
+    const { source, target } = req.query;
+    if (!source || !target) {
+      return res.status(400).json({ error: 'source and target query params are required.' });
+    }
+    const rate = await Maplerad.getExchangeRate(source as string, target as string);
+    res.json(rate);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message || 'Failed to fetch exchange rate' });
+  }
+});
+
+/**
+ * GET /api/fx/pairs — Supported FX pairs
+ */
+app.get('/api/fx/pairs', authenticateToken, async (req: any, res: any) => {
+  res.json({ pairs: Maplerad.SUPPORTED_FX_PAIRS });
+});
+
+/**
+ * POST /api/fx/quote — Generate a binding FX quote with balance validation
+ */
 app.post('/api/fx/quote', authenticateToken, async (req: any, res: any) => {
   try {
     const { sourceCurrency, targetCurrency, amount } = req.body;
+    const userId = req.user.userId;
+    const parsedAmount = parseFloat(amount);
+
+    // Input validation
     if (!sourceCurrency || !targetCurrency || !amount) {
       return res.status(400).json({ error: 'sourceCurrency, targetCurrency, and amount are required.' });
     }
-    const quote = await Maplerad.generateFxQuote(sourceCurrency, targetCurrency, parseFloat(amount));
-    res.json(quote);
+    if (sourceCurrency === targetCurrency) {
+      return res.status(400).json({ error: 'Source and target currencies must be different.' });
+    }
+    if (isNaN(parsedAmount) || parsedAmount <= 0) {
+      return res.status(400).json({ error: 'Amount must be a positive number.' });
+    }
+    if (parsedAmount < 1) {
+      return res.status(400).json({ error: 'Minimum swap amount is 1.00.' });
+    }
+
+    // Verify user is KYC-verified
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    if (!user || user.kycStatus !== 'VERIFIED') {
+      return res.status(403).json({ error: 'Identity verification required before executing FX swaps.' });
+    }
+
+    // Check source wallet exists and has sufficient balance
+    const sourceWallet = await prisma.wallet.findFirst({
+      where: { userId, currency: sourceCurrency as any }
+    });
+    if (!sourceWallet) {
+      return res.status(400).json({ error: `You don't have a ${sourceCurrency} wallet. Please create one first.` });
+    }
+    if (parseFloat(sourceWallet.balance.toString()) < parsedAmount) {
+      return res.status(400).json({ 
+        error: `Insufficient ${sourceCurrency} balance. Available: ${parseFloat(sourceWallet.balance.toString()).toFixed(2)}` 
+      });
+    }
+
+    // Check target wallet exists (create if needed later during swap)
+    const targetWallet = await prisma.wallet.findFirst({
+      where: { userId, currency: targetCurrency as any }
+    });
+
+    console.log(`[FX] Quote request: ${parsedAmount} ${sourceCurrency} → ${targetCurrency} by user ${userId}`);
+
+    // Call Maplerad for binding quote
+    const quote = await Maplerad.generateFxQuote(sourceCurrency, targetCurrency, parsedAmount);
+
+    // Cache the quote for swap execution
+    const quoteRef = quote.reference || quote.id;
+    pendingQuotes.set(quoteRef, {
+      userId,
+      sourceCurrency,
+      targetCurrency,
+      sourceAmount: parsedAmount,
+      targetAmount: quote.target_amount ? quote.target_amount / 100 : 0,
+      rate: quote.rate || 0,
+      reference: quoteRef,
+      expiresAt: Date.now() + 30000 // 30 second TTL
+    });
+
+    res.json({
+      reference: quoteRef,
+      sourceCurrency,
+      targetCurrency,
+      sourceAmount: parsedAmount,
+      targetAmount: quote.target_amount ? quote.target_amount / 100 : 0,
+      rate: quote.rate,
+      sourceBalance: parseFloat(sourceWallet.balance.toString()),
+      targetWalletExists: !!targetWallet,
+      expiresIn: 30 // seconds
+    });
+
   } catch (error: any) {
+    console.error('[FX] Quote Error:', error.message);
     res.status(500).json({ error: error.message || 'Failed to generate FX quote' });
   }
 });
 
+/**
+ * POST /api/fx/swap — Execute a confirmed FX swap
+ * This is the critical money-moving endpoint.
+ */
 app.post('/api/fx/swap', authenticateToken, async (req: any, res: any) => {
   try {
-    const { quoteReference } = req.body;
+    const { quoteReference, sourceCurrency, targetCurrency, sourceAmount } = req.body;
+    const userId = req.user.userId;
+
     if (!quoteReference) {
       return res.status(400).json({ error: 'quoteReference is required.' });
     }
-    const result = await Maplerad.executeFxSwap(quoteReference);
-    res.json(result);
+
+    // 1. Retrieve cached quote to validate context
+    const cachedQuote = pendingQuotes.get(quoteReference);
+    if (!cachedQuote) {
+      return res.status(410).json({ error: 'Quote has expired. Please generate a new quote.' });
+    }
+    if (cachedQuote.userId !== userId) {
+      return res.status(403).json({ error: 'This quote does not belong to you.' });
+    }
+    if (Date.now() > cachedQuote.expiresAt) {
+      pendingQuotes.delete(quoteReference);
+      return res.status(410).json({ error: 'Quote has expired. Please generate a new quote.' });
+    }
+
+    // Use cached values (server-authoritative, not client-supplied)
+    const src = cachedQuote.sourceCurrency;
+    const tgt = cachedQuote.targetCurrency;
+    const srcAmount = cachedQuote.sourceAmount;
+    const tgtAmount = cachedQuote.targetAmount;
+    const rate = cachedQuote.rate;
+
+    // 2. Re-validate source wallet balance (could have changed since quote)
+    const sourceWallet = await prisma.wallet.findFirst({
+      where: { userId, currency: src as any }
+    });
+    if (!sourceWallet || parseFloat(sourceWallet.balance.toString()) < srcAmount) {
+      pendingQuotes.delete(quoteReference);
+      return res.status(400).json({ error: `Insufficient ${src} balance for this swap.` });
+    }
+
+    // 3. Find or create target wallet
+    let targetWallet = await prisma.wallet.findFirst({
+      where: { userId, currency: tgt as any }
+    });
+
+    if (!targetWallet) {
+      console.log(`[FX] Auto-creating ${tgt} wallet for user ${userId}...`);
+      targetWallet = await prisma.wallet.create({
+        data: {
+          userId,
+          currency: tgt as any,
+          balance: 0.00,
+          metadata: { provider: 'FX_SWAP_AUTO', note: 'Auto-created during currency swap' }
+        }
+      });
+    }
+
+    console.log(`[FX] ⚡ Executing swap: ${srcAmount} ${src} → ${tgtAmount} ${tgt} (Rate: ${rate})`);
+
+    // 4. Execute swap on Maplerad
+    let mapleradResult: any;
+    try {
+      mapleradResult = await Maplerad.executeFxSwap(quoteReference);
+    } catch (swapErr: any) {
+      // Record failed swap
+      await prisma.fxSwap.create({
+        data: {
+          userId,
+          sourceWalletId: sourceWallet.id,
+          targetWalletId: targetWallet.id,
+          sourceCurrency: src,
+          targetCurrency: tgt,
+          sourceAmount: srcAmount,
+          targetAmount: tgtAmount,
+          rate: rate,
+          quoteReference,
+          provider: 'MAPLERAD',
+          status: 'FAILED',
+          failureReason: swapErr.message
+        }
+      });
+      
+      pendingQuotes.delete(quoteReference);
+      throw swapErr;
+    }
+
+    // 5. Atomic wallet updates + transaction recording
+    const debitRef = `FX_DEBIT_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
+    const creditRef = `FX_CREDIT_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
+
+    await prisma.$transaction([
+      // Debit source wallet
+      prisma.wallet.update({
+        where: { id: sourceWallet.id },
+        data: { balance: { decrement: srcAmount } }
+      }),
+      // Credit target wallet
+      prisma.wallet.update({
+        where: { id: targetWallet.id },
+        data: { balance: { increment: tgtAmount } }
+      }),
+      // Record debit transaction
+      prisma.transaction.create({
+        data: {
+          userId,
+          walletId: sourceWallet.id,
+          type: 'WITHDRAWAL',
+          amount: srcAmount,
+          currency: src as any,
+          status: 'COMPLETED',
+          reference: debitRef,
+          category: 'FX_SWAP',
+          metadata: {
+            type: 'FX_SWAP_DEBIT',
+            targetCurrency: tgt,
+            rate: rate,
+            quoteReference
+          }
+        }
+      }),
+      // Record credit transaction
+      prisma.transaction.create({
+        data: {
+          userId,
+          walletId: targetWallet.id,
+          type: 'DEPOSIT',
+          amount: tgtAmount,
+          currency: tgt as any,
+          status: 'COMPLETED',
+          reference: creditRef,
+          category: 'FX_SWAP',
+          metadata: {
+            type: 'FX_SWAP_CREDIT',
+            sourceCurrency: src,
+            rate: rate,
+            quoteReference
+          }
+        }
+      }),
+      // Record FxSwap
+      prisma.fxSwap.create({
+        data: {
+          userId,
+          sourceWalletId: sourceWallet.id,
+          targetWalletId: targetWallet.id,
+          sourceCurrency: src,
+          targetCurrency: tgt,
+          sourceAmount: srcAmount,
+          targetAmount: tgtAmount,
+          rate: rate,
+          quoteReference,
+          providerReference: mapleradResult?.id || mapleradResult?.reference || null,
+          provider: 'MAPLERAD',
+          status: 'COMPLETED'
+        }
+      })
+    ]);
+
+    // 6. Send notification
+    await createNotification(
+      userId,
+      '💱 Currency Swap Completed',
+      `Swapped ${srcAmount.toFixed(2)} ${src} → ${tgtAmount.toFixed(2)} ${tgt} at rate ${rate}`,
+      'SUCCESS'
+    );
+
+    // 7. Send email notification
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    if (user?.email) {
+      await sendEmail(
+        user.email,
+        '💱 Paypee — Currency Swap Confirmation',
+        `<div style="font-family:sans-serif;max-width:500px;margin:0 auto;padding:2rem;">
+          <h2 style="color:#6366f1;">Currency Swap Executed</h2>
+          <div style="background:#f8fafc;border-radius:12px;padding:1.5rem;margin:1rem 0;">
+            <p><strong>From:</strong> ${srcAmount.toFixed(2)} ${src}</p>
+            <p><strong>To:</strong> ${tgtAmount.toFixed(2)} ${tgt}</p>
+            <p><strong>Rate:</strong> 1 ${src} = ${rate} ${tgt}</p>
+            <p><strong>Date:</strong> ${new Date().toLocaleString()}</p>
+          </div>
+          <p style="color:#64748b;font-size:0.85rem;">If you did not authorize this swap, contact support immediately.</p>
+        </div>`
+      );
+    }
+
+    // 8. Cleanup
+    pendingQuotes.delete(quoteReference);
+
+    console.log(`[FX] ✅ Swap completed: ${srcAmount} ${src} → ${tgtAmount} ${tgt}`);
+
+    res.json({
+      status: 'COMPLETED',
+      sourceCurrency: src,
+      targetCurrency: tgt,
+      sourceAmount: srcAmount,
+      targetAmount: tgtAmount,
+      rate,
+      quoteReference,
+      providerReference: mapleradResult?.id || mapleradResult?.reference || null
+    });
+
   } catch (error: any) {
+    console.error('[FX] Swap Error:', error.message);
     res.status(500).json({ error: error.message || 'Failed to execute FX swap' });
   }
 });
 
+/**
+ * GET /api/fx/history — User's FX swap history
+ */
 app.get('/api/fx/history', authenticateToken, async (req: any, res: any) => {
   try {
-    const history = await Maplerad.getFxHistory();
-    res.json(history);
+    const swaps = await prisma.fxSwap.findMany({
+      where: { userId: req.user.userId },
+      orderBy: { createdAt: 'desc' },
+      take: 50
+    });
+    res.json(swaps);
   } catch (error: any) {
+    console.error('[FX] History Error:', error.message);
     res.status(500).json({ error: error.message || 'Failed to get FX history' });
   }
 });
+
 
 app.listen(PORT, () => {
   console.log(`🚀 Paypee Core API running on http://localhost:${PORT}`);

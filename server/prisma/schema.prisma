@@ -67,7 +67,9 @@ model User {
   teamMembers   TeamMember[]
   vaults        Vault[]
   notifications Notification[]
+  fxSwaps       FxSwap[]
 }
+
 
 model Wallet {
   id           String   @id @default(uuid())
@@ -176,4 +178,24 @@ model Notification {
   createdAt DateTime @default(now())
 
   user      User     @relation(fields: [userId], references: [id])
+}
+
+model FxSwap {
+  id                String   @id @default(uuid())
+  userId            String
+  sourceWalletId    String
+  targetWalletId    String
+  sourceCurrency    String
+  targetCurrency    String
+  sourceAmount      Decimal
+  targetAmount      Decimal
+  rate              Decimal
+  quoteReference    String   @unique
+  providerReference String?
+  provider          String   @default("MAPLERAD")
+  status            String   @default("PENDING") // PENDING, COMPLETED, FAILED
+  failureReason     String?
+  createdAt         DateTime @default(now())
+
+  user              User     @relation(fields: [userId], references: [id])
 }
