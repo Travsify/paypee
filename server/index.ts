@@ -351,6 +351,81 @@ app.post('/api/transactions', authenticateToken, async (req: any, res: any): Pro
 });
 
 // ==========================================
+// Payouts (Maplerad Transfers) Routes
+// ==========================================
+
+app.get('/api/payouts/banks', authenticateToken, async (req: any, res: any) => {
+  try {
+    const banks = await Maplerad.getBanks();
+    res.json(banks);
+  } catch (error: any) {
+    res.status(500).json({ error: 'Failed to fetch banks' });
+  }
+});
+
+app.post('/api/payouts/transfer', authenticateToken, async (req: any, res: any) => {
+  try {
+    const { amount, currency, bankCode, accountNumber, walletId } = req.body;
+    const userId = req.user.userId;
+    const parsedAmount = parseFloat(amount);
+
+    if (!walletId || !bankCode || !accountNumber || isNaN(parsedAmount) || parsedAmount <= 0) {
+      return res.status(400).json({ error: 'Invalid payout parameters' });
+    }
+
+    // Check balance
+    const wallet = await prisma.wallet.findUnique({ where: { id: walletId } });
+    if (!wallet || wallet.userId !== userId) {
+      return res.status(404).json({ error: 'Wallet not found' });
+    }
+
+    if (parseFloat(wallet.balance.toString()) < parsedAmount) {
+      return res.status(400).json({ error: 'Insufficient funds' });
+    }
+
+    console.log(`[PAYOUT] Executing transfer of ${parsedAmount} ${currency} to ${accountNumber} (${bankCode})`);
+
+    // Execute via Maplerad
+    const payoutResult = await Maplerad.processPayout(parsedAmount, currency, { bankCode, number: accountNumber });
+
+    // Atomic DB update
+    const reference = `PAYOUT_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
+    
+    await prisma.$transaction([
+      prisma.wallet.update({
+        where: { id: walletId },
+        data: { balance: { decrement: parsedAmount } }
+      }),
+      prisma.transaction.create({
+        data: {
+          userId,
+          walletId,
+          type: 'WITHDRAWAL',
+          amount: parsedAmount,
+          currency: currency as any,
+          status: 'COMPLETED',
+          reference,
+          category: 'TRANSFER',
+          desc: `Transfer to ${accountNumber}`,
+          metadata: {
+            provider: 'MAPLERAD',
+            providerReference: payoutResult?.id || null,
+            bankCode,
+            accountNumber
+          }
+        }
+      })
+    ]);
+
+    res.status(200).json({ status: 'COMPLETED', reference });
+
+  } catch (error: any) {
+    console.error('[PAYOUT ERROR]', error.message);
+    res.status(500).json({ error: error.message || 'Transfer failed' });
+  }
+});
+
+// ==========================================
 // Developer API Keys Routes
 // ==========================================
 

@@ -187,6 +187,27 @@ export const processPayout = async (amount: number, currency: string, accountDet
 };
 
 /**
+ * Get Banks / Institutions
+ */
+export const getBanks = async () => {
+  try {
+    const response = await mapleradClient.get('/institutions');
+    return response.data.data;
+  } catch (error: any) {
+    console.error('[MAPLERAD] Get Banks Error:', error.response?.data || error.message);
+    // Return some default Nigerian banks if API fails
+    return [
+      { bank_code: '044', name: 'Access Bank' },
+      { bank_code: '058', name: 'GTBank' },
+      { bank_code: '057', name: 'Zenith Bank' },
+      { bank_code: '033', name: 'UBA' },
+      { bank_code: '011', name: 'First Bank' },
+      { bank_code: '090267', name: 'Kuda Microfinance Bank' }
+    ];
+  }
+};
+
+/**
  * Generate an FX Quote (Step 1 of currency swap)
  */
 export const generateFxQuote = async (sourceCurrency: string, targetCurrency: string, amount: number) => {

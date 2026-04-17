@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   X, 
@@ -7,31 +7,92 @@ import {
   User, 
   AlertCircle,
   CheckCircle2,
-  ChevronDown
+  ChevronDown,
+  Wallet
 } from 'lucide-react';
 
 interface PayoutModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
-  balance: string;
+  wallets: any[];
 }
 
-const PayoutModal: React.FC<PayoutModalProps> = ({ isOpen, onClose, onSuccess, balance }) => {
+const PayoutModal: React.FC<PayoutModalProps> = ({ isOpen, onClose, onSuccess, wallets }) => {
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  
   const [amount, setAmount] = useState('');
-  const [bank, setBank] = useState('');
+  const [bankCode, setBankCode] = useState('');
   const [accountNumber, setAccountNumber] = useState('');
+  const [selectedWalletId, setSelectedWalletId] = useState('');
+  const [banks, setBanks] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (isOpen) {
+      setStep(1);
+      setAmount('');
+      setBankCode('');
+      setAccountNumber('');
+      setError('');
+      if (wallets.length > 0) {
+        setSelectedWalletId(wallets[0].id);
+      }
+      fetchBanks();
+    }
+  }, [isOpen, wallets]);
+
+  const fetchBanks = async () => {
+    try {
+      const response = await fetch('https://paypee-api-kmhv.onrender.com/api/payouts/banks', {
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('paypee_token')}` }
+      });
+      const data = await response.json();
+      if (Array.isArray(data)) {
+        setBanks(data);
+      }
+    } catch (err) {
+      console.error('Failed to fetch banks', err);
+    }
+  };
+
+  const selectedWallet = wallets.find(w => w.id === selectedWalletId);
+  const balance = selectedWallet ? parseFloat(selectedWallet.balance) : 0;
+  const currency = selectedWallet?.currency || 'USD';
 
   const handlePayout = async () => {
     setLoading(true);
-    // Simulate Fincra request
-    setTimeout(() => {
-       setLoading(false);
-       setStep(3);
-       onSuccess();
-    }, 2500);
+    setError('');
+    try {
+      const response = await fetch('https://paypee-api-kmhv.onrender.com/api/payouts/transfer', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('paypee_token')}`
+        },
+        body: JSON.stringify({
+          amount,
+          currency,
+          bankCode,
+          accountNumber,
+          walletId: selectedWalletId
+        })
+      });
+
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.error || 'Transfer failed');
+      }
+
+      setStep(3);
+      onSuccess();
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -49,19 +110,39 @@ const PayoutModal: React.FC<PayoutModalProps> = ({ isOpen, onClose, onSuccess, b
             {step === 1 && (
               <>
                 <h2 style={{ fontSize: '1.75rem', fontWeight: 800, marginBottom: '0.5rem' }}>Send Money</h2>
-                <p style={{ color: '#64748b', marginBottom: '2.5rem' }}>Enter recipient details for local bank transfer.</p>
+                <p style={{ color: '#64748b', marginBottom: '2.5rem' }}>Transfer funds to any external bank account.</p>
                 
+                {error && (
+                  <div style={{ background: 'rgba(244, 63, 94, 0.1)', color: '#f43f5e', padding: '1rem', borderRadius: '12px', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', fontWeight: 600 }}>
+                    <AlertCircle size={18} /> {error}
+                  </div>
+                )}
+
                 <div style={{ display: 'grid', gap: '1.5rem', marginBottom: '2rem' }}>
                   <div style={inputGroupStyle}>
-                    <label style={labelStyle}>SELECT BANK</label>
+                    <label style={labelStyle}>PAY FROM WALLET</label>
+                    <div style={selectWrapperStyle}>
+                      <Wallet size={18} color="var(--primary)" />
+                      <select value={selectedWalletId} onChange={(e) => setSelectedWalletId(e.target.value)} style={selectStyle}>
+                        {wallets.map(w => (
+                          <option key={w.id} value={w.id}>
+                            {w.currency} Wallet - Balance: {parseFloat(w.balance).toFixed(2)}
+                          </option>
+                        ))}
+                      </select>
+                      <ChevronDown size={18} style={{ marginLeft: 'auto' }} />
+                    </div>
+                  </div>
+
+                  <div style={inputGroupStyle}>
+                    <label style={labelStyle}>SELECT DESTINATION BANK</label>
                     <div style={selectWrapperStyle}>
                       <Building2 size={18} color="var(--primary)" />
-                      <select value={bank} onChange={(e) => setBank(e.target.value)} style={selectStyle}>
+                      <select value={bankCode} onChange={(e) => setBankCode(e.target.value)} style={selectStyle}>
                         <option value="">Select Bank</option>
-                        <option value="access">Access Bank</option>
-                        <option value="gtb">GTBank</option>
-                        <option value="zenith">Zenith Bank</option>
-                        <option value="kuda">Kuda Microfinance</option>
+                        {banks.map(b => (
+                           <option key={b.bank_code} value={b.bank_code}>{b.name}</option>
+                        ))}
                       </select>
                       <ChevronDown size={18} style={{ marginLeft: 'auto' }} />
                     </div>
@@ -84,8 +165,8 @@ const PayoutModal: React.FC<PayoutModalProps> = ({ isOpen, onClose, onSuccess, b
 
                 <button 
                   onClick={() => setStep(2)}
-                  disabled={!bank || accountNumber.length < 10}
-                  style={{ width: '100%', background: 'var(--primary)', color: '#fff', border: 'none', padding: '1.2rem', borderRadius: '16px', fontSize: '1.1rem', fontWeight: 700, cursor: 'pointer', opacity: (!bank || accountNumber.length < 10) ? 0.5 : 1 }}
+                  disabled={!bankCode || accountNumber.length < 10 || !selectedWalletId}
+                  style={{ width: '100%', background: 'var(--primary)', color: '#fff', border: 'none', padding: '1.2rem', borderRadius: '16px', fontSize: '1.1rem', fontWeight: 700, cursor: 'pointer', opacity: (!bankCode || accountNumber.length < 10 || !selectedWalletId) ? 0.5 : 1 }}
                 >
                   Continue
                 </button>
@@ -96,9 +177,15 @@ const PayoutModal: React.FC<PayoutModalProps> = ({ isOpen, onClose, onSuccess, b
               <>
                 <h2 style={{ fontSize: '1.75rem', fontWeight: 800, marginBottom: '2.5rem' }}>Transfer Amount</h2>
                 
+                {error && (
+                  <div style={{ background: 'rgba(244, 63, 94, 0.1)', color: '#f43f5e', padding: '1rem', borderRadius: '12px', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', fontWeight: 600 }}>
+                    <AlertCircle size={18} /> {error}
+                  </div>
+                )}
+
                 <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
                   <div style={{ fontSize: '3rem', fontWeight: 800, color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
-                    <span style={{ fontSize: '1.5rem', opacity: 0.5 }}>$</span>
+                    <span style={{ fontSize: '1.5rem', opacity: 0.5 }}>{currency}</span>
                     <input 
                       autoFocus
                       type="number" 
@@ -108,17 +195,17 @@ const PayoutModal: React.FC<PayoutModalProps> = ({ isOpen, onClose, onSuccess, b
                       style={{ background: 'transparent', border: 'none', color: '#fff', outline: 'none', width: '200px', textAlign: 'center', fontSize: '3rem', fontWeight: 800 }}
                     />
                   </div>
-                  <p style={{ color: '#64748b', marginTop: '1rem' }}>Available Balance: ${balance}</p>
+                  <p style={{ color: '#64748b', marginTop: '1rem' }}>Available Balance: {balance.toFixed(2)} {currency}</p>
                 </div>
 
                 <div style={{ background: 'rgba(255,255,255,0.02)', borderRadius: '20px', padding: '1.5rem', marginBottom: '2.5rem', border: '1px solid #1e293b' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
                     <span style={{ color: '#64748b' }}>Transfer Fee</span>
-                    <span style={{ fontWeight: 600 }}>$1.50</span>
+                    <span style={{ fontWeight: 600 }}>0.00 {currency}</span>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px solid #1e293b', paddingTop: '1rem' }}>
                     <span style={{ fontWeight: 700 }}>Total To Pay</span>
-                    <span style={{ fontWeight: 800, color: 'var(--primary)' }}>${(parseFloat(amount || '0') + 1.5).toFixed(2)}</span>
+                    <span style={{ fontWeight: 800, color: 'var(--primary)' }}>{amount ? parseFloat(amount).toFixed(2) : '0.00'} {currency}</span>
                   </div>
                 </div>
 
@@ -126,8 +213,8 @@ const PayoutModal: React.FC<PayoutModalProps> = ({ isOpen, onClose, onSuccess, b
                    <button onClick={() => setStep(1)} style={{ flex: 1, background: 'transparent', color: '#fff', border: '1px solid #1e293b', padding: '1.2rem', borderRadius: '16px', fontWeight: 700, cursor: 'pointer' }}>Back</button>
                    <button 
                      onClick={handlePayout}
-                     disabled={loading || !amount || parseFloat(amount) > parseFloat(balance)}
-                     style={{ flex: 2, background: 'var(--primary)', color: '#fff', border: 'none', padding: '1.2rem', borderRadius: '16px', fontWeight: 700, cursor: 'pointer', opacity: (loading || !amount || parseFloat(amount) > parseFloat(balance)) ? 0.5 : 1 }}
+                     disabled={loading || !amount || parseFloat(amount) > balance}
+                     style={{ flex: 2, background: 'var(--primary)', color: '#fff', border: 'none', padding: '1.2rem', borderRadius: '16px', fontWeight: 700, cursor: 'pointer', opacity: (loading || !amount || parseFloat(amount) > balance) ? 0.5 : 1 }}
                    >
                      {loading ? 'Processing...' : 'Send Money'}
                    </button>
@@ -141,7 +228,7 @@ const PayoutModal: React.FC<PayoutModalProps> = ({ isOpen, onClose, onSuccess, b
                    <CheckCircle2 size={50} />
                 </div>
                 <h2 style={{ fontSize: '2rem', fontWeight: 800, marginBottom: '1rem' }}>Transfer Successful!</h2>
-                <p style={{ color: '#64748b', marginBottom: '3rem' }}>Your transfer of ${amount} to {accountNumber} is being processed and will arrive shortly.</p>
+                <p style={{ color: '#64748b', marginBottom: '3rem' }}>Your transfer of {amount} {currency} to {accountNumber} is being processed.</p>
                 <button 
                   onClick={onClose}
                   style={{ width: '100%', background: 'var(--primary)', color: '#fff', border: 'none', padding: '1.2rem', borderRadius: '16px', fontWeight: 700, cursor: 'pointer' }}

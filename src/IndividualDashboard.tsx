@@ -498,7 +498,12 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
           )}
         </main>
       </div>
-      <PayoutModal isOpen={isPayoutOpen} onClose={() => setIsPayoutOpen(false)} balance={getWalletBalance()} onSuccess={fetchUserData} />
+      <PayoutModal 
+        isOpen={isPayoutOpen} 
+        onClose={() => setIsPayoutOpen(false)} 
+        onSuccess={fetchUserData} 
+        wallets={userData?.wallets || []} 
+      />
       <AccountCreationModal 
         isOpen={isAccountModalOpen} 
         onClose={() => setIsAccountModalOpen(false)} 
