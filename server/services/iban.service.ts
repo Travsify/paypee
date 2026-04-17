@@ -42,7 +42,15 @@ export class IbanService {
              user.email
           );
 
-          // B. Issue Account
+          // B. Upgrade Customer to Tier 1 KYC (Required for NGN Accounts)
+          if (bvn) {
+             console.log(`[MAPLERAD DEBUG] Upgrading Customer ${customer.id} to Tier 1 using provided BVN...`);
+             await Maplerad.upgradeCustomerTier1(customer.id, { bvn: bvn });
+          } else {
+             console.log(`[MAPLERAD WARNING] No BVN provided. Maplerad may block virtual account creation if customer is not Tier 1.`);
+          }
+
+          // C. Issue Account
           const apiData = await Maplerad.issueVirtualAccount(customer.id, currency);
           
           details = {
@@ -51,7 +59,7 @@ export class IbanService {
              bic: apiData.bank_code || '0000',
              bankName: apiData.bank_name || 'Standard Chartered',
              provider: 'Maplerad',
-             extRef: apiData.id
+             extRef: apiData.id || apiData.reference || apiData.account_number
           };
        } catch (err: any) {
           console.error(`❌ Maplerad ${currency} Provisioning failed:`, err.message);

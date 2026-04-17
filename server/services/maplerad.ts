@@ -68,6 +68,41 @@ export const createCustomer = async (firstName: string, lastName: string, email:
 };
 
 /**
+ * Upgrades a customer to Tier 1 (Required for NGN Virtual Accounts on Live API)
+ */
+export const upgradeCustomerTier1 = async (customerId: string, kycData: any) => {
+  try {
+    console.log(`[MAPLERAD DEBUG] Upgrading customer ${customerId} to Tier 1...`);
+    const response = await mapleradClient.patch('/customers/upgrade/tier1', {
+      customer_id: customerId,
+      dob: kycData.dob || '1990-01-01', // Must be YYYY-MM-DD
+      identification_number: kycData.bvn, // The actual BVN
+      address: {
+        street: kycData.street || '123 Main Street',
+        street2: '',
+        city: kycData.city || 'Lagos',
+        state: kycData.state || 'Lagos',
+        country: 'NG',
+        postal_code: kycData.postalCode || '100001'
+      },
+      phone: {
+        phone_number: kycData.phoneNumber || '08000000000',
+        phone_country_code: '234',
+        phone_short_code: 'NG'
+      }
+    });
+    return response.data.data;
+  } catch (error: any) {
+    console.error('[MAPLERAD] Tier 1 Upgrade Error:', error.response?.data || error.message);
+    // Ignore already upgraded errors
+    if (error.response?.data?.message?.toLowerCase().includes('already upgraded')) {
+      return true;
+    }
+    throw new Error(error.response?.data?.message || 'Failed to upgrade customer to Tier 1 on Maplerad');
+  }
+};
+
+/**
  * Provisions a virtual account for a customer.
  */
 export const issueVirtualAccount = async (customerId: string, currency: string) => {
