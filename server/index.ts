@@ -365,9 +365,9 @@ app.get('/api/payouts/banks', authenticateToken, async (req: any, res: any) => {
 
 app.post('/api/payouts/transfer', authenticateToken, async (req: any, res: any) => {
   try {
-    const { amount, currency, bankCode, accountNumber, walletId } = req.body;
+    const { amount, sourceCurrency, targetCurrency, bankCode, accountNumber, routingNumber, swiftCode, iban, walletId } = req.body;
     const userId = req.user.userId;
-    const parsedAmount = parseFloat(amount);
+    const parsedAmount = parseFloat(amount); // This is the amount in sourceCurrency to deduct
 
     if (!walletId || !bankCode || !accountNumber || isNaN(parsedAmount) || parsedAmount <= 0) {
       return res.status(400).json({ error: 'Invalid payout parameters' });
@@ -383,18 +383,48 @@ app.post('/api/payouts/transfer', authenticateToken, async (req: any, res: any) 
       return res.status(400).json({ error: 'Insufficient funds' });
     }
 
-    console.log(`[PAYOUT] Executing transfer of ${parsedAmount} ${currency} to ${accountNumber} (${bankCode})`);
+    let payoutAmount = parsedAmount;
+    let payoutCurrency = sourceCurrency || wallet.currency;
+    let fxRate = 1;
 
-    // Execute via Maplerad
-    const payoutResult = await Maplerad.processPayout(parsedAmount, currency, { bankCode, number: accountNumber });
+    // Check if auto-conversion is needed
+    if (targetCurrency && targetCurrency !== payoutCurrency) {
+      console.log(`[PAYOUT] Auto-converting ${parsedAmount} ${payoutCurrency} to ${targetCurrency}...`);
+      
+      // 1. Generate FX Quote (sourceAmount -> targetAmount)
+      const quote = await Maplerad.generateFxQuote(payoutCurrency, targetCurrency, parsedAmount);
+      const quoteRef = quote.reference || quote.id;
+      payoutAmount = quote.target_amount ? quote.target_amount / 100 : 0;
+      fxRate = quote.rate || 1;
 
-    // Atomic DB update
+      // 2. Execute FX Swap internally on Maplerad
+      await Maplerad.executeFxSwap(quoteRef);
+      payoutCurrency = targetCurrency;
+      
+      console.log(`[PAYOUT] FX Swap complete. Executing transfer of ${payoutAmount} ${payoutCurrency}`);
+    } else {
+      console.log(`[PAYOUT] Executing local transfer of ${parsedAmount} ${payoutCurrency}`);
+    }
+
+    // 3. Execute Maplerad Payout
+    // Add extra international fields if they exist
+    const accountDetails = {
+      bankCode,
+      number: accountNumber,
+      routing_number: routingNumber,
+      swift_code: swiftCode,
+      iban: iban
+    };
+
+    const payoutResult = await Maplerad.processPayout(payoutAmount, payoutCurrency, accountDetails);
+
+    // 4. Atomic DB update (Only deduct once, log the transfer)
     const reference = `PAYOUT_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
     
     await prisma.$transaction([
       prisma.wallet.update({
         where: { id: walletId },
-        data: { balance: { decrement: parsedAmount } }
+        data: { balance: { decrement: parsedAmount } } // Always deduct the source amount
       }),
       prisma.transaction.create({
         data: {
@@ -402,7 +432,7 @@ app.post('/api/payouts/transfer', authenticateToken, async (req: any, res: any) 
           walletId,
           type: 'WITHDRAWAL',
           amount: parsedAmount,
-          currency: currency as any,
+          currency: wallet.currency as any,
           status: 'COMPLETED',
           reference,
           category: 'TRANSFER',
@@ -411,13 +441,16 @@ app.post('/api/payouts/transfer', authenticateToken, async (req: any, res: any) 
             provider: 'MAPLERAD',
             providerReference: payoutResult?.id || null,
             bankCode,
-            accountNumber
+            accountNumber,
+            targetCurrency: payoutCurrency,
+            targetAmount: payoutAmount,
+            fxRate: fxRate
           }
         }
       })
     ]);
 
-    res.status(200).json({ status: 'COMPLETED', reference });
+    res.status(200).json({ status: 'COMPLETED', reference, targetAmount: payoutAmount, targetCurrency: payoutCurrency });
 
   } catch (error: any) {
     console.error('[PAYOUT ERROR]', error.message);
