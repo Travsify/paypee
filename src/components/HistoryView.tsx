@@ -13,7 +13,8 @@ import {
   Activity,
   CheckCircle2,
   Clock,
-  XCircle
+  XCircle,
+  Zap
 } from 'lucide-react';
 
 interface Transaction {
