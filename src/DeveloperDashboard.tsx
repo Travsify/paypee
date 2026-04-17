@@ -31,7 +31,6 @@ import {
   Plus,
   History,
   Lock,
-  Lock,
   RefreshCcw,
   CreditCard
 } from 'lucide-react';

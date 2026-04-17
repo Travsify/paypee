@@ -181,7 +181,7 @@ const PayoutModal: React.FC<PayoutModalProps> = ({ isOpen, onClose, onSuccess, w
                     exit={{ opacity: 0, y: -10 }}
                     style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: '#0f172a', border: '1px solid #1e293b', borderRadius: '16px', marginTop: '0.5rem', zIndex: 100, maxHeight: '250px', overflowY: 'auto', boxShadow: '0 10px 25px rgba(0,0,0,0.5)' }}
                   >
-                    <div style={{ sticky: 'top', background: '#0f172a', padding: '0.75rem', borderBottom: '1px solid #1e293b' }}>
+                    <div style={{ position: 'sticky', top: 0, background: '#0f172a', padding: '0.75rem', borderBottom: '1px solid #1e293b', zIndex: 1 }}>
                       <input 
                         autoFocus
                         placeholder="Search provider..." 
