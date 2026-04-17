@@ -1,0 +1,15 @@
+{
+    "compilerOptions": {
+        "experimentalDecorators": true,
+        "target": "es6",
+        "module": "commonjs",
+        "moduleResolution": "node",
+        "declaration": true,
+        "outDir": "./dist",
+        "esModuleInterop": true,
+        "strict": true,
+        "checkJs": true,
+        "allowSyntheticDefaultImports": true,
+        "strictNullChecks": false
+    }
+}

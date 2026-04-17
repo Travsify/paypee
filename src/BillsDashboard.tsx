@@ -1,149 +1,307 @@
-import React, { useState } from 'react';
-import { motion } from 'framer-motion';
+import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Zap, 
   Smartphone, 
   Tv, 
-  Trophy, 
   Activity, 
   ChevronRight, 
-  ArrowRight,
-  ShieldCheck
+  ShieldCheck,
+  RefreshCcw,
+  Search,
+  Wifi,
+  Wallet,
+  CheckCircle2
 } from 'lucide-react';
 
-const BillCategory = ({ icon: Icon, name, active, onClick }: any) => (
-  <motion.div 
-    whileTap={{ scale: 0.95 }}
-    onClick={onClick}
-    style={{ 
-      padding: '1.5rem', 
-      background: active ? 'var(--primary)' : 'rgba(255,255,255,0.02)', 
-      border: '1px solid #1e293b', 
-      borderRadius: '20px', 
-      textAlign: 'center', 
-      cursor: 'pointer',
-      transition: 'all 0.3s',
-      color: active ? '#fff' : 'inherit'
-    }}
-  >
-     <div style={{ marginBottom: '1rem', display: 'flex', justifyContent: 'center' }}>
-        <Icon size={24} />
-     </div>
-     <div style={{ fontSize: '0.8rem', fontWeight: 800 }}>{name}</div>
-  </motion.div>
-);
-
 const BillsDashboard = () => {
-  const [category, setCategory] = useState('AIRTIME');
-  const [selectedProvider, setSelectedProvider] = useState<any>(null);
+  const [categories, setCategories] = useState<any[]>([]);
+  const [activeCategoryId, setActiveCategoryId] = useState<string | null>(null);
+  const [billers, setBillers] = useState<any[]>([]);
+  const [selectedBiller, setSelectedBiller] = useState<any>(null);
+  const [products, setProducts] = useState<any[]>([]);
+  const [selectedProduct, setSelectedProduct] = useState<any>(null);
+  
+  const [loading, setLoading] = useState(true);
+  const [processing, setProcessing] = useState(false);
+  const [success, setSuccess] = useState(false);
+  
+  // Payment Form
+  const [customerId, setCustomerId] = useState('');
+  const [amount, setAmount] = useState('');
+  const [userWallets, setUserWallets] = useState<any[]>([]);
+  const [selectedWalletId, setSelectedWalletId] = useState('');
 
-  const providers: Record<string, any[]> = {
-     AIRTIME: [
-        { id: '1', name: 'MTN Nigeria', icon: <Smartphone color="#facc15" /> },
-        { id: '2', name: 'Airtel Nigeria', icon: <Smartphone color="#ef4444" /> },
-        { id: '3', name: 'Glo Nigeria', icon: <Smartphone color="#10b981" /> }
-     ],
-     UTILITY: [
-        { id: '10', name: 'EKEDC (Lagos)', icon: <Activity color="#6366f1" /> },
-        { id: '11', name: 'IKEDC (Lagos)', icon: <Activity color="#6366f1" /> }
-     ],
-     CABLE: [
-        { id: '20', name: 'DSTV Nigeria', icon: <Tv color="#3b82f6" /> },
-        { id: '21', name: 'GOTV Nigeria', icon: <Tv color="#3b82f6" /> }
-     ],
-     BETTING: [
-        { id: '30', name: 'Bet9ja', icon: <Trophy color="#22c55e" /> },
-        { id: '31', name: 'SportyBet', icon: <Trophy color="#ef4444" /> }
-     ]
+  const fetchInitialData = async () => {
+    try {
+      const token = localStorage.getItem('paypee_token');
+      const [catRes, userRes] = await Promise.all([
+        fetch('https://paypee-api-kmhv.onrender.com/api/bills/categories', { headers: { 'Authorization': `Bearer ${token}` } }),
+        fetch('https://paypee-api-kmhv.onrender.com/api/users/me', { headers: { 'Authorization': `Bearer ${token}` } })
+      ]);
+      
+      const catData = await catRes.json();
+      const userData = await userRes.json();
+      
+      if (Array.isArray(catData)) {
+        setCategories(catData);
+        if (catData.length > 0) setActiveCategoryId(catData[0].id);
+      }
+      if (userData.wallets) {
+        setUserWallets(userData.wallets);
+        const ngnWallet = userData.wallets.find((w: any) => w.currency === 'NGN');
+        if (ngnWallet) setSelectedWalletId(ngnWallet.id);
+      }
+      setLoading(false);
+    } catch (err) {
+      console.error('Fetch error:', err);
+      setLoading(false);
+    }
   };
+
+  useEffect(() => {
+    fetchInitialData();
+  }, []);
+
+  useEffect(() => {
+    if (activeCategoryId) {
+      fetchBillers(activeCategoryId);
+      setSelectedBiller(null);
+      setProducts([]);
+    }
+  }, [activeCategoryId]);
+
+  useEffect(() => {
+    if (selectedBiller) {
+      fetchProducts(selectedBiller.id);
+    }
+  }, [selectedBiller]);
+
+  const fetchBillers = async (catId: string) => {
+    try {
+      const token = localStorage.getItem('paypee_token');
+      const res = await fetch(`https://paypee-api-kmhv.onrender.com/api/bills/billers?category=${catId}&country=NG`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (Array.isArray(data)) setBillers(data);
+    } catch (err) {}
+  };
+
+  const fetchProducts = async (billerId: string) => {
+    try {
+      const token = localStorage.getItem('paypee_token');
+      const res = await fetch(`https://paypee-api-kmhv.onrender.com/api/bills/products?billerId=${billerId}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (Array.isArray(data)) setProducts(data);
+    } catch (err) {}
+  };
+
+  const handlePay = async (e: any) => {
+    e.preventDefault();
+    setProcessing(true);
+    try {
+      const token = localStorage.getItem('paypee_token');
+      const res = await fetch('https://paypee-api-kmhv.onrender.com/api/bills/pay', {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}` 
+        },
+        body: JSON.stringify({
+          amount: parseFloat(amount || selectedProduct?.amount || '0'),
+          sourceWalletId: selectedWalletId,
+          billerId: selectedBiller.id,
+          productId: selectedProduct.id,
+          meter_number: customerId,
+          phone_number: customerId
+        })
+      });
+      
+      if (res.ok) {
+        setSuccess(true);
+        setTimeout(() => { setSuccess(false); setSelectedBiller(null); setAmount(''); setCustomerId(''); }, 3000);
+      } else {
+        const err = await res.json();
+        alert(err.error || 'Payment failed');
+      }
+    } catch (err) {
+      alert('Network error');
+    } finally {
+      setProcessing(false);
+    }
+  };
+
+  if (loading) return <div style={{ padding: '5rem', textAlign: 'center' }}>Loading bills system...</div>;
 
   return (
     <div style={{ padding: '1rem' }}>
-       <div style={{ marginBottom: '3rem' }}>
-          <h1 style={{ fontSize: '2rem', fontWeight: 900, marginBottom: '0.5rem' }}>Bills & Utilities</h1>
-          <p style={{ color: '#64748b' }}>Settle airtime, data, and utilities instantly from your Paypee balance.</p>
-       </div>
+      <div style={{ marginBottom: '2.5rem' }}>
+        <h2 style={{ fontSize: '2rem', fontWeight: 800, marginBottom: '0.5rem' }}>Bills & Utilities</h2>
+        <p style={{ color: 'var(--text-muted)' }}>Pay for airtime, internet, power, and cable TV instantly.</p>
+      </div>
 
-       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1.5rem', marginBottom: '4rem' }}>
-          <BillCategory icon={Smartphone} name="Airtime & Data" active={category === 'AIRTIME'} onClick={() => setCategory('AIRTIME')} />
-          <BillCategory icon={Activity} name="Electricity" active={category === 'UTILITY'} onClick={() => setCategory('UTILITY')} />
-          <BillCategory icon={Tv} name="Cable TV" active={category === 'CABLE'} onClick={() => setCategory('CABLE')} />
-          <BillCategory icon={Trophy} name="Betting" active={category === 'BETTING'} onClick={() => setCategory('BETTING')} />
-       </div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '1rem', marginBottom: '3rem' }}>
+        {categories.map(cat => (
+          <CategoryItem 
+            key={cat.id} 
+            cat={cat} 
+            active={activeCategoryId === cat.id} 
+            onClick={() => setActiveCategoryId(cat.id)} 
+          />
+        ))}
+      </div>
 
-       <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: '3rem' }}>
-          <div>
-             <h3 style={{ fontSize: '1.2rem', fontWeight: 800, marginBottom: '2rem' }}>Choose Provider</h3>
-             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                {providers[category].map(p => (
-                   <motion.div 
-                      key={p.id}
-                      onClick={() => setSelectedProvider(p)}
-                      style={{ 
-                         display: 'flex', 
-                         justifyContent: 'space-between', 
-                         alignItems: 'center', 
-                         padding: '1.5rem', 
-                         background: 'rgba(255,255,255,0.02)', 
-                         border: `1px solid ${selectedProvider?.id === p.id ? 'var(--primary)' : '#1e293b'}`, 
-                         borderRadius: '20px',
-                         cursor: 'pointer'
-                      }}
-                   >
-                      <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-                         <div style={{ width: 40, height: 40, background: '#0f172a', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                            {p.icon}
-                         </div>
-                         <div style={{ fontWeight: 700 }}>{p.name}</div>
-                      </div>
-                      <ChevronRight size={18} color="#475569" />
-                   </motion.div>
-                ))}
-             </div>
-          </div>
-
-          <div style={{ background: '#0a0f1e', border: '1px solid #1e293b', borderRadius: '32px', padding: '2rem' }}>
-             {selectedProvider ? (
-                <>
-                   <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-                      <div style={{ width: 64, height: 64, background: '#0f172a', borderRadius: '20px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1rem' }}>
-                         {selectedProvider.icon}
-                      </div>
-                      <h4 style={{ fontSize: '1.1rem', fontWeight: 800 }}>{selectedProvider.name}</h4>
-                   </div>
-
-                   <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                      <div>
-                         <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: '#475569', marginBottom: '0.5rem' }}>CUSTOMER IDENTIFIER</label>
-                         <input placeholder="Phone / Account No." style={{ width: '100%', background: 'transparent', border: '1px solid #1e293b', padding: '1rem', borderRadius: '14px', color: '#fff', outline: 'none' }} />
-                      </div>
-                      <div>
-                         <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: '#475569', marginBottom: '0.5rem' }}>AMOUNT</label>
-                         <input placeholder="0.00" type="number" style={{ width: '100%', background: 'transparent', border: '1px solid #1e293b', padding: '1rem', borderRadius: '14px', color: '#fff', outline: 'none' }} />
-                      </div>
-                      <button style={{ width: '100%', background: 'var(--primary)', color: '#fff', border: 'none', padding: '1.2rem', borderRadius: '16px', fontWeight: 800, cursor: 'pointer', marginTop: '1rem' }}>
-                         Pay Bill
-                      </button>
-                   </div>
-                </>
-             ) : (
-                <div style={{ height: '300px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', color: '#475569' }}>
-                   <Smartphone size={40} style={{ marginBottom: '1rem', opacity: 0.3 }} />
-                   <div style={{ fontWeight: 700 }}>Select a provider<br />to continue</div>
+      <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '3rem' }}>
+        {/* Billers List */}
+        <div>
+          <h3 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <Search size={18} /> Select Provider
+          </h3>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '0.75rem' }}>
+            {billers.map(b => (
+              <motion.div 
+                key={b.id}
+                whileHover={{ x: 5 }}
+                onClick={() => setSelectedBiller(b)}
+                style={{ 
+                  display: 'flex', 
+                  justifyContent: 'space-between', 
+                  alignItems: 'center', 
+                  padding: '1.25rem', 
+                  background: 'rgba(255,255,255,0.02)', 
+                  border: `1px solid ${selectedBiller?.id === b.id ? 'var(--primary)' : 'var(--border)'}`, 
+                  borderRadius: '16px',
+                  cursor: 'pointer'
+                }}
+              >
+                <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                  <img src={b.image} style={{ width: 40, height: 40, borderRadius: '10px', objectFit: 'cover' }} alt="" />
+                  <div style={{ fontWeight: 700, fontSize: '0.95rem' }}>{b.name}</div>
                 </div>
-             )}
+                <ChevronRight size={18} color="var(--text-muted)" />
+              </motion.div>
+            ))}
           </div>
-       </div>
+        </div>
 
-       <div style={{ marginTop: '4rem', padding: '2rem', border: '1px solid rgba(99, 102, 241, 0.2)', borderRadius: '24px', background: 'rgba(99, 102, 241, 0.05)', display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
-          <div style={{ color: 'var(--primary)' }}><ShieldCheck size={32} /></div>
-          <div>
-             <div style={{ fontWeight: 800, fontSize: '0.9rem', marginBottom: '0.2rem' }}>Verified Settlement</div>
-             <p style={{ color: '#64748b', fontSize: '0.8rem', margin: 0 }}>All bill payments are finalized in real-time via our primary financial grid.</p>
+        {/* Payment Form */}
+        <div style={{ position: 'sticky', top: '2rem' }}>
+          <div style={{ background: '#0a0f1e', border: '1px solid var(--border)', borderRadius: '32px', padding: '2.5rem' }}>
+            {success ? (
+              <div style={{ textAlign: 'center', padding: '2rem' }}>
+                <div style={{ width: 64, height: 64, background: 'rgba(16,185,129,0.1)', color: '#10b981', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem' }}>
+                  <CheckCircle2 size={32} />
+                </div>
+                <h3 style={{ fontSize: '1.25rem', fontWeight: 800, marginBottom: '0.5rem' }}>Payment Successful</h3>
+                <p style={{ color: 'var(--text-muted)' }}>Your bill has been settled and finalized.</p>
+              </div>
+            ) : selectedBiller ? (
+              <form onSubmit={handlePay}>
+                <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+                  <img src={selectedBiller.image} style={{ width: 64, height: 64, borderRadius: '16px', marginBottom: '1rem' }} alt="" />
+                  <h4 style={{ fontSize: '1.1rem', fontWeight: 800 }}>{selectedBiller.name}</h4>
+                </div>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-muted)', marginBottom: '0.5rem' }}>SELECT PRODUCT</label>
+                    <select 
+                      style={inputStyle} 
+                      onChange={e => setSelectedProduct(products.find(p => p.id === e.target.value))}
+                      required
+                    >
+                      <option value="">Select a plan</option>
+                      {products.map(p => (
+                        <option key={p.id} value={p.id}>{p.name} {p.amount ? ` - ${p.amount}` : ''}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-muted)', marginBottom: '0.5rem' }}>CUSTOMER ID / PHONE</label>
+                    <input 
+                      placeholder="e.g. 08012345678" 
+                      value={customerId}
+                      onChange={e => setCustomerId(e.target.value)}
+                      required 
+                      style={inputStyle} 
+                    />
+                  </div>
+
+                  {(!selectedProduct || !selectedProduct.amount) && (
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-muted)', marginBottom: '0.5rem' }}>AMOUNT (NGN)</label>
+                      <input 
+                        placeholder="0.00" 
+                        type="number" 
+                        value={amount}
+                        onChange={e => setAmount(e.target.value)}
+                        required 
+                        style={inputStyle} 
+                      />
+                    </div>
+                  )}
+
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-muted)', marginBottom: '0.5rem' }}>PAY FROM</label>
+                    <select style={inputStyle} value={selectedWalletId} onChange={e => setSelectedWalletId(e.target.value)}>
+                      {userWallets.map(w => (
+                        <option key={w.id} value={w.id}>{w.currency} Wallet (${parseFloat(w.balance).toFixed(2)})</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <button 
+                    disabled={processing}
+                    style={{ width: '100%', background: 'var(--primary)', color: '#fff', border: 'none', padding: '1.25rem', borderRadius: '16px', fontWeight: 800, cursor: 'pointer', marginTop: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
+                  >
+                    {processing ? <RefreshCcw size={20} className="animate-spin" /> : 'Confirm Payment'}
+                  </button>
+                </div>
+              </form>
+            ) : (
+              <div style={{ height: '350px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', color: 'var(--text-muted)' }}>
+                <div style={{ width: 64, height: 64, background: 'rgba(255,255,255,0.02)', borderRadius: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1.5rem' }}>
+                  <Zap size={32} style={{ opacity: 0.3 }} />
+                </div>
+                <div style={{ fontWeight: 700, fontSize: '1rem' }}>Select a provider<br />to pay your bill</div>
+              </div>
+            )}
           </div>
-       </div>
+        </div>
+      </div>
     </div>
   );
 };
+
+const CategoryItem = ({ cat, active, onClick }: any) => {
+  const Icon = cat.id.includes('airtime') ? Smartphone : cat.id.includes('data') ? Wifi : cat.id.includes('utility') ? Zap : Tv;
+  return (
+    <motion.div 
+      whileTap={{ scale: 0.95 }}
+      onClick={onClick}
+      style={{ 
+        padding: '1.25rem', 
+        background: active ? 'var(--primary)' : 'rgba(255,255,255,0.02)', 
+        border: '1px solid var(--border)', 
+        borderRadius: '20px', 
+        textAlign: 'center', 
+        cursor: 'pointer',
+        transition: 'all 0.3s',
+        color: active ? '#fff' : 'inherit'
+      }}
+    >
+       <div style={{ marginBottom: '0.75rem', display: 'flex', justifyContent: 'center', color: active ? '#fff' : 'var(--primary)' }}>
+          <Icon size={24} />
+       </div>
+       <div style={{ fontSize: '0.8rem', fontWeight: 800 }}>{cat.name}</div>
+    </motion.div>
+  );
+};
+
+const inputStyle = { width: '100%', background: 'rgba(255,255,255,0.03)', border: '1px solid var(--border)', padding: '1rem', borderRadius: '14px', color: '#fff', outline: 'none', fontSize: '0.9rem', fontWeight: 600 };
 
 export default BillsDashboard;

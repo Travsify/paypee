@@ -31,6 +31,8 @@ import SettingsView from './SettingsView';
 import VerificationGate from './VerificationGate';
 import VaultsDashboard from './VaultsDashboard';
 import BillsDashboard from './BillsDashboard';
+import CardsDashboard from './CardsDashboard';
+import CollectionsDashboard from './CollectionsDashboard';
 import AiAdvisor from './AiAdvisor';
 import PayoutModal from './PayoutModal';
 import SwapModal from './SwapModal';
@@ -184,6 +186,7 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
             <SidebarItem icon={Send} label="Transfer" active={activeSection === 'transfers'} onClick={() => navigate('transfers')} />
             <SidebarItem icon={Lock} label="Vaults" active={activeSection === 'vaults'} onClick={() => navigate('vaults')} />
             <SidebarItem icon={Zap} label="Bills & Utilities" active={activeSection === 'bills'} onClick={() => navigate('bills')} />
+            <SidebarItem icon={ExternalLink} label="Collections" active={activeSection === 'collections'} onClick={() => navigate('collections')} />
             <SidebarItem icon={Bot} label="AI Advisor" active={activeSection === 'ai'} onClick={() => navigate('ai')} />
           </div>
 
@@ -232,6 +235,9 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
           {activeSection === 'ai' && <AiAdvisor transactions={transactions} userName={userData?.firstName} />}
           {activeSection === 'settings' && <SettingsView />}
           {activeSection === 'vaults' && <VaultsDashboard />}
+          {activeSection === 'cards' && <CardsDashboard />}
+          {activeSection === 'bills' && <BillsDashboard />}
+          {activeSection === 'collections' && <CollectionsDashboard />}
           {activeSection === 'wallets' && (
             <div style={{ padding: '0' }}>
                <h2 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '2rem' }}>My Bank Accounts</h2>

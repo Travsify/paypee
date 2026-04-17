@@ -904,21 +904,179 @@ app.delete('/api/accounts/:id', authenticateToken, async (req: any, res: any): P
 // Bill Payments (Airtime, Data, Utilities)
 // ==========================================
 
-app.get('/api/bills/providers', authenticateToken, async (req: any, res: any) => {
+app.get('/api/bills/categories', authenticateToken, async (req: any, res: any) => {
   try {
-    const providers = await BillsService.getProviders(req.query.category as string || 'AIRTIME');
-    res.json(providers);
+    const categories = await Maplerad.getBillCategories();
+    res.json(categories);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch categories' });
+  }
+});
+
+app.get('/api/bills/billers', authenticateToken, async (req: any, res: any) => {
+  try {
+    const { category, country } = req.query;
+    const billers = await Maplerad.getBillers(category as string, country as string);
+    res.json(billers);
   } catch (error) {
     res.status(500).json({ error: 'Failed to fetch billers' });
   }
 });
 
+app.get('/api/bills/products', authenticateToken, async (req: any, res: any) => {
+  try {
+    const { billerId } = req.query;
+    const products = await Maplerad.getBillerProducts(billerId as string);
+    res.json(products);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch products' });
+  }
+});
+
 app.post('/api/bills/pay', authenticateToken, async (req: any, res: any) => {
   try {
-    const transaction = await BillsService.payBill(req.user.userId, req.body);
-    res.status(201).json(transaction);
+    const { amount, sourceWalletId, billerId, productId, customerId, phoneNumber, meterNumber } = req.body;
+    
+    // 1. Verify wallet balance
+    const wallet = await prisma.wallet.findUnique({ where: { id: sourceWalletId } });
+    if (!wallet || parseFloat(wallet.balance.toString()) < amount) {
+      return res.status(400).json({ error: 'Insufficient wallet balance.' });
+    }
+
+    // 2. Process via Maplerad
+    const mapleradCustomer = await Maplerad.createCustomer(req.user.firstName || 'Paypee', req.user.lastName || 'User', req.user.email);
+    
+    const result = await Maplerad.payBill({
+      biller_id: billerId,
+      product_id: productId,
+      amount: amount,
+      customer_id: mapleradCustomer.id,
+      phone_number: phoneNumber,
+      meter_number: meterNumber
+    });
+
+    // 3. Deduct from wallet and record transaction
+    const ref = `BILL_${Date.now()}`;
+    await prisma.$transaction([
+      prisma.wallet.update({ where: { id: sourceWalletId }, data: { balance: { decrement: amount } } }),
+      prisma.transaction.create({
+        data: {
+          userId: req.user.userId,
+          walletId: sourceWalletId,
+          type: 'WITHDRAWAL',
+          amount: amount,
+          currency: wallet.currency,
+          status: 'COMPLETED',
+          reference: ref,
+          category: 'BILL_PAYMENT',
+          metadata: { billerId, productId, result }
+        }
+      })
+    ]);
+
+    res.status(201).json({ status: 'COMPLETED', reference: ref });
   } catch (error: any) {
     res.status(400).json({ error: error.message });
+  }
+});
+
+// ==========================================
+// Virtual Cards (Issuing)
+// ==========================================
+
+app.post('/api/cards/issue', authenticateToken, async (req: any, res: any) => {
+  try {
+    const { currency, amount, walletId } = req.body;
+    const userId = req.user.userId;
+
+    // 1. Check wallet balance for initial funding
+    const wallet = await prisma.wallet.findUnique({ where: { id: walletId } });
+    if (!wallet || parseFloat(wallet.balance.toString()) < amount) {
+      return res.status(400).json({ error: 'Insufficient funds for initial card funding.' });
+    }
+
+    // 2. Maplerad customer
+    const mapleradCustomer = await Maplerad.createCustomer(req.user.firstName, req.user.lastName, req.user.email);
+    
+    // 3. Issue via Maplerad
+    const card = await Maplerad.issueVirtualCard(mapleradCustomer.id, currency, amount);
+
+    // 4. Update DB
+    await prisma.$transaction([
+      prisma.wallet.update({ where: { id: walletId }, data: { balance: { decrement: amount } } }),
+      prisma.virtualCard.create({
+        data: {
+          userId,
+          walletId,
+          cardNumber: card.card_number,
+          expiry: card.expiry,
+          cvv: card.cvv,
+          status: 'ACTIVE',
+          dailyLimit: 1000
+        }
+      }),
+      prisma.transaction.create({
+        data: {
+          userId,
+          walletId,
+          type: 'WITHDRAWAL',
+          amount,
+          currency: wallet.currency,
+          status: 'COMPLETED',
+          reference: `CARD_GEN_${Date.now()}`,
+          category: 'CARD_ISSUING'
+        }
+      })
+    ]);
+
+    res.status(201).json(card);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.get('/api/cards', authenticateToken, async (req: any, res: any) => {
+  try {
+    const cards = await prisma.virtualCard.findMany({ where: { userId: req.user.userId } });
+    res.json(cards);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch cards' });
+  }
+});
+
+// ==========================================
+// Payment Links & Collections (Commerce)
+// ==========================================
+
+app.post('/api/collections/links', authenticateToken, async (req: any, res: any) => {
+  try {
+    const { title, amount, currency, description } = req.body;
+    const link = await Maplerad.createPaymentLink({ title, amount, currency, description });
+    
+    const dbLink = await prisma.paymentLink.create({
+      data: {
+        userId: req.user.userId,
+        title,
+        amount,
+        currency,
+        description,
+        slug: link.id,
+        isActive: true
+      }
+    });
+
+    res.status(201).json({ ...dbLink, url: link.url });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.get('/api/collections/links', authenticateToken, async (req: any, res: any) => {
+  try {
+    const links = await prisma.paymentLink.findMany({ where: { userId: req.user.userId } });
+    res.json(links);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch links' });
   }
 });
 
