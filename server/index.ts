@@ -1,5 +1,6 @@
 import express, { Request, Response } from 'express';
 import cors from 'cors';
+import axios from 'axios';
 import dotenv from 'dotenv';
 import { PrismaClient, AccountRole } from '@prisma/client';
 import bcrypt from 'bcryptjs';
@@ -735,10 +736,7 @@ app.post('/api/vaults', authenticateToken, async (req: any, res: any): Promise<a
   }
 });
 
-// ==========================================
 // Bills & Utilities
-// ==========================================
-import { BillsService } from './services/bills.service';
 
 app.get('/api/bills/providers', authenticateToken, async (req: any, res: any): Promise<any> => {
   try {
