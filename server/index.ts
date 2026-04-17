@@ -353,7 +353,7 @@ app.post('/api/transactions', authenticateToken, async (req: any, res: any): Pro
          try {
            const destNumber = req.body.destinationAccount || '0123456789';
            const destBank = req.body.bankCode || '058';
-           await Maplerad.processPayout({ amount, currency, account_number: destNumber, bank_code: destBank });
+           await Maplerad.processPayout(amount, currency, { number: destNumber, bankCode: destBank });
          } catch (err) {
            console.warn('Fincra failure:', err);
          }

@@ -182,7 +182,6 @@ const CollectionsView = () => {
             >
               <div style={{ padding: '2.5rem' }}>
                <h3 style={{ fontSize: '1.5rem', fontWeight: 800, marginBottom: '2rem' }}>Create Payment Link</h3>
-               <h3 style={{ fontSize: '1.5rem', fontWeight: 800, marginBottom: '2rem' }}>Create Payment Link</h3>
                <form onSubmit={handleCreateLink}>
                  <div style={{ marginBottom: '1.5rem' }}>
                    <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 800, color: 'var(--text-muted)', marginBottom: '0.6rem', letterSpacing: '1px' }}>LINK TITLE</label>
@@ -204,6 +203,7 @@ const CollectionsView = () => {
                     </button>
                  </div>
                </form>
+              </div>
             </motion.div>
           </div>
         )}
