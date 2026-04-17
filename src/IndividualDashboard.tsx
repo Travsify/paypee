@@ -374,7 +374,10 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
                                   balance={parseFloat(w.balance).toFixed(2)}
                                   details={w.metadata ? (typeof w.metadata === 'string' ? JSON.parse(w.metadata) : w.metadata) : {}}
                                   userName={`${userData?.firstName} ${userData?.lastName}`}
-                                  onDelete={deleteAccount}
+                                  onDelete={() => deleteAccount(w.id)}
+                                  onSend={() => setIsPayoutOpen(true)}
+                                  onTopUp={() => alert(`To top up your ${w.currency} wallet, please initiate a transfer to your provisioned account number.`)}
+                                  onSwap={() => setIsSwapOpen(true)}
                                 />
                             );
                           })}
