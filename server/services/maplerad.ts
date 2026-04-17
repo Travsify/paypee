@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { HttpsProxyAgent } from 'https-proxy-agent';
 import dotenv from 'dotenv';
 dotenv.config();
 
@@ -8,12 +9,18 @@ const MAPLERAD_BASE_URL = process.env.MAPLERAD_ENV === 'live'
 
 const MAPLERAD_SECRET_KEY = (process.env.MAPLERAD_SECRET_KEY || '').replace(/"/g, '').trim();
 
+// 🛡️ PROXY CONFIGURATION for Maplerad IP Whitelisting
+const PROXY_URL = process.env.MAPLERAD_PROXY_URL || process.env.FINCRA_PROXY_URL;
+const proxyAgent = PROXY_URL ? new HttpsProxyAgent(PROXY_URL) : undefined;
+
 const mapleradClient = axios.create({
   baseURL: MAPLERAD_BASE_URL,
   headers: {
     'Authorization': `Bearer ${MAPLERAD_SECRET_KEY}`,
     'Content-Type': 'application/json'
-  }
+  },
+  httpsAgent: proxyAgent,
+  proxy: false // Disable axios internal proxy logic to use the agent
 });
 
 /**
