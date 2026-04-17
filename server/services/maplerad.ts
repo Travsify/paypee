@@ -369,10 +369,14 @@ export const getBillCategories = async () => {
  */
 export const getBillers = async (category: string, country: string = 'NG') => {
   try {
+    console.log(`[MAPLERAD] Fetching billers for ${category} in ${country}...`);
     const response = await mapleradClient.get(`/bills/billers?category=${category}&country=${country}`);
     return response.data.data;
   } catch (error: any) {
     console.error('[MAPLERAD] Get Billers Error:', error.response?.data || error.message);
+    if (error.response?.status === 401 || error.response?.status === 403) {
+      console.warn('[MAPLERAD] Authentication/Whitelisting issue detected for Bills API.');
+    }
     return [];
   }
 };

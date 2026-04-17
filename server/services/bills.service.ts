@@ -20,7 +20,20 @@ export class BillsService {
         mappedCategory = 'cable';
       }
       
-      const billers = await Maplerad.getBillers(mappedCategory);
+      let billers = await Maplerad.getBillers(mappedCategory);
+      
+      // Fallback for electricity if 'utility' returns nothing (some regions use 'power')
+      if (billers.length === 0 && mappedCategory === 'utility') {
+         console.log('⚠️ Maplerad returned no billers for "utility", trying "power"...');
+         billers = await Maplerad.getBillers('power');
+      }
+
+      // Fallback for cable if 'cable' returns nothing (some regions use 'tv')
+      if (billers.length === 0 && mappedCategory === 'cable') {
+         console.log('⚠️ Maplerad returned no billers for "cable", trying "tv"...');
+         billers = await Maplerad.getBillers('tv');
+      }
+      
       return billers || [];
     } catch (err: any) {
       console.error(`❌ Maplerad Failed to fetch bill providers for ${category}:`, err.message);
