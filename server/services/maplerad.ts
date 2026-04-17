@@ -56,10 +56,9 @@ export const createCustomer = async (firstName: string, lastName: string, email:
  */
 export const issueVirtualAccount = async (customerId: string, currency: string) => {
   try {
-    const response = await mapleradClient.post('/issuing/accounts', {
+    const response = await mapleradClient.post('/collections/virtual-account', {
       customer_id: customerId,
-      currency: currency,
-      type: 'static'
+      currency: currency
     });
     return response.data.data; // Returns account details (account_number, bank_name, etc.)
   } catch (error: any) {
