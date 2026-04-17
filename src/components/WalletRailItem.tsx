@@ -10,7 +10,7 @@ import {
   Zap, 
   ArrowUpRight, 
   ArrowDownLeft,
-  Trash2
+  ArrowRightLeft
 } from 'lucide-react';
 
 interface WalletRailItemProps {
@@ -22,6 +22,7 @@ interface WalletRailItemProps {
   onDelete?: (id: string) => void;
   onSend?: () => void;
   onTopUp?: () => void;
+  onSwap?: () => void;
 }
 
 const CopyValue = ({ value, label }: { value: string; label: string }) => {
@@ -149,6 +150,9 @@ const WalletRailItem: React.FC<WalletRailItemProps> = ({ currency, balance, symb
                      </button>
                      <button onClick={(e) => { e.stopPropagation(); if (onTopUp) onTopUp(); }} style={{ flex: 1, minWidth: '100px', background: 'rgba(255,255,255,0.05)', color: '#fff', border: '1px solid var(--border)', borderRadius: '12px', padding: '0.75rem', fontWeight: 700, fontSize: '0.85rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', cursor: 'pointer' }}>
                         <ArrowDownLeft size={16} /> Top up
+                     </button>
+                     <button onClick={(e) => { e.stopPropagation(); if (onSwap) onSwap(); }} style={{ flex: 1, minWidth: '100px', background: 'rgba(245, 158, 11, 0.1)', color: '#f59e0b', border: '1px solid rgba(245, 158, 11, 0.2)', borderRadius: '12px', padding: '0.75rem', fontWeight: 700, fontSize: '0.85rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+                        <ArrowRightLeft size={16} /> Swap
                      </button>
                   </div>
                </div>

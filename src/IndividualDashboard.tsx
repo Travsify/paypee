@@ -247,6 +247,7 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
                         onDelete={() => deleteAccount(w.id)}
                         onSend={() => setIsPayoutOpen(true)}
                         onTopUp={() => alert(`To top up your ${w.currency} wallet, please initiate a transfer to your provisioned account number.`)}
+                        onSwap={() => alert(`Maplerad FX Swap module initializing... You will soon be able to swap ${w.currency} to other balances here.`)}
                       />
                     );
                   })}
