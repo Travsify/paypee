@@ -302,9 +302,30 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
 
             {activeSection === 'wallets' && (
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '2rem' }}>
-                {userData?.wallets?.map((w: any) => (
-                   <BalanceCard key={w.id} currency={w.currency} amount={parseFloat(w.balance).toFixed(2)} onSwap={() => setIsSwapOpen(true)} onPayout={() => setIsPayoutOpen(true)} />
-                ))}
+                {userData?.wallets?.map((w: any) => {
+                  const symbols: any = { USD: '$', EUR: '€', NGN: '₦', GBP: '£', BTC: '₿' };
+                  const gradients: any = {
+                    USD: "linear-gradient(135deg, #6366f1 0%, #a855f7 100%)",
+                    NGN: "linear-gradient(135deg, #10b981 0%, #059669 100%)",
+                    EUR: "linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)",
+                    BTC: "linear-gradient(135deg, #f59e0b 0%, #d97706 100%)"
+                  };
+                  const details = w.metadata ? (typeof w.metadata === 'string' ? JSON.parse(w.metadata) : w.metadata) : {};
+
+                  return (
+                    <BalanceCard 
+                      key={w.id} 
+                      currency={w.currency} 
+                      symbol={symbols[w.currency] || w.currency}
+                      amount={parseFloat(w.balance).toFixed(2)} 
+                      gradient={gradients[w.currency] || "linear-gradient(135deg, #1e293b 0%, #0f172a 100%)"}
+                      details={details}
+                      userName={`${userData?.firstName} ${userData?.lastName}`}
+                      type="INDIVIDUAL"
+                      onDelete={(id) => {/* Handle delete */}}
+                    />
+                  );
+                })}
               </div>
             )}
 
