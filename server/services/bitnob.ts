@@ -1,3 +1,5 @@
+import axios from 'axios';
+import { HttpsProxyAgent } from 'https-proxy-agent';
 import dotenv from 'dotenv';
 dotenv.config();
 
@@ -7,9 +9,18 @@ const BITNOB_BASE_URL = process.env.BITNOB_ENV === 'live'
 
 const BITNOB_SECRET_KEY = process.env.BITNOB_SECRET_KEY || '';
 
-const getHeaders = () => ({
-  'Authorization': `Bearer ${BITNOB_SECRET_KEY}`,
-  'Content-Type': 'application/json'
+// 🛡️ PROXY CONFIGURATION for Bitnob IP Whitelisting
+const PROXY_URL = process.env.MAPLERAD_PROXY_URL || process.env.FINCRA_PROXY_URL;
+const proxyAgent = PROXY_URL ? new HttpsProxyAgent(PROXY_URL) : undefined;
+
+const bitnobClient = axios.create({
+  baseURL: BITNOB_BASE_URL,
+  headers: {
+    'Authorization': `Bearer ${BITNOB_SECRET_KEY}`,
+    'Content-Type': 'application/json'
+  },
+  httpsAgent: proxyAgent,
+  proxy: false
 });
 
 /**
@@ -17,22 +28,15 @@ const getHeaders = () => ({
  */
 export const createLightningInvoice = async (amountUsd: number, customerEmail: string) => {
   try {
-    const response = await fetch(`${BITNOB_BASE_URL}/lightning/invoices`, {
-      method: 'POST',
-      headers: getHeaders(),
-      body: JSON.stringify({
+    const response = await bitnobClient.post('/lightning/invoices', {
         customerEmail: customerEmail,
         description: `Deposit to Paypee Wallet`,
         amount: amountUsd,
         currency: 'USD'
-      })
     });
-    
-    const data = await response.json();
-    if (!response.ok) throw new Error(data.message || 'Bitnob Invoice Creation Failed');
-    return data.data; // Returns lnurl or payment request
-  } catch (error) {
-    console.error('[BITNOB] Invoice Error:', error);
+    return response.data.data;
+  } catch (error: any) {
+    console.error('[BITNOB] Invoice Error:', error.response?.data || error.message);
     throw error;
   }
 };
@@ -42,22 +46,16 @@ export const createLightningInvoice = async (amountUsd: number, customerEmail: s
  */
 export const processCryptoPayout = async (amountUsd: number, destinationBitcoinAddress: string) => {
   try {
-    const response = await fetch(`${BITNOB_BASE_URL}/transactions/send`, {
-        method: 'POST',
-        headers: getHeaders(),
-        body: JSON.stringify({
-            amount: amountUsd,
-            currency: 'USD',
-            address: destinationBitcoinAddress,
-            network: 'lightning' // or 'on-chain'
-        })
+    const response = await bitnobClient.post('/transactions/send', {
+        amount: amountUsd,
+        currency: 'USD',
+        address: destinationBitcoinAddress,
+        network: 'lightning' // or 'on-chain'
     });
-
-    const data = await response.json();
-    if (!response.ok) throw new Error(data.message || 'Bitnob Crypto Payout Failed');
-    return data.data;
-  } catch (error) {
-    console.error('[BITNOB] Payout Error:', error);
+    return response.data.data;
+  } catch (error: any) {
+    console.error('[BITNOB] Payout Error:', error.response?.data || error.message);
     throw error;
   }
 };
+
