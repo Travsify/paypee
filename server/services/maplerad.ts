@@ -456,6 +456,7 @@ export const payBill = async (payload: {
   product_id?: string 
 }) => {
   try {
+    console.log(`[MAPLERAD DEBUG] PayBill Payload received:`, JSON.stringify(payload));
     const categoryPath = mapCategoryToPath(payload.category);
     
     // Build the request body based on category

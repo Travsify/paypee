@@ -114,7 +114,7 @@ const BillsView = () => {
 
   useEffect(() => {
     if (selectedProvider) {
-      fetchProducts(selectedProvider.id);
+      fetchProducts(selectedProvider.identifier || selectedProvider.id);
     } else {
       setProducts([]);
       setSelectedProductId('');
@@ -242,11 +242,11 @@ const BillsView = () => {
                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: '1.25rem' }}>
                    {providers.map((p) => (
                      <motion.div
-                       key={p.id}
-                       whileHover={{ scale: 1.05, y: -5, borderColor: 'rgba(255,255,255,0.2)' }}
-                       whileTap={{ scale: 0.95 }}
-                       onClick={() => setSelectedProvider(p)}
-                       style={{ 
+                        key={p.identifier || p.id}
+                        whileHover={{ scale: 1.05, y: -5, borderColor: 'rgba(255,255,255,0.2)' }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => setSelectedProvider({ ...p, id: p.identifier || p.id })}
+                        style={{ 
                          background: 'rgba(255,255,255,0.02)', 
                          border: '1px solid rgba(255,255,255,0.05)', 
                          borderRadius: '20px', padding: '1.5rem 1rem', 
