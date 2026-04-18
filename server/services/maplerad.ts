@@ -11,6 +11,11 @@ const MAPLERAD_SECRET_KEY = (process.env.MAPLERAD_SECRET_KEY || '').replace(/"/g
 
 // 🛡️ PROXY CONFIGURATION for Maplerad IP Whitelisting
 const PROXY_URL = process.env.MAPLERAD_PROXY_URL || process.env.FINCRA_PROXY_URL;
+if (PROXY_URL) {
+  const maskedProxy = PROXY_URL.replace(/:[^:@]+@/, ':****@');
+  console.log(`[MAPLERAD] Initializing with proxy: ${maskedProxy}`);
+}
+
 const proxyAgent = PROXY_URL ? new HttpsProxyAgent(PROXY_URL) : undefined;
 
 const mapleradClient = axios.create({
@@ -20,19 +25,48 @@ const mapleradClient = axios.create({
     'Content-Type': 'application/json'
   },
   httpsAgent: proxyAgent,
-  proxy: false // Disable axios internal proxy logic to use the agent
+  proxy: false 
 });
+
+// Direct client for fallback/testing
+const directClient = axios.create({
+  baseURL: MAPLERAD_BASE_URL,
+  headers: {
+    'Authorization': `Bearer ${MAPLERAD_SECRET_KEY}`,
+    'Content-Type': 'application/json'
+  }
+});
+
+// Helper for robust requests with proxy fallback
+const makeRequest = async (method: 'get' | 'post' | 'put' | 'delete', url: string, data?: any, params?: any) => {
+  try {
+    const config = { params };
+    if (method === 'get' || method === 'delete') {
+      return await mapleradClient[method](url, config);
+    } else {
+      return await mapleradClient[method](url, data, config);
+    }
+  } catch (err: any) {
+    if (err.response?.status === 407 && PROXY_URL) {
+      console.warn(`⚠️ [MAPLERAD] Proxy 407 on ${url}. Attempting DIRECT fallback...`);
+      const config = { params };
+      if (method === 'get' || method === 'delete') {
+        return await directClient[method](url, config);
+      } else {
+        return await directClient[method](url, data, config);
+      }
+    }
+    throw err;
+  }
+};
+
 
 /**
  * Registers a customer on Maplerad.
  */
 export const createCustomer = async (firstName: string, lastName: string, email: string) => {
   try {
-    console.log(`[MAPLERAD DEBUG] Env: ${process.env.MAPLERAD_ENV || 'undefined'}, Proxy URL configured: ${!!PROXY_URL}`);
-    console.log(`[MAPLERAD DEBUG] Calling ${MAPLERAD_BASE_URL}/customers for ${email}`);
-    console.log(`[MAPLERAD DEBUG] Header: Authorization: Bearer ${MAPLERAD_SECRET_KEY.substring(0, 8)}...`);
-
-    const response = await mapleradClient.post('/customers', {
+    const response = await makeRequest('post', '/customers', {
       first_name: firstName,
       last_name: lastName,
       email: email,
@@ -42,7 +76,9 @@ export const createCustomer = async (firstName: string, lastName: string, email:
   } catch (error: any) {
     if (error.response) {
         if (error.response.status === 407) {
-           console.error('🛑 [MAPLERAD PROXY ERROR] 407 Proxy Authentication Required. Your proxy credentials in MAPLERAD_PROXY_URL are incorrect or expired.');
+           console.error('🛑 [MAPLERAD PROXY ERROR] 407 Proxy Authentication Required. Your Fixie/Proxy credentials are invalid.');
+        } else if (error.response.status === 403) {
+           console.error('🚫 [MAPLERAD IP ERROR] 403 Forbidden. Maplerad is blocking this IP. A working proxy is REQUIRED.');
         } else {
            console.error('[MAPLERAD DEBUG] Full Error Response:', JSON.stringify(error.response.data));
         }
@@ -57,15 +93,9 @@ export const createCustomer = async (firstName: string, lastName: string, email:
         
         // Otherwise, fetch the customer list to find their ID
         console.log(`[MAPLERAD DEBUG] Customer already enrolled, fetching list to find ID for ${email}`);
-        try {
-            const listRes = await mapleradClient.get('/customers');
-            const customers = listRes.data?.data || [];
-            const existing = customers.find((c: any) => c.email === email);
-            if (existing) return existing;
-            console.log(`[MAPLERAD DEBUG] Could not find ${email} in the first page of customers.`);
-        } catch (fetchErr: any) {
-            console.error('[MAPLERAD] Failed to fetch existing customer list:', fetchErr.message);
-        }
+        const customers = await getCustomers();
+        const existing = customers.find((c: any) => c.email === email);
+        if (existing) return existing;
     }
     console.error('[MAPLERAD] Create Customer Error:', error.response?.data || error.message);
     throw new Error(error.response?.data?.message || 'Failed to create Maplerad customer. Check keys/whitelisting.');
@@ -90,7 +120,7 @@ export const upgradeCustomerTier1 = async (customerId: string, kycData: any) => 
       }
     }
 
-    const response = await mapleradClient.patch('/customers/upgrade/tier1', {
+    const response = await makeRequest('patch', '/customers/upgrade/tier1', {
       customer_id: customerId,
       dob: formattedDob,
       identification_number: kycData.bvn, // The actual BVN
@@ -124,7 +154,7 @@ export const upgradeCustomerTier1 = async (customerId: string, kycData: any) => 
  */
 export const issueVirtualAccount = async (customerId: string, currency: string) => {
   try {
-    const response = await mapleradClient.post('/collections/virtual-account', {
+    const response = await makeRequest('post', '/collections/virtual-account', {
       customer_id: customerId,
       currency: currency
     });
@@ -134,7 +164,7 @@ export const issueVirtualAccount = async (customerId: string, currency: string) 
     if (errorMsg.toLowerCase().includes('already enrolled') || errorMsg.toLowerCase().includes('already exist')) {
       try {
         console.log(`[MAPLERAD DEBUG] Customer already enrolled, fetching existing virtual accounts for ${customerId}...`);
-        const existing = await mapleradClient.get(`/customers/${customerId}/virtual-account`);
+        const existing = await makeRequest('get', `/customers/${customerId}/virtual-account`);
         const accounts = existing.data.data;
         
         if (Array.isArray(accounts)) {
@@ -158,7 +188,7 @@ export const issueVirtualAccount = async (customerId: string, currency: string) 
  */
 export const issueVirtualCard = async (customerId: string, currency: string, amount: number) => {
   try {
-    const response = await mapleradClient.post('/issuing/cards', {
+    const response = await makeRequest('post', '/issuing/cards', {
       customer_id: customerId,
       currency: currency,
       amount: amount * 100, // Maplerad uses kobo/cents
@@ -177,7 +207,7 @@ export const issueVirtualCard = async (customerId: string, currency: string, amo
  */
 export const processPayout = async (amount: number, currency: string, accountDetails: any) => {
   try {
-    const response = await mapleradClient.post('/transfers', {
+    const response = await makeRequest('post', '/transfers', {
       amount: amount * 100,
       currency: currency,
       bank_code: accountDetails.bankCode,
@@ -196,7 +226,7 @@ export const processPayout = async (amount: number, currency: string, accountDet
  */
 export const getBanks = async (currency: string = 'NGN') => {
   try {
-    const response = await mapleradClient.get(`/institutions?currency=${currency}`);
+    const response = await makeRequest('get', `/institutions?currency=${currency}`);
     return response.data.data;
   } catch (error: any) {
     console.error('[MAPLERAD] Get Banks Error:', error.response?.data || error.message);
@@ -226,7 +256,7 @@ export const getBanks = async (currency: string = 'NGN') => {
 export const generateFxQuote = async (sourceCurrency: string, targetCurrency: string, amount: number) => {
   try {
     console.log(`[MAPLERAD FX] Generating quote: ${amount} ${sourceCurrency} → ${targetCurrency}`);
-    const response = await mapleradClient.post('/fx/quote', {
+    const response = await makeRequest('post', '/fx/quote', {
       source_currency: sourceCurrency,
       target_currency: targetCurrency,
       amount: Math.round(amount * 100)
@@ -244,7 +274,7 @@ export const generateFxQuote = async (sourceCurrency: string, targetCurrency: st
 export const executeFxSwap = async (quoteReference: string) => {
   try {
     console.log(`[MAPLERAD FX] Executing swap with quote: ${quoteReference}`);
-    const response = await mapleradClient.post('/fx', {
+    const response = await makeRequest('post', '/fx', {
       quote_reference: quoteReference
     });
     return response.data.data;
@@ -259,7 +289,7 @@ export const executeFxSwap = async (quoteReference: string) => {
  */
 export const getFxHistory = async () => {
   try {
-    const response = await mapleradClient.get('/fx');
+    const response = await makeRequest('get', '/fx');
     return response.data.data;
   } catch (error: any) {
     console.error('[MAPLERAD FX] History Error:', error.response?.data || error.message);
@@ -274,7 +304,7 @@ export const getExchangeRate = async (sourceCurrency: string, targetCurrency: st
   try {
     console.log(`[MAPLERAD FX] Fetching rate: ${sourceCurrency} → ${targetCurrency}`);
     // Use a small reference amount to get the rate without committing
-    const response = await mapleradClient.post('/fx/quote', {
+    const response = await makeRequest('post', '/fx/quote', {
       source_currency: sourceCurrency,
       target_currency: targetCurrency,
       amount: 100 // 1.00 in minor units for rate calculation
@@ -301,7 +331,7 @@ export const getExchangeRate = async (sourceCurrency: string, targetCurrency: st
 export const getCards = async (customerId?: string) => {
   try {
     const url = customerId ? `/issuing/cards?customer_id=${customerId}` : '/issuing/cards';
-    const response = await mapleradClient.get(url);
+    const response = await makeRequest('get', url);
     return response.data.data;
   } catch (error: any) {
     console.error('[MAPLERAD] Get Cards Error:', error.response?.data || error.message);
@@ -314,7 +344,7 @@ export const getCards = async (customerId?: string) => {
  */
 export const getCardDetails = async (cardId: string) => {
   try {
-    const response = await mapleradClient.get(`/issuing/cards/${cardId}`);
+    const response = await makeRequest('get', `/issuing/cards/${cardId}`);
     return response.data.data;
   } catch (error: any) {
     console.error('[MAPLERAD] Get Card Details Error:', error.response?.data || error.message);
@@ -327,7 +357,7 @@ export const getCardDetails = async (cardId: string) => {
  */
 export const fundCard = async (cardId: string, amount: number) => {
   try {
-    const response = await mapleradClient.post(`/issuing/cards/${cardId}/fund`, {
+    const response = await makeRequest('post', `/issuing/cards/${cardId}/fund`, {
       amount: Math.round(amount * 100)
     });
     return response.data.data;
@@ -343,7 +373,7 @@ export const fundCard = async (cardId: string, amount: number) => {
 export const toggleCardStatus = async (cardId: string, status: 'FREEZE' | 'UNFREEZE') => {
   try {
     const endpoint = status === 'FREEZE' ? 'freeze' : 'unfreeze';
-    const response = await mapleradClient.patch(`/issuing/cards/${cardId}/${endpoint}`);
+    const response = await makeRequest('patch', `/issuing/cards/${cardId}/${endpoint}`);
     return response.data.data;
   } catch (error: any) {
     console.error('[MAPLERAD] Card Status Error:', error.response?.data || error.message);
@@ -375,7 +405,7 @@ export const getBillers = async (category: string, country: string = 'NG') => {
     // Map our category names to Maplerad's endpoint paths
     const categoryPath = mapCategoryToPath(category);
     console.log(`[MAPLERAD] Fetching billers: /bills/${categoryPath}/billers/${country}`);
-    const response = await mapleradClient.get(`/bills/${categoryPath}/billers/${country}`);
+    const response = await makeRequest('get', `/bills/${categoryPath}/billers/${country}`);
     return response.data.data || [];
   } catch (error: any) {
     console.error('[MAPLERAD] Get Billers Error:', error.response?.data || error.message);
@@ -436,7 +466,7 @@ export const payBill = async (payload: {
     }
 
     console.log(`[MAPLERAD] Paying bill via POST /bills/${categoryPath}:`, JSON.stringify(body));
-    const response = await mapleradClient.post(`/bills/${categoryPath}`, body);
+    const response = await makeRequest('post', `/bills/${categoryPath}`, body);
     return response.data.data;
   } catch (error: any) {
     console.error('[MAPLERAD] Pay Bill Error:', error.response?.data || error.message);
@@ -466,7 +496,7 @@ function mapCategoryToPath(category: string): string {
  */
 export const createPaymentLink = async (payload: { title: string, amount: number, currency: string, description?: string }) => {
   try {
-    const response = await mapleradClient.post('/collections/links', {
+    const response = await makeRequest('post', '/collections/links', {
       ...payload,
       amount: Math.round(payload.amount * 100)
     });
@@ -482,7 +512,7 @@ export const createPaymentLink = async (payload: { title: string, amount: number
  */
 export const getPaymentLinks = async () => {
   try {
-    const response = await mapleradClient.get('/collections/links');
+    const response = await makeRequest('get', '/collections/links');
     return response.data.data;
   } catch (error: any) {
     console.error('[MAPLERAD] Get Links Error:', error.response?.data || error.message);
@@ -534,7 +564,7 @@ export const SUPPORTED_FX_PAIRS = [
  */
 export const getCustomerVirtualAccounts = async (customerId: string) => {
   try {
-    const response = await mapleradClient.get(`/customers/${customerId}/virtual-account`);
+    const response = await makeRequest('get', `/customers/${customerId}/virtual-account`);
     return Array.isArray(response.data.data) ? response.data.data : [response.data.data];
   } catch (error: any) {
     console.error('[MAPLERAD] Get Virtual Accounts Error:', error.response?.data || error.message);
@@ -548,7 +578,7 @@ export const getCustomerVirtualAccounts = async (customerId: string) => {
 export const getTransactions = async (customerId?: string) => {
   try {
     const url = customerId ? `/transactions?customer_id=${customerId}` : '/transactions';
-    const response = await mapleradClient.get(url);
+    const response = await makeRequest('get', url);
     console.log(`[MAPLERAD DEBUG] GET ${url} - Status: ${response.status}`);
     
     // The data might be in response.data.data (standard) or nested further
