@@ -157,13 +157,19 @@ export class IbanService {
       }
 
       // 5. Fetch external transactions (latest 50) for this specific customer
-      const externalTxs = await Maplerad.getTransactions(customer.id);
+      let externalTxs = await Maplerad.getTransactions(customer.id);
+      
+      if (!Array.isArray(externalTxs) || externalTxs.length === 0) {
+        console.log(`[RECONCILE] Customer-specific lookup returned 0. Trying global platform lookup...`);
+        externalTxs = await Maplerad.getTransactions(); // Global
+      }
+
       if (!Array.isArray(externalTxs)) {
         console.log(`[RECONCILE] Maplerad returned non-array transactions:`, externalTxs);
         return;
       }
 
-      console.log(`[RECONCILE] Raw external transactions found: ${externalTxs.length}`);
+      console.log(`[RECONCILE] Total external transactions to scan: ${externalTxs.length}`);
       if (externalTxs.length > 0) {
         console.log(`[RECONCILE] Sample TX statuses: ${externalTxs.slice(0, 3).map((t: any) => t.status).join(', ')}`);
       }
