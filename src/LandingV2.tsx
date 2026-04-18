@@ -61,11 +61,11 @@ const HeroSection = ({ onAuth }: { onAuth: () => void }) => {
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.75rem', padding: '0.5rem 1.2rem', ...glassPanel, borderRadius: '99px', color: theme.cyan, fontSize: '0.85rem', fontWeight: 800, letterSpacing: '0.05em', marginBottom: '2.5rem' }}>
              <Activity size={14} /> GLOBAL FINANCE OS
           </div>
-          <h1 style={{ fontSize: 'clamp(4rem, 8vw, 7rem)', fontWeight: 900, letterSpacing: '-0.04em', lineHeight: 1, marginBottom: '2rem', color: theme.text1 }}>
+          <h1 style={{ fontSize: 'clamp(3rem, 6vw, 4.5rem)', fontWeight: 800, letterSpacing: '-0.03em', lineHeight: 1.1, marginBottom: '1.5rem', color: theme.text1 }}>
              Global Finance.<br />
-             <span style={{ background: `linear-gradient(to right, ${theme.primary}, ${theme.cyan}, ${theme.purple})`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Unified & Instant.</span>
+             <span style={{ color: theme.text1 }}>Unified & Instant.</span>
           </h1>
-          <p style={{ fontSize: '1.25rem', color: theme.text2, maxWidth: '600px', margin: '0 auto 3rem', lineHeight: 1.6, fontWeight: 500 }}>
+          <p style={{ fontSize: '1.25rem', color: theme.text2, maxWidth: '650px', margin: '0 auto 2.5rem', lineHeight: 1.6, fontWeight: 400 }}>
              Hold any currency, send money worldwide in seconds, swap crypto and let AI manage your finances — all from one beautifully simple app.
           </p>
           <div style={{ display: 'flex', gap: '1.5rem', justifyContent: 'center', flexWrap: 'wrap' }}>
@@ -96,8 +96,9 @@ const HeroSection = ({ onAuth }: { onAuth: () => void }) => {
 const LivePreview = () => (
   <section style={{ padding: '4rem 0', position: 'relative', zIndex: 20 }}>
     <div className="container" style={{ textAlign: 'center', marginBottom: '3rem' }}>
-       <h2 style={{ fontSize: '2.5rem', fontWeight: 900, color: theme.text1 }}>Live Preview</h2>
-       <p style={{ color: theme.text2, fontSize: '1.2rem' }}>Real balances, real charts, real transactions. Everything you need in one calm dashboard.</p>
+       <div style={{ color: theme.text2, fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase', marginBottom: '1rem', fontSize: '0.85rem' }}>Live Preview</div>
+       <h2 style={{ fontSize: 'clamp(2rem, 4vw, 3rem)', fontWeight: 800, color: theme.text1, letterSpacing: '-0.02em', marginBottom: '1rem' }}>Real balances, real charts.</h2>
+       <p style={{ color: theme.text2, fontSize: '1.125rem', maxWidth: '600px', margin: '0 auto' }}>Everything you need in one calm dashboard.</p>
     </div>
     <div className="container" style={{ display: 'flex', justifyContent: 'center' }}>
        <motion.div initial={{ opacity: 0, y: 50, rotateX: 20 }} whileInView={{ opacity: 1, y: 0, rotateX: 0 }} viewport={{ once: true, margin: "-100px" }} transition={{ duration: 1, type: "spring" }} style={{ width: '100%', maxWidth: '1000px', ...glassPanel, background: `linear-gradient(180deg, rgba(10, 15, 44, 0.8) 0%, rgba(2, 6, 23, 0.9) 100%)`, overflow: 'hidden', position: 'relative', boxShadow: `0 30px 100px rgba(0,0,0,0.8), 0 0 0 1px ${theme.glassBorder}` }}>
@@ -141,8 +142,9 @@ const LivePreview = () => (
 const Capabilities = () => (
   <section id="features" style={{ padding: '8rem 0' }}>
     <div className="container">
-       <div style={{ textAlign: 'center', marginBottom: '5rem' }}>
-          <h2 style={{ fontSize: '3rem', fontWeight: 900, color: theme.text1 }}>Everything you need</h2>
+       <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
+          <div style={{ color: theme.text2, fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase', marginBottom: '1rem', fontSize: '0.85rem' }}>Features</div>
+          <h2 style={{ fontSize: 'clamp(2rem, 4vw, 3rem)', fontWeight: 800, color: theme.text1, letterSpacing: '-0.02em' }}>Everything you need</h2>
        </div>
        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem' }}>
           {[
@@ -171,9 +173,9 @@ const MultiCurrency = () => (
      <div className="container">
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '4rem', alignItems: 'center' }}>
            <div>
-              <div style={{ color: theme.cyan, fontWeight: 700, marginBottom: '1rem' }}>Multi-currency wallet</div>
-              <h2 style={{ fontSize: '3rem', fontWeight: 900, color: theme.text1, marginBottom: '1.5rem', lineHeight: 1.1 }}>Every currency.<br/>One balance you can trust.</h2>
-              <p style={{ color: theme.text2, fontSize: '1.2rem', lineHeight: 1.6 }}>Switch between fiat and crypto in a single tap. No hidden fees, no spreads — just clean, real-time balances wherever you are.</p>
+              <div style={{ color: theme.cyan, fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase', marginBottom: '1rem', fontSize: '0.85rem' }}>Multi-currency wallet</div>
+              <h2 style={{ fontSize: 'clamp(2rem, 4vw, 3rem)', fontWeight: 800, color: theme.text1, marginBottom: '1.5rem', lineHeight: 1.1, letterSpacing: '-0.02em' }}>Every currency.<br/>One balance you can trust.</h2>
+              <p style={{ color: theme.text2, fontSize: '1.125rem', lineHeight: 1.6 }}>Switch between fiat and crypto in a single tap. No hidden fees, no spreads — just clean, real-time balances wherever you are.</p>
            </div>
            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
               {[
@@ -270,8 +272,8 @@ const VirtualCards = () => (
            {/* Right side: Text Content */}
            <div>
               <div style={{ color: theme.purple, fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase', marginBottom: '1rem', fontSize: '0.85rem' }}>Virtual cards</div>
-              <h2 style={{ fontSize: '3.5rem', fontWeight: 900, color: theme.text1, marginBottom: '1.5rem', lineHeight: 1.1 }}>Beautiful cards.<br/>Total control.</h2>
-              <p style={{ color: theme.text2, fontSize: '1.2rem', marginBottom: '3rem', lineHeight: 1.6 }}>Spin up unlimited virtual cards for subscriptions, travel or business. Freeze, unfreeze and set spending limits — instantly.</p>
+              <h2 style={{ fontSize: 'clamp(2rem, 4vw, 3rem)', fontWeight: 800, color: theme.text1, marginBottom: '1.5rem', lineHeight: 1.1, letterSpacing: '-0.02em' }}>Beautiful cards.<br/>Total control.</h2>
+              <p style={{ color: theme.text2, fontSize: '1.125rem', marginBottom: '3rem', lineHeight: 1.6 }}>Spin up unlimited virtual cards for subscriptions, travel or business. Freeze, unfreeze and set spending limits — instantly.</p>
               
               <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap' }}>
                  <div style={{ ...glassPanel, padding: '1.5rem', display: 'flex', alignItems: 'center', gap: '1rem', flex: 1, minWidth: '240px' }}>
@@ -327,9 +329,9 @@ const GlobalTransfers = () => (
               <button style={{ width: '100%', padding: '1rem', background: theme.primary, color: '#fff', border: 'none', borderRadius: '12px', fontWeight: 800, fontSize: '1rem' }}>Send Now</button>
            </div>
            <div>
-              <div style={{ color: theme.primary, fontWeight: 700, marginBottom: '1rem' }}>Global transfers</div>
-              <h2 style={{ fontSize: '3rem', fontWeight: 900, color: theme.text1, marginBottom: '1.5rem', lineHeight: 1.1 }}>Send money like sending a text.</h2>
-              <p style={{ color: theme.text2, fontSize: '1.2rem', lineHeight: 1.6 }}>80+ countries. 40+ currencies. No banking jargon — just a recipient, an amount, and done.</p>
+              <div style={{ color: theme.primary, fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase', marginBottom: '1rem', fontSize: '0.85rem' }}>Global transfers</div>
+              <h2 style={{ fontSize: 'clamp(2rem, 4vw, 3rem)', fontWeight: 800, color: theme.text1, marginBottom: '1.5rem', lineHeight: 1.1, letterSpacing: '-0.02em' }}>Send money like sending a text.</h2>
+              <p style={{ color: theme.text2, fontSize: '1.125rem', lineHeight: 1.6 }}>80+ countries. 40+ currencies. No banking jargon — just a recipient, an amount, and done.</p>
            </div>
         </div>
      </div>
@@ -340,9 +342,9 @@ const GlobalTransfers = () => (
 const CryptoSwap = () => (
    <section id="crypto" style={{ padding: '8rem 0' }}>
       <div className="container" style={{ textAlign: 'center' }}>
-         <div style={{ color: theme.cyan, fontWeight: 700, marginBottom: '1rem' }}>Crypto & swap</div>
-         <h2 style={{ fontSize: '3.5rem', fontWeight: 900, color: theme.text1, marginBottom: '1.5rem' }}>Trade fiat & crypto in a tap.</h2>
-         <p style={{ color: theme.text2, fontSize: '1.2rem', maxWidth: '600px', margin: '0 auto 4rem' }}>Aggregated liquidity from top exchanges gives you the best price every time — no spreads, no surprises.</p>
+         <div style={{ color: theme.cyan, fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase', marginBottom: '1rem', fontSize: '0.85rem' }}>Crypto & swap</div>
+         <h2 style={{ fontSize: 'clamp(2rem, 4vw, 3rem)', fontWeight: 800, color: theme.text1, marginBottom: '1.5rem', letterSpacing: '-0.02em' }}>Trade fiat & crypto in a tap.</h2>
+         <p style={{ color: theme.text2, fontSize: '1.125rem', maxWidth: '600px', margin: '0 auto 4rem' }}>Aggregated liquidity from top exchanges gives you the best price every time — no spreads, no surprises.</p>
          
          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '2rem', flexWrap: 'wrap' }}>
             <div style={{ ...glassPanel, padding: '2rem', width: '280px', textAlign: 'left' }}>
@@ -371,8 +373,8 @@ const PaypeeAI = () => (
       <div className="container">
          <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
             <Bot size={48} color={theme.purple} style={{ margin: '0 auto 1.5rem' }} />
-            <h2 style={{ fontSize: '3rem', fontWeight: 900, color: theme.text1, marginBottom: '1.5rem' }}>An assistant that grows your money quietly.</h2>
-            <p style={{ color: theme.text2, fontSize: '1.2rem', maxWidth: '600px', margin: '0 auto' }}>Paypee AI watches markets, currencies and your spending — then acts on your behalf. Like having a private banker in your pocket.</p>
+            <h2 style={{ fontSize: 'clamp(2rem, 4vw, 3rem)', fontWeight: 800, color: theme.text1, marginBottom: '1.5rem', letterSpacing: '-0.02em' }}>An assistant that grows your money quietly.</h2>
+            <p style={{ color: theme.text2, fontSize: '1.125rem', maxWidth: '600px', margin: '0 auto' }}>Paypee AI watches markets, currencies and your spending — then acts on your behalf. Like having a private banker in your pocket.</p>
          </div>
          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem' }}>
             <div style={{ ...glassPanel, padding: '2rem' }}>
@@ -397,9 +399,9 @@ const Security = () => (
    <section style={{ padding: '8rem 0' }}>
       <div className="container" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '4rem', alignItems: 'center' }}>
          <div>
-            <div style={{ color: theme.primary, fontWeight: 700, marginBottom: '1rem' }}>Security</div>
-            <h2 style={{ fontSize: '3.5rem', fontWeight: 900, color: theme.text1, marginBottom: '1.5rem', lineHeight: 1.1 }}>Built like a vault.<br/>Feels like silk.</h2>
-            <p style={{ color: theme.text2, fontSize: '1.2rem', lineHeight: 1.6 }}>Your money and data are protected by the same systems trusted by global banks. Every layer hardened. Every action audited.</p>
+            <div style={{ color: theme.primary, fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase', marginBottom: '1rem', fontSize: '0.85rem' }}>Security</div>
+            <h2 style={{ fontSize: 'clamp(2rem, 4vw, 3rem)', fontWeight: 800, color: theme.text1, marginBottom: '1.5rem', lineHeight: 1.1, letterSpacing: '-0.02em' }}>Built like a vault.<br/>Feels like silk.</h2>
+            <p style={{ color: theme.text2, fontSize: '1.125rem', lineHeight: 1.6 }}>Your money and data are protected by the same systems trusted by global banks. Every layer hardened. Every action audited.</p>
          </div>
          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
             <div>
@@ -432,8 +434,8 @@ const ForWho = ({ onAuth }: { onAuth: () => void }) => (
    <section id="forwho" style={{ padding: '8rem 0', background: theme.bg2, borderTop: `1px solid ${theme.glassBorder}` }}>
       <div className="container">
          <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
-            <div style={{ color: theme.cyan, fontWeight: 700, marginBottom: '1rem' }}>For who</div>
-            <h2 style={{ fontSize: '3.5rem', fontWeight: 900, color: theme.text1 }}>Built for everyone.</h2>
+            <div style={{ color: theme.cyan, fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase', marginBottom: '1rem', fontSize: '0.85rem' }}>For who</div>
+            <h2 style={{ fontSize: 'clamp(2rem, 4vw, 3rem)', fontWeight: 800, color: theme.text1, letterSpacing: '-0.02em' }}>Built for everyone.</h2>
          </div>
          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '2rem' }}>
             <div style={{ ...glassPanel, padding: '3rem 2rem', display: 'flex', flexDirection: 'column' }}>
@@ -507,8 +509,8 @@ const CTA = ({ onAuth }: { onAuth: () => void }) => (
    <section style={{ padding: '8rem 0', position: 'relative', overflow: 'hidden' }}>
       <div style={{ position: 'absolute', inset: 0, background: `radial-gradient(circle at center, ${theme.primary}40 0%, transparent 70%)` }} />
       <div className="container" style={{ textAlign: 'center', position: 'relative', zIndex: 10, ...glassPanel, padding: '6rem 2rem' }}>
-         <h2 style={{ fontSize: '4rem', fontWeight: 900, color: theme.text1, marginBottom: '1.5rem' }}>Join millions building a better financial life with Paypee.</h2>
-         <p style={{ color: theme.text2, fontSize: '1.2rem', marginBottom: '3rem' }}>Setup takes under 60 seconds.</p>
+         <h2 style={{ fontSize: 'clamp(2rem, 4vw, 3rem)', fontWeight: 800, color: theme.text1, marginBottom: '1.5rem', letterSpacing: '-0.02em' }}>Join millions building a better financial life with Paypee.</h2>
+         <p style={{ color: theme.text2, fontSize: '1.125rem', marginBottom: '3rem' }}>Setup takes under 60 seconds.</p>
          <button onClick={onAuth} style={{ background: theme.text1, color: theme.bg, border: 'none', padding: '1.5rem 4rem', borderRadius: '20px', fontWeight: 900, fontSize: '1.2rem', cursor: 'pointer' }}>
             Get Started
          </button>
