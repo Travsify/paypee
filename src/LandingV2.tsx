@@ -57,7 +57,7 @@ const HeroSection = ({ onAuth }: { onAuth: () => void }) => {
       
       <div className="container" style={{ position: 'relative', zIndex: 10, textAlign: 'center' }}>
         <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 1 }}>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.75rem', padding: '0.5rem 1.2rem', borderRadius: '99px', ...glassPanel, color: theme.cyan, fontSize: '0.85rem', fontWeight: 800, letterSpacing: '0.05em', marginBottom: '2.5rem' }}>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.75rem', padding: '0.5rem 1.2rem', ...glassPanel, borderRadius: '99px', color: theme.cyan, fontSize: '0.85rem', fontWeight: 800, letterSpacing: '0.05em', marginBottom: '2.5rem' }}>
              <Activity size={14} /> PAYPEE OS 2.0 ONLINE
           </div>
           <h1 style={{ fontSize: 'clamp(4rem, 8vw, 7rem)', fontWeight: 900, letterSpacing: '-0.04em', lineHeight: 1, marginBottom: '2rem', color: theme.text1 }}>
@@ -233,7 +233,7 @@ const GlobalTransfers = () => (
                  <span style={{ fontSize: '2rem', color: theme.text1, fontWeight: 800 }}>$5,000</span>
                  <span style={{ color: theme.text2, alignSelf: 'center' }}>USD</span>
               </div>
-              <div style={{ display: 'flex', justifyContent: 'center', my: '1rem' }}><ArrowRight color={theme.primary} /></div>
+              <div style={{ display: 'flex', justifyContent: 'center', margin: '1rem 0' }}><ArrowRight color={theme.primary} /></div>
               <div style={{ ...glassPanel, padding: '1rem', marginBottom: '2rem', display: 'flex', justifyContent: 'space-between' }}>
                  <span style={{ fontSize: '2rem', color: theme.cyan, fontWeight: 800 }}>£3,940</span>
                  <span style={{ color: theme.text2, alignSelf: 'center' }}>GBP</span>
