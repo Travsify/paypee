@@ -116,6 +116,25 @@ const LandingV2: React.FC<LandingV2Props> = ({ onAuth, setLandingView }) => {
                >
                   <div className="absolute -inset-10 bg-primary/20 blur-[100px] rounded-full opacity-50 animate-pulse" />
                   
+                  {/* Floating Live Balance Cards */}
+                  <motion.div 
+                    animate={{ y: [0, -15, 0] }}
+                    transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                    className="absolute -top-12 -left-12 z-30 glass-panel !p-5 !rounded-2xl border-primary/30 shadow-[0_20px_40px_rgba(0,0,0,0.4)]"
+                  >
+                    <div className="text-[10px] font-black uppercase tracking-widest text-text-dim mb-1">USD Balance</div>
+                    <div className="text-2xl font-black italic">$12,450.00</div>
+                  </motion.div>
+
+                  <motion.div 
+                    animate={{ y: [0, 15, 0] }}
+                    transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+                    className="absolute -bottom-10 -right-8 z-30 glass-panel !p-5 !rounded-2xl border-secondary/30 shadow-[0_20px_40px_rgba(0,0,0,0.4)]"
+                  >
+                    <div className="text-[10px] font-black uppercase tracking-widest text-text-dim mb-1">Liquidity</div>
+                    <div className="text-2xl font-black italic text-secondary">0.42 BTC</div>
+                  </motion.div>
+
                   {/* The AI Core Visual */}
                   <div className="relative glass-panel !p-0 !rounded-[80px] h-[600px] w-full overflow-hidden border-white/10 shadow-2xl">
                      <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-bg-deep to-secondary/10" />
@@ -150,12 +169,21 @@ const LandingV2: React.FC<LandingV2Props> = ({ onAuth, setLandingView }) => {
                      </div>
 
                      <div className="absolute bottom-12 left-12 right-12 glass-panel !p-8 bg-black/40 backdrop-blur-3xl border-white/5">
-                        <div className="flex justify-between items-center mb-4">
-                           <span className="text-[8px] font-black uppercase tracking-[0.4em] text-white/30">Intelligence Feed</span>
-                           <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
+                        <div className="flex justify-between items-center mb-6">
+                           <span className="text-[10px] font-black uppercase tracking-[0.4em] text-white/30">Intelligence Logs</span>
+                           <div className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
                         </div>
-                        <div className="text-xs font-medium text-white/80 leading-relaxed font-mono">
-                           {"{ system_event: \"USD Settlement\", corridor: \"NGN-USDT\", latency: \"104ms\", status: \"Optimized\" }"}
+                        <div className="space-y-3">
+                           {[
+                             "⚡ CONVERTED NGN → USDT [PREVENT_LOSS]",
+                             "📊 OPTIMIZED ENTITY SUBSCRIPTIONS",
+                             "💡 ROUTED SWAP VIA MAPLERAD_V2"
+                           ].map((log, i) => (
+                             <div key={i} className="text-[10px] font-bold text-white/70 font-mono tracking-tight flex items-center gap-2">
+                                <span className="text-primary opacity-50">[{new Date().toLocaleTimeString()}]</span>
+                                {log}
+                             </div>
+                           ))}
                         </div>
                      </div>
                   </div>
