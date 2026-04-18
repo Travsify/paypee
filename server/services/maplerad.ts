@@ -222,13 +222,19 @@ export const issueVirtualCard = async (customerId: string, currency: string, amo
  */
 export const processPayout = async (amount: number, currency: string, accountDetails: any) => {
   try {
-    const response = await makeRequest('post', '/transfers', {
+    const payload: any = {
       amount: amount * 100,
       currency: currency,
-      bank_code: accountDetails.bankCode,
       account_number: accountDetails.number,
       reason: 'Paypee Payout'
-    });
+    };
+    
+    if (accountDetails.bankCode) payload.bank_code = accountDetails.bankCode;
+    if (accountDetails.routing_number) payload.routing_number = accountDetails.routing_number;
+    if (accountDetails.swift_code) payload.swift_code = accountDetails.swift_code;
+    if (accountDetails.iban) payload.iban = accountDetails.iban;
+
+    const response = await makeRequest('post', '/transfers', payload);
     return response.data.data;
   } catch (error: any) {
     console.error('[MAPLERAD] Payout Error:', error.response?.data || error.message);

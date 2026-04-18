@@ -405,7 +405,8 @@ app.post('/api/payouts/transfer', authenticateToken, async (req: any, res: any) 
     const userId = req.user.userId;
     const parsedAmount = parseFloat(amount); // This is the amount in sourceCurrency to deduct
 
-    if (!walletId || !bankCode || !accountNumber || isNaN(parsedAmount) || parsedAmount <= 0) {
+    const hasBankOrIntlCode = bankCode || routingNumber || iban || swiftCode;
+    if (!walletId || !hasBankOrIntlCode || !accountNumber || isNaN(parsedAmount) || parsedAmount <= 0) {
       return res.status(400).json({ error: 'Invalid payout parameters' });
     }
 
