@@ -67,9 +67,12 @@ const HeroSection = ({ onAuth }: { onAuth: () => void }) => {
           <p style={{ fontSize: '1.25rem', color: theme.text2, maxWidth: '600px', margin: '0 auto 3rem', lineHeight: 1.6, fontWeight: 500 }}>
              The intelligent financial operating system. Combine banking, crypto, and AI-powered wealth management in one powerful interface.
           </p>
-          <div style={{ display: 'flex', gap: '1.5rem', justifyContent: 'center' }}>
+          <div style={{ display: 'flex', gap: '1.5rem', justifyContent: 'center', flexWrap: 'wrap' }}>
              <motion.button onClick={onAuth} whileHover={{ scale: 1.05, boxShadow: `0 0 30px ${theme.primary}80` }} whileTap={{ scale: 0.95 }} style={{ background: theme.primary, color: '#fff', border: 'none', padding: '1.2rem 3rem', borderRadius: '16px', fontWeight: 800, fontSize: '1.1rem', cursor: 'pointer' }}>
-                Open Account
+                Get Started
+             </motion.button>
+             <motion.button onClick={onAuth} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} style={{ background: 'transparent', color: '#fff', border: `1px solid ${theme.glassBorder}`, padding: '1.2rem 3rem', borderRadius: '16px', fontWeight: 800, fontSize: '1.1rem', cursor: 'pointer' }}>
+                Try Demo
              </motion.button>
           </div>
         </motion.div>
@@ -335,29 +338,32 @@ const Security = () => (
    </section>
 );
 
-// 10. Developer Tools
-const DevTools = () => (
+// 10. For Who Section
+const ForWho = ({ onAuth }: { onAuth: () => void }) => (
    <section style={{ padding: '8rem 0', background: theme.bg2, borderTop: `1px solid ${theme.glassBorder}` }}>
       <div className="container">
-         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6rem', alignItems: 'center' }}>
-            <div style={{ ...glassPanel, padding: '2rem', background: '#020617', fontFamily: 'monospace', color: theme.cyan, overflowX: 'hidden' }}>
-               <div style={{ color: theme.text2, marginBottom: '1rem', fontSize: '0.8rem' }}>// Initialize Paypee SDK</div>
-               <div>const paypee = new Paypee('sk_live_...');</div>
-               <br/>
-               <div style={{ color: theme.text2, marginBottom: '1rem', fontSize: '0.8rem' }}>// Create a payout</div>
-               <div>await paypee.payouts.create(&#123;</div>
-               <div style={{ paddingLeft: '1rem' }}>amount: 5000,</div>
-               <div style={{ paddingLeft: '1rem' }}>currency: 'USD',</div>
-               <div style={{ paddingLeft: '1rem' }}>destination: 'iban_...'</div>
-               <div>&#125;);</div>
-            </div>
-            <div>
-               <h2 style={{ fontSize: '3rem', fontWeight: 900, color: theme.text1, marginBottom: '1.5rem', lineHeight: 1.1 }}>Built for<br/>Engineers.</h2>
-               <p style={{ color: theme.text2, fontSize: '1.2rem', lineHeight: 1.6 }}>Robust APIs, comprehensive SDKs, and enterprise-grade webhooks. Integrate global finance into your app in an afternoon.</p>
-               <div style={{ display: 'flex', gap: '1rem', marginTop: '2rem' }}>
-                  <button style={{ background: 'transparent', color: theme.primary, border: 'none', fontWeight: 800, fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>Read Docs <ArrowRight size={18} /></button>
-               </div>
-            </div>
+         <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
+            <h2 style={{ fontSize: '3rem', fontWeight: 900, color: theme.text1 }}>Built for Everyone.</h2>
+         </div>
+         <div className="grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '2rem' }}>
+            <motion.div whileHover={{ y: -10 }} style={{ ...glassPanel, padding: '2rem', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+               <div style={{ width: 48, height: 48, background: `linear-gradient(135deg, ${theme.cyan}, ${theme.primary})`, borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: `0 0 20px ${theme.cyan}40` }}><Users color="#fff" /></div>
+               <h3 style={{ fontSize: '1.5rem', fontWeight: 800, color: theme.text1 }}>Individuals</h3>
+               <p style={{ color: theme.text2, lineHeight: 1.6 }}>Global wallets, virtual cards, and instant remittances for global citizens.</p>
+               <button onClick={onAuth} style={{ marginTop: 'auto', background: 'transparent', color: theme.primary, border: 'none', fontWeight: 800, textAlign: 'left', cursor: 'pointer', padding: 0 }}>Explore Personal <ArrowRight size={16} style={{ verticalAlign: 'middle' }} /></button>
+            </motion.div>
+            <motion.div whileHover={{ y: -10 }} style={{ ...glassPanel, padding: '2rem', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+               <div style={{ width: 48, height: 48, background: `linear-gradient(135deg, ${theme.primary}, ${theme.purple})`, borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: `0 0 20px ${theme.primary}40` }}><Building2 color="#fff" /></div>
+               <h3 style={{ fontSize: '1.5rem', fontWeight: 800, color: theme.text1 }}>Businesses</h3>
+               <p style={{ color: theme.text2, lineHeight: 1.6 }}>Automated treasury, mass payouts, and multi-currency collection rails.</p>
+               <button onClick={onAuth} style={{ marginTop: 'auto', background: 'transparent', color: theme.primary, border: 'none', fontWeight: 800, textAlign: 'left', cursor: 'pointer', padding: 0 }}>Explore Business <ArrowRight size={16} style={{ verticalAlign: 'middle' }} /></button>
+            </motion.div>
+            <motion.div whileHover={{ y: -10 }} style={{ ...glassPanel, padding: '2rem', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+               <div style={{ width: 48, height: 48, background: `linear-gradient(135deg, ${theme.purple}, ${theme.cyan})`, borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: `0 0 20px ${theme.purple}40` }}><Terminal color="#fff" /></div>
+               <h3 style={{ fontSize: '1.5rem', fontWeight: 800, color: theme.text1 }}>Developers</h3>
+               <p style={{ color: theme.text2, lineHeight: 1.6 }}>Unified API, robust SDKs, and enterprise-grade webhooks for fintech builders.</p>
+               <button onClick={onAuth} style={{ marginTop: 'auto', background: 'transparent', color: theme.primary, border: 'none', fontWeight: 800, textAlign: 'left', cursor: 'pointer', padding: 0 }}>Explore Docs <ArrowRight size={16} style={{ verticalAlign: 'middle' }} /></button>
+            </motion.div>
          </div>
       </div>
    </section>
@@ -405,12 +411,58 @@ const LandingV2 = ({ onAuth }: { onAuth: () => void }) => {
       <CryptoSwap />
       <PaypeeAI />
       <Security />
-      <DevTools />
+      <ForWho onAuth={onAuth} />
       <SocialProof />
       <CTA onAuth={onAuth} />
       
-      <footer style={{ padding: '4rem 0', textAlign: 'center', borderTop: `1px solid ${theme.glassBorder}` }}>
-         <p style={{ color: theme.text2, fontSize: '0.9rem' }}>© 2026 Paypee Technologies. All rights reserved.</p>
+      <footer style={{ padding: '6rem 0 3rem', borderTop: `1px solid ${theme.glassBorder}`, background: theme.bg }}>
+        <div className="container">
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4rem', justifyContent: 'space-between', marginBottom: '4rem' }}>
+            <div style={{ flex: '1 1 300px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem' }}>
+                 <div style={{ width: 32, height: 32, background: `linear-gradient(135deg, ${theme.primary}, ${theme.purple})`, borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <Zap size={18} color="#fff" />
+                 </div>
+                 <span style={{ fontSize: '1.25rem', fontWeight: 900, letterSpacing: '-0.02em', color: theme.text1 }}>PAYPEE</span>
+              </div>
+              <p style={{ color: theme.text2, maxWidth: '300px', lineHeight: 1.6 }}>An advanced finance app made simple for everyone. Connect globally, instantly.</p>
+            </div>
+            <div style={{ flex: '1 1 150px' }}>
+              <h5 style={{ marginBottom: '1.5rem', color: theme.text1, fontWeight: 800 }}>Product</h5>
+              <ul style={{ listStyle: 'none', padding: 0, color: theme.text2, lineHeight: 2.5, fontSize: '0.9rem' }}>
+                <li style={{ cursor: 'pointer' }}>Global Wallets</li>
+                <li style={{ cursor: 'pointer' }}>Virtual Cards</li>
+                <li style={{ cursor: 'pointer' }}>Transfers</li>
+                <li style={{ cursor: 'pointer' }}>Crypto Swap</li>
+              </ul>
+            </div>
+            <div style={{ flex: '1 1 150px' }}>
+              <h5 style={{ marginBottom: '1.5rem', color: theme.text1, fontWeight: 800 }}>Company</h5>
+              <ul style={{ listStyle: 'none', padding: 0, color: theme.text2, lineHeight: 2.5, fontSize: '0.9rem' }}>
+                <li style={{ cursor: 'pointer' }}>About Us</li>
+                <li style={{ cursor: 'pointer' }}>Careers</li>
+                <li style={{ cursor: 'pointer' }}>Press</li>
+                <li style={{ cursor: 'pointer' }}>Blog</li>
+              </ul>
+            </div>
+            <div style={{ flex: '1 1 150px' }}>
+              <h5 style={{ marginBottom: '1.5rem', color: theme.text1, fontWeight: 800 }}>Support</h5>
+              <ul style={{ listStyle: 'none', padding: 0, color: theme.text2, lineHeight: 2.5, fontSize: '0.9rem' }}>
+                <li style={{ cursor: 'pointer' }}>Help Center</li>
+                <li style={{ cursor: 'pointer' }}>System Status</li>
+                <li style={{ cursor: 'pointer' }}>Contact Us</li>
+                <li style={{ cursor: 'pointer' }}>Security</li>
+              </ul>
+            </div>
+          </div>
+          <div style={{ fontSize: '0.8rem', color: theme.text2, display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', borderTop: `1px solid ${theme.glassBorder}`, paddingTop: '2rem', gap: '1rem' }}>
+            <span>© 2026 Paypee Technologies Ltd. All rights reserved.</span>
+            <div style={{ display: 'flex', gap: '2rem' }}>
+              <span style={{ cursor: 'pointer' }}>Privacy Policy</span>
+              <span style={{ cursor: 'pointer' }}>Terms of Service</span>
+            </div>
+          </div>
+        </div>
       </footer>
     </div>
   );
