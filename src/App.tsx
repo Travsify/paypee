@@ -230,7 +230,6 @@ const App = () => {
 
   return (
     <div className="app-shell">
-      <header style={{ position: 'sticky', top: 0, zIndex: 2000, background: 'rgba(2, 6, 23, 0.98)', backdropFilter: 'blur(10px)', borderBottom: '1px solid var(--border)' }}>
       {landingView === 'main' && (
         <header className="fixed top-0 left-0 right-0 z-50 nav-blur py-4 lg:py-6">
           <div className="container flex justify-between items-center">
