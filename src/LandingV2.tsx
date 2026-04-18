@@ -4,7 +4,8 @@ import {
   Zap, ArrowRight, Globe, Cpu, Shield, Activity, 
   CreditCard, Wallet, Repeat, Terminal, Users, Lock, Building2,
   ChevronRight, Smartphone, ArrowUpRight, BarChart3,
-  Bot, ShieldCheck, Code2, Link as LinkIcon, Star, CheckCircle2
+  Bot, ShieldCheck, Code2, Link as LinkIcon, Star, CheckCircle2,
+  Wifi, Snowflake, SlidersHorizontal
 } from 'lucide-react';
 
 // --- STYLES ---
@@ -197,35 +198,103 @@ const MultiCurrency = () => (
 // 5. Virtual Cards Experience
 const VirtualCards = () => (
   <section id="cards" style={{ padding: '8rem 0', overflow: 'hidden' }}>
-     <div className="container" style={{ textAlign: 'center' }}>
-        <div style={{ color: theme.purple, fontWeight: 700, marginBottom: '1rem' }}>Virtual cards</div>
-        <h2 style={{ fontSize: '3.5rem', fontWeight: 900, color: theme.text1, marginBottom: '1.5rem' }}>Beautiful cards. Total control.</h2>
-        <p style={{ color: theme.text2, fontSize: '1.2rem', maxWidth: '600px', margin: '0 auto 4rem', lineHeight: 1.6 }}>Spin up unlimited virtual cards for subscriptions, travel or business. Freeze, unfreeze and set spending limits — instantly.</p>
-        
-        <div style={{ position: 'relative', height: '400px', display: 'flex', justifyContent: 'center', alignItems: 'center', perspective: '1000px' }}>
-           <div style={{ position: 'absolute', width: '100%', height: '100%', background: `radial-gradient(circle, ${theme.purple}20 0%, transparent 50%)`, filter: 'blur(50px)' }} />
-           
-           <motion.div animate={{ rotateY: [0, 5, -5, 0], rotateX: [5, 0, 5] }} transition={{ duration: 6, repeat: Infinity, ease: 'linear' }} style={{ zIndex: 10 }}>
-              <div style={{ width: '360px', height: '220px', background: `linear-gradient(135deg, ${theme.primary}, ${theme.purple})`, borderRadius: '24px', padding: '2rem', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', boxShadow: `0 30px 60px rgba(0,0,0,0.5)` }}>
-                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <div style={{ fontWeight: 900, fontSize: '1.2rem', color: '#fff' }}>PAYPEE</div>
+     <div className="container">
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '6rem', alignItems: 'center' }}>
+           {/* Left side: Cards Stack */}
+           <div style={{ position: 'relative', height: '400px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              
+              {/* Back Card */}
+              <motion.div animate={{ rotate: -15, x: -60, y: 20 }} style={{ position: 'absolute', zIndex: 1, width: '320px', height: '200px', background: `linear-gradient(135deg, ${theme.purple}, #c084fc)`, borderRadius: '16px', padding: '1.5rem', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', boxShadow: `0 20px 40px rgba(0,0,0,0.4)` }}>
+                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div style={{ fontWeight: 800, fontSize: '1.1rem', color: '#fff' }}>paypee</div>
+                    <Wifi size={20} color="#fff" style={{ transform: 'rotate(90deg)' }} />
                  </div>
-                 <div style={{ fontSize: '1.5rem', letterSpacing: '4px', color: '#fff', fontWeight: 600 }}>•••• 8421</div>
                  <div>
-                    <div style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.7)', textTransform: 'uppercase' }}>Cardholder</div>
-                    <div style={{ fontSize: '1rem', color: '#fff', fontWeight: 600 }}>Sarah Okafor</div>
+                    <div style={{ fontSize: '1.2rem', letterSpacing: '4px', color: '#fff', fontWeight: 600, marginBottom: '1rem' }}>•••• •••• •••• 8421</div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+                       <div>
+                          <div style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.7)', textTransform: 'uppercase', marginBottom: '0.2rem' }}>CARDHOLDER</div>
+                          <div style={{ fontSize: '0.9rem', color: '#fff', fontWeight: 600 }}>Sarah Okafor</div>
+                       </div>
+                       <div style={{ display: 'flex' }}>
+                          <div style={{ width: '24px', height: '24px', borderRadius: '50%', background: 'rgba(255,255,255,0.5)' }}></div>
+                          <div style={{ width: '24px', height: '24px', borderRadius: '50%', background: 'rgba(255,255,255,0.8)', marginLeft: '-12px' }}></div>
+                       </div>
+                    </div>
                  </div>
-              </div>
-           </motion.div>
-           
-           <div style={{ position: 'absolute', display: 'flex', gap: '2rem', bottom: 0 }}>
-              <div style={{ ...glassPanel, padding: '1rem 1.5rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                 <Lock color={theme.cyan} /> <div><div style={{ fontWeight: 700 }}>Freeze instantly</div><div style={{ fontSize: '0.8rem', color: theme.text2 }}>One tap, zero fraud</div></div>
-              </div>
-              <div style={{ ...glassPanel, padding: '1rem 1.5rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                 <Activity color={theme.purple} /> <div><div style={{ fontWeight: 700 }}>Set limits</div><div style={{ fontSize: '0.8rem', color: theme.text2 }}>Daily, monthly, per-merchant</div></div>
+              </motion.div>
+
+              {/* Middle Card */}
+              <motion.div animate={{ rotate: -5, x: -30, y: -20 }} style={{ position: 'absolute', zIndex: 2, width: '320px', height: '200px', background: `linear-gradient(135deg, ${theme.cyan}, #06b6d4)`, borderRadius: '16px', padding: '1.5rem', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', boxShadow: `0 20px 40px rgba(0,0,0,0.5)` }}>
+                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div style={{ fontWeight: 800, fontSize: '1.1rem', color: '#fff' }}>paypee</div>
+                    <Wifi size={20} color="#fff" style={{ transform: 'rotate(90deg)' }} />
+                 </div>
+                 <div>
+                    <div style={{ fontSize: '1.2rem', letterSpacing: '4px', color: '#fff', fontWeight: 600, marginBottom: '1rem' }}>•••• •••• •••• 2256</div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+                       <div>
+                          <div style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.7)', textTransform: 'uppercase', marginBottom: '0.2rem' }}>CARDHOLDER</div>
+                          <div style={{ fontSize: '0.9rem', color: '#fff', fontWeight: 600 }}>Sarah Okafor</div>
+                       </div>
+                       <div style={{ display: 'flex' }}>
+                          <div style={{ width: '24px', height: '24px', borderRadius: '50%', background: 'rgba(255,255,255,0.5)' }}></div>
+                          <div style={{ width: '24px', height: '24px', borderRadius: '50%', background: 'rgba(255,255,255,0.8)', marginLeft: '-12px' }}></div>
+                       </div>
+                    </div>
+                 </div>
+              </motion.div>
+
+              {/* Front Card */}
+              <motion.div animate={{ rotate: 8, x: 20, y: 10 }} style={{ position: 'absolute', zIndex: 3, width: '340px', height: '210px', background: `linear-gradient(135deg, ${theme.primary}, #818cf8)`, borderRadius: '16px', padding: '1.8rem', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', boxShadow: `0 30px 60px rgba(0,0,0,0.6)` }}>
+                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div style={{ fontWeight: 800, fontSize: '1.2rem', color: '#fff' }}>paypee</div>
+                    <Wifi size={22} color="#fff" style={{ transform: 'rotate(90deg)' }} />
+                 </div>
+                 <div>
+                    <div style={{ fontSize: '1.4rem', letterSpacing: '8px', color: '#fff', fontWeight: 600, marginBottom: '1.2rem' }}>•••• 9034</div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+                       <div>
+                          <div style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.7)', textTransform: 'uppercase', marginBottom: '0.2rem' }}>CARDHOLDER</div>
+                          <div style={{ fontSize: '1rem', color: '#fff', fontWeight: 600 }}>Sarah Okafor</div>
+                       </div>
+                       <div style={{ display: 'flex' }}>
+                          <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'rgba(255,255,255,0.5)' }}></div>
+                          <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'rgba(255,255,255,0.8)', marginLeft: '-14px' }}></div>
+                       </div>
+                    </div>
+                 </div>
+              </motion.div>
+           </div>
+
+           {/* Right side: Text Content */}
+           <div>
+              <div style={{ color: theme.purple, fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase', marginBottom: '1rem', fontSize: '0.85rem' }}>Virtual cards</div>
+              <h2 style={{ fontSize: '3.5rem', fontWeight: 900, color: theme.text1, marginBottom: '1.5rem', lineHeight: 1.1 }}>Beautiful cards.<br/>Total control.</h2>
+              <p style={{ color: theme.text2, fontSize: '1.2rem', marginBottom: '3rem', lineHeight: 1.6 }}>Spin up unlimited virtual cards for subscriptions, travel or business. Freeze, unfreeze and set spending limits — instantly.</p>
+              
+              <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap' }}>
+                 <div style={{ ...glassPanel, padding: '1.5rem', display: 'flex', alignItems: 'center', gap: '1rem', flex: 1, minWidth: '240px' }}>
+                    <div style={{ background: 'rgba(34, 211, 238, 0.1)', padding: '0.75rem', borderRadius: '12px' }}>
+                       <Snowflake color={theme.cyan} size={20} />
+                    </div>
+                    <div>
+                       <div style={{ fontWeight: 700, color: theme.text1, marginBottom: '0.2rem' }}>Freeze instantly</div>
+                       <div style={{ fontSize: '0.85rem', color: theme.text2 }}>One tap, zero fraud</div>
+                    </div>
+                 </div>
+                 <div style={{ ...glassPanel, padding: '1.5rem', display: 'flex', alignItems: 'center', gap: '1rem', flex: 1, minWidth: '240px' }}>
+                    <div style={{ background: 'rgba(167, 139, 250, 0.1)', padding: '0.75rem', borderRadius: '12px' }}>
+                       <SlidersHorizontal color={theme.purple} size={20} />
+                    </div>
+                    <div>
+                       <div style={{ fontWeight: 700, color: theme.text1, marginBottom: '0.2rem' }}>Set limits</div>
+                       <div style={{ fontSize: '0.85rem', color: theme.text2 }}>Daily, monthly, per-merchant</div>
+                    </div>
+                 </div>
               </div>
            </div>
+
         </div>
      </div>
   </section>
