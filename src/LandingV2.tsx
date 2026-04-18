@@ -71,76 +71,85 @@ const LandingV2: React.FC<LandingV2Props> = ({ onAuth }) => {
               transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
               className="lg:col-span-6 stagger-load"
             >
-              <div className="badge mb-8 animate-pulse">
-                <Star size={14} className="fill-current text-primary" /> 
-                <span className="ml-2">The Fintech Operating System</span>
+              <div className="flex items-center gap-4 mb-10">
+                <div className="badge py-2 px-4 bg-primary/10 border-primary/20 text-primary animate-pulse">
+                  <Star size={14} className="fill-current" /> 
+                  <span className="ml-2 font-black tracking-widest text-[10px] uppercase">The Fintech Operating System</span>
+                </div>
               </div>
-              <h1 className="mb-8 leading-[0.95] tracking-tighter">
+              <h1 className="mb-10 leading-[0.9] tracking-tighter text-6xl lg:text-8xl font-black">
                 Global Finance. <br/>
                 <span className="text-gradient">Unified & Instant.</span>
               </h1>
-              <p className="text-xl lg:text-2xl text-white/50 mb-12 max-w-xl leading-relaxed">
+              <p className="text-xl lg:text-2xl text-white/50 mb-14 max-w-xl leading-relaxed">
                 Empowering businesses and creators with the infrastructure to move value anywhere, anytime. One platform for cards, accounts, and global liquidity.
               </p>
               
-              <div className="flex flex-wrap gap-4 lg:gap-6 mb-16">
-                <button className="btn btn-primary btn-lg group w-full sm:w-auto" onClick={onAuth}>
-                  Get Started <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
+              <div className="flex flex-wrap gap-5 lg:gap-8 mb-20">
+                <button className="btn btn-primary btn-lg px-12 py-5 rounded-2xl group w-full sm:w-auto text-lg shadow-[0_20px_40px_rgba(99,102,241,0.3)]" onClick={onAuth}>
+                  Get Started <ArrowRight size={22} className="group-hover:translate-x-1 transition-transform" />
                 </button>
-                <button className="btn btn-outline btn-lg w-full sm:w-auto">
+                <button className="btn btn-outline btn-lg px-12 py-5 rounded-2xl w-full sm:w-auto text-lg border-white/10 hover:bg-white/5">
                   API Reference
                 </button>
               </div>
 
-              <div className="flex items-center gap-12 border-t border-white/5 pt-12">
+              <div className="grid grid-cols-3 gap-8 border-t border-white/5 pt-12">
                 <div>
-                  <div className="text-2xl font-black text-white">50+</div>
-                  <div className="text-xs uppercase tracking-widest text-white/30 font-bold">Countries</div>
+                  <div className="text-4xl lg:text-5xl font-black text-white tracking-tighter">50+</div>
+                  <div className="text-[10px] uppercase tracking-[0.2em] text-white/30 font-black mt-2">Countries</div>
                 </div>
                 <div>
-                  <div className="text-2xl font-black text-white">120ms</div>
-                  <div className="text-xs uppercase tracking-widest text-white/30 font-bold">API Latency</div>
+                  <div className="text-4xl lg:text-5xl font-black text-white tracking-tighter">120ms</div>
+                  <div className="text-[10px] uppercase tracking-[0.2em] text-white/30 font-black mt-2">API Latency</div>
                 </div>
                 <div>
-                  <div className="text-2xl font-black text-white">99.9%</div>
-                  <div className="text-xs uppercase tracking-widest text-white/30 font-bold">Reliability</div>
+                  <div className="text-4xl lg:text-5xl font-black text-white tracking-tighter">99.9%</div>
+                  <div className="text-[10px] uppercase tracking-[0.2em] text-white/30 font-black mt-2">Reliability</div>
                 </div>
               </div>
             </motion.div>
 
             {/* Dynamic Animated Hero Visual */}
-            <div className="lg:col-span-6 relative h-[450px] lg:h-[650px]">
+            <div className="lg:col-span-6 relative h-[500px] lg:h-[700px]">
               <div className="absolute inset-0 flex items-center justify-center">
                 <AnimatePresence mode="wait">
                   <motion.div
                     key={currentHeroImage}
-                    initial={{ opacity: 0, scale: 0.8, rotateY: 20 }}
+                    initial={{ opacity: 0, scale: 0.9, rotateY: 15 }}
                     animate={{ opacity: 1, scale: 1, rotateY: 0 }}
-                    exit={{ opacity: 0, scale: 1.1, rotateY: -20 }}
+                    exit={{ opacity: 0, scale: 1.05, rotateY: -15 }}
                     transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-                    className="relative w-full h-full hero-image-container"
+                    className="relative w-full h-full hero-image-container premium-border shadow-[0_50px_100px_rgba(0,0,0,0.5)]"
                   >
                     <img 
                       src={heroImages[currentHeroImage].src} 
-                      alt={heroImages[currentHeroImage].label}
-                      className="w-full h-full object-cover rounded-[64px]"
+                      alt="" // Decorative for the visual layout
+                      className="w-full h-full object-cover rounded-[56px]"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent rounded-[64px]" />
-                    <div className="absolute bottom-10 left-10">
-                      <div className="badge bg-white/10 backdrop-blur-md border-white/20 text-white">
-                        {heroImages[currentHeroImage].label}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent rounded-[56px]" />
+                    
+                    <div className="absolute bottom-12 left-12 right-12 flex justify-between items-end">
+                      <div>
+                        <div className="text-xs uppercase tracking-[0.3em] text-white/40 font-black mb-3">Live Environment</div>
+                        <div className="text-3xl font-black text-white tracking-tight">
+                          {heroImages[currentHeroImage].label}
+                        </div>
+                      </div>
+                      <div className="badge py-2 px-4 bg-white/10 backdrop-blur-xl border-white/20 text-white font-bold text-[10px] tracking-widest uppercase">
+                        SECURE Rails
                       </div>
                     </div>
                   </motion.div>
                 </AnimatePresence>
 
                 {/* Floating Indicators */}
-                <div className="absolute -right-4 top-1/2 -translate-y-1/2 flex flex-col gap-3">
+                <div className="absolute -right-8 top-1/2 -translate-y-1/2 flex flex-col gap-4">
                   {heroImages.map((_, i) => (
                     <button 
                       key={i}
                       onClick={() => setCurrentHeroImage(i)}
-                      className={`w-1.5 h-12 rounded-full transition-all duration-500 ${currentHeroImage === i ? 'bg-primary h-20' : 'bg-white/10'}`}
+                      className={`w-1 h-16 rounded-full transition-all duration-700 ${currentHeroImage === i ? 'bg-primary h-24' : 'bg-white/5 hover:bg-white/20'}`}
                     />
                   ))}
                 </div>
