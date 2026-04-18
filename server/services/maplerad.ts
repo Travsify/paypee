@@ -592,7 +592,7 @@ export const getCustomerVirtualAccounts = async (customerId: string) => {
  */
 export const getTransactions = async (customerId?: string) => {
   try {
-    const url = customerId ? `/transactions?customer_id=${customerId}` : '/transactions';
+    const url = customerId ? `/transactions?customer_id=${customerId}&limit=100` : '/transactions?limit=100';
     const response = await makeRequest('get', url);
     console.log(`[MAPLERAD DEBUG] GET ${url} - Status: ${response.status}`);
     

@@ -171,21 +171,10 @@ export class IbanService {
 
       console.log(`[RECONCILE] Total external transactions to scan: ${externalTxs.length}`);
       
-      if (externalTxs.length > 0) {
-          console.log(`[RECONCILE] DEBUG: Local accounts being checked: ${externalAccounts.map((a: any) => a.account_number).join(', ')}`);
-          const sampleTx = externalTxs[0];
-          console.log(`[RECONCILE] DEBUG: Sample External TX data: ${JSON.stringify({
-              id: sampleTx.id,
-              amount: sampleTx.amount,
-              acc: sampleTx.account_number,
-              metaAcc: sampleTx.meta?.account_number,
-              type: sampleTx.type
-          })}`);
-      }
+      console.log(`[RECONCILE] Total external transactions to scan: ${externalTxs.length}`);
 
       // Filter transactions that belong to this user's accounts
       const userAccNumbers = externalAccounts.map((a: any) => String(a.account_number));
-      console.log(`[RECONCILE] DEBUG: Scanning ${externalTxs.length} TXs for matches against: ${userAccNumbers.join(', ')}`);
 
       const relevantTxs = externalTxs.filter((tx: any) => {
         const txAcc = String(tx.account_number || tx.virtual_account_number || tx.virtual_account?.account_number || tx.meta?.account_number || tx.meta?.virtual_account_number || '');
