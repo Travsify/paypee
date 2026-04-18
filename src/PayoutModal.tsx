@@ -181,7 +181,7 @@ const PayoutModal: React.FC<PayoutModalProps> = ({ isOpen, onClose, onComplete, 
                     exit={{ opacity: 0, y: -10 }}
                     style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: '#0f172a', border: '1px solid #1e293b', borderRadius: '16px', marginTop: '0.5rem', zIndex: 100, maxHeight: '250px', overflowY: 'auto', boxShadow: '0 10px 25px rgba(0,0,0,0.5)' }}
                   >
-                    <div style={{ position: 'sticky', top: 0, background: '#0f172a', padding: '0.75rem', borderBottom: '1px solid #1e293b', zIndex: 1 }}>
+                    <div style={{ position: 'sticky', top: 0, background: '#0f172a', padding: '0.75rem', borderBottom: '1px solid #1e293b', zIndex: 1 }} onClick={(e) => e.stopPropagation()}>
                       <input 
                         autoFocus
                         placeholder="Search provider..." 
@@ -194,7 +194,12 @@ const PayoutModal: React.FC<PayoutModalProps> = ({ isOpen, onClose, onComplete, 
                     {filteredBanks.map(b => (
                       <div 
                         key={b.bank_code} 
-                        onClick={() => { setBankCode(b.bank_code); setIsBankDropdownOpen(false); setBankSearch(''); }}
+                        onClick={(e) => { 
+                          e.stopPropagation();
+                          setBankCode(b.bank_code); 
+                          setIsBankDropdownOpen(false); 
+                          setBankSearch(''); 
+                        }}
                         style={{ padding: '1rem', cursor: 'pointer', transition: 'background 0.2s', borderBottom: '1px solid rgba(255,255,255,0.03)', fontSize: '0.95rem', background: bankCode === b.bank_code ? 'rgba(99, 102, 241, 0.1)' : 'transparent' }}
                         onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.05)'}
                         onMouseLeave={(e) => e.currentTarget.style.background = bankCode === b.bank_code ? 'rgba(99, 102, 241, 0.1)' : 'transparent'}
