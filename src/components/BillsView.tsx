@@ -12,11 +12,13 @@ import {
   ArrowRight,
   ShieldCheck,
   Activity,
+  Globe,
+  Trophy,
   X
 } from 'lucide-react';
 
 const BillsView = () => {
-  const [activeCategory, setActiveCategory] = useState('AIRTIME');
+  const [activeCategory, setActiveCategory] = useState('airtime');
   const [providers, setProviders] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [selectedProvider, setSelectedProvider] = useState<any>(null);
@@ -30,10 +32,12 @@ const BillsView = () => {
   const [success, setSuccess] = useState(false);
 
   const categories = [
-    { id: 'AIRTIME', name: 'Airtime', icon: <Smartphone />, color: '#10b981' },
-    { id: 'DATA', name: 'Mobile Data', icon: <Wifi />, color: '#3b82f6' },
-    { id: 'UTILITY', name: 'Electricity', icon: <Lightbulb />, color: '#f59e0b' },
-    { id: 'TV', name: 'Cable TV', icon: <Tv />, color: '#ef4444' }
+    { id: 'airtime', name: 'Airtime', icon: <Smartphone />, color: '#10b981' },
+    { id: 'data', name: 'Mobile Data', icon: <Wifi />, color: '#3b82f6' },
+    { id: 'electricity', name: 'Electricity', icon: <Lightbulb />, color: '#f59e0b' },
+    { id: 'cable', name: 'Cable TV', icon: <Tv />, color: '#ef4444' },
+    { id: 'internet', name: 'Internet', icon: <Globe />, color: '#8b5cf6' },
+    { id: 'betting', name: 'Betting', icon: <Trophy />, color: '#22d3ee' }
   ];
 
   const [products, setProducts] = useState<any[]>([]);

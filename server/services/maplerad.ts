@@ -347,31 +347,31 @@ export const toggleCardStatus = async (cardId: string, status: 'FREEZE' | 'UNFRE
 };
 
 /**
- * Bill Payments: Get Categories (Airtime, Data, Power, etc.)
+ * Bill Payments: Get Categories
  */
 export const getBillCategories = async () => {
-  try {
-    const response = await mapleradClient.get('/bills/categories');
-    return response.data.data;
-  } catch (error: any) {
-    console.error('[MAPLERAD] Bill Categories Error:', error.response?.data || error.message);
-    return [
-      { id: 'airtime', name: 'Airtime', icon: 'smartphone' },
-      { id: 'data', name: 'Mobile Data', icon: 'wifi' },
-      { id: 'utility', name: 'Electricity', icon: 'zap' },
-      { id: 'cable', name: 'Cable TV', icon: 'tv' }
-    ];
-  }
+  // Maplerad doesn't have a generic categories endpoint; we define them ourselves
+  return [
+    { id: 'airtime', name: 'Airtime', icon: 'smartphone' },
+    { id: 'data', name: 'Mobile Data', icon: 'wifi' },
+    { id: 'electricity', name: 'Electricity', icon: 'zap' },
+    { id: 'cable', name: 'Cable TV', icon: 'tv' },
+    { id: 'internet', name: 'Internet', icon: 'globe' },
+    { id: 'betting', name: 'Betting', icon: 'trophy' }
+  ];
 };
 
 /**
  * Bill Payments: Get Billers for a category
+ * Maplerad uses per-category endpoints: /bills/airtime/billers/{country}
  */
 export const getBillers = async (category: string, country: string = 'NG') => {
   try {
-    console.log(`[MAPLERAD] Fetching billers for ${category} in ${country}...`);
-    const response = await mapleradClient.get(`/bills/billers?category=${category}&country=${country}`);
-    return response.data.data;
+    // Map our category names to Maplerad's endpoint paths
+    const categoryPath = mapCategoryToPath(category);
+    console.log(`[MAPLERAD] Fetching billers: /bills/${categoryPath}/billers/${country}`);
+    const response = await mapleradClient.get(`/bills/${categoryPath}/billers/${country}`);
+    return response.data.data || [];
   } catch (error: any) {
     console.error('[MAPLERAD] Get Billers Error:', error.response?.data || error.message);
     if (error.response?.status === 401 || error.response?.status === 403) {
@@ -382,33 +382,87 @@ export const getBillers = async (category: string, country: string = 'NG') => {
 };
 
 /**
- * Bill Payments: Get Products for a biller
+ * Bill Payments: Get Products for a biller (not all categories have this)
  */
 export const getBillerProducts = async (billerId: string) => {
-  try {
-    const response = await mapleradClient.get(`/bills/billers/${billerId}/products`);
-    return response.data.data;
-  } catch (error: any) {
-    console.error('[MAPLERAD] Biller Products Error:', error.response?.data || error.message);
-    return [];
-  }
+  // Maplerad doesn't have a generic products-per-biller endpoint;
+  // Products are implicit in the biller list for most categories.
+  // For electricity (meters), the identifier is entered by the user.
+  console.log(`[MAPLERAD] Product fetch requested for biller ${billerId} — returning biller info as product`);
+  return [];
 };
 
 /**
- * Process a Bill Payment
+ * Process a Bill Payment via the correct category-specific endpoint
  */
-export const payBill = async (payload: { biller_id: string, product_id: string, amount: number, customer_id: string, phone_number?: string, meter_number?: string }) => {
+export const payBill = async (payload: { 
+  category: string, 
+  phone_number?: string, 
+  amount: number, 
+  identifier?: string,
+  biller_id?: string,
+  meter_number?: string,
+  smartcard_number?: string,
+  product_id?: string 
+}) => {
   try {
-    const response = await mapleradClient.post('/bills', {
-      ...payload,
-      amount: Math.round(payload.amount * 100)
-    });
+    const categoryPath = mapCategoryToPath(payload.category);
+    
+    // Build the request body based on category
+    const body: any = {
+      amount: Math.round(payload.amount * 100) // Maplerad uses kobo/cents
+    };
+
+    // Airtime & Data need phone_number + identifier (biller code like "ng-airtime")
+    if (categoryPath === 'airtime' || categoryPath === 'data') {
+      body.phone_number = payload.phone_number || payload.meter_number;
+      body.identifier = payload.biller_id || payload.identifier;
+    }
+    // Electricity needs meter_number + identifier
+    else if (categoryPath === 'electricity') {
+      body.meter_number = payload.meter_number || payload.phone_number;
+      body.identifier = payload.biller_id || payload.identifier;
+    }
+    // Cable TV needs smartcard_number + identifier  
+    else if (categoryPath === 'cabletv') {
+      body.smartcard_number = payload.smartcard_number || payload.phone_number;
+      body.identifier = payload.biller_id || payload.identifier;
+      if (payload.product_id) body.product_id = payload.product_id;
+    }
+    // Internet & Betting
+    else {
+      body.phone_number = payload.phone_number || payload.meter_number;
+      body.identifier = payload.biller_id || payload.identifier;
+    }
+
+    console.log(`[MAPLERAD] Paying bill via POST /bills/${categoryPath}:`, JSON.stringify(body));
+    const response = await mapleradClient.post(`/bills/${categoryPath}`, body);
     return response.data.data;
   } catch (error: any) {
     console.error('[MAPLERAD] Pay Bill Error:', error.response?.data || error.message);
     throw new Error(error.response?.data?.message || 'Bill payment failed');
   }
 };
+
+/**
+ * Maps our internal category names to Maplerad's URL path segment
+ */
+function mapCategoryToPath(category: string): string {
+  const map: Record<string, string> = {
+    'airtime': 'airtime',
+    'data': 'data',
+    'electricity': 'electricity',
+    'utility': 'electricity',
+    'power': 'electricity',
+    'cable': 'cabletv',
+    'cabletv': 'cabletv',
+    'tv': 'cabletv',
+    'internet': 'internet',
+    'betting': 'betting',
+    'education': 'education'
+  };
+  return map[category.toLowerCase()] || category.toLowerCase();
+}
 
 /**
  * Create a Payment Link (Commerce/Collections)

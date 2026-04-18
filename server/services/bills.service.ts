@@ -6,34 +6,13 @@ const prisma = new PrismaClient();
 export class BillsService {
   /**
    * Fetches available bill providers from Maplerad.
+   * Uses the correct per-category endpoint: /bills/{category}/billers/{country}
    */
   static async getProviders(category: string) {
     console.log(`📡 Fetching Maplerad billers for category: ${category}...`);
     
     try {
-      const normalized = category.toLowerCase();
-      let mappedCategory = normalized;
-      
-      if (normalized === 'electricity' || normalized === 'utility') {
-        mappedCategory = 'utility';
-      } else if (normalized === 'tv' || normalized === 'cable') {
-        mappedCategory = 'cable';
-      }
-      
-      let billers = await Maplerad.getBillers(mappedCategory);
-      
-      // Fallback for electricity if 'utility' returns nothing (some regions use 'power')
-      if (billers.length === 0 && mappedCategory === 'utility') {
-         console.log('⚠️ Maplerad returned no billers for "utility", trying "power"...');
-         billers = await Maplerad.getBillers('power');
-      }
-
-      // Fallback for cable if 'cable' returns nothing (some regions use 'tv')
-      if (billers.length === 0 && mappedCategory === 'cable') {
-         console.log('⚠️ Maplerad returned no billers for "cable", trying "tv"...');
-         billers = await Maplerad.getBillers('tv');
-      }
-      
+      const billers = await Maplerad.getBillers(category);
       return billers || [];
     } catch (err: any) {
       console.error(`❌ Maplerad Failed to fetch bill providers for ${category}:`, err.message);
@@ -55,6 +34,7 @@ export class BillsService {
 
   /**
    * Executes a bill payment transaction via Maplerad.
+   * Now routes through the correct category-specific endpoint.
    */
   static async payBill(userId: string, data: { walletId: string, amount: number, providerId: string, productId: string, customerId: string, category: string }) {
     const { walletId, amount, providerId, productId, customerId, category } = data;
@@ -92,13 +72,17 @@ export class BillsService {
         }
       });
 
-      // 4. Trigger Maplerad's bill payment
+      // 4. Trigger Maplerad's bill payment via the correct category-specific endpoint
       try {
         await Maplerad.payBill({
+          category: category,
           biller_id: providerId,
           product_id: productId,
           amount: amount,
-          customer_id: customerId
+          phone_number: customerId,
+          meter_number: customerId,
+          smartcard_number: customerId,
+          identifier: providerId
         });
         
         console.log(`✅ [MAPLERAD SETTLED]: User ${userId} ${category} finalized.`);
