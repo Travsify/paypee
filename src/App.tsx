@@ -32,7 +32,7 @@ import {
   Webhook,
   Server
 } from 'lucide-react';
-import IndividualDashboard from './IndividualDashboard';
+import NextGenDashboard from './NextGenDashboard';
 import BusinessDashboard from './BusinessDashboard';
 import DeveloperDashboard from './DeveloperDashboard';
 import Docs from './Docs';
@@ -152,7 +152,7 @@ const App = () => {
   };
 
   if (view === 'individual') {
-    return <IndividualDashboard onLogout={handleLogout} />;
+    return <NextGenDashboard />;
   }
   if (view === 'business') {
     return <BusinessDashboard onLogout={handleLogout} />;
