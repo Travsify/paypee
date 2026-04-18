@@ -38,12 +38,13 @@ const directClient = axios.create({
 });
 
 // Helper for robust requests with proxy fallback
-const makeRequest = async (method: 'get' | 'post' | 'put' | 'delete', url: string, data?: any, params?: any) => {
+const makeRequest = async (method: 'get' | 'post' | 'put' | 'delete' | 'patch', url: string, data?: any, params?: any): Promise<any> => {
   try {
     const config = { params };
     if (method === 'get' || method === 'delete') {
       return await mapleradClient[method](url, config);
     } else {
+      // @ts-ignore - Support patch/post/put dynamically
       return await mapleradClient[method](url, data, config);
     }
   } catch (err: any) {
@@ -53,10 +54,24 @@ const makeRequest = async (method: 'get' | 'post' | 'put' | 'delete', url: strin
       if (method === 'get' || method === 'delete') {
         return await directClient[method](url, config);
       } else {
+        // @ts-ignore
         return await directClient[method](url, data, config);
       }
     }
     throw err;
+  }
+};
+
+/**
+ * Get all customers from Maplerad.
+ */
+export const getCustomers = async () => {
+  try {
+    const response = await makeRequest('get', '/customers');
+    return response.data.data || [];
+  } catch (error: any) {
+    console.error('[MAPLERAD] Get Customers Error:', error.response?.data || error.message);
+    return [];
   }
 };
 
@@ -525,7 +540,7 @@ export const getPaymentLinks = async () => {
  */
 export const getMapleradPayStatus = async (reference: string) => {
   try {
-    const response = await mapleradClient.get(`/collections/links/status/${reference}`);
+    const response = await makeRequest('get', `/collections/links/status/${reference}`);
     return response.data.data;
   } catch (error: any) {
     console.error('[MAPLERAD] Link Status Error:', error.response?.data || error.message);
