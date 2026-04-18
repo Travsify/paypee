@@ -9,22 +9,6 @@ import {
   Activity
 } from 'lucide-react';
 
-const Nav = () => (
-  <nav style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100, padding: '1.5rem 2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(2, 6, 23, 0.8)', backdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-       <div style={{ width: 32, height: 32, background: 'linear-gradient(135deg, #6366f1, #a855f7)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <Zap size={18} color="#fff" />
-       </div>
-       <span style={{ fontSize: '1.25rem', fontWeight: 900, letterSpacing: '-0.02em', color: '#fff' }}>PAYPEE</span>
-    </div>
-    <div style={{ display: 'flex', gap: '2.5rem', alignItems: 'center' }}>
-       {['Platform', 'Solutions', 'Developers'].map(item => (
-         <a key={item} href="#" style={{ color: '#94a3b8', textDecoration: 'none', fontSize: '0.95rem', fontWeight: 600, transition: 'color 0.2s' }} onMouseEnter={e => e.currentTarget.style.color = '#fff'} onMouseLeave={e => e.currentTarget.style.color = '#94a3b8'}>{item}</a>
-       ))}
-       <button style={{ background: '#fff', color: '#020617', border: 'none', padding: '0.75rem 1.5rem', borderRadius: '12px', fontWeight: 800, fontSize: '0.9rem', cursor: 'pointer' }}>Get API Keys</button>
-    </div>
-  </nav>
-);
 
 const WorldClassHero = ({ onAuth }: { onAuth: () => void }) => {
   return (
@@ -133,7 +117,6 @@ const AnimatedSection = ({ title, desc, icon, image, reverse, color }: any) => {
 const LandingV2 = ({ onAuth }: { onAuth: () => void }) => {
   return (
     <div style={{ background: '#020617', color: '#fff', minHeight: '100vh', fontFamily: 'Inter, sans-serif' }}>
-      <Nav />
       <WorldClassHero onAuth={onAuth} />
       
       <AnimatedSection 
