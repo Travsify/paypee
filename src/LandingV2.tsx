@@ -46,103 +46,97 @@ const LandingV2: React.FC<LandingV2Props> = ({ onAuth, setLandingView }) => {
   }, []);
 
   return (
-    <div className="landing-v2 bg-[#020617] text-white selection:bg-primary/30">
+    <div className="landing-v2 bg-[#020617] text-white selection:bg-primary/30 overflow-x-hidden">
+      
+      {/* Dynamic Background Liquidity */}
+      <div className="fixed inset-0 pointer-events-none z-0">
+        <div className="absolute top-[10%] left-[-10%] w-[50vw] h-[50vw] bg-primary/10 blur-[150px] rounded-full animate-pulse" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[50vw] h-[50vw] bg-pink-500/5 blur-[150px] rounded-full" />
+      </div>
       
       {/* 1. HERO SECTION: The Fintech OS */}
-      <section className="relative min-h-screen flex items-center pt-32 lg:pt-0 overflow-hidden">
-        <div className="absolute top-0 left-0 w-full h-full pointer-events-none overflow-hidden">
-          <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/20 blur-[120px] rounded-full"></div>
-          <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-pink-500/10 blur-[120px] rounded-full"></div>
-        </div>
-        
-        <div className="container relative z-10">
+      <section className="relative min-h-screen flex items-center pt-32 lg:pt-0 overflow-hidden z-10">
+        <div className="container relative">
           <div className="grid grid-cols-1 lg:grid-cols-12 items-center gap-16">
             <motion.div 
-              initial={{ opacity: 0, x: -60 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
+              initial={{ opacity: 0, y: 40 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
               className="lg:col-span-7"
             >
-              <div className="inline-flex items-center gap-3 px-4 py-2 rounded-full bg-primary/5 border border-primary/20 mb-8 animate-pulse">
-                <Star size={14} className="text-primary fill-current" />
-                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-primary">The Fintech Operating System</span>
+              <div className="inline-flex items-center gap-3 px-5 py-2 rounded-full bg-white/5 border border-white/10 mb-10">
+                <div className="w-2 h-2 rounded-full bg-primary animate-ping" />
+                <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white/60">The Operating System for Global Money</span>
               </div>
               
-              <h1 className="text-7xl lg:text-[110px] font-black leading-[0.85] tracking-tighter italic uppercase mb-10">
+              <h1 className="text-7xl lg:text-[130px] font-black leading-[0.8] tracking-tighter italic uppercase mb-10 mix-blend-plus-lighter">
                 Global Finance. <br/>
-                <span className="text-gradient">Unified & Instant.</span>
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-white to-pink-500">Unified & Instant.</span>
               </h1>
               
-              <p className="text-xl lg:text-2xl text-white/40 max-w-xl leading-relaxed mb-12 font-medium">
-                The infrastructure for modern value movement. One platform for multi-currency accounts, virtual cards, and institutional crypto liquidity.
+              <p className="text-xl lg:text-2xl text-text-dim max-w-xl leading-relaxed mb-12 font-medium">
+                The high-fidelity infrastructure for modern value movement. One dashboard for global accounts, virtual cards, and AI-driven wealth intelligence.
               </p>
               
               <div className="flex flex-wrap gap-6 mb-16">
-                <button className="btn btn-primary btn-lg px-14 py-6 rounded-2xl group text-lg shadow-[0_20px_40px_rgba(99,102,241,0.3)]" onClick={onAuth}>
-                  Get Started <ArrowRight size={22} className="group-hover:translate-x-1 transition-transform" />
+                <button className="btn-nextgen btn-primary !px-16 !py-8 !text-lg !rounded-3xl shadow-[0_20px_60px_rgba(99,102,241,0.4)]" onClick={onAuth}>
+                  Get Started <ArrowRight size={22} />
                 </button>
-                <button className="btn btn-outline btn-lg px-12 py-6 rounded-2xl text-lg hover:bg-white/5 border-white/10">
-                  API Reference
+                <button className="btn-nextgen btn-ghost !px-12 !py-8 !text-lg !rounded-3xl border-white/10" onClick={() => setLandingView('developer')}>
+                  Explore API
                 </button>
               </div>
 
-              <div className="flex items-center gap-16 border-t border-white/5 pt-10">
+              <div className="flex items-center gap-16 border-t border-white/5 pt-12">
                 {[
                   { val: "50+", label: "Countries" },
-                  { val: "120ms", label: "Latency" },
-                  { val: "99.9%", label: "Uptime" }
+                  { val: "100ms", label: "Avg Latency" },
+                  { val: "100%", label: "Redundancy" }
                 ].map((stat, i) => (
-                  <div key={i}>
-                    <div className="text-4xl font-black text-white tracking-tighter">{stat.val}</div>
-                    <div className="text-[10px] uppercase tracking-[0.3em] text-white/30 font-black mt-2">{stat.label}</div>
+                  <div key={i} className="group cursor-default">
+                    <div className="text-4xl font-black text-white tracking-tighter group-hover:text-primary transition-colors">{stat.val}</div>
+                    <div className="text-[10px] uppercase tracking-[0.4em] text-text-dim font-black mt-2">{stat.label}</div>
                   </div>
                 ))}
               </div>
             </motion.div>
 
             <div className="lg:col-span-5 relative">
-              <div className="relative h-[600px] lg:h-[750px] w-full">
-                <AnimatePresence mode="wait">
-                  <motion.div
-                    key={currentHeroImage}
-                    initial={{ opacity: 0, scale: 0.95, rotateY: 10, x: 20 }}
-                    animate={{ opacity: 1, scale: 1, rotateY: 0, x: 0 }}
-                    exit={{ opacity: 0, scale: 1.05, rotateY: -10, x: -20 }}
-                    transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-                    className="absolute inset-0 premium-border shadow-[0_80px_160px_rgba(0,0,0,0.6)]"
-                  >
-                    <img 
-                      src={heroImages[currentHeroImage].src} 
-                      alt="" 
-                      className="w-full h-full object-cover rounded-[56px]"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/20 to-transparent rounded-[56px]" />
-                    
-                    <div className="absolute bottom-12 left-12 right-12 flex justify-between items-end">
-                      <div>
-                        <div className="text-[10px] uppercase tracking-[0.4em] text-white/40 font-black mb-3">Active Infrastructure</div>
-                        <div className="text-3xl font-black text-white italic uppercase tracking-tight">
-                          {heroImages[currentHeroImage].label}
-                        </div>
-                      </div>
-                      <div className="px-5 py-3 rounded-2xl bg-emerald-500/10 backdrop-blur-2xl border border-emerald-500/20 text-emerald-400 font-black text-[10px] tracking-widest uppercase">
-                        SECURE RAILS
-                      </div>
-                    </div>
-                  </motion.div>
-                </AnimatePresence>
+               <div className="relative group">
+                  <div className="absolute -inset-1 bg-gradient-to-r from-primary to-pink-500 rounded-[60px] blur opacity-20 group-hover:opacity-40 transition duration-1000 group-hover:duration-200" />
+                  <div className="relative h-[650px] lg:h-[800px] w-full glass-panel !rounded-[60px] !p-0 overflow-hidden">
+                    <AnimatePresence mode="wait">
+                      <motion.div
+                        key={currentHeroImage}
+                        initial={{ opacity: 0, scale: 1.1 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.9 }}
+                        transition={{ duration: 1 }}
+                        className="absolute inset-0"
+                      >
+                        <img 
+                          src={heroImages[currentHeroImage].src} 
+                          alt="" 
+                          className="w-full h-full object-cover"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-bg-deep via-transparent to-transparent" />
+                      </motion.div>
+                    </AnimatePresence>
 
-                {/* Vertical Indicators */}
-                <div className="absolute -right-12 top-1/2 -translate-y-1/2 flex flex-col gap-6">
-                  {heroImages.map((_, i) => (
-                    <button 
-                      key={i}
-                      onClick={() => setCurrentHeroImage(i)}
-                      className={`w-1 h-14 rounded-full transition-all duration-700 ${currentHeroImage === i ? 'bg-primary h-24' : 'bg-white/5 hover:bg-white/10'}`}
-                    />
-                  ))}
-                </div>
-              </div>
+                    <div className="absolute bottom-12 left-12 right-12">
+                       <div className="glass-panel p-8 !bg-black/40 !backdrop-blur-3xl border-white/10">
+                          <div className="text-[10px] uppercase tracking-[0.4em] text-text-dim font-black mb-3">Live Environment</div>
+                          <div className="text-3xl font-black text-white italic uppercase tracking-tight mb-4">
+                            {heroImages[currentHeroImage].label}
+                          </div>
+                          <div className="flex items-center gap-2">
+                             <div className="w-2 h-2 rounded-full bg-emerald-400" />
+                             <span className="text-[10px] font-black text-emerald-400 uppercase tracking-widest">Global Sockets Active</span>
+                          </div>
+                       </div>
+                    </div>
+                  </div>
+               </div>
             </div>
           </div>
         </div>
@@ -176,27 +170,27 @@ const LandingV2: React.FC<LandingV2Props> = ({ onAuth, setLandingView }) => {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 relative z-10">
             {[
-              { title: "Multi-Currency Wallets", icon: <Wallet size={32} />, color: "var(--primary)", desc: "Hold and manage 50+ fiat and digital currencies in one unified ledger." },
-              { title: "Instant Virtual Cards", icon: <CreditCard size={32} />, color: "#ec4899", desc: "Issue USD and NGN virtual cards for global spending in seconds." },
-              { title: "Global Payouts", icon: <Zap size={32} />, color: "#10b981", desc: "Disburse funds to bank accounts and mobile wallets in 100+ countries instantly." },
-              { title: "Institutional Crypto", icon: <Bitcoin size={32} />, color: "#f59e0b", desc: "Bridge traditional finance with deep digital asset liquidity and swaps." },
-              { title: "Unified SDKs", icon: <Code2 size={32} />, color: "#3b82f6", desc: "The world's most developer-friendly financial infrastructure." },
-              { title: "Automated Compliance", icon: <ShieldCheck size={32} />, color: "#8b5cf6", desc: "Embedded KYC, AML, and fraud monitoring that scales with your volume." }
+              { title: "Unified Treasury", icon: <Wallet size={32} />, color: "var(--primary)", desc: "Hold and manage 50+ fiat and digital currencies in one frictionless ledger." },
+              { title: "Virtual Power", icon: <CreditCard size={32} />, color: "#ec4899", desc: "Issue USD and NGN virtual cards for global subscriptions in seconds." },
+              { title: "Global Rails", icon: <Zap size={32} />, color: "#10b981", desc: "Disburse funds to banks and mobile wallets in 100+ countries instantly." },
+              { title: "Digital Liquidity", icon: <Bitcoin size={32} />, color: "#f59e0b", desc: "Bridge traditional finance with institutional digital asset liquidity." },
+              { title: "Unified API", icon: <Code2 size={32} />, color: "#3b82f6", desc: "The world's most robust financial infrastructure, accessible via one SDK." },
+              { title: "AI Intelligence", icon: <Cpu size={32} />, color: "#8b5cf6", desc: "Embedded proactive financial intelligence that monitors treasury health." }
             ].map((feature, i) => (
               <motion.div 
                 key={i}
                 whileHover={{ y: -12 }}
-                className="glass-card p-12 group"
+                className="glass-panel p-12 group hover:border-primary/50 transition-all"
               >
                 <div className="w-16 h-16 rounded-3xl mb-10 flex items-center justify-center transition-all group-hover:scale-110 group-hover:rotate-3" style={{ background: `${feature.color}15`, color: feature.color, border: `1px solid ${feature.color}30` }}>
                   {feature.icon}
                 </div>
                 <h3 className="text-2xl font-black italic uppercase mb-6">{feature.title}</h3>
-                <p className="text-white/40 leading-relaxed mb-10">{feature.desc}</p>
-                <div className="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-white/20 group-hover:text-primary transition-colors cursor-pointer">
-                  EXPLORE FEATURE <ChevronRight size={14} />
+                <p className="text-text-dim leading-relaxed mb-10">{feature.desc}</p>
+                <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-white/20 group-hover:text-primary transition-colors cursor-pointer">
+                   Node Connection: Stable <ChevronRight size={14} />
                 </div>
               </motion.div>
             ))}
@@ -205,42 +199,44 @@ const LandingV2: React.FC<LandingV2Props> = ({ onAuth, setLandingView }) => {
       </section>
 
       {/* 4. CRYPTO ENGINE: Next-Gen Liquidity */}
-      <section className="section-padding relative overflow-hidden bg-primary/[0.02]">
+      <section className="section-padding relative overflow-hidden bg-white/[0.01] z-10">
         <div className="container">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-24 items-center">
             <div className="order-2 lg:order-1">
-              <div className="glass-card p-12 relative overflow-hidden">
+              <div className="glass-panel p-12 relative overflow-hidden group">
                 <div className="absolute top-0 right-0 p-8">
-                  <Bitcoin size={48} className="text-primary/20 animate-pulse" />
+                  <Bitcoin size={48} className="text-primary/20 animate-pulse group-hover:text-primary/40 transition-colors" />
                 </div>
                 <div className="mb-12">
-                  <div className="text-xs font-black uppercase tracking-[0.3em] text-primary mb-4">Market Execution</div>
-                  <h3 className="text-4xl font-black italic uppercase mb-6">Institutional Crypto Engine.</h3>
-                  <p className="text-white/40 leading-relaxed mb-10">Access deep liquidity pools across major exchanges and protocols. Swap, bridge, and settle digital assets with fiat in real-time.</p>
+                  <div className="text-[10px] font-black uppercase tracking-[0.4em] text-primary mb-4">Deep Liquidity Matrix</div>
+                  <h3 className="text-4xl font-black italic uppercase mb-6">Institutional Swap Engine.</h3>
+                  <p className="text-text-dim leading-relaxed mb-10 font-medium">Access deep liquidity pools across major protocols. Settle digital assets with fiat instantly on institutional-grade rails.</p>
                 </div>
                 
-                <div className="space-y-6">
+                <div className="space-y-4">
                   {[
-                    { label: "USDT / NGN", rate: "1,540.20", trend: "+0.2%" },
-                    { label: "BTC / USD", rate: "64,210.50", trend: "-1.1%" },
-                    { label: "USDC / EUR", rate: "0.921", trend: "+0.01%" }
+                    { label: "USDT / NGN", rate: "1,540.20", trend: "+0.2%", provider: "Maplerad" },
+                    { label: "BTC / USD", rate: "64,210.50", trend: "-1.1%", provider: "Bitnob" },
                   ].map((pair, i) => (
-                    <div key={i} className="flex items-center justify-between p-6 rounded-2xl bg-white/[0.03] border border-white/5">
+                    <div key={i} className="flex items-center justify-between p-6 rounded-2xl bg-white/[0.02] border border-white/5 hover:border-white/10 transition-colors">
                       <div className="flex items-center gap-4">
-                        <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold text-[10px]">
+                        <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary font-bold text-[10px]">
                           {pair.label.split(' / ')[0]}
                         </div>
-                        <span className="font-bold tracking-tight">{pair.label}</span>
+                        <div>
+                           <div className="font-black tracking-tight text-white">{pair.label}</div>
+                           <div className="text-[8px] font-black text-text-dim uppercase tracking-widest">via {pair.provider}</div>
+                        </div>
                       </div>
                       <div className="text-right">
-                        <div className="font-black text-white">{pair.rate}</div>
+                        <div className="font-black text-white italic">{pair.rate}</div>
                         <div className={`text-[10px] font-bold ${pair.trend.startsWith('+') ? 'text-emerald-400' : 'text-rose-400'}`}>{pair.trend}</div>
                       </div>
                     </div>
                   ))}
                 </div>
                 
-                <button className="btn btn-primary w-full mt-10" onClick={onAuth}>Launch Swap Engine</button>
+                <button className="btn-nextgen btn-primary w-full mt-10" onClick={onAuth}>Deploy Swap Rail</button>
               </div>
             </div>
             
@@ -273,77 +269,75 @@ const LandingV2: React.FC<LandingV2Props> = ({ onAuth, setLandingView }) => {
       </section>
 
       {/* 5. VIRTUAL CARDS: Power in your hands */}
-      <section className="section-padding relative">
+      <section className="section-padding relative z-10">
         <div className="container">
           <div className="text-center max-w-3xl mx-auto mb-24">
-            <div className="badge mb-6 mx-auto">Issuing</div>
+            <div className="badge mb-6 mx-auto">Card Issuing</div>
             <h2 className="text-6xl font-black italic uppercase mb-8">The World is <br/> <span className="text-gradient">Your Marketplace.</span></h2>
-            <p className="text-white/40 text-lg">Instant virtual cards for global payments. Pay for subscriptions, ads, and tools anywhere Mastercard/Visa are accepted.</p>
+            <p className="text-text-dim text-lg font-medium">Issue high-fidelity virtual cards in seconds. Pay for global subscriptions, cloud infra, and marketing with institutional-grade controls.</p>
           </div>
           
           <div className="relative">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              <div className="glass-card p-10 flex flex-col justify-between h-[450px]">
+              <div className="glass-panel p-10 flex flex-col justify-between h-[450px]">
                 <div>
-                  <div className="w-12 h-12 rounded-2xl bg-pink-500/10 text-pink-500 flex items-center justify-center mb-8">
+                  <div className="w-12 h-12 rounded-2xl bg-primary/10 text-primary flex items-center justify-center mb-8">
                     <CreditCard size={24} />
                   </div>
-                  <h4 className="text-2xl font-black italic uppercase mb-4">Unlimited Creation</h4>
-                  <p className="text-white/40 leading-relaxed">Issue as many cards as you need. One for each team, project, or recurring expense.</p>
+                  <h4 className="text-2xl font-black italic uppercase mb-4">Elastic Limits</h4>
+                  <p className="text-text-dim leading-relaxed">Define real-time spending thresholds. Adjust, freeze, or recycle cards with zero latency via API or Console.</p>
                 </div>
                 <div className="flex -space-x-4">
                   {[1,2,3,4].map(i => (
-                    <div key={i} className="w-12 h-12 rounded-full border-4 border-[#020617] bg-surface-light flex items-center justify-center overflow-hidden">
-                      <img src={`https://i.pravatar.cc/100?u=${i}`} alt="" className="w-full h-full object-cover" />
+                    <div key={i} className="w-12 h-12 rounded-full border-4 border-bg-deep bg-surface-light flex items-center justify-center overflow-hidden">
+                      <img src={`https://i.pravatar.cc/100?u=${i+10}`} alt="" className="w-full h-full object-cover" />
                     </div>
                   ))}
-                  <div className="w-12 h-12 rounded-full border-4 border-[#020617] bg-primary flex items-center justify-center text-[10px] font-black">+12k</div>
+                  <div className="w-12 h-12 rounded-full border-4 border-bg-deep bg-primary flex items-center justify-center text-[10px] font-black">+14k</div>
                 </div>
               </div>
 
-              <div className="lg:scale-110 z-10">
-                <div className="glass-card bg-gradient-to-br from-primary/20 to-pink-500/20 p-1 rounded-[48px]">
-                  <div className="bg-[#020617] rounded-[47px] p-12 h-[480px] flex flex-col justify-between relative overflow-hidden">
-                    <div className="absolute top-[-20%] right-[-20%] w-64 h-64 bg-primary/20 blur-[80px] rounded-full"></div>
+              <div className="lg:scale-110 z-10 group">
+                 <div className="absolute -inset-1 bg-gradient-to-r from-primary to-pink-500 rounded-[52px] blur-xl opacity-20 group-hover:opacity-40 transition duration-1000" />
+                 <div className="glass-panel !bg-bg-deep !rounded-[48px] p-12 h-[480px] flex flex-col justify-between relative overflow-hidden border-white/10">
+                    <div className="absolute top-[-20%] right-[-20%] w-64 h-64 bg-primary/10 blur-[80px] rounded-full group-hover:bg-primary/20 transition-all"></div>
                     <div>
                       <div className="flex justify-between items-start mb-16">
-                        <Zap size={40} className="text-primary fill-current" />
+                        <Zap size={40} className="text-primary" />
                         <span className="font-black italic tracking-tighter text-2xl">PAYPEE</span>
                       </div>
                       <div className="space-y-2 mb-12">
-                        <div className="text-[10px] uppercase tracking-[0.4em] text-white/30 font-black">Card Number</div>
-                        <div className="text-2xl font-bold tracking-[0.2em] text-white">4582 •••• •••• 1024</div>
+                        <div className="text-[10px] uppercase tracking-[0.4em] text-text-dim font-black">Card ID: PP-8842-X</div>
+                        <div className="text-2xl font-bold tracking-[0.25em] text-white">4582 •••• •••• 1024</div>
                       </div>
                     </div>
                     <div className="flex justify-between items-end">
                       <div>
-                        <div className="text-[10px] uppercase tracking-[0.4em] text-white/30 font-black mb-1">Card Holder</div>
-                        <div className="text-lg font-black italic uppercase text-white">ALEXANDER STRIDE</div>
+                        <div className="text-[10px] uppercase tracking-[0.4em] text-text-dim font-black mb-1">Entity Holder</div>
+                        <div className="text-lg font-black italic uppercase text-white">STRIDE LABS INC.</div>
                       </div>
-                      <div className="text-right">
-                        <div className="text-[10px] uppercase tracking-[0.4em] text-white/30 font-black mb-1">Expires</div>
-                        <div className="text-lg font-bold text-white">12 / 28</div>
+                      <div className="px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-[10px] font-black italic">
+                        PLATINUM RAILS
                       </div>
                     </div>
-                  </div>
-                </div>
+                 </div>
               </div>
 
-              <div className="glass-card p-10 flex flex-col justify-between h-[450px]">
+              <div className="glass-panel p-10 flex flex-col justify-between h-[450px]">
                 <div>
-                  <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center mb-8">
+                  <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center mb-8">
                     <ShieldCheck size={24} />
                   </div>
-                  <h4 className="text-2xl font-black italic uppercase mb-4">Granular Control</h4>
-                  <p className="text-white/40 leading-relaxed">Set spend limits, freeze cards instantly, and track transactions in real-time with push alerts.</p>
+                  <h4 className="text-2xl font-black italic uppercase mb-4">Proactive Security</h4>
+                  <p className="text-text-dim leading-relaxed">AI-driven fraud detection monitors every byte of transaction data. Automated merchant-lock for high-risk corridors.</p>
                 </div>
                 <div className="space-y-4">
                   <div className="h-2 w-full bg-white/5 rounded-full overflow-hidden">
-                    <motion.div initial={{ width: 0 }} whileInView={{ width: '65%' }} className="h-full bg-primary" />
+                    <motion.div initial={{ width: 0 }} whileInView={{ width: '85%' }} className="h-full bg-emerald-400" />
                   </div>
-                  <div className="flex justify-between text-[10px] font-black uppercase tracking-widest text-white/30">
-                    <span>Spent: $650.00</span>
-                    <span>Limit: $1,000.00</span>
+                  <div className="flex justify-between text-[10px] font-black uppercase tracking-widest text-emerald-400/60">
+                    <span>Safety Score: 98%</span>
+                    <span>Monitoring Active</span>
                   </div>
                 </div>
               </div>
@@ -351,64 +345,63 @@ const LandingV2: React.FC<LandingV2Props> = ({ onAuth, setLandingView }) => {
           </div>
         </div>
       </section>
+     </section>
 
       {/* 6. GLOBAL TREASURY: 50+ Currencies */}
-      <section className="section-padding relative overflow-hidden bg-white/[0.01]">
+      <section className="section-padding relative overflow-hidden bg-white/[0.01] z-10">
         <div className="container">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-24 items-center">
+            <div className="relative">
+               <div className="glass-panel !p-12 bg-surface/40 group">
+                <div className="flex justify-between items-center mb-12">
+                  <h4 className="text-xl font-black italic uppercase tracking-tight">Enterprise Treasury Hub</h4>
+                  <Globe size={24} className="text-primary group-hover:rotate-180 transition-transform duration-1000" />
+                </div>
+                <div className="space-y-6">
+                  {[
+                    { curr: "USD", name: "US Dollar", amount: "42,850.00", flag: "🇺🇸", trend: "Stable" },
+                    { curr: "NGN", name: "Nigerian Naira", amount: "12,400,000.00", flag: "🇳🇬", trend: "+12%" },
+                    { curr: "EUR", name: "Euro", amount: "8,210.50", flag: "🇪🇺", trend: "Stable" },
+                  ].map((balance, i) => (
+                    <div key={i} className="flex items-center justify-between p-4 rounded-2xl hover:bg-white/5 transition-all cursor-pointer">
+                      <div className="flex items-center gap-4">
+                        <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-2xl">{balance.flag}</div>
+                        <div>
+                          <div className="font-black text-white italic">{balance.curr}</div>
+                          <div className="text-[10px] font-bold text-text-dim uppercase tracking-widest">{balance.name}</div>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-xl font-black text-white italic">{balance.amount}</div>
+                        <div className="text-[8px] font-black text-emerald-400 uppercase tracking-widest">{balance.trend}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <button className="btn-nextgen btn-primary w-full mt-10" onClick={onAuth}>Deploy Treasury Node</button>
+              </div>
+            </div>
+
             <div>
-              <div className="badge mb-8">Treasury</div>
+              <div className="badge mb-8">Unified Treasury</div>
               <h2 className="text-6xl font-black italic uppercase leading-[0.95] mb-10">
                 A Unified Ledger for <br/>
                 <span className="text-gradient">Every Border.</span>
               </h2>
-              <p className="text-xl text-white/40 leading-relaxed font-medium mb-12">
-                Say goodbye to fragmented banking. Manage your global liquidity in one unified treasury system that supports over 50 fiat currencies.
+              <p className="text-xl text-text-dim leading-relaxed font-medium mb-12">
+                Abstract away the fragmentation of global banking. Manage your liquidity in one frictionless system that settles in milliseconds.
               </p>
               
               <div className="grid grid-cols-2 gap-8">
                 {[
                   { val: "T+0", label: "Settlement Speed" },
                   { val: "54", label: "Global Corridors" },
-                  { val: "0.1%", label: "Average Fee" },
-                  { val: "24/7", label: "Liquidity Access" }
                 ].map((stat, i) => (
-                  <div key={i} className="p-8 glass-card border-none bg-white/[0.03]">
-                    <div className="text-3xl font-black text-white italic tracking-tighter mb-2">{stat.val}</div>
-                    <div className="text-[10px] uppercase tracking-[0.2em] text-white/40 font-black">{stat.label}</div>
+                  <div key={i} className="p-8 glass-panel border-white/5 bg-white/[0.03] group hover:border-primary/50 transition-all">
+                    <div className="text-3xl font-black text-white italic tracking-tighter mb-2 group-hover:text-primary transition-colors">{stat.val}</div>
+                    <div className="text-[10px] uppercase tracking-[0.2em] text-text-dim font-black">{stat.label}</div>
                   </div>
                 ))}
-              </div>
-            </div>
-            
-            <div className="relative">
-              <div className="glass-card p-12 bg-surface/40">
-                <div className="flex justify-between items-center mb-12">
-                  <h4 className="text-xl font-black italic uppercase tracking-tight">Active Balances</h4>
-                  <Globe size={24} className="text-primary opacity-50" />
-                </div>
-                <div className="space-y-8">
-                  {[
-                    { curr: "USD", name: "US Dollar", amount: "42,850.00", flag: "🇺🇸" },
-                    { curr: "NGN", name: "Nigerian Naira", amount: "12,400,000.00", flag: "🇳🇬" },
-                    { curr: "EUR", name: "Euro", amount: "8,210.50", flag: "🇪🇺" },
-                    { curr: "GBP", name: "British Pound", amount: "5,400.00", flag: "🇬🇧" }
-                  ].map((balance, i) => (
-                    <div key={i} className="flex items-center justify-between">
-                      <div className="flex items-center gap-4">
-                        <div className="text-3xl">{balance.flag}</div>
-                        <div>
-                          <div className="font-black text-white italic">{balance.curr}</div>
-                          <div className="text-[10px] font-bold text-white/30 uppercase tracking-widest">{balance.name}</div>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <div className="text-xl font-black text-white">{balance.amount}</div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                <button className="btn btn-primary w-full mt-12" onClick={onAuth}>Fund Wallet</button>
               </div>
             </div>
           </div>
