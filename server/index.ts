@@ -430,7 +430,7 @@ app.post('/api/payouts/transfer', authenticateToken, async (req: any, res: any) 
       // 1. Generate FX Quote (sourceAmount -> targetAmount)
       const quote = await Maplerad.generateFxQuote(payoutCurrency, targetCurrency, parsedAmount);
       const quoteRef = quote.reference || quote.id;
-      payoutAmount = quote.target_amount ? quote.target_amount / 100 : 0;
+      payoutAmount = quote.target_amount ? quote.target_amount / 100 : (parsedAmount * (quote.rate || 1));
       fxRate = quote.rate || 1;
 
       // 2. Execute FX Swap internally on Maplerad
@@ -1319,7 +1319,7 @@ app.post('/api/fx/quote', authenticateToken, async (req: any, res: any) => {
       sourceCurrency,
       targetCurrency,
       sourceAmount: parsedAmount,
-      targetAmount: quote.target_amount ? quote.target_amount / 100 : 0,
+      targetAmount: quote.target_amount ? quote.target_amount / 100 : (parsedAmount * (quote.rate || 0)),
       rate: quote.rate || 0,
       reference: quoteRef,
       expiresAt: Date.now() + 30000 // 30 second TTL
@@ -1330,7 +1330,7 @@ app.post('/api/fx/quote', authenticateToken, async (req: any, res: any) => {
       sourceCurrency,
       targetCurrency,
       sourceAmount: parsedAmount,
-      targetAmount: quote.target_amount ? quote.target_amount / 100 : 0,
+      targetAmount: quote.target_amount ? quote.target_amount / 100 : (parsedAmount * (quote.rate || 0)),
       rate: quote.rate,
       sourceBalance: parseFloat(sourceWallet.balance.toString()),
       targetWalletExists: !!targetWallet,

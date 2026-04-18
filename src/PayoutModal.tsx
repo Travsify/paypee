@@ -60,7 +60,7 @@ const PayoutModal: React.FC<PayoutModalProps> = ({ isOpen, onClose, onComplete, 
         setSelectedWalletId(wallets[0].id);
       }
     }
-  }, [isOpen, wallets]);
+  }, [isOpen]);
 
   useEffect(() => {
     if (isOpen && targetCurrency) {
