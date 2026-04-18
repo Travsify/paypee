@@ -1036,6 +1036,15 @@ app.post('/api/accounts/provision', authenticateToken, async (req: any, res: any
   }
 });
 
+app.post('/api/accounts/reconcile', authenticateToken, async (req: any, res: any) => {
+  try {
+    const result = await IbanService.reconcileUserWallets(req.user.userId);
+    res.json(result);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message || 'Reconciliation failed' });
+  }
+});
+
 app.delete('/api/accounts/:id', authenticateToken, async (req: any, res: any): Promise<any> => {
    try {
       const { id } = req.params;
@@ -1554,119 +1563,87 @@ app.get('/api/fx/history', authenticateToken, async (req: any, res: any) => {
 // Webhook Handlers (Fincra & Maplerad)
 // ==========================================
 
-app.post('/api/webhooks/maplerad', async (req: Request, res: Response) => {
-  try {
-    const { event, data } = req.body;
-    console.log(`[WEBHOOK] Maplerad Event: ${event}`);
-
-    if (event === 'virtual_account.payment' || event === 'collection.successful') {
-      const { amount, currency, account_number, reference } = data;
-      const cleanAmount = parseFloat(amount);
-
-      const wallets = await prisma.wallet.findMany();
-      const wallet = wallets.find(w => {
-         const meta = w.metadata as any;
-         return meta && (meta.iban === account_number || meta.accountNumber === account_number);
-      });
-
-      if (wallet) {
-        await prisma.$transaction([
-          prisma.wallet.update({
-            where: { id: wallet.id },
-            data: { balance: { increment: cleanAmount } }
-          }),
-          prisma.transaction.create({
-            data: {
-              userId: wallet.userId,
-              walletId: wallet.id,
-              type: 'DEPOSIT',
-              amount: cleanAmount,
-              currency: currency || wallet.currency,
-              status: 'COMPLETED',
-              reference: reference || `MAPLE_${Date.now()}`,
-              desc: `Inbound Settlement: ${account_number}`,
-              category: 'COLLECTION'
-            }
-          }),
-          prisma.notification.create({
-            data: {
-              userId: wallet.userId,
-              title: 'Capital Received',
-              message: `Your ${currency} wallet has been credited with ${cleanAmount}.`,
-              type: 'SUCCESS'
-            }
-          })
-        ]);
-      }
-    }
-    res.status(200).send('OK');
-  } catch (error: any) {
-    console.error('[WEBHOOK ERROR] Maplerad:', error.message);
-    res.status(500).send('Error');
-  }
-});
-
+// Unified Maplerad Webhook Handler
 app.post('/api/webhooks/maplerad', async (req: Request, res: Response) => {
   try {
     const signature = req.headers['maplerad-signature'] as string;
-    if (!Maplerad.verifyWebhookSignature(signature, req.body)) {
-      console.warn('[WEBHOOK] Invalid Maplerad signature');
+    const payload = req.body;
+    const { event, data } = payload;
+
+    console.log(`[MAPLERAD WEBHOOK] Received event: ${event}`);
+
+    // 1. Verify Signature
+    if (!Maplerad.verifyWebhookSignature(signature, payload)) {
+      console.warn('[MAPLERAD WEBHOOK] Invalid signature. Ignoring request.');
       return res.status(401).send('Unauthorized');
     }
 
-    const { event, data } = req.body;
-    console.log(`[WEBHOOK] Maplerad Event: ${event}`);
-
-    if (event === 'collection.success') {
+    // 2. Handle Inbound Payments
+    if (event === 'collection.success' || event === 'virtual_account.payment' || event === 'collection.successful') {
       const { amount, currency, account_number, reference } = data;
-      const parsedAmount = amount / 100; // Maplerad uses minor units
+      
+      // Maplerad sends amounts in minor units (kobo/cents)
+      const parsedAmount = Number(amount) / 100;
+      
+      console.log(`[MAPLERAD WEBHOOK] Processing ${parsedAmount} ${currency} for account ${account_number}`);
 
       // Find wallet by account_number in metadata
+      // We search through wallets to find one with a matching account number in its metadata
       const wallets = await prisma.wallet.findMany();
       const wallet = wallets.find(w => {
          const meta = w.metadata as any;
-         return meta && (meta.iban === account_number || meta.account_number === account_number);
+         if (!meta) return false;
+         // Check various possible keys where we might have stored the account number
+         return meta.iban === account_number || 
+                meta.account_number === account_number || 
+                meta.accountNumber === account_number ||
+                meta.virtual_account_number === account_number;
       });
 
       if (wallet) {
         await prisma.$transaction([
+          // Increment wallet balance
           prisma.wallet.update({
             where: { id: wallet.id },
             data: { balance: { increment: parsedAmount } }
           }),
+          // Create transaction record
           prisma.transaction.create({
             data: {
               userId: wallet.userId,
               walletId: wallet.id,
               type: 'DEPOSIT',
               amount: parsedAmount,
-              currency: currency,
+              currency: currency || wallet.currency,
               status: 'COMPLETED',
-              reference: `MAPLERAD_${reference}`,
+              reference: reference ? `MAPLE_${reference}` : `MAPLE_AUTO_${Date.now()}`,
+              desc: `Inbound Settlement: ${account_number}`,
               category: 'BANK_TRANSFER',
               metadata: data
             }
           }),
+          // Notify user
           prisma.notification.create({
             data: {
               userId: wallet.userId,
-              title: 'Payment Received',
-              message: `Your account has been credited with ${parsedAmount} ${currency}.`,
+              title: 'Funds Received',
+              message: `Your ${currency || wallet.currency} wallet has been credited with ${parsedAmount}.`,
               type: 'SUCCESS'
             }
           })
         ]);
-        console.log(`[WEBHOOK] Successfully processed payment of ${parsedAmount} ${currency} for user ${wallet.userId}`);
+        console.log(`[MAPLERAD WEBHOOK] Reconciled ${parsedAmount} ${currency} for User ${wallet.userId}`);
+      } else {
+        console.warn(`[MAPLERAD WEBHOOK] No wallet found for account number: ${account_number}`);
       }
     }
 
-    res.status(200).send('OK');
+    res.status(200).send('Webhook Processed');
   } catch (error: any) {
-    console.error('[WEBHOOK ERROR] Maplerad:', error.message);
-    res.status(500).send('Error');
+    console.error('[MAPLERAD WEBHOOK ERROR]:', error.message);
+    res.status(500).send('Internal Server Error');
   }
 });
-
 
 app.listen(PORT, () => {
   console.log(`🚀 Paypee Core API running on http://localhost:${PORT}`);

@@ -93,4 +93,136 @@ export class IbanService {
       accountDetails: details
     };
   }
+
+  /**
+   * Reconciles user wallets by fetching external transactions and verifying local state.
+   * This is a "healing" function to catch missed webhooks or failed provisioning.
+   */
+  static async reconcileUserWallets(userId: string) {
+    console.log(`[RECONCILE] Starting reconciliation for user ${userId}...`);
+    
+    try {
+      // 1. Fetch user and their wallets
+      const user = await prisma.user.findUnique({
+        where: { id: userId },
+        include: { wallets: true }
+      });
+
+      if (!user) throw new Error("User not found for reconciliation");
+
+      // 2. Fetch Maplerad Customer ID (idempotent)
+      const customer = await Maplerad.createCustomer(
+        user.firstName || "Customer",
+        user.lastName || "Paypee",
+        user.email
+      );
+
+      if (!customer?.id) {
+        console.warn(`[RECONCILE] Could not find Maplerad customer for ${user.email}`);
+        return;
+      }
+
+      // 3. Fetch all virtual accounts for this customer from Maplerad
+      console.log(`[RECONCILE] Fetching virtual accounts for customer ${customer.id}...`);
+      const externalAccounts = await Maplerad.getCustomerVirtualAccounts(customer.id);
+      
+      // 4. Update missing metadata in local wallets
+      for (const extAcc of externalAccounts) {
+        const wallet = user.wallets.find(w => w.currency === extAcc.currency);
+        if (wallet) {
+          const currentMeta = typeof wallet.metadata === 'string' ? JSON.parse(wallet.metadata) : wallet.metadata;
+          
+          // If metadata is missing or account number is not there, update it
+          if (!currentMeta || (!currentMeta.iban && !currentMeta.account_number)) {
+            console.log(`[RECONCILE] Fixing missing metadata for ${wallet.currency} wallet...`);
+            await prisma.wallet.update({
+              where: { id: wallet.id },
+              data: {
+                metadata: {
+                  ...currentMeta,
+                  accountHolder: `${user.firstName} ${user.lastName}`,
+                  iban: extAcc.account_number,
+                  account_number: extAcc.account_number,
+                  bankName: extAcc.bank_name,
+                  bankCode: extAcc.bank_code,
+                  provider: 'Maplerad',
+                  reconciledAt: new Date().toISOString()
+                }
+              }
+            });
+            // Update the local reference for the next step
+            wallet.metadata = { iban: extAcc.account_number, account_number: extAcc.account_number }; 
+          }
+        }
+      }
+
+      // 5. Fetch external transactions (latest 50)
+      const externalTxs = await Maplerad.getTransactions();
+      if (!Array.isArray(externalTxs)) return;
+
+      // Filter transactions that belong to this user's accounts
+      const userAccNumbers = externalAccounts.map((a: any) => a.account_number);
+      const relevantTxs = externalTxs.filter((tx: any) => 
+        tx.status === 'SUCCESSFUL' && 
+        userAccNumbers.includes(tx.account_number)
+      );
+
+      console.log(`[RECONCILE] Found ${relevantTxs.length} relevant external transactions for user.`);
+
+      for (const tx of relevantTxs) {
+        await prisma.$transaction(async (txPrisma) => {
+          const ref = `MAPLE_${tx.id || tx.reference}`;
+          
+          // Check if transaction already exists locally
+          const existingTx = await txPrisma.transaction.findUnique({
+            where: { reference: ref }
+          });
+
+          if (existingTx) return;
+
+          const amount = tx.amount / 100;
+          const wallet = user.wallets.find(w => w.currency === tx.currency);
+          
+          if (!wallet) return;
+
+          console.log(`[RECONCILE] Processing missed transaction ${tx.id} for ${amount} ${tx.currency}`);
+
+          // Create transaction record
+          await txPrisma.transaction.create({
+            data: {
+              userId,
+              walletId: wallet.id,
+              type: 'DEPOSIT',
+              amount: amount,
+              currency: tx.currency as any,
+              status: 'COMPLETED',
+              reference: ref,
+              category: 'TRANSFER',
+              metadata: { source: 'RECONCILIATION', externalData: tx }
+            }
+          });
+
+          // Update wallet balance
+          await txPrisma.wallet.update({
+            where: { id: wallet.id },
+            data: { balance: { increment: amount } }
+          });
+
+          // Create notification
+          await txPrisma.notification.create({
+            data: {
+              userId,
+              title: 'Funds Reconciled',
+              message: `Your ${tx.currency} wallet was credited with ${amount} from a previous settlement.`,
+              type: 'SUCCESS'
+            }
+          });
+        });
+      }
+
+      console.log(`[RECONCILE] Completed successfully for user ${userId}.`);
+    } catch (error: any) {
+      console.error(`[RECONCILE] Error:`, error.message);
+    }
+  }
 }

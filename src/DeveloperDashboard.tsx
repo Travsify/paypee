@@ -200,11 +200,13 @@ const DeveloperDashboard = ({ onLogout }: { onLogout?: () => void }) => {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', background: '#020617', color: '#fff', overflow: 'hidden' }}>
-      <VerificationGate 
-        kycStatus={userData?.kycStatus || 'PENDING'} 
-        accountType="DEVELOPER"
-        onStatusChange={(status) => setUserData((prev: any) => ({ ...prev, kycStatus: status }))}
-      />
+      {userData && (
+        <VerificationGate 
+          kycStatus={userData.kycStatus} 
+          accountType="DEVELOPER"
+          onStatusChange={(status) => setUserData((prev: any) => ({ ...prev, kycStatus: status }))}
+        />
+      )}
       
       <div style={{ display: 'flex', flex: 1, overflow: 'hidden', position: 'relative' }}>
         {/* Sidebar - Hidden on Mobile */}

@@ -51,26 +51,34 @@ interface BalanceCardProps {
 
 const getAccountNumber = (details: any) => {
   if (!details) return null;
-  const flat = details.iban || 
-               details.accountNumber || 
-               details.account_number || 
-               details.virtual_account_number || 
-               details.address || 
-               details.nuban;
+  let data = details;
+  if (typeof details === 'string') {
+    try { data = JSON.parse(details); } catch (e) { return null; }
+  }
+  const flat = data.iban || 
+               data.accountNumber || 
+               data.account_number || 
+               data.virtual_account_number || 
+               data.address || 
+               data.nuban;
   if (flat) return flat;
   
-  if (details.data) {
-    return details.data.account_number || 
-           details.data.accountNumber || 
-           details.data.virtual_account_number || 
-           details.data.address;
+  if (data.data) {
+    return data.data.account_number || 
+           data.data.accountNumber || 
+           data.data.virtual_account_number || 
+           data.data.address;
   }
   return null;
 };
 
 const getBankName = (details: any) => {
   if (!details) return null;
-  return details.bankName || details.bank_name || details.bank || details.provider;
+  let data = details;
+  if (typeof details === 'string') {
+    try { data = JSON.parse(details); } catch (e) { return null; }
+  }
+  return data.bankName || data.bank_name || data.bank || data.provider;
 };
 
 const BalanceCard: React.FC<BalanceCardProps> = ({ currency, symbol, amount, gradient, details, userName, type = 'INDIVIDUAL', onDelete }) => {

@@ -523,3 +523,33 @@ export const SUPPORTED_FX_PAIRS = [
   { source: 'EUR', target: 'GBP' },
   { source: 'GBP', target: 'EUR' },
 ];
+
+/**
+ * Get virtual accounts for a specific customer
+ */
+export const getCustomerVirtualAccounts = async (customerId: string) => {
+  try {
+    const response = await mapleradClient.get(`/customers/${customerId}/virtual-account`);
+    return Array.isArray(response.data.data) ? response.data.data : [response.data.data];
+  } catch (error: any) {
+    console.error('[MAPLERAD] Get Virtual Accounts Error:', error.response?.data || error.message);
+    return [];
+  }
+};
+
+/**
+ * Get transactions for the account or a specific customer
+ */
+export const getTransactions = async (customerId?: string) => {
+  try {
+    // Maplerad often uses /transactions with query params or /customers/:id/transactions
+    // Based on their common pattern, we'll try the customer_id filter first
+    const url = customerId ? `/transactions?customer_id=${customerId}` : '/transactions';
+    const response = await mapleradClient.get(url);
+    return response.data.data;
+  } catch (error: any) {
+    console.error('[MAPLERAD] Get Transactions Error:', error.response?.data || error.message);
+    return [];
+  }
+};
+

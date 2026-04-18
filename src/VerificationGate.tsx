@@ -29,6 +29,8 @@ interface Notification {
   createdAt: string;
 }
 
+import { API_BASE } from './config';
+
 const VerificationGate: React.FC<VerificationGateProps> = ({ kycStatus: initialStatus, accountType, onStatusChange }) => {
   const [kycStatus, setKycStatus] = useState(initialStatus);
   const [showModal, setShowModal] = useState(false);
@@ -51,7 +53,7 @@ const VerificationGate: React.FC<VerificationGateProps> = ({ kycStatus: initialS
 
   const fetchStatus = useCallback(async () => {
     try {
-      const res = await fetch('https://paypee-api-kmhv.onrender.com/api/verify/status', { headers: { 'Authorization': `Bearer ${token}` } });
+      const res = await fetch(`${API_BASE}/api/verify/status`, { headers: { 'Authorization': `Bearer ${token}` } });
       const data = await res.json();
       if (data.kycStatus && data.kycStatus !== kycStatus) {
         setKycStatus(data.kycStatus);
@@ -95,18 +97,17 @@ const VerificationGate: React.FC<VerificationGateProps> = ({ kycStatus: initialS
     }
   };
 
-  // Poll every 10s while PROCESSING
+  // Poll every 10s while PROCESSING, otherwise 30s for notifications
   useEffect(() => {
     fetchStatus();
 
-    if (kycStatus === 'PROCESSING') {
-      const interval = setInterval(fetchStatus, 10000);
-      return () => clearInterval(interval);
-    }
+    const interval = setInterval(fetchStatus, kycStatus === 'PROCESSING' ? 10000 : 30000);
+    return () => clearInterval(interval);
   }, [kycStatus, fetchStatus]);
 
+
   const handleMarkRead = async () => {
-    await fetch('https://paypee-api-kmhv.onrender.com/api/notifications/read', { method: 'POST', headers });
+    await fetch(`${API_BASE}/api/notifications/read`, { method: 'POST', headers });
     setNotifications(prev => prev.map(n => ({ ...n, read: true })));
     setUnreadCount(0);
   };
@@ -169,7 +170,7 @@ const VerificationGate: React.FC<VerificationGateProps> = ({ kycStatus: initialS
       console.log('[FRONTEND DEBUG] 🚀 Sending FETCH request to Render...');
       console.log('[FRONTEND DEBUG] Payload size:', compressedImage.length);
 
-      const res = await fetch('https://paypee-api-kmhv.onrender.com/api/verify/identity', {
+      const res = await fetch(`${API_BASE}/api/verify/identity`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,

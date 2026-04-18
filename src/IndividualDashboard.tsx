@@ -28,6 +28,7 @@ import AiAdvisor from './AiAdvisor';
 import SettingsView from './SettingsView';
 import PayoutModal from './PayoutModal';
 import VerificationGate from './VerificationGate';
+import BalanceCard from './components/BalanceCard';
 import SwapModal from './SwapModal';
 import WalletRailItem from './components/WalletRailItem';
 import AccountCreationModal from './AccountCreationModal';
@@ -35,6 +36,7 @@ import VaultsView from './components/VaultsView';
 import BillsView from './components/BillsView';
 import CollectionsView from './components/CollectionsView';
 import HistoryView from './components/HistoryView';
+import { API_BASE } from './config';
 
 const SidebarItem = ({ icon: Icon, label, active = false, onClick }: { icon: any, label: string, active?: boolean, onClick?: () => void }) => (
   <div 
@@ -45,67 +47,6 @@ const SidebarItem = ({ icon: Icon, label, active = false, onClick }: { icon: any
     <span style={{ fontSize: '0.95rem' }}>{label}</span>
   </div>
 );
-
-const BalanceCard = ({ currency, amount, onSwap, onPayout, accountDetails }: { currency: string, amount: string, onSwap: () => void, onPayout: () => void, accountDetails?: any }) => {
-  const getGradient = (cur: string) => {
-    const map: Record<string, string> = {
-      USD: 'linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)',
-      NGN: 'linear-gradient(135deg, #059669 0%, #10b981 100%)',
-      EUR: 'linear-gradient(135deg, #1e40af 0%, #3b82f6 100%)',
-      GBP: 'linear-gradient(135deg, #7c2d12 0%, #ea580c 100%)'
-    };
-    return map[cur] || 'linear-gradient(135deg, #1e293b 0%, #334155 100%)';
-  };
-
-  const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text);
-    alert('Account details copied!');
-  };
-
-  return (
-    <motion.div 
-      whileHover={{ y: -5 }}
-      style={{ 
-        background: getGradient(currency), 
-        padding: '2rem', 
-        borderRadius: '28px', 
-        color: '#fff',
-        boxShadow: '0 20px 40px -10px rgba(0,0,0,0.3)',
-        position: 'relative',
-        overflow: 'hidden',
-        minHeight: '300px',
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'space-between'
-      }}
-    >
-      <div style={{ position: 'absolute', top: '-10%', right: '-10%', width: '150px', height: '150px', background: 'rgba(255,255,255,0.1)', borderRadius: '50%', filter: 'blur(40px)' }} />
-      <div style={{ position: 'relative', zIndex: 1 }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-          <div style={{ fontWeight: 800, letterSpacing: '2px', fontSize: '0.8rem', opacity: 0.8 }}>{currency} ACCOUNT</div>
-          <div style={{ width: 40, height: 40, background: 'rgba(255,255,255,0.2)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <Wallet size={20} />
-          </div>
-        </div>
-        <div style={{ fontSize: '2.5rem', fontWeight: 900, marginBottom: '0.5rem', letterSpacing: '-1px' }}>
-          {currency === 'USD' ? '$' : currency === 'EUR' ? '€' : currency === 'GBP' ? '£' : '₦'}{amount}
-        </div>
-        
-        {accountDetails && (
-          <div style={{ background: 'rgba(0,0,0,0.2)', padding: '1rem', borderRadius: '16px', marginBottom: '1.5rem', cursor: 'pointer' }} onClick={() => copyToClipboard(accountDetails.iban)}>
-            <div style={{ fontSize: '0.65rem', fontWeight: 800, opacity: 0.6, marginBottom: '0.25rem', letterSpacing: '1px' }}>{accountDetails.bankName || 'VIRTUAL ACCOUNT'}</div>
-            <div style={{ fontSize: '1.1rem', fontWeight: 700, fontFamily: 'monospace' }}>{accountDetails.iban}</div>
-          </div>
-        )}
-      </div>
-
-      <div style={{ display: 'flex', gap: '0.75rem', position: 'relative', zIndex: 1 }}>
-        <button onClick={onSwap} style={{ flex: 1, background: 'rgba(255,255,255,0.2)', border: 'none', color: '#fff', padding: '0.85rem', borderRadius: '14px', fontWeight: 700, cursor: 'pointer', fontSize: '0.85rem' }}>Convert</button>
-        <button onClick={onPayout} style={{ flex: 1, background: '#fff', border: 'none', color: '#000', padding: '0.85rem', borderRadius: '14px', fontWeight: 700, cursor: 'pointer', fontSize: '0.85rem' }}>Withdraw</button>
-      </div>
-    </motion.div>
-  );
-};
 
 const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
   const [activeSection, setActiveSection] = useState('overview');
@@ -121,8 +62,8 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
     const headers = { 'Authorization': `Bearer ${token}` };
     try {
       const [uRes, txRes] = await Promise.all([
-        fetch('https://paypee-api-kmhv.onrender.com/api/users/me', { headers }),
-        fetch('https://paypee-api-kmhv.onrender.com/api/transactions', { headers })
+        fetch(`${API_BASE}/api/users/me`, { headers }),
+        fetch(`${API_BASE}/api/transactions`, { headers })
       ]);
       const uData = await uRes.json();
       const txData = await txRes.json();
@@ -133,6 +74,24 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
 
   useEffect(() => {
     fetchUserData();
+    
+    // Auto-reconcile on mount to pick up any missed webhooks
+    const reconcile = async () => {
+      const token = localStorage.getItem('paypee_token');
+      if (token) {
+        try {
+          await fetch(`${API_BASE}/api/accounts/reconcile`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+          fetchUserData(); // Refresh after reconciliation
+        } catch (err) {
+          console.warn('Reconciliation silent fail:', err);
+        }
+      }
+    };
+    reconcile();
+
     const interval = setInterval(fetchUserData, 15000);
     return () => clearInterval(interval);
   }, []);
@@ -140,7 +99,7 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
   const handleCreateAccount = async (currency: string, bvn?: string, kycData?: any) => {
     setIsGenerating(true);
     try {
-      const response = await fetch('https://paypee-api-kmhv.onrender.com/api/accounts', {
+      const response = await fetch(`${API_BASE}/api/accounts`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -164,13 +123,23 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
 
   const navigate = (section: string) => setActiveSection(section);
 
+  const getCardProps = (currency: string) => {
+    if (currency === 'USD') return { symbol: '$', gradient: 'linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%)' };
+    if (currency === 'EUR') return { symbol: '€', gradient: 'linear-gradient(135deg, #312e81 0%, #6366f1 100%)' };
+    if (currency === 'GBP') return { symbol: '£', gradient: 'linear-gradient(135deg, #4c1d95 0%, #8b5cf6 100%)' };
+    if (currency === 'BTC') return { symbol: '₿', gradient: 'linear-gradient(135deg, #b45309 0%, #f59e0b 100%)' };
+    return { symbol: '₦', gradient: 'linear-gradient(135deg, #064e3b 0%, #10b981 100%)' };
+  };
+
   return (
     <div className="dashboard-shell">
-      <VerificationGate 
-        kycStatus={userData?.kycStatus || 'PENDING'} 
-        accountType="INDIVIDUAL"
-        onStatusChange={(status) => setUserData((prev: any) => ({ ...prev, kycStatus: status }))}
-      />
+      {userData && (
+        <VerificationGate 
+          kycStatus={userData.kycStatus} 
+          accountType="INDIVIDUAL"
+          onStatusChange={(status) => setUserData((prev: any) => ({ ...prev, kycStatus: status }))}
+        />
+      )}
 
       {/* Modern Desktop Sidebar */}
       <aside className="modern-sidebar desktop-only">
@@ -277,18 +246,20 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
                       <button onClick={() => navigate('wallets')} style={{ background: 'transparent', border: 'none', color: '#94a3b8', fontSize: '0.9rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>View All <ChevronRight size={14} /></button>
                    </div>
                    <div style={{ display: 'flex', gap: '1.5rem', overflowX: 'auto', paddingBottom: '1rem' }}>
-                      {userData?.wallets?.map((w: any) => (
-                         <div key={w.id} style={{ minWidth: '280px', flex: 1, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '24px', padding: '1.5rem', position: 'relative', overflow: 'hidden', boxShadow: '0 20px 40px rgba(0,0,0,0.5)' }}>
-                            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '40px', background: 'linear-gradient(180deg, rgba(255,255,255,0.05) 0%, transparent 100%)' }} />
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', position: 'relative', zIndex: 1 }}>
-                               <div style={{ fontWeight: 700, color: '#94a3b8' }}>{w.currency}</div>
-                               <div style={{ width: 32, height: 32, background: 'rgba(255,255,255,0.1)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                  <Wallet size={16} color="#fff" />
-                               </div>
-                            </div>
-                            <div style={{ fontSize: '1.8rem', fontWeight: 900 }}>{w.currency === 'USD' ? '$' : w.currency === 'EUR' ? '€' : w.currency === 'GBP' ? '£' : '₦'}{parseFloat(w.balance).toFixed(2)}</div>
-                         </div>
-                      ))}
+                      {userData?.wallets?.map((w: any) => {
+                         const { symbol, gradient } = getCardProps(w.currency);
+                         return (
+                           <BalanceCard 
+                             key={w.id} 
+                             currency={w.currency} 
+                             symbol={symbol} 
+                             gradient={gradient} 
+                             details={w.metadata} 
+                             amount={parseFloat(w.balance).toFixed(2)} 
+                             userName={userData?.firstName}
+                           />
+                         );
+                      })}
                       {!userData?.wallets?.length && (
                          <div style={{ minWidth: '280px', flex: 1, background: 'rgba(255,255,255,0.03)', border: '1px dashed rgba(255,255,255,0.1)', borderRadius: '24px', padding: '1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', cursor: 'pointer' }} onClick={() => setIsAccountModalOpen(true)}>
                             <Plus size={24} color="#94a3b8" style={{ marginBottom: '0.5rem' }} />
@@ -316,7 +287,7 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
                       <div style={{ flex: 1, position: 'relative', minHeight: '200px', display: 'flex', alignItems: 'flex-end' }}>
                          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(34, 211, 238, 0.1), transparent)', borderBottom: '2px solid #22d3ee' }}>
                             <svg width="100%" height="100%" preserveAspectRatio="none" viewBox="0 0 100 100">
-                              <path d="M0,100 Q10,90 20,95 T40,80 T60,85 T80,50 T100,20" fill="none" stroke="#22d3ee" strokeWidth="2" vectorEffect="non-scaling-stroke" />
+                               <path d="M0,100 Q10,90 20,95 T40,80 T60,85 T80,50 T100,20" fill="none" stroke="#22d3ee" strokeWidth="2" vectorEffect="non-scaling-stroke" />
                             </svg>
                          </div>
                       </div>
@@ -379,7 +350,7 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
                                   <td style={{ padding: '1rem 0', textAlign: 'right', fontWeight: 800, color: tx.type === 'DEPOSIT' ? '#22d3ee' : '#fff' }}>
                                      {tx.type === 'DEPOSIT' ? '+' : '-'}{tx.currency} {parseFloat(tx.amount).toFixed(2)}
                                   </td>
-                               </tr>
+                                </tr>
                             )) : (
                                <tr>
                                   <td colSpan={4} style={{ padding: '3rem 0', textAlign: 'center' }}>
@@ -394,7 +365,7 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
                                         <button onClick={() => setIsPayoutOpen(true)} className="btn btn-primary" style={{ padding: '0.6rem 1.5rem', fontSize: '0.9rem', marginTop: '0.5rem' }}>Make a Transfer</button>
                                      </div>
                                   </td>
-                               </tr>
+                                </tr>
                             )}
                          </tbody>
                       </table>
@@ -406,9 +377,22 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
 
             {activeSection === 'wallets' && (
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '2rem' }}>
-                {userData?.wallets?.map((w: any) => (
-                   <BalanceCard key={w.id} currency={w.currency} amount={parseFloat(w.balance).toFixed(2)} onSwap={() => setIsSwapOpen(true)} onPayout={() => setIsPayoutOpen(true)} />
-                ))}
+                {userData?.wallets?.map((w: any) => {
+                   const { symbol, gradient } = getCardProps(w.currency);
+                   return (
+                     <BalanceCard 
+                       key={w.id} 
+                       currency={w.currency} 
+                       symbol={symbol} 
+                       gradient={gradient} 
+                       details={w.metadata} 
+                       amount={parseFloat(w.balance).toFixed(2)} 
+                       userName={userData?.firstName}
+                       onSwap={() => setIsSwapOpen(true)}
+                       onPayout={() => setIsPayoutOpen(true)}
+                     />
+                   );
+                })}
               </div>
             )}
 
@@ -460,6 +444,7 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
         onClose={() => setIsAccountModalOpen(false)} 
         onSelect={handleCreateAccount}
         isProcessing={isGenerating}
+        existingCurrencies={userData?.wallets?.map((w: any) => w.currency) || []}
       />
     </div>
   );

@@ -42,7 +42,7 @@ const Auth = ({ onComplete, onBack }: AuthProps) => {
         ? JSON.stringify({ email, password })
         : JSON.stringify({ email, password, role: accountType.toUpperCase(), firstName, lastName, businessName });
 
-      const res = await fetch(`https://paypee-api-kmhv.onrender.com${endpoint}`, {
+      const res = await fetch(`${API_BASE}${endpoint}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body
