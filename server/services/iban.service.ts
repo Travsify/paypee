@@ -170,8 +170,17 @@ export class IbanService {
       }
 
       console.log(`[RECONCILE] Total external transactions to scan: ${externalTxs.length}`);
+      
       if (externalTxs.length > 0) {
-        console.log(`[RECONCILE] Sample TX statuses: ${externalTxs.slice(0, 3).map((t: any) => t.status).join(', ')}`);
+          console.log(`[RECONCILE] DEBUG: Local accounts being checked: ${externalAccounts.map((a: any) => a.account_number).join(', ')}`);
+          const sampleTx = externalTxs[0];
+          console.log(`[RECONCILE] DEBUG: Sample External TX data: ${JSON.stringify({
+              id: sampleTx.id,
+              amount: sampleTx.amount,
+              acc: sampleTx.account_number,
+              metaAcc: sampleTx.meta?.account_number,
+              type: sampleTx.type
+          })}`);
       }
 
       // Filter transactions that belong to this user's accounts
