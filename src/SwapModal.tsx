@@ -16,7 +16,7 @@ const currencyConfig: Record<string, { symbol: string; icon: string; color: stri
   GBP: { symbol: '£', icon: '🇬🇧', color: '#8b5cf6' },
 };
 
-const API_BASE = 'https://paypee-api-kmhv.onrender.com';
+import { API_BASE } from './config';
 
 const SwapModal: React.FC<SwapModalProps> = ({ isOpen, onClose, onComplete, wallets }) => {
   const [fromCurrency, setFromCurrency] = useState('');
