@@ -39,26 +39,13 @@ const SidebarItem = ({ icon: Icon, label, active = false, onClick }: { icon: any
   <div 
     onClick={onClick}
     className={`nav-link ${active ? 'active' : ''}`}
-    style={{ color: active ? '#fff' : 'var(--text-muted)' }}
   >
-    <Icon size={22} strokeWidth={active ? 2.5 : 2} />
-    <span style={{ fontSize: '1rem', fontWeight: active ? 800 : 600 }}>{label}</span>
+    <Icon size={20} />
+    <span style={{ fontSize: '0.95rem' }}>{label}</span>
   </div>
 );
 
-const BalanceCard = ({ currency, amount, onSwap, onPayout, accountDetails, symbol, gradient, details, userName, type, onDelete }: { 
-  currency: string, 
-  amount: string, 
-  onSwap?: () => void, 
-  onPayout?: () => void,
-  accountDetails?: any,
-  symbol?: string,
-  gradient?: string,
-  details?: any[],
-  userName?: string,
-  type?: string,
-  onDelete?: (id: string) => void
-}) => {
+const BalanceCard = ({ currency, amount, onSwap, onPayout, accountDetails }: { currency: string, amount: string, onSwap: () => void, onPayout: () => void, accountDetails?: any }) => {
   const getGradient = (cur: string) => {
     const map: Record<string, string> = {
       USD: 'linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)',
@@ -179,13 +166,13 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
   return (
     <div className="dashboard-shell">
       <VerificationGate 
-        kycStatus={userData?.kycStatus} 
+        kycStatus={userData?.kycStatus || 'PENDING'} 
         accountType="INDIVIDUAL"
         onStatusChange={(status) => setUserData((prev: any) => ({ ...prev, kycStatus: status }))}
       />
 
       {/* Modern Desktop Sidebar */}
-      <aside className="modern-sidebar">
+      <aside className="modern-sidebar desktop-only">
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '0 0.5rem', marginBottom: '3.5rem' }}>
           <div style={{ width: 40, height: 40, background: 'var(--primary)', borderRadius: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 10px 20px -5px var(--primary-glow)' }}>
              <Zap size={24} color="#fff" strokeWidth={3} />
@@ -249,29 +236,16 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
             {activeSection === 'overview' && (
               <div>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: '2rem', marginBottom: '4rem' }}>
-                  {userData?.wallets?.map((w: any) => {
-                    const symbols: any = { USD: '$', EUR: '€', NGN: '₦', GBP: '£', BTC: '₿' };
-                    const gradients: any = {
-                      USD: "linear-gradient(135deg, #6366f1 0%, #a855f7 100%)",
-                      NGN: "linear-gradient(135deg, #10b981 0%, #059669 100%)",
-                      EUR: "linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)",
-                      BTC: "linear-gradient(135deg, #f59e0b 0%, #d97706 100%)"
-                    };
-                    const details = w.metadata ? (typeof w.metadata === 'string' ? JSON.parse(w.metadata) : w.metadata) : {};
-                    
-                    return (
-                      <BalanceCard 
-                        key={w.id}
-                        currency={w.currency}
-                        symbol={symbols[w.currency] || w.currency}
-                        amount={parseFloat(w.balance).toFixed(2)}
-                        gradient={gradients[w.currency] || "linear-gradient(135deg, #1e293b 0%, #0f172a 100%)"}
-                        details={details}
-                        userName={`${userData?.firstName} ${userData?.lastName}`}
-                        type="INDIVIDUAL"
-                      />
-                    );
-                  })}
+                  {userData?.wallets?.map((w: any) => (
+                    <BalanceCard 
+                      key={w.id}
+                      currency={w.currency}
+                      amount={parseFloat(w.balance).toFixed(2)}
+                      onSwap={() => setIsSwapOpen(true)}
+                      onPayout={() => setIsPayoutOpen(true)}
+                      accountDetails={w.metadata}
+                    />
+                  ))}
                   <motion.div 
                     onClick={() => setIsAccountModalOpen(true)}
                     whileHover={{ scale: 1.02 }}
@@ -314,30 +288,9 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
 
             {activeSection === 'wallets' && (
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '2rem' }}>
-                {userData?.wallets?.map((w: any) => {
-                  const symbols: any = { USD: '$', EUR: '€', NGN: '₦', GBP: '£', BTC: '₿' };
-                  const gradients: any = {
-                    USD: "linear-gradient(135deg, #6366f1 0%, #a855f7 100%)",
-                    NGN: "linear-gradient(135deg, #10b981 0%, #059669 100%)",
-                    EUR: "linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)",
-                    BTC: "linear-gradient(135deg, #f59e0b 0%, #d97706 100%)"
-                  };
-                  const details = w.metadata ? (typeof w.metadata === 'string' ? JSON.parse(w.metadata) : w.metadata) : {};
-
-                  return (
-                    <BalanceCard 
-                      key={w.id} 
-                      currency={w.currency} 
-                      symbol={symbols[w.currency] || w.currency}
-                      amount={parseFloat(w.balance).toFixed(2)} 
-                      gradient={gradients[w.currency] || "linear-gradient(135deg, #1e293b 0%, #0f172a 100%)"}
-                      details={details}
-                      userName={`${userData?.firstName} ${userData?.lastName}`}
-                      type="INDIVIDUAL"
-                      onDelete={(id) => {/* Handle delete */}}
-                    />
-                  );
-                })}
+                {userData?.wallets?.map((w: any) => (
+                   <BalanceCard key={w.id} currency={w.currency} amount={parseFloat(w.balance).toFixed(2)} onSwap={() => setIsSwapOpen(true)} onPayout={() => setIsPayoutOpen(true)} />
+                ))}
               </div>
             )}
 

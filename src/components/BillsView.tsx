@@ -49,11 +49,9 @@ const BillsView = () => {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await res.json();
-      console.log(`[BILLS] Fetched providers for ${cat}:`, data);
       if (Array.isArray(data)) setProviders(data);
       else setProviders([]);
     } catch (err) {
-      console.error('[BILLS] Fetch error:', err);
       setProviders([]);
     } finally {
       setLoading(false);

@@ -1,195 +1,137 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { 
+  Sparkles, 
   ArrowRight, 
-  CheckCircle2, 
   Smartphone, 
   CreditCard, 
-  Zap, 
+  Globe, 
   ShieldCheck, 
-  Globe,
-  Wallet,
-  Star,
-  ChevronLeft,
-  Bitcoin
+  Zap,
+  CheckCircle2
 } from 'lucide-react';
 
-interface LandingIndividualProps {
-  onBack: () => void;
-  onGetStarted: () => void;
-}
-
-const LandingIndividual: React.FC<LandingIndividualProps> = ({ onBack, onGetStarted }) => {
+const LandingIndividual = ({ onAuth }: { onAuth: () => void }) => {
   return (
-    <div className="landing-individual">
-      <nav className="fixed top-0 left-0 right-0 z-50 nav-blur py-6">
-        <div className="container flex justify-between items-center">
-          <button 
-            onClick={onBack}
-            className="flex items-center gap-2 text-white/50 hover:text-white transition-colors font-bold group"
-          >
-            <ChevronLeft size={20} className="group-hover:-translate-x-1 transition-transform" /> Back to Ecosystem
-          </button>
-          <div className="text-2xl font-black tracking-tighter text-white">
-            PAYPEE <span className="text-primary">INDIVIDUAL</span>
-          </div>
-          <button className="btn btn-primary px-6 py-2 rounded-xl text-sm" onClick={onGetStarted}>
-            Get Started
-          </button>
-        </div>
-      </nav>
-
+    <div style={{ paddingTop: '5rem', paddingBottom: '4rem' }}>
       {/* Hero Section */}
-      <section className="hero-section section-padding relative overflow-hidden min-h-[90vh] flex items-center">
-        <div className="hero-glow"></div>
-        <div className="container">
-          <div className="grid grid-cols-1 lg:grid-cols-2 items-center gap-20">
-            <motion.div 
-              initial={{ opacity: 0, x: -50 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.8 }}
-              className="stagger-load"
-            >
-              <div className="badge mb-8">
-                <Star size={14} className="fill-current text-primary" /> 
-                <span className="ml-2">For Global Citizens</span>
-              </div>
-              <h1 className="mb-8 leading-tight">
-                Your money, <br />
-                <span className="text-gradient">Without Borders.</span>
-              </h1>
-              <p className="text-xl text-white/50 mb-12 max-w-xl leading-relaxed">
-                Experience the ultimate freedom of global banking. Open USD, EUR, and GBP wallets in seconds, issue virtual cards, and move money at the speed of light.
-              </p>
-              <div className="flex flex-wrap gap-6">
-                <button className="btn btn-primary btn-lg px-12" onClick={onGetStarted}>
-                  Open Your Account <ArrowRight size={20} />
-                </button>
-                <button className="btn btn-outline btn-lg px-12">
-                  View Card Plans
-                </button>
-              </div>
-            </motion.div>
-            
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.8 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true }}
-              transition={{ duration: 1, type: "spring" }}
-              className="relative"
-            >
-              <div className="hero-image-container animate-float premium-border">
-                <img 
-                  src="/virtual_card_paypee_1776472492359.png" 
-                  alt="Paypee Virtual Card" 
-                  className="w-full h-auto rounded-[48px]"
-                />
-              </div>
-              
-              {/* Floating Social Proof Card */}
+      <section className="hero container perspective-3d" style={{ marginBottom: '6rem' }}>
+        <div className="info-row" style={{ alignItems: 'center', textAlign: 'left', gap: '2rem' }}>
+           <div className="hero-text-content">
               <motion.div 
-                initial={{ x: 50, opacity: 0 }}
-                whileInView={{ x: 0, opacity: 1 }}
-                transition={{ delay: 0.5 }}
-                className="absolute -bottom-10 -right-10 glass-card p-8 min-w-[300px] hidden md:block"
+                className="badge"
+                initial={{ x: -20, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
               >
-                <div className="flex items-center gap-5 mb-6">
-                  <div className="w-12 h-12 rounded-2xl bg-emerald-500/20 flex items-center justify-center text-emerald-400">
-                    <ShieldCheck size={24} />
-                  </div>
-                  <div>
-                    <div className="font-bold">Global Wallet</div>
-                    <div className="text-xs text-white/40 uppercase tracking-widest font-bold">Active & Secure</div>
-                  </div>
-                </div>
-                <div className="text-3xl font-black text-white">$12,450.00</div>
+                <Sparkles size={14} style={{ marginRight: '0.5rem' }} /> FOR INDIVIDUALS
               </motion.div>
-            </motion.div>
-          </div>
-        </div>
-      </section>
-
-      {/* Benefits Section */}
-      <section className="section-padding relative">
-        <div className="container">
-          <div className="text-center mb-24 stagger-load">
-            <div className="badge mx-auto mb-6">Capabilities</div>
-            <h2 className="mb-8 leading-tight">Everything you need to <br/> <span className="text-gradient">Manage Global Wealth.</span></h2>
-            <p className="max-w-2xl mx-auto text-lg text-white/40">We've built a world-class financial infrastructure so you can focus on building your dreams.</p>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {[
-              { icon: <Wallet size={32} />, title: "Global Multi-Currency", desc: "Hold and manage NGN, USD, GBP, and EUR in one place with institutional security.", color: "var(--primary)" },
-              { icon: <CreditCard size={32} />, title: "Infinite Virtual Cards", desc: "Create unlimited virtual USD cards for international subscriptions and shopping.", color: "#ec4899" },
-              { icon: <Zap size={32} />, title: "Instant FX Swaps", desc: "Swap between currencies at mid-market rates instantly. No hidden fees, ever.", color: "#10b981" },
-              { icon: <Bitcoin size={32} />, title: "Digital Assets", desc: "Seamlessly hold and trade digital assets with direct fiat on/off-ramps.", color: "#f59e0b" }
-            ].map((f, i) => (
+              <motion.h1
+                initial={{ y: 30, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ duration: 0.8 }}
+                style={{ textAlign: 'left', fontSize: '4.5rem', marginBottom: '1.5rem', lineHeight: 1.1 }}
+              >
+                Your Global <br />
+                <span style={{ color: 'var(--primary)' }}>Money Hub.</span>
+              </motion.h1>
+              <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.4 }}
+                style={{ margin: '0 0 2.5rem 0', fontSize: '1.25rem', maxWidth: '500px', color: 'var(--text-muted)' }}
+              >
+                Access USD, EUR, and GBP wallets instantly. Issue virtual cards, send money globally, and manage your personal wealth without borders.
+              </motion.p>
               <motion.div 
-                key={i} 
-                whileHover={{ y: -10 }}
-                className="glass-card p-10 transition-all duration-500"
+                className="hero-btns"
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.6 }}
+                style={{ justifyContent: 'flex-start' }}
               >
-                <div className="w-16 h-16 rounded-2xl flex items-center justify-center mb-10 transition-transform hover:scale-110" style={{ background: `${f.color}15`, color: f.color, border: `1px solid ${f.color}30` }}>
-                  {f.icon}
-                </div>
-                <h3 className="text-2xl mb-6">{f.title}</h3>
-                <p className="text-white/40 leading-relaxed">{f.desc}</p>
+                <button className="btn btn-primary" onClick={onAuth} style={{ padding: '1.2rem 3rem', fontSize: '1.1rem' }}>
+                  Open Free Account <ArrowRight size={20} />
+                </button>
               </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* People-Connected Section */}
-      <section className="section-padding bg-surface/30">
-        <div className="container">
-          <div className="grid grid-cols-1 lg:grid-cols-2 items-center gap-24">
-            <div className="hero-image-container people-mask order-2 lg:order-1">
-              <img 
-                src="/diverse_people_paypee_1776472528598.png" 
-                alt="Paypee Community" 
-                className="w-full h-auto"
-              />
-            </div>
-            
-            <div className="stagger-load order-1 lg:order-2">
-              <div className="badge mb-8">Community</div>
-              <h2 className="mb-8 leading-tight">Built for the next <br/> <span className="text-gradient">Generation of Creators.</span></h2>
-              <p className="text-lg text-white/40 mb-12 leading-relaxed">
-                Join over 500,000 individuals who are breaking financial barriers. Whether you're a freelancer, a digital nomad, or a global traveler, Paypee is built for you.
-              </p>
-              <div className="space-y-8">
-                {[
-                  "Connect with your global audience effortlessly",
-                  "Receive payments from platforms like Upwork and Fiverr",
-                  "Spend locally with the best exchange rates in Africa"
-                ].map((item, i) => (
-                  <div key={i} className="flex items-center gap-6 p-4 rounded-2xl hover:bg-white/5 transition-colors">
-                    <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary">
-                      <CheckCircle2 size={24} />
+           </div>
+           <div className="hero-visual-content" style={{ position: 'relative', height: '550px', background: 'var(--glass)', borderRadius: '40px', border: '1px solid var(--glass-border)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <motion.div 
+                animate={{ y: [-10, 10, -10] }} 
+                transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
+                style={{ position: 'relative', zIndex: 2 }}
+              >
+                <Smartphone size={300} color="var(--primary)" opacity={0.8} />
+              </motion.div>
+              <div style={{ position: 'absolute', top: '20%', right: '10%', background: 'rgba(255,255,255,0.05)', padding: '1rem', borderRadius: '16px', backdropFilter: 'blur(10px)', border: '1px solid var(--border)', zIndex: 3 }}>
+                 <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                    <div style={{ background: '#10b981', borderRadius: '50%', padding: '0.4rem' }}><CheckCircle2 size={16} color="#fff" /></div>
+                    <div>
+                       <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Received from UK</div>
+                       <div style={{ fontWeight: 800 }}>£1,250.00</div>
                     </div>
-                    <span className="font-bold text-lg text-white/80">{item}</span>
-                  </div>
-                ))}
+                 </div>
               </div>
-              <button className="btn btn-primary mt-16 px-12" onClick={onGetStarted}>
-                Join the Community <ArrowRight size={20} />
-              </button>
-            </div>
-          </div>
+              <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: '400px', height: '400px', background: 'radial-gradient(circle, var(--accent) 0%, transparent 70%)', filter: 'blur(80px)', opacity: 0.2, zIndex: 0 }} />
+           </div>
         </div>
       </section>
 
-      {/* Footer CTA */}
-      <section className="section-padding text-center">
-        <div className="container stagger-load">
-          <h2 className="text-5xl lg:text-7xl mb-12 font-black tracking-tighter">Start your global journey.</h2>
-          <button className="btn btn-primary btn-lg px-20" onClick={onGetStarted}>
-            Get Started Now
-          </button>
+      {/* Benefits Grid */}
+      <section className="section container">
+        <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
+           <h2 style={{ fontSize: '3rem' }}>Everything You Need</h2>
+           <p style={{ color: 'var(--text-muted)', fontSize: '1.2rem' }}>We've reimagined personal finance for the modern African.</p>
         </div>
+        <div className="grid">
+           {[
+             { icon: <Globe />, title: "Multi-Currency Wallets", desc: "Hold your net worth in NGN, USD, GBP, and EUR to protect against local currency devaluation." },
+             { icon: <CreditCard />, title: "Virtual Cards", desc: "Create a virtual Mastercard in one tap. Perfect for Netflix, AWS, Apple Music, and global shopping." },
+             { icon: <Zap />, title: "Instant Transfers", desc: "Send money localized or globally at lightning speed. Zero hidden fees, crystal clear exchange rates." },
+             { icon: <ShieldCheck />, title: "Bank-Grade Security", desc: "Your money is protected by 256-bit encryption and regulated global custody partners." }
+           ].map((item, idx) => (
+             <motion.div key={idx} className="card tilt-card" whileHover={{ y: -5 }}>
+                <div className="card-icon" style={{ color: 'var(--primary)' }}>{item.icon}</div>
+                <h3 style={{ fontSize: '1.5rem', marginBottom: '1rem' }}>{item.title}</h3>
+                <p style={{ color: 'var(--text-muted)' }}>{item.desc}</p>
+             </motion.div>
+           ))}
+        </div>
+      </section>
+      
+      {/* Specific Demo / Hook */}
+      <section className="section container" style={{ marginTop: '4rem', background: 'rgba(99, 102, 241, 0.05)', borderRadius: '40px', padding: '4rem' }}>
+         <div className="info-row" style={{ alignItems: 'center' }}>
+            <div className="info-visual-content">
+               <div style={{ 
+                  background: 'linear-gradient(135deg, #1e293b 0%, #334155 100%)', 
+                  borderRadius: '24px', 
+                  padding: '2rem', 
+                  aspectRatio: '1.6 / 1',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'space-between',
+                  boxShadow: '0 20px 40px -10px rgba(0,0,0,0.4)',
+                  position: 'relative',
+                  overflow: 'hidden'
+                }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <Zap size={32} color="var(--primary)" />
+                    <span style={{ fontSize: '1rem', fontWeight: 700, opacity: 0.6 }}>VIRTUAL DEBIT</span>
+                  </div>
+                  <div style={{ fontSize: '1.8rem', letterSpacing: '3px', fontWeight: 600 }}>**** **** **** 4021</div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <div><div style={{ opacity: 0.5, fontSize: '0.8rem' }}>HOLDER</div><div style={{ fontWeight: 600 }}>SARAH CHEN</div></div>
+                    <div><div style={{ opacity: 0.5, fontSize: '0.8rem' }}>EXPIRES</div><div style={{ fontWeight: 600 }}>08/29</div></div>
+                  </div>
+                  <div style={{ position: 'absolute', right: '-20%', bottom: '-20%', width: '200px', height: '200px', background: 'var(--primary)', filter: 'blur(80px)' }} />
+               </div>
+            </div>
+            <div className="info-content" style={{ paddingLeft: '4rem' }}>
+               <h2>Cards that just work.</h2>
+               <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem', marginBottom: '2rem' }}>Stop worrying about transaction limits and card failures. Our USD virtual cards are universally accepted anywhere Mastercard is supported online.</p>
+               <button className="btn btn-outline" onClick={onAuth}>Issue Your Card Today</button>
+            </div>
+         </div>
       </section>
     </div>
   );

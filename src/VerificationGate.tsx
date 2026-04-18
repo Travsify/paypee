@@ -225,15 +225,7 @@ const VerificationGate: React.FC<VerificationGateProps> = ({ kycStatus: initialS
 
   const cfg = statusConfig[kycStatus as keyof typeof statusConfig];
 
-  useEffect(() => {
-    if (initialStatus) setKycStatus(initialStatus);
-  }, [initialStatus]);
-
-
-
   // Fully unlocked — just render notification bell only
-  if (!kycStatus) return null; // Don't show anything while loading
-  
   if (kycStatus === 'VERIFIED') {
     if (notifications.length === 0 && unreadCount === 0) return null;
     return (

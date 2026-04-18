@@ -37,14 +37,25 @@ import BalanceCard from './components/BalanceCard';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart as ReBarChart, Bar, Cell } from 'recharts';
 
 const SidebarItem = ({ icon: Icon, label, active = false, onClick }: { icon: any, label: string, active?: boolean, onClick?: () => void }) => (
-  <div 
+  <motion.div 
     onClick={onClick}
-    className={`nav-link ${active ? 'active' : ''}`}
-    style={{ color: active ? '#fff' : 'var(--text-muted)' }}
+    whileHover={{ x: 5, color: '#fff' }}
+    style={{ 
+      display: 'flex', 
+      alignItems: 'center', 
+      gap: '1rem', 
+      padding: '0.8rem 1.2rem', 
+      borderRadius: '12px', 
+      cursor: 'pointer',
+      background: active ? 'rgba(99, 102, 241, 0.1)' : 'transparent',
+      color: active ? 'var(--primary)' : 'var(--text-muted)',
+      fontWeight: active ? 600 : 500,
+      marginBottom: '0.4rem'
+    }}
   >
-    <Icon size={22} strokeWidth={active ? 2.5 : 2} />
-    <span style={{ fontSize: '1rem', fontWeight: active ? 800 : 600 }}>{label}</span>
-  </div>
+    <Icon size={20} />
+    <span style={{ fontSize: '0.95rem' }}>{label}</span>
+  </motion.div>
 );
 
 const MetricCard = ({ label, value, trend, icon: Icon, color }: { label: string, value: string, trend: string, icon: any, color: string }) => {
@@ -167,22 +178,22 @@ const BusinessDashboard = ({ onLogout }: { onLogout?: () => void }) => {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', background: '#020617', color: '#fff', overflow: 'hidden' }}>
       <VerificationGate 
-        kycStatus={userData?.kycStatus} 
+        kycStatus={userData?.kycStatus || 'PENDING'} 
         accountType="BUSINESS"
         onStatusChange={(status) => setUserData((prev: any) => ({ ...prev, kycStatus: status }))}
       />
       
-      <div className="dashboard-shell">
-        {/* Modern Desktop Sidebar */}
-        <aside className="modern-sidebar">
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '0 0.5rem', marginBottom: '3.5rem' }}>
-            <div style={{ width: 40, height: 40, background: 'var(--primary)', borderRadius: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 10px 20px -5px var(--primary-glow)' }}>
-               <Zap size={24} color="#fff" strokeWidth={3} />
+      <div style={{ display: 'flex', flex: 1, overflow: 'hidden', position: 'relative' }}>
+        {/* Sidebar - Hidden on Mobile */}
+        <aside className="dashboard-aside" style={{ width: '280px', borderRight: '1px solid var(--border)', background: '#0a0f1e', padding: '2rem 1.5rem', display: 'flex', flexDirection: 'column' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0 0.5rem', marginBottom: '3rem' }}>
+            <div style={{ width: 32, height: 32, background: 'var(--primary)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+               <Zap size={20} color="#fff" strokeWidth={3} />
             </div>
-            <span style={{ fontSize: '1.5rem', fontWeight: 900, letterSpacing: '-0.04em' }}>Paypee <span style={{ color: 'var(--primary)', fontSize: '0.6rem', verticalAlign: 'top', marginLeft: '2px' }}>BIZ</span></span>
+            <span style={{ fontSize: '1.25rem', fontWeight: 900, letterSpacing: '-0.02em' }}>Paypee <span style={{ color: 'var(--primary)', fontSize: '0.6rem', verticalAlign: 'top', marginLeft: '2px' }}>BIZ</span></span>
           </div>
           
-          <div style={{ flex: 1 }}>
+          <div style={{ flex: 1, overflowY: 'auto' }}>
              <SidebarItem icon={LayoutDashboard} label="Treasury Hub" active={activeSection === 'dashboard'} onClick={() => navigate('dashboard')} />
              <SidebarItem icon={Wallet} label="Corporate Wallets" active={activeSection === 'wallets'} onClick={() => navigate('wallets')} />
              <SidebarItem icon={Send} label="Bulk Payouts" active={activeSection === 'payouts'} onClick={() => navigate('payouts')} />
@@ -194,8 +205,9 @@ const BusinessDashboard = ({ onLogout }: { onLogout?: () => void }) => {
              <SidebarItem icon={Bot} label="Business AI" active={activeSection === 'ai'} onClick={() => navigate('ai')} />
           </div>
 
-          <div style={{ borderTop: '1px solid var(--border)', paddingTop: '1.5rem' }}>
+          <div style={{ borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '1.5rem', marginTop: '1.5rem' }}>
             <SidebarItem icon={Settings} label="Settings" active={activeSection === 'settings'} onClick={() => navigate('settings')} />
+            <SidebarItem icon={HelpCircle} label="Help & Support" onClick={() => navigate('help')} />
             <SidebarItem icon={LogOut} label="Log Out" onClick={onLogout} />
           </div>
         </aside>
