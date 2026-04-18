@@ -542,11 +542,21 @@ export const getCustomerVirtualAccounts = async (customerId: string) => {
  */
 export const getTransactions = async (customerId?: string) => {
   try {
-    // Maplerad often uses /transactions with query params or /customers/:id/transactions
-    // Based on their common pattern, we'll try the customer_id filter first
     const url = customerId ? `/transactions?customer_id=${customerId}` : '/transactions';
     const response = await mapleradClient.get(url);
-    return response.data.data;
+    console.log(`[MAPLERAD DEBUG] GET ${url} - Status: ${response.status}`);
+    
+    // The data might be in response.data.data (standard) or nested further
+    let txs = response.data.data;
+    
+    if (txs && !Array.isArray(txs) && typeof txs === 'object') {
+       console.log(`[MAPLERAD DEBUG] Transactions payload keys: ${Object.keys(txs).join(', ')}`);
+       if (Array.isArray(txs.transactions)) txs = txs.transactions;
+       else if (Array.isArray(txs.history)) txs = txs.history;
+       else if (Array.isArray(txs.list)) txs = txs.list;
+    }
+    
+    return Array.isArray(txs) ? txs : [];
   } catch (error: any) {
     console.error('[MAPLERAD] Get Transactions Error:', error.response?.data || error.message);
     return [];
