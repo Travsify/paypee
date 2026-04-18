@@ -1,18 +1,19 @@
 :root {
-  /* Color Palette - Next Gen Fintech */
+  /* Color Palette - Next Gen Fintech OS */
   --bg-deep: #020617;
   --bg-surface: #0f172a;
-  --bg-glass: rgba(15, 23, 42, 0.7);
+  --bg-glass: rgba(15, 23, 42, 0.6);
   
   --primary: #6366f1; /* Electric Indigo */
-  --primary-glow: rgba(99, 102, 241, 0.4);
+  --primary-glow: rgba(99, 102, 241, 0.5);
   --secondary: #ec4899; /* Pink */
-  --secondary-glow: rgba(236, 72, 153, 0.3);
+  --secondary-glow: rgba(236, 72, 153, 0.4);
   
   --accent-emerald: #10b981;
   --accent-amber: #f59e0b;
   --accent-rose: #f43f5e;
   --accent-cyan: #06b6d4;
+  --accent-purple: #a855f7;
 
   --text-main: #f8fafc;
   --text-muted: #94a3b8;
@@ -21,8 +22,13 @@
   --border-glass: rgba(255, 255, 255, 0.08);
   --border-bright: rgba(255, 255, 255, 0.15);
   
-  --shadow-premium: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-  --blur-std: blur(12px);
+  --shadow-premium: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
+  --blur-std: blur(24px);
+  
+  /* Luminous System Tokens */
+  --glow-blue: 0 0 40px rgba(99, 102, 241, 0.3);
+  --glow-cyan: 0 0 40px rgba(6, 182, 212, 0.3);
+  --refraction-border: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.02) 50%, rgba(255,255,255,0.1) 100%);
 }
 
 @font-face {
@@ -84,30 +90,56 @@
 /* Glassmorphism Components */
 .glass-panel {
   background: var(--bg-glass);
-  backdrop-filter: var(--blur-std);
+  backdrop-filter: var(--blur-std) saturate(180%);
+  -webkit-backdrop-filter: var(--blur-std) saturate(180%);
   border: 1px solid var(--border-glass);
-  border-radius: 24px;
+  border-radius: 32px;
   box-shadow: var(--shadow-premium);
+  position: relative;
+  overflow: hidden;
+}
+
+.glass-panel::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--refraction-border);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: xor;
+  -webkit-mask-composite: xor;
+  padding: 1px;
+  pointer-events: none;
 }
 
 .glass-card {
-  background: rgba(255, 255, 255, 0.03);
-  backdrop-filter: blur(8px);
+  background: rgba(255, 255, 255, 0.02);
+  backdrop-filter: blur(12px);
   border: 1px solid var(--border-glass);
-  border-radius: 20px;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 24px;
+  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .glass-card:hover {
-  background: rgba(255, 255, 255, 0.05);
-  border-color: var(--border-bright);
-  transform: translateY(-4px);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.2);
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0 40px 80px rgba(0, 0, 0, 0.5);
 }
 
 /* Typography Helpers */
+.text-massive {
+  font-size: clamp(3.5rem, 12vw, 10rem);
+  font-weight: 900;
+  line-height: 0.8;
+  letter-spacing: -0.05em;
+  text-transform: uppercase;
+  font-style: italic;
+  filter: drop-shadow(0 0 30px var(--primary-glow));
+}
+
 .text-gradient {
-  background: linear-gradient(135deg, #fff 0%, var(--primary) 100%);
+  background: linear-gradient(135deg, #fff 0%, var(--primary) 50%, var(--secondary) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
@@ -130,126 +162,57 @@
   animation: slide-up 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-/* Layout */
-.dashboard-grid {
-  display: grid;
-  grid-template-columns: 280px 1fr 340px;
-  gap: 24px;
-  padding: 24px;
-  height: 100vh;
-  box-sizing: border-box;
-}
-
-@media (max-width: 1280px) {
-  .dashboard-grid {
-    grid-template-columns: 80px 1fr 300px;
-  }
-}
-
-@media (max-width: 1024px) {
-  .dashboard-grid {
-    grid-template-columns: 1fr;
-    height: auto;
-  }
-  .sidebar, .ai-panel {
-    display: none;
-  }
-}
-
-/* Specific UI Elements */
-.currency-pill {
-  padding: 12px 20px;
-  border-radius: 16px;
+/* Buttons */
+.btn-nextgen {
+  padding: 16px 32px;
+  border-radius: 20px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
   display: flex;
   align-items: center;
   gap: 12px;
   cursor: pointer;
-  border: 1px solid transparent;
-}
-
-.currency-pill.active {
-  background: var(--primary);
-  box-shadow: 0 0 20px var(--primary-glow);
-}
-
-.btn-nextgen {
-  padding: 14px 28px;
-  border-radius: 16px;
-  font-weight: 700;
-  transition: all 0.2s;
   border: none;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 10px;
+  position: relative;
+  overflow: hidden;
 }
 
 .btn-primary {
   background: var(--primary);
   color: white;
+  box-shadow: 0 10px 30px var(--primary-glow);
 }
 
 .btn-primary:hover {
-  background: #4f46e5;
-  box-shadow: 0 0 25px var(--primary-glow);
-  transform: scale(1.02);
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 0 20px 40px var(--primary-glow);
 }
 
 .btn-ghost {
   background: rgba(255, 255, 255, 0.05);
-  color: var(--text-main);
+  color: white;
   border: 1px solid var(--border-glass);
 }
 
 .btn-ghost:hover {
   background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.3);
 }
 
-/* Card Visuals */
-.virtual-card-preview {
-  width: 100%;
-  aspect-ratio: 1.58/1;
-  background: linear-gradient(135deg, #1e293b 0%, #020617 100%);
-  border-radius: 20px;
-  padding: 24px;
-  position: relative;
-  overflow: hidden;
-  border: 1px solid var(--border-glass);
+/* System Features */
+.system-card {
+  @extend .glass-panel;
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.8), rgba(2, 6, 23, 0.9));
 }
 
-.card-mesh {
+.luminous-accent {
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-image: radial-gradient(circle at 2px 2px, rgba(255,255,255,0.05) 1px, transparent 0);
-  background-size: 24px 24px;
-}
-
-.card-glow {
-  position: absolute;
-  top: -50%;
-  right: -50%;
-  width: 100%;
-  height: 100%;
-  background: radial-gradient(circle, var(--primary-glow) 0%, transparent 70%);
-}
-
-/* Custom Scrollbar */
-::-webkit-scrollbar {
-  width: 6px;
-}
-
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 10px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.2);
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  filter: blur(60px);
+  z-index: 0;
+  pointer-events: none;
 }

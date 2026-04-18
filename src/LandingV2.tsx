@@ -1,196 +1,231 @@
-import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useState, useEffect, useRef } from 'react';
+import { motion, AnimatePresence, useScroll, useTransform, useSpring } from 'framer-motion';
 import { 
-  Globe, 
-  Cpu, 
-  Zap, 
   ArrowRight, 
-  Code2,
-  BarChart4,
-  Star,
-  ChevronRight,
-  ShieldCheck,
-  CreditCard,
-  Wallet,
-  Bitcoin,
+  Wallet, 
+  CreditCard, 
+  Zap, 
+  Bitcoin, 
+  Globe, 
+  ShieldCheck, 
+  ChevronRight, 
+  Cpu, 
+  Code2, 
+  Lock, 
+  Activity,
+  BarChart3,
   Layers,
-  Repeat,
-  Terminal,
-  Lock,
-  Users,
-  CheckCircle2,
-  TrendingUp,
-  ExternalLink
+  Terminal
 } from 'lucide-react';
+import './NextGen.css';
 
 interface LandingV2Props {
   onAuth: () => void;
-  setLandingView: (view: any) => void;
+  setLandingView: (view: 'individual' | 'business' | 'developer') => void;
 }
 
 const LandingV2: React.FC<LandingV2Props> = ({ onAuth, setLandingView }) => {
-  const [activeTab, setActiveTab] = useState(0);
-  const [currentHeroImage, setCurrentHeroImage] = useState(0);
+  const [activeLayer, setActiveLayer] = useState(0);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({ target: containerRef });
+  
+  const smoothY = useSpring(scrollYProgress, { stiffness: 100, damping: 30 });
+  const scale = useTransform(smoothY, [0, 0.2], [1, 0.95]);
+  const opacity = useTransform(smoothY, [0, 0.1, 0.9, 1], [1, 1, 1, 0]);
 
-  const heroImages = [
-    { src: "/hero_finance_africa_1776472358279.png", label: "Global Liquidity" },
-    { src: "/virtual_card_paypee_1776472492359.png", label: "Virtual Power" },
-    { src: "/diverse_people_paypee_1776472528598.png", label: "Human Centric" }
-  ];
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentHeroImage((prev) => (prev + 1) % heroImages.length);
-    }, 6000);
-    return () => clearInterval(timer);
-  }, []);
+  // Parallax elements
+  const y1 = useTransform(smoothY, [0, 1], [0, -200]);
+  const y2 = useTransform(smoothY, [0, 1], [0, -500]);
+  const rotate = useTransform(smoothY, [0, 1], [0, 5]);
 
   return (
-    <div className="landing-v2 bg-[#020617] text-white selection:bg-primary/30 overflow-x-hidden">
+    <div ref={containerRef} className="nextgen-dashboard bg-[#020617] text-white selection:bg-primary/30 overflow-x-hidden">
       
-      {/* Dynamic Background Liquidity */}
-      <div className="fixed inset-0 pointer-events-none z-0">
-        <div className="absolute top-[10%] left-[-10%] w-[50vw] h-[50vw] bg-primary/10 blur-[150px] rounded-full animate-pulse" />
-        <div className="absolute bottom-[-10%] right-[-10%] w-[50vw] h-[50vw] bg-pink-500/5 blur-[150px] rounded-full" />
+      {/* 1. SYSTEM BACKGROUND (PERSISTENT) */}
+      <div className="fixed inset-0 z-0 pointer-events-none">
+        <div className="absolute top-[10%] left-[-10%] w-[60vw] h-[60vw] bg-primary/10 blur-[150px] rounded-full animate-pulse" />
+        <div className="absolute bottom-[-20%] right-[-10%] w-[50vw] h-[50vw] bg-secondary/5 blur-[150px] rounded-full" />
+        <div className="absolute top-[40%] right-[10%] w-[30vw] h-[30vw] bg-accent-cyan/5 blur-[120px] rounded-full" />
+        
+        {/* Animated Grid Lines */}
+        <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '48px 48px' }} />
       </div>
-      
-      {/* 1. HERO SECTION: The Fintech OS */}
-      <section className="relative min-h-screen flex items-center pt-32 lg:pt-0 overflow-hidden z-10">
-        <div className="container relative">
-          <div className="grid grid-cols-1 lg:grid-cols-12 items-center gap-16">
-            <motion.div 
-              initial={{ opacity: 0, y: 40 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
-              className="lg:col-span-7"
-            >
-              <div className="inline-flex items-center gap-3 px-5 py-2 rounded-full bg-white/5 border border-white/10 mb-10">
-                <div className="w-2 h-2 rounded-full bg-primary animate-ping" />
-                <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white/60">The Operating System for Global Money</span>
-              </div>
-              
-              <h1 className="text-7xl lg:text-[130px] font-black leading-[0.8] tracking-tighter italic uppercase mb-10 mix-blend-plus-lighter">
-                Global Finance. <br/>
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-white to-pink-500">Unified & Instant.</span>
-              </h1>
-              
-              <p className="text-xl lg:text-2xl text-text-dim max-w-xl leading-relaxed mb-12 font-medium">
-                The high-fidelity infrastructure for modern value movement. One dashboard for global accounts, virtual cards, and AI-driven wealth intelligence.
-              </p>
-              
-              <div className="flex flex-wrap gap-6 mb-16">
-                <button className="btn-nextgen btn-primary !px-16 !py-8 !text-lg !rounded-3xl shadow-[0_20px_60px_rgba(99,102,241,0.4)]" onClick={onAuth}>
-                  Get Started <ArrowRight size={22} />
-                </button>
-                <button className="btn-nextgen btn-ghost !px-12 !py-8 !text-lg !rounded-3xl border-white/10" onClick={() => setLandingView('developer')}>
-                  Explore API
-                </button>
-              </div>
 
-              <div className="flex items-center gap-16 border-t border-white/5 pt-12">
-                {[
-                  { val: "50+", label: "Countries" },
-                  { val: "100ms", label: "Avg Latency" },
-                  { val: "100%", label: "Redundancy" }
-                ].map((stat, i) => (
-                  <div key={i} className="group cursor-default">
-                    <div className="text-4xl font-black text-white tracking-tighter group-hover:text-primary transition-colors">{stat.val}</div>
-                    <div className="text-[10px] uppercase tracking-[0.4em] text-text-dim font-black mt-2">{stat.label}</div>
-                  </div>
-                ))}
-              </div>
-            </motion.div>
+      {/* 2. NAVIGATION (MINIMAL & ADAPTIVE) */}
+      <nav className="fixed top-0 left-0 w-full z-50 px-8 py-6">
+        <div className="container flex justify-between items-center">
+          <div className="flex items-center gap-4">
+            <div className="w-10 h-10 glass-panel flex items-center justify-center !rounded-xl border-primary/20">
+              <Zap size={20} className="text-primary fill-current" />
+            </div>
+            <span className="text-2xl font-black italic tracking-tighter uppercase">Paypee</span>
+          </div>
+          
+          <div className="hidden lg:flex items-center gap-12 glass-panel !py-3 !px-8 !rounded-full bg-white/5 border-white/5">
+             {['Platform', 'Intelligence', 'Infrastructure', 'Treasury'].map(item => (
+               <a key={item} href="#" className="text-[10px] font-black uppercase tracking-[0.3em] text-white/40 hover:text-white transition-colors">{item}</a>
+             ))}
+          </div>
+
+          <button className="btn-nextgen btn-primary !py-3 !px-8 !rounded-xl" onClick={onAuth}>
+            Launch Console
+          </button>
+        </div>
+      </nav>
+
+      {/* 3. HERO: THE SYSTEM CORE */}
+      <section className="relative min-h-screen flex items-center justify-center z-10">
+        <motion.div style={{ scale, opacity }} className="container relative">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-center">
+            
+            <div className="lg:col-span-7">
+              <motion.div 
+                initial={{ opacity: 0, y: 40 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
+              >
+                <div className="inline-flex items-center gap-3 px-5 py-2 rounded-full bg-white/5 border border-white/10 mb-8">
+                  <Activity size={14} className="text-primary animate-pulse" />
+                  <span className="text-[10px] font-black uppercase tracking-[0.4em] text-white/60 italic">System Status: Active // Global Rails Online</span>
+                </div>
+                
+                <h1 className="text-massive mb-10 mix-blend-plus-lighter">
+                  Global Money.<br/>
+                  <span className="text-gradient">Unified OS.</span>
+                </h1>
+                
+                <p className="text-2xl text-text-dim max-w-xl leading-tight mb-12 font-medium">
+                  The first high-fidelity financial operating system. Fluid liquidity, real-time intelligence, and institutional infrastructure in one dashboard.
+                </p>
+                
+                <div className="flex flex-wrap gap-8">
+                  <button className="btn-nextgen btn-primary !px-16 !py-8 !text-xl !rounded-2xl shadow-[0_20px_60px_rgba(99,102,241,0.4)] group" onClick={onAuth}>
+                    Get Started <ArrowRight size={24} className="group-hover:translate-x-2 transition-transform" />
+                  </button>
+                  <button className="btn-nextgen btn-ghost !px-12 !py-8 !text-xl !rounded-2xl" onClick={() => setLandingView('developer')}>
+                    API Console
+                  </button>
+                </div>
+              </motion.div>
+            </div>
 
             <div className="lg:col-span-5 relative">
-               <div className="relative group">
-                  <div className="absolute -inset-1 bg-gradient-to-r from-primary to-pink-500 rounded-[60px] blur opacity-20 group-hover:opacity-40 transition duration-1000 group-hover:duration-200" />
-                  <div className="relative h-[650px] lg:h-[800px] w-full glass-panel !rounded-[60px] !p-0 overflow-hidden">
-                    <AnimatePresence mode="wait">
-                      <motion.div
-                        key={currentHeroImage}
-                        initial={{ opacity: 0, scale: 1.1 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.9 }}
-                        transition={{ duration: 1 }}
-                        className="absolute inset-0"
-                      >
-                        <img 
-                          src={heroImages[currentHeroImage].src} 
-                          alt="" 
-                          className="w-full h-full object-cover"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-bg-deep via-transparent to-transparent" />
-                      </motion.div>
-                    </AnimatePresence>
+               <motion.div 
+                 style={{ y: y1 }}
+                 className="relative group cursor-none"
+               >
+                  <div className="absolute -inset-10 bg-primary/20 blur-[100px] rounded-full opacity-50 animate-pulse" />
+                  
+                  {/* The AI Core Visual */}
+                  <div className="relative glass-panel !p-0 !rounded-[80px] h-[600px] w-full overflow-hidden border-white/10 shadow-2xl">
+                     <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-bg-deep to-secondary/10" />
+                     
+                     {/* Floating Data Modules */}
+                     <motion.div 
+                       animate={{ y: [0, -20, 0], rotate: [0, 2, 0] }}
+                       transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
+                       className="absolute top-12 left-12 glass-panel !p-6 !rounded-3xl border-primary/20 bg-primary/5"
+                     >
+                        <BarChart3 size={32} className="text-primary" />
+                     </motion.div>
 
-                    <div className="absolute bottom-12 left-12 right-12">
-                       <div className="glass-panel p-8 !bg-black/40 !backdrop-blur-3xl border-white/10">
-                          <div className="text-[10px] uppercase tracking-[0.4em] text-text-dim font-black mb-3">Live Environment</div>
-                          <div className="text-3xl font-black text-white italic uppercase tracking-tight mb-4">
-                            {heroImages[currentHeroImage].label}
-                          </div>
-                          <div className="flex items-center gap-2">
-                             <div className="w-2 h-2 rounded-full bg-emerald-400" />
-                             <span className="text-[10px] font-black text-emerald-400 uppercase tracking-widest">Global Sockets Active</span>
-                          </div>
-                       </div>
-                    </div>
+                     <motion.div 
+                       animate={{ y: [0, 20, 0], rotate: [0, -2, 0] }}
+                       transition={{ duration: 8, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+                       className="absolute bottom-24 right-12 glass-panel !p-6 !rounded-3xl border-secondary/20 bg-secondary/5"
+                     >
+                        <Bitcoin size={32} className="text-secondary" />
+                     </motion.div>
+
+                     {/* Central System HUD */}
+                     <div className="absolute inset-0 flex items-center justify-center">
+                        <div className="relative">
+                           <div className="w-64 h-64 rounded-full border border-white/10 animate-[spin_20s_linear_infinite]" />
+                           <div className="absolute inset-0 w-64 h-64 rounded-full border-t-2 border-primary animate-[spin_10s_linear_infinite]" />
+                           <div className="absolute inset-0 flex items-center justify-center flex-col text-center">
+                              <div className="text-[10px] font-black uppercase tracking-[0.5em] text-primary mb-2">AI Core</div>
+                              <div className="text-4xl font-black italic uppercase">Active</div>
+                           </div>
+                        </div>
+                     </div>
+
+                     <div className="absolute bottom-12 left-12 right-12 glass-panel !p-8 bg-black/40 backdrop-blur-3xl border-white/5">
+                        <div className="flex justify-between items-center mb-4">
+                           <span className="text-[8px] font-black uppercase tracking-[0.4em] text-white/30">Intelligence Feed</span>
+                           <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
+                        </div>
+                        <div className="text-xs font-medium text-white/80 leading-relaxed font-mono">
+                           {"{ system_event: \"USD Settlement\", corridor: \"NGN-USDT\", latency: \"104ms\", status: \"Optimized\" }"}
+                        </div>
+                     </div>
                   </div>
-               </div>
+               </motion.div>
             </div>
           </div>
-        </div>
+        </motion.div>
       </section>
 
-      {/* 2. SOCIAL PROOF: Trusted Infrastructure */}
-      <section className="py-24 border-y border-white/5 bg-white/[0.01]">
+      {/* 4. FLUID DATA SURFACE: THE MODULES */}
+      <section className="relative py-32 z-10">
         <div className="container">
-          <div className="text-center mb-12">
-            <span className="text-[10px] font-black uppercase tracking-[0.4em] text-white/30">Backed by the world's most robust networks</span>
-          </div>
-          <div className="flex flex-wrap justify-center items-center gap-12 lg:gap-24 opacity-30 grayscale hover:grayscale-0 transition-all">
-            {['Mastercard', 'Visa', 'Fincra', 'Maplerad', 'Circle', 'Binance'].map((partner) => (
-              <span key={partner} className="text-2xl font-black italic tracking-tighter text-white">{partner}</span>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* 3. CORE CAPABILITIES: The Fintech Stack */}
-      <section className="section-padding relative">
-        <div className="container">
-          <div className="max-w-3xl mb-24">
-            <div className="badge mb-6">Capabilities</div>
-            <h2 className="text-6xl font-black italic uppercase leading-[0.9] mb-8">
-              Everything you need to <br/>
-              <span className="text-gradient">Move Value Globally.</span>
-            </h2>
-            <p className="text-xl text-white/40 leading-relaxed font-medium">
-              We've abstracted the complexity of banking, cards, and crypto into a single, elegant interface.
+          <div className="flex flex-col lg:flex-row gap-12 items-end justify-between mb-32">
+            <div className="max-w-2xl">
+              <div className="badge mb-8 !px-6 !py-2 !rounded-full bg-primary/10 text-primary border-primary/20">The Infrastructure</div>
+              <h2 className="text-6xl lg:text-8xl font-black italic uppercase leading-[0.8] mb-12">
+                Engineered for <br/>
+                <span className="text-gradient">Total Control.</span>
+              </h2>
+            </div>
+            <p className="text-xl text-text-dim max-w-md font-medium leading-relaxed mb-4">
+              Break free from traditional banking silos. Our system provides modular rails for every financial need.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 relative z-10">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
             {[
-              { title: "Unified Treasury", icon: <Wallet size={32} />, color: "var(--primary)", desc: "Hold and manage 50+ fiat and digital currencies in one frictionless ledger." },
-              { title: "Virtual Power", icon: <CreditCard size={32} />, color: "#ec4899", desc: "Issue USD and NGN virtual cards for global subscriptions in seconds." },
-              { title: "Global Rails", icon: <Zap size={32} />, color: "#10b981", desc: "Disburse funds to banks and mobile wallets in 100+ countries instantly." },
-              { title: "Digital Liquidity", icon: <Bitcoin size={32} />, color: "#f59e0b", desc: "Bridge traditional finance with institutional digital asset liquidity." },
-              { title: "Unified API", icon: <Code2 size={32} />, color: "#3b82f6", desc: "The world's most robust financial infrastructure, accessible via one SDK." },
-              { title: "AI Intelligence", icon: <Cpu size={32} />, color: "#8b5cf6", desc: "Embedded proactive financial intelligence that monitors treasury health." }
-            ].map((feature, i) => (
+              { 
+                title: "Unified Treasury", 
+                icon: <Wallet size={32} />, 
+                color: "var(--primary)", 
+                desc: "One ledger. 50+ currencies. Instant settlement. The foundation of global finance.",
+                stat: "T+0 Settlement"
+              },
+              { 
+                title: "Virtual Issuing", 
+                icon: <CreditCard size={32} />, 
+                color: "var(--secondary)", 
+                desc: "Deploy USD/NGN virtual cards at scale. Instant issuance with deep spend controls.",
+                stat: "Unlimited Nodes"
+              },
+              { 
+                title: "Liquid Crypto", 
+                icon: <Bitcoin size={32} />, 
+                color: "var(--accent-cyan)", 
+                desc: "Bridge fiat and crypto instantly. Access deep institutional liquidity on-demand.",
+                stat: "0.1% Slippage"
+              }
+            ].map((module, i) => (
               <motion.div 
                 key={i}
-                whileHover={{ y: -12 }}
-                className="glass-panel p-12 group hover:border-primary/50 transition-all"
+                whileHover={{ y: -20, rotate: i % 2 === 0 ? 1 : -1 }}
+                className="glass-panel !p-12 h-[500px] flex flex-col justify-between group hover:border-primary/50 transition-all cursor-pointer overflow-visible"
               >
-                <div className="w-16 h-16 rounded-3xl mb-10 flex items-center justify-center transition-all group-hover:scale-110 group-hover:rotate-3" style={{ background: `${feature.color}15`, color: feature.color, border: `1px solid ${feature.color}30` }}>
-                  {feature.icon}
+                <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/5 blur-[60px] rounded-full group-hover:bg-primary/10 transition-colors" />
+                
+                <div>
+                  <div className="w-20 h-20 rounded-[32px] mb-12 flex items-center justify-center transition-all group-hover:scale-110 group-hover:rotate-6 shadow-2xl" 
+                       style={{ background: `${module.color}15`, color: module.color, border: `1px solid ${module.color}30` }}>
+                    {module.icon}
+                  </div>
+                  <h3 className="text-3xl font-black italic uppercase mb-6">{module.title}</h3>
+                  <p className="text-text-dim text-lg leading-relaxed mb-8">{module.desc}</p>
                 </div>
-                <h3 className="text-2xl font-black italic uppercase mb-6">{feature.title}</h3>
-                <p className="text-text-dim leading-relaxed mb-10">{feature.desc}</p>
-                <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-white/20 group-hover:text-primary transition-colors cursor-pointer">
-                   Node Connection: Stable <ChevronRight size={14} />
+                
+                <div className="flex items-center justify-between border-t border-white/5 pt-8">
+                  <div className="text-[10px] font-black uppercase tracking-[0.4em] text-primary">{module.stat}</div>
+                  <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-all">
+                    <ChevronRight size={18} />
+                  </div>
                 </div>
               </motion.div>
             ))}
@@ -198,421 +233,159 @@ const LandingV2: React.FC<LandingV2Props> = ({ onAuth, setLandingView }) => {
         </div>
       </section>
 
-      {/* 4. CRYPTO ENGINE: Next-Gen Liquidity */}
-      <section className="section-padding relative overflow-hidden bg-white/[0.01] z-10">
-        <div className="container">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-24 items-center">
-            <div className="order-2 lg:order-1">
-              <div className="glass-panel p-12 relative overflow-hidden group">
-                <div className="absolute top-0 right-0 p-8">
-                  <Bitcoin size={48} className="text-primary/20 animate-pulse group-hover:text-primary/40 transition-colors" />
-                </div>
-                <div className="mb-12">
-                  <div className="text-[10px] font-black uppercase tracking-[0.4em] text-primary mb-4">Deep Liquidity Matrix</div>
-                  <h3 className="text-4xl font-black italic uppercase mb-6">Institutional Swap Engine.</h3>
-                  <p className="text-text-dim leading-relaxed mb-10 font-medium">Access deep liquidity pools across major protocols. Settle digital assets with fiat instantly on institutional-grade rails.</p>
-                </div>
-                
-                <div className="space-y-4">
-                  {[
-                    { label: "USDT / NGN", rate: "1,540.20", trend: "+0.2%", provider: "Maplerad" },
-                    { label: "BTC / USD", rate: "64,210.50", trend: "-1.1%", provider: "Bitnob" },
-                  ].map((pair, i) => (
-                    <div key={i} className="flex items-center justify-between p-6 rounded-2xl bg-white/[0.02] border border-white/5 hover:border-white/10 transition-colors">
-                      <div className="flex items-center gap-4">
-                        <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary font-bold text-[10px]">
-                          {pair.label.split(' / ')[0]}
-                        </div>
-                        <div>
-                           <div className="font-black tracking-tight text-white">{pair.label}</div>
-                           <div className="text-[8px] font-black text-text-dim uppercase tracking-widest">via {pair.provider}</div>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <div className="font-black text-white italic">{pair.rate}</div>
-                        <div className={`text-[10px] font-bold ${pair.trend.startsWith('+') ? 'text-emerald-400' : 'text-rose-400'}`}>{pair.trend}</div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                
-                <button className="btn-nextgen btn-primary w-full mt-10" onClick={onAuth}>Deploy Swap Rail</button>
-              </div>
-            </div>
+      {/* 5. THE AI STAR: COGNITIVE INTELLIGENCE */}
+      <section className="relative py-64 z-10 overflow-hidden">
+        <div className="absolute inset-0 bg-primary/5 mix-blend-overlay" />
+        <div className="container relative">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-32 items-center">
             
+            <div className="relative order-2 lg:order-1">
+               <div className="absolute -inset-20 bg-primary/20 blur-[150px] rounded-full animate-pulse" />
+               <motion.div 
+                 animate={{ rotate: 360 }}
+                 transition={{ duration: 40, repeat: Infinity, ease: "linear" }}
+                 className="w-full aspect-square glass-panel !rounded-full border-primary/20 relative"
+               >
+                  <div className="absolute inset-12 rounded-full border border-dashed border-white/10" />
+                  <div className="absolute inset-24 rounded-full border border-dashed border-white/5" />
+                  
+                  {/* Floating AI Nodes */}
+                  {[0, 72, 144, 216, 288].map((deg, i) => (
+                    <motion.div 
+                      key={i}
+                      className="absolute w-20 h-20 glass-panel !rounded-2xl !p-0 flex items-center justify-center border-primary/40 bg-primary/10"
+                      style={{ 
+                        top: `calc(50% + ${Math.sin(deg * Math.PI / 180) * 40}%)`,
+                        left: `calc(50% + ${Math.cos(deg * Math.PI / 180) * 40}%)`,
+                      }}
+                    >
+                      {i % 2 === 0 ? <Cpu size={24} /> : <Terminal size={24} />}
+                    </motion.div>
+                  ))}
+               </motion.div>
+               <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="glass-panel !p-12 !rounded-[60px] bg-black/60 backdrop-blur-3xl border-primary/30 shadow-[0_0_100px_rgba(99,102,241,0.2)]">
+                     <div className="w-24 h-24 rounded-full bg-primary flex items-center justify-center animate-pulse mb-8 mx-auto">
+                        <Cpu size={48} className="text-white" />
+                     </div>
+                     <div className="text-center">
+                        <div className="text-[10px] font-black uppercase tracking-[0.5em] text-primary mb-4">Neural Engine</div>
+                        <div className="text-4xl font-black italic uppercase mb-2">Paypee AI</div>
+                        <div className="text-xs font-bold text-text-dim uppercase tracking-widest">Decision Matrix L4</div>
+                     </div>
+                  </div>
+               </div>
+            </div>
+
             <div className="order-1 lg:order-2">
-              <div className="badge mb-8">Crypto & Web3</div>
-              <h2 className="text-6xl font-black italic uppercase leading-[0.95] mb-10">
-                Bridge the gap <br/>
-                <span className="text-gradient">Traditional & Digital.</span>
+              <div className="badge mb-8 !bg-accent-purple/10 !text-accent-purple !border-accent-purple/20">Cognitive Wealth</div>
+              <h2 className="text-6xl lg:text-8xl font-black italic uppercase leading-[0.8] mb-12">
+                The IQ of <br/>
+                <span className="text-gradient">Modern Capital.</span>
               </h2>
-              <ul className="space-y-8">
-                {[
-                  { title: "Universal Liquidity", desc: "Aggregated liquidity from top-tier exchanges for best-price execution." },
-                  { title: "Fiat On/Off Ramps", desc: "Seamlessly move from local fiat to digital assets and back in seconds." },
-                  { title: "Stablecoin Treasury", desc: "Manage your business treasury in USDC, USDT, and more with full transparency." }
-                ].map((item, i) => (
-                  <li key={i} className="flex gap-6">
-                    <div className="w-12 h-12 rounded-2xl bg-primary/10 flex-shrink-0 flex items-center justify-center text-primary">
-                      <Repeat size={20} />
-                    </div>
-                    <div>
-                      <h4 className="text-xl font-black italic uppercase mb-2">{item.title}</h4>
-                      <p className="text-white/40 leading-relaxed font-medium">{item.desc}</p>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 5. VIRTUAL CARDS: Power in your hands */}
-      <section className="section-padding relative z-10">
-        <div className="container">
-          <div className="text-center max-w-3xl mx-auto mb-24">
-            <div className="badge mb-6 mx-auto">Card Issuing</div>
-            <h2 className="text-6xl font-black italic uppercase mb-8">The World is <br/> <span className="text-gradient">Your Marketplace.</span></h2>
-            <p className="text-text-dim text-lg font-medium">Issue high-fidelity virtual cards in seconds. Pay for global subscriptions, cloud infra, and marketing with institutional-grade controls.</p>
-          </div>
-          
-          <div className="relative">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              <div className="glass-panel p-10 flex flex-col justify-between h-[450px]">
-                <div>
-                  <div className="w-12 h-12 rounded-2xl bg-primary/10 text-primary flex items-center justify-center mb-8">
-                    <CreditCard size={24} />
-                  </div>
-                  <h4 className="text-2xl font-black italic uppercase mb-4">Elastic Limits</h4>
-                  <p className="text-text-dim leading-relaxed">Define real-time spending thresholds. Adjust, freeze, or recycle cards with zero latency via API or Console.</p>
-                </div>
-                <div className="flex -space-x-4">
-                  {[1,2,3,4].map(i => (
-                    <div key={i} className="w-12 h-12 rounded-full border-4 border-bg-deep bg-surface-light flex items-center justify-center overflow-hidden">
-                      <img src={`https://i.pravatar.cc/100?u=${i+10}`} alt="" className="w-full h-full object-cover" />
-                    </div>
-                  ))}
-                  <div className="w-12 h-12 rounded-full border-4 border-bg-deep bg-primary flex items-center justify-center text-[10px] font-black">+14k</div>
-                </div>
-              </div>
-
-              <div className="lg:scale-110 z-10 group">
-                 <div className="absolute -inset-1 bg-gradient-to-r from-primary to-pink-500 rounded-[52px] blur-xl opacity-20 group-hover:opacity-40 transition duration-1000" />
-                 <div className="glass-panel !bg-bg-deep !rounded-[48px] p-12 h-[480px] flex flex-col justify-between relative overflow-hidden border-white/10">
-                    <div className="absolute top-[-20%] right-[-20%] w-64 h-64 bg-primary/10 blur-[80px] rounded-full group-hover:bg-primary/20 transition-all"></div>
-                    <div>
-                      <div className="flex justify-between items-start mb-16">
-                        <Zap size={40} className="text-primary" />
-                        <span className="font-black italic tracking-tighter text-2xl">PAYPEE</span>
-                      </div>
-                      <div className="space-y-2 mb-12">
-                        <div className="text-[10px] uppercase tracking-[0.4em] text-text-dim font-black">Card ID: PP-8842-X</div>
-                        <div className="text-2xl font-bold tracking-[0.25em] text-white">4582 •••• •••• 1024</div>
-                      </div>
-                    </div>
-                    <div className="flex justify-between items-end">
-                      <div>
-                        <div className="text-[10px] uppercase tracking-[0.4em] text-text-dim font-black mb-1">Entity Holder</div>
-                        <div className="text-lg font-black italic uppercase text-white">STRIDE LABS INC.</div>
-                      </div>
-                      <div className="px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-[10px] font-black italic">
-                        PLATINUM RAILS
-                      </div>
-                    </div>
-                 </div>
-              </div>
-
-              <div className="glass-panel p-10 flex flex-col justify-between h-[450px]">
-                <div>
-                  <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center mb-8">
-                    <ShieldCheck size={24} />
-                  </div>
-                  <h4 className="text-2xl font-black italic uppercase mb-4">Proactive Security</h4>
-                  <p className="text-text-dim leading-relaxed">AI-driven fraud detection monitors every byte of transaction data. Automated merchant-lock for high-risk corridors.</p>
-                </div>
-                <div className="space-y-4">
-                  <div className="h-2 w-full bg-white/5 rounded-full overflow-hidden">
-                    <motion.div initial={{ width: 0 }} whileInView={{ width: '85%' }} className="h-full bg-emerald-400" />
-                  </div>
-                  <div className="flex justify-between text-[10px] font-black uppercase tracking-widest text-emerald-400/60">
-                    <span>Safety Score: 98%</span>
-                    <span>Monitoring Active</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 6. GLOBAL TREASURY: 50+ Currencies */}
-      <section className="section-padding relative overflow-hidden bg-white/[0.01] z-10">
-        <div className="container">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-24 items-center">
-            <div className="relative">
-               <div className="glass-panel !p-12 bg-surface/40 group">
-                <div className="flex justify-between items-center mb-12">
-                  <h4 className="text-xl font-black italic uppercase tracking-tight">Enterprise Treasury Hub</h4>
-                  <Globe size={24} className="text-primary group-hover:rotate-180 transition-transform duration-1000" />
-                </div>
-                <div className="space-y-6">
-                  {[
-                    { curr: "USD", name: "US Dollar", amount: "42,850.00", flag: "🇺🇸", trend: "Stable" },
-                    { curr: "NGN", name: "Nigerian Naira", amount: "12,400,000.00", flag: "🇳🇬", trend: "+12%" },
-                    { curr: "EUR", name: "Euro", amount: "8,210.50", flag: "🇪🇺", trend: "Stable" },
-                  ].map((balance, i) => (
-                    <div key={i} className="flex items-center justify-between p-4 rounded-2xl hover:bg-white/5 transition-all cursor-pointer">
-                      <div className="flex items-center gap-4">
-                        <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-2xl">{balance.flag}</div>
-                        <div>
-                          <div className="font-black text-white italic">{balance.curr}</div>
-                          <div className="text-[10px] font-bold text-text-dim uppercase tracking-widest">{balance.name}</div>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <div className="text-xl font-black text-white italic">{balance.amount}</div>
-                        <div className="text-[8px] font-black text-emerald-400 uppercase tracking-widest">{balance.trend}</div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                <button className="btn-nextgen btn-primary w-full mt-10" onClick={onAuth}>Deploy Treasury Node</button>
-              </div>
-            </div>
-
-            <div>
-              <div className="badge mb-8">Unified Treasury</div>
-              <h2 className="text-6xl font-black italic uppercase leading-[0.95] mb-10">
-                A Unified Ledger for <br/>
-                <span className="text-gradient">Every Border.</span>
-              </h2>
-              <p className="text-xl text-text-dim leading-relaxed font-medium mb-12">
-                Abstract away the fragmentation of global banking. Manage your liquidity in one frictionless system that settles in milliseconds.
+              <p className="text-2xl text-text-dim leading-relaxed mb-16 font-medium">
+                Our AI doesn't just show data—it acts on it. Automated hedging, liquidity optimization, and predictive treasury management.
               </p>
               
-              <div className="grid grid-cols-2 gap-8">
-                {[
-                  { val: "T+0", label: "Settlement Speed" },
-                  { val: "54", label: "Global Corridors" },
-                ].map((stat, i) => (
-                  <div key={i} className="p-8 glass-panel border-white/5 bg-white/[0.03] group hover:border-primary/50 transition-all">
-                    <div className="text-3xl font-black text-white italic tracking-tighter mb-2 group-hover:text-primary transition-colors">{stat.val}</div>
-                    <div className="text-[10px] uppercase tracking-[0.2em] text-text-dim font-black">{stat.label}</div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 7. DEVELOPER EXPERIENCE: Infrastructure as Code */}
-      <section className="section-padding relative">
-        <div className="container">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-24 items-center">
-            <div className="order-2 lg:order-1 relative">
-              <div className="rounded-[40px] bg-[#0f172a] border border-white/10 overflow-hidden shadow-2xl">
-                <div className="bg-[#1e293b] px-6 py-4 flex items-center justify-between">
-                  <div className="flex gap-2">
-                    <div className="w-3 h-3 rounded-full bg-rose-500" />
-                    <div className="w-3 h-3 rounded-full bg-amber-500" />
-                    <div className="w-3 h-3 rounded-full bg-emerald-500" />
-                  </div>
-                  <div className="text-[10px] font-black uppercase tracking-widest text-white/30">POST /v1/wallets/create</div>
-                </div>
-                <div className="p-8 font-mono text-sm leading-relaxed overflow-x-auto">
-                  <pre className="text-emerald-400">
-                    {`{
-  "currency": "USD",
-  "name": "Treasury_Alpha",
-  "metadata": {
-    "node": "region_west_1",
-    "tier": "enterprise"
-  }
-}`}
-                  </pre>
-                  <div className="h-px bg-white/5 my-6" />
-                  <pre className="text-white/40">
-                    {`// response 201
-{
-  "id": "wal_01hq92...",
-  "status": "active",
-  "ledger_id": "ldg_88v..."
-}`}
-                  </pre>
-                </div>
-              </div>
-              <div className="absolute -bottom-8 -right-8 glass-card p-6 min-w-[200px] shadow-2xl">
-                <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center text-primary">
-                    <Terminal size={20} />
-                  </div>
-                  <div>
-                    <div className="text-xs font-black italic uppercase">Docs Ready</div>
-                    <div className="text-[10px] text-white/40 font-bold">SDK v4.2.1 Active</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            
-            <div className="order-1 lg:order-2">
-              <div className="badge mb-8">Developers</div>
-              <h2 className="text-6xl font-black italic uppercase leading-[0.95] mb-10">
-                Built by Devs, <br/>
-                <span className="text-gradient">For the Visionaries.</span>
-              </h2>
-              <p className="text-xl text-white/40 leading-relaxed font-medium mb-12">
-                Our APIs are designed for reliability and speed. Integrate complex financial flows with a few lines of code.
-              </p>
-              <ul className="space-y-6">
-                {[
-                  "Complete SDKs for Node.js, Python, and Go.",
-                  "Comprehensive Webhook Engine for real-time events.",
-                  "Sandbox environment with mirrored production rails.",
-                  "99.99% API Uptime guaranteed by SLA."
-                ].map((text, i) => (
-                  <li key={i} className="flex items-center gap-4">
-                    <CheckCircle2 size={18} className="text-emerald-400 flex-shrink-0" />
-                    <span className="font-bold text-white/60">{text}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 8. SECURITY & COMPLIANCE: Built on Trust */}
-      <section className="section-padding relative overflow-hidden bg-white/[0.01]">
-        <div className="container">
-          <div className="text-center max-w-3xl mx-auto mb-24">
-            <div className="badge mb-6 mx-auto">Security</div>
-            <h2 className="text-6xl font-black italic uppercase mb-8">Bank-Grade <br/> <span className="text-gradient">Security by Default.</span></h2>
-            <p className="text-white/40 text-lg">We maintain the highest standards of data protection and regulatory compliance globally.</p>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {[
-              { title: "PCI-DSS Level 1", desc: "Highest level of payment security certification." },
-              { title: "AES-256 Encryption", desc: "Military-grade encryption for all data at rest and transit." },
-              { title: "Global KYC/KYB", desc: "Automated identity verification in 150+ countries." },
-              { title: "24/7 Monitoring", desc: "Real-time threat detection and AI-powered fraud prevention." }
-            ].map((item, i) => (
-              <div key={i} className="p-10 glass-card bg-surface/20 text-center">
-                <Lock size={32} className="mx-auto mb-8 text-primary opacity-50" />
-                <h4 className="text-xl font-black italic uppercase mb-4">{item.title}</h4>
-                <p className="text-white/30 text-sm leading-relaxed">{item.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* 9. TESTIMONIALS: Human Proof */}
-      <section className="section-padding relative">
-        <div className="container">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-center">
-            <div className="lg:col-span-4">
-              <div className="badge mb-8">Stories</div>
-              <h2 className="text-5xl font-black italic uppercase leading-tight mb-8">
-                The New Standard <br/>
-                <span className="text-gradient">of Success.</span>
-              </h2>
-              <div className="flex items-center gap-4 mb-10">
-                <div className="flex">
-                  {[1,2,3,4,5].map(i => <Star key={i} size={16} className="text-amber-400 fill-current" />)}
-                </div>
-                <span className="font-black italic uppercase text-xs tracking-widest text-white/30">4.9/5 Average Rating</span>
-              </div>
-            </div>
-            
-            <div className="lg:col-span-8">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                {[
-                  { name: "Sarah Chen", role: "Founder, Stride Labs", quote: "Paypee changed how we handle global payouts. What used to take days now happens in milliseconds." },
-                  { name: "Marcus Thorne", role: "CTO, NexaPay", quote: "The API documentation is flawless. We integrated the crypto swap engine in less than 48 hours." }
-                ].map((t, i) => (
-                  <div key={i} className="glass-card p-10 bg-white/[0.02]">
-                    <p className="text-lg text-white/60 italic leading-relaxed mb-10">"{t.quote}"</p>
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 rounded-full bg-primary/20 overflow-hidden">
-                        <img src={`https://i.pravatar.cc/100?u=${t.name}`} alt="" />
+              <div className="space-y-8">
+                 {[
+                   { title: "Predictive Flows", desc: "Forecast cash flow with 98% accuracy using deep neural analysis." },
+                   { title: "Auto-Hedge", desc: "Protect treasury from volatility with real-time currency balancing." }
+                 ].map((item, i) => (
+                   <div key={i} className="flex gap-8 group">
+                      <div className="w-1.5 h-16 bg-white/5 rounded-full overflow-hidden">
+                        <motion.div 
+                          initial={{ height: 0 }}
+                          whileInView={{ height: '100%' }}
+                          transition={{ duration: 1.5, delay: i * 0.5 }}
+                          className="w-full bg-accent-purple"
+                        />
                       </div>
                       <div>
-                        <div className="font-black italic uppercase text-white tracking-tight">{t.name}</div>
-                        <div className="text-[10px] font-bold text-white/30 uppercase tracking-widest">{t.role}</div>
+                        <h4 className="text-2xl font-black italic uppercase mb-2 group-hover:text-accent-purple transition-colors">{item.title}</h4>
+                        <p className="text-text-dim text-lg">{item.desc}</p>
                       </div>
-                    </div>
+                   </div>
+                 ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 6. SYSTEM PLATFORM PREVIEW: THE DASHBOARD LAYER */}
+      <section className="relative py-32 z-10 overflow-hidden">
+         <div className="container">
+            <div className="glass-panel !p-2 !rounded-[60px] border-white/10 shadow-2xl overflow-hidden group">
+               <div className="relative h-[800px] w-full bg-surface/50 rounded-[58px] overflow-hidden">
+                  <div className="absolute inset-0 bg-gradient-to-t from-bg-deep via-transparent to-transparent z-10" />
+                  
+                  {/* Mock Dashboard Preview */}
+                  <div className="p-16 grid grid-cols-12 gap-12 opacity-40 group-hover:opacity-100 transition-opacity duration-1000">
+                     <div className="col-span-3 space-y-8">
+                        {[1,2,3,4,5].map(i => <div key={i} className="h-12 w-full glass-panel !rounded-xl" />)}
+                     </div>
+                     <div className="col-span-6 space-y-12">
+                        <div className="h-64 w-full glass-panel !rounded-3xl border-primary/20" />
+                        <div className="grid grid-cols-2 gap-8">
+                           <div className="h-48 glass-panel !rounded-3xl" />
+                           <div className="h-48 glass-panel !rounded-3xl" />
+                        </div>
+                     </div>
+                     <div className="col-span-3 space-y-8">
+                        <div className="h-96 w-full glass-panel !rounded-3xl bg-primary/5 border-primary/10" />
+                        <div className="h-48 w-full glass-panel !rounded-3xl" />
+                     </div>
                   </div>
-                ))}
-              </div>
+
+                  <div className="absolute inset-0 flex items-center justify-center z-20">
+                     <div className="text-center">
+                        <div className="text-[10px] font-black uppercase tracking-[0.8em] text-primary mb-10">Interface Preview</div>
+                        <h2 className="text-7xl font-black italic uppercase mb-12">One System. <br/> Unlimited Scale.</h2>
+                        <button className="btn-nextgen btn-primary !px-16 !py-8 !text-xl !rounded-2xl mx-auto" onClick={onAuth}>
+                           Enter the System
+                        </button>
+                     </div>
+                  </div>
+               </div>
             </div>
-          </div>
-        </div>
+         </div>
       </section>
 
-      {/* 10. FINAL CTA: Ready to scale? */}
-      <section className="section-padding relative">
+      {/* 7. FOOTER: SYSTEM TERMINAL */}
+      <footer className="relative py-32 z-10 border-t border-white/5 bg-black/40 backdrop-blur-3xl">
         <div className="container">
-          <div className="glass-card bg-gradient-to-br from-primary/30 to-pink-500/20 p-1 rounded-[64px]">
-            <div className="bg-[#020617] rounded-[63px] p-24 text-center relative overflow-hidden">
-              <div className="absolute top-0 left-0 w-full h-full pointer-events-none opacity-20">
-                <div className="absolute top-[-50%] left-[-20%] w-[80%] h-[80%] bg-primary blur-[120px] rounded-full" />
-                <div className="absolute bottom-[-50%] right-[-20%] w-[80%] h-[80%] bg-pink-500 blur-[120px] rounded-full" />
-              </div>
-              
-              <div className="relative z-10">
-                <div className="badge mx-auto mb-10">Join the Future</div>
-                <h2 className="text-6xl lg:text-8xl font-black italic uppercase leading-[0.9] mb-12">
-                  Scale your business <br/>
-                  <span className="text-gradient">Beyond Borders.</span>
-                </h2>
-                <div className="flex flex-wrap justify-center gap-8">
-                  <button className="btn btn-primary btn-lg px-16 py-8 rounded-3xl text-xl shadow-2xl shadow-primary/30" onClick={onAuth}>Open Your Account Now</button>
-                  <button className="btn btn-outline btn-lg px-14 py-8 rounded-3xl text-xl">Contact Enterprise</button>
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-24 mb-24">
+            <div className="lg:col-span-6">
+              <div className="flex items-center gap-4 mb-12">
+                <div className="w-12 h-12 glass-panel flex items-center justify-center !rounded-xl border-primary/20">
+                  <Zap size={24} className="text-primary fill-current" />
                 </div>
-                <p className="mt-12 text-white/30 font-bold uppercase tracking-[0.3em] text-[10px]">No credit card required. Setup in 5 minutes.</p>
+                <span className="text-4xl font-black italic tracking-tighter uppercase">Paypee</span>
               </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 11. FOOTER: Professional Ecosystem */}
-      <footer className="py-24 border-t border-white/5 bg-white/[0.01]">
-        <div className="container">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-16 mb-24">
-            <div className="lg:col-span-4">
-              <div className="flex items-center gap-4 mb-8">
-                <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center text-white">
-                  <Zap size={20} fill="currentColor" />
-                </div>
-                <span className="text-2xl font-black tracking-tighter italic uppercase">PAYPEE</span>
-              </div>
-              <p className="text-white/30 text-sm leading-relaxed max-w-sm">
-                Paypee is a financial technology company, not a bank. Banking services are provided by our partner banks.
+              <p className="text-2xl text-text-dim max-w-lg font-medium leading-relaxed mb-12">
+                The global operating system for value movement. Unified, institutional, and AI-first.
               </p>
-              <div className="flex gap-4 mt-8">
-                {[Globe, Repeat, Bitcoin, Users].map((Icon, i) => (
-                  <div key={i} className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-white/40 hover:text-white hover:bg-white/10 transition-colors cursor-pointer">
-                    <Icon size={18} />
+              <div className="flex gap-6">
+                {[Globe, Terminal, Code2, Layers].map((Icon, i) => (
+                  <div key={i} className="w-14 h-14 glass-panel flex items-center justify-center !rounded-2xl border-white/10 hover:border-primary hover:text-primary transition-all cursor-pointer">
+                    <Icon size={22} />
                   </div>
                 ))}
               </div>
             </div>
             
             {[
-              { title: "Products", links: ["Individual", "Business", "Developer", "Crypto", "Virtual Cards"] },
-              { title: "Company", links: ["About", "Careers", "Press", "Contact"] },
-              { title: "Legal", links: ["Terms", "Privacy", "Security", "AML Policy"] }
+              { title: "Nodes", links: ["Individual", "Business", "Developer", "Crypto"] },
+              { title: "Matrix", links: ["Treasury", "Security", "AI Core", "Virtual Cards"] },
+              { title: "Protocol", links: ["API Docs", "SDKs", "Status", "Legal"] }
             ].map((col, i) => (
               <div key={i} className="lg:col-span-2">
-                <h5 className="font-black italic uppercase text-xs tracking-widest text-white mb-8">{col.title}</h5>
-                <ul className="space-y-4">
+                <h5 className="text-[10px] font-black uppercase tracking-[0.5em] text-white/20 mb-12">{col.title}</h5>
+                <ul className="space-y-6">
                   {col.links.map(link => (
                     <li key={link}>
-                      <a href="#" className="text-sm font-bold text-white/30 hover:text-primary transition-colors">{link}</a>
+                      <a href="#" className="text-lg font-bold text-text-dim hover:text-primary transition-colors italic">{link}</a>
                     </li>
                   ))}
                 </ul>
@@ -620,11 +393,17 @@ const LandingV2: React.FC<LandingV2Props> = ({ onAuth, setLandingView }) => {
             ))}
           </div>
           
-          <div className="flex flex-col md:flex-row justify-between items-center pt-12 border-t border-white/5 gap-8">
-            <div className="text-[10px] font-black uppercase tracking-[0.4em] text-white/20">© 2026 PAYPEE INC. ALL RIGHTS RESERVED.</div>
-            <div className="flex gap-8 text-[10px] font-black uppercase tracking-[0.3em] text-white/20">
-              <span className="hover:text-white cursor-pointer transition-colors">STATUS: OPERATIONAL</span>
-              <span className="hover:text-white cursor-pointer transition-colors">SECURITY: PCI-DSS L1</span>
+          <div className="flex flex-col md:flex-row justify-between items-center pt-16 border-t border-white/5 gap-8">
+            <div className="text-[10px] font-black uppercase tracking-[0.5em] text-white/10">© 2026 PAYPEE NODE_01 // ALL RIGHTS RESERVED.</div>
+            <div className="flex gap-12 text-[10px] font-black uppercase tracking-[0.3em] text-white/20">
+               <div className="flex items-center gap-2">
+                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                  <span>SYSTEM_STABLE</span>
+               </div>
+               <div className="flex items-center gap-2">
+                  <div className="w-1.5 h-1.5 rounded-full bg-primary" />
+                  <span>SECURED_SSL_V4</span>
+               </div>
             </div>
           </div>
         </div>
