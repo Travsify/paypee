@@ -240,27 +240,32 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
                 {/* 1. Master Summary */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '2rem' }}>
                    <div>
-                      <div style={{ color: 'var(--text-muted)', textTransform: 'uppercase', fontSize: '0.8rem', letterSpacing: '2px', marginBottom: '0.5rem' }}>Total Net Worth</div>
-                      <div style={{ fontSize: 'clamp(2.5rem, 5vw, 4rem)', fontWeight: 900, lineHeight: 1, marginBottom: '0.5rem' }}>$128,450.20</div>
+                      <div style={{ color: 'var(--text-muted)', textTransform: 'uppercase', fontSize: '0.8rem', letterSpacing: '2px', marginBottom: '0.5rem' }}>Total Liquid Capital</div>
+                      <div style={{ fontSize: 'clamp(2.5rem, 5vw, 4rem)', fontWeight: 900, lineHeight: 1, marginBottom: '0.5rem' }}>
+                        {userData?.wallets?.length > 0 
+                           ? `₦${userData.wallets.reduce((acc: number, w: any) => acc + parseFloat(w.balance), 0).toLocaleString(undefined, {minimumFractionDigits: 2})}` 
+                           : '₦0.00'
+                        }
+                      </div>
                       <div style={{ color: '#22d3ee', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                          <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#22d3ee', boxShadow: '0 0 10px #22d3ee' }}></div>
-                         +$2,340 this week
+                         Live tracking active
                       </div>
                    </div>
                    
                    {/* 2. Quick Actions */}
-                   <div style={{ display: 'flex', gap: '1rem' }} className="desktop-only">
+                   <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', justifyContent: 'flex-end' }} className="desktop-only">
                       <button onClick={() => setIsPayoutOpen(true)} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.8rem 1.5rem', background: '#6366f1', color: '#fff', border: 'none', borderRadius: '12px', fontWeight: 800, cursor: 'pointer', boxShadow: '0 10px 20px -5px rgba(99, 102, 241, 0.5)' }}>
-                         <Send size={16} /> Send
+                         <Send size={16} /> Transfer
                       </button>
-                      <button style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.8rem 1.5rem', background: 'rgba(255,255,255,0.05)', color: '#fff', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', fontWeight: 700, cursor: 'pointer' }}>
+                      <button onClick={() => setIsAccountModalOpen(true)} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.8rem 1.5rem', background: 'rgba(255,255,255,0.05)', color: '#fff', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', fontWeight: 700, cursor: 'pointer' }}>
                          <ArrowDownLeft size={16} /> Receive
                       </button>
                       <button onClick={() => setIsSwapOpen(true)} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.8rem 1.5rem', background: 'rgba(255,255,255,0.05)', color: '#fff', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', fontWeight: 700, cursor: 'pointer' }}>
                          <Repeat size={16} /> Swap
                       </button>
-                      <button onClick={() => setIsAccountModalOpen(true)} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.8rem 1.5rem', background: 'rgba(255,255,255,0.05)', color: '#fff', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', fontWeight: 700, cursor: 'pointer' }}>
-                         <Plus size={16} /> Add Money
+                      <button onClick={() => navigate('bills')} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.8rem 1.5rem', background: 'rgba(255,255,255,0.05)', color: '#fff', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', fontWeight: 700, cursor: 'pointer' }}>
+                         <Zap size={16} /> Pay Bills
                       </button>
                    </div>
                 </div>
@@ -290,16 +295,9 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
                             <div style={{ color: '#94a3b8', fontWeight: 600 }}>Create Wallet</div>
                          </div>
                       )}
-                      {/* Fake BTC Wallet for visual parity */}
-                      <div style={{ minWidth: '280px', flex: 1, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '24px', padding: '1.5rem', position: 'relative', overflow: 'hidden', boxShadow: '0 20px 40px rgba(0,0,0,0.5)' }}>
-                         <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '40px', background: 'linear-gradient(180deg, rgba(167, 139, 250, 0.1) 0%, transparent 100%)' }} />
-                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', position: 'relative', zIndex: 1 }}>
-                            <div style={{ fontWeight: 700, color: '#94a3b8' }}>BTC</div>
-                            <div style={{ width: 32, height: 32, background: 'rgba(167, 139, 250, 0.2)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                               <span style={{ color: '#a78bfa', fontWeight: 900 }}>₿</span>
-                            </div>
-                         </div>
-                         <div style={{ fontSize: '1.8rem', fontWeight: 900 }}>0.8421</div>
+                      <div style={{ minWidth: '280px', flex: 1, background: 'rgba(255,255,255,0.03)', border: '1px dashed rgba(255,255,255,0.1)', borderRadius: '24px', padding: '1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', cursor: 'pointer', transition: 'all 0.2s', boxShadow: '0 10px 30px rgba(0,0,0,0.3)' }} onClick={() => setIsAccountModalOpen(true)}>
+                         <Plus size={24} color="#94a3b8" style={{ marginBottom: '0.5rem' }} />
+                         <div style={{ color: '#94a3b8', fontWeight: 600 }}>Create New Wallet</div>
                       </div>
                    </div>
                 </div>
@@ -362,7 +360,7 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
                             </tr>
                          </thead>
                          <tbody>
-                            {transactions.length > 0 ? transactions.slice(0, 4).map(tx => (
+                            {transactions.length > 0 ? transactions.slice(0, 5).map(tx => (
                                <tr key={tx.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.02)' }}>
                                   <td style={{ padding: '1rem 0' }}>
                                      <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
@@ -383,42 +381,20 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
                                   </td>
                                </tr>
                             )) : (
-                               <>
-                                  {/* Dummy transactions for $1B visual parity */}
-                                  <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.02)' }}>
-                                     <td style={{ padding: '1rem 0' }}>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                                           <div style={{ width: 36, height: 36, borderRadius: '10px', background: 'rgba(34,211,238,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><ArrowDownLeft size={16} color="#22d3ee" /></div>
-                                           <div style={{ fontWeight: 700 }}>Stripe Payout</div>
+                               <tr>
+                                  <td colSpan={4} style={{ padding: '3rem 0', textAlign: 'center' }}>
+                                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
+                                        <div style={{ width: 64, height: 64, background: 'rgba(255,255,255,0.05)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                           <History size={24} color="#94a3b8" />
                                         </div>
-                                     </td>
-                                     <td style={{ padding: '1rem 0', color: '#94a3b8', fontSize: '0.9rem' }}>Today, 10:24 AM</td>
-                                     <td style={{ padding: '1rem 0' }}><span style={{ padding: '0.25rem 0.5rem', background: 'rgba(34,211,238,0.1)', color: '#22d3ee', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 700 }}>SUCCESS</span></td>
-                                     <td style={{ padding: '1rem 0', textAlign: 'right', fontWeight: 800, color: '#22d3ee' }}>+$2,400.00</td>
-                                  </tr>
-                                  <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.02)' }}>
-                                     <td style={{ padding: '1rem 0' }}>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                                           <div style={{ width: 36, height: 36, borderRadius: '10px', background: 'rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><ArrowUpRight size={16} color="#fff" /></div>
-                                           <div style={{ fontWeight: 700 }}>Netflix Subscription</div>
+                                        <div>
+                                           <div style={{ fontWeight: 700, fontSize: '1.1rem', marginBottom: '0.25rem' }}>No Recent Activity</div>
+                                           <div style={{ color: '#94a3b8', fontSize: '0.9rem' }}>Your latest transactions will appear here.</div>
                                         </div>
-                                     </td>
-                                     <td style={{ padding: '1rem 0', color: '#94a3b8', fontSize: '0.9rem' }}>Yesterday</td>
-                                     <td style={{ padding: '1rem 0' }}><span style={{ padding: '0.25rem 0.5rem', background: 'rgba(34,211,238,0.1)', color: '#22d3ee', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 700 }}>SUCCESS</span></td>
-                                     <td style={{ padding: '1rem 0', textAlign: 'right', fontWeight: 800, color: '#fff' }}>-$15.99</td>
-                                  </tr>
-                                  <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.02)' }}>
-                                     <td style={{ padding: '1rem 0' }}>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                                           <div style={{ width: 36, height: 36, borderRadius: '10px', background: 'rgba(167, 139, 250, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Repeat size={16} color="#a78bfa" /></div>
-                                           <div style={{ fontWeight: 700 }}>Crypto Swap → BTC</div>
-                                        </div>
-                                     </td>
-                                     <td style={{ padding: '1rem 0', color: '#94a3b8', fontSize: '0.9rem' }}>Mar 12, 2026</td>
-                                     <td style={{ padding: '1rem 0' }}><span style={{ padding: '0.25rem 0.5rem', background: 'rgba(34,211,238,0.1)', color: '#22d3ee', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 700 }}>SUCCESS</span></td>
-                                     <td style={{ padding: '1rem 0', textAlign: 'right', fontWeight: 800, color: '#fff' }}>-$1,000.00</td>
-                                  </tr>
-                               </>
+                                        <button onClick={() => setIsPayoutOpen(true)} className="btn btn-primary" style={{ padding: '0.6rem 1.5rem', fontSize: '0.9rem', marginTop: '0.5rem' }}>Make a Transfer</button>
+                                     </div>
+                                  </td>
+                               </tr>
                             )}
                          </tbody>
                       </table>
