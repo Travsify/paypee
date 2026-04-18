@@ -231,28 +231,28 @@ const App = () => {
   return (
     <div className="app-shell">
       {landingView === 'main' && (
-        <header className="fixed top-0 left-0 right-0 z-50 nav-blur py-4 lg:py-6">
-          <div className="container flex justify-between items-center">
+        <header className="fixed top-0 left-0 right-0 z-[100] nav-blur h-[88px] flex items-center">
+          <div className="container flex justify-between items-center relative h-full">
             <motion.button 
               whileHover={{ scale: 1.05 }}
               onClick={() => { setView('landing'); setLandingView('main'); }}
-              style={{ background: 'transparent', border: 'none', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '1.25rem', fontWeight: 900, color: '#fff' }}
+              className="flex items-center gap-4 cursor-pointer p-0 bg-transparent border-none text-white transition-all"
             >
-              <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center text-white">
-                <Zap size={20} fill="currentColor" />
+              <div className="w-11 h-11 rounded-xl bg-primary flex items-center justify-center text-white shadow-[0_0_20px_rgba(99,102,241,0.4)]">
+                <Zap size={24} fill="currentColor" />
               </div>
-              PAYPEE
+              <span className="text-2xl font-black tracking-tighter uppercase italic">PAYPEE</span>
             </motion.button>
             
-            <div className="desktop-only" style={{ display: 'flex', gap: '3rem' }}>
-               <button onClick={() => { setView('landing'); setLandingView('individual'); }} style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', fontSize: '0.9rem', cursor: 'pointer', fontWeight: 700 }}>Individuals</button>
-               <button onClick={() => { setView('landing'); setLandingView('business'); }} style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', fontSize: '0.9rem', cursor: 'pointer', fontWeight: 700 }}>Businesses</button>
-               <button onClick={() => { setView('landing'); setLandingView('developer'); }} style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', fontSize: '0.9rem', cursor: 'pointer', fontWeight: 700 }}>Developers</button>
+            <div className="desktop-only absolute left-1/2 -translate-x-1/2 flex items-center gap-10">
+               <button onClick={() => { setView('landing'); setLandingView('individual'); }} className="nav-link">Individuals</button>
+               <button onClick={() => { setView('landing'); setLandingView('business'); }} className="nav-link">Businesses</button>
+               <button onClick={() => { setView('landing'); setLandingView('developer'); }} className="nav-link">Developers</button>
             </div>
 
-            <div style={{ display: 'flex', gap: '0.6rem', alignItems: 'center' }}>
-              <button className="btn btn-outline" onClick={() => setView('auth')} style={{ padding: '0.6rem 1.2rem', fontSize: '0.85rem' }}>Login</button>
-              <button className="btn btn-primary" onClick={() => setView('auth')} style={{ padding: '0.6rem 1.5rem', fontSize: '0.85rem' }}>Open Account</button>
+            <div className="flex items-center gap-4">
+              <button className="btn btn-outline h-11 px-6 rounded-xl text-xs" onClick={() => setView('auth')}>Login</button>
+              <button className="btn btn-primary h-11 px-8 rounded-xl text-xs shadow-lg shadow-primary/20" onClick={() => setView('auth')}>Open Account</button>
             </div>
           </div>
         </header>

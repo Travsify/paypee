@@ -69,24 +69,24 @@ const LandingV2: React.FC<LandingV2Props> = ({ onAuth }) => {
               initial={{ opacity: 0, x: -60 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
-              className="lg:col-span-6 stagger-load"
+              className="lg:col-span-7 stagger-load pr-12"
             >
-              <div className="flex items-center gap-4 mb-10">
+              <div className="flex items-center gap-4 mb-8">
                 <div className="badge py-2 px-4 bg-primary/10 border-primary/20 text-primary animate-pulse">
                   <Star size={14} className="fill-current" /> 
-                  <span className="ml-2 font-black tracking-widest text-[10px] uppercase">The Fintech Operating System</span>
+                  <span className="ml-2 font-black tracking-widest text-[9px] uppercase">The Fintech Operating System</span>
                 </div>
               </div>
-              <h1 className="mb-10 leading-[0.9] tracking-tighter text-6xl lg:text-8xl font-black">
+              <h1 className="mb-8 leading-[0.85] tracking-tighter text-7xl lg:text-[100px] font-black italic uppercase">
                 Global Finance. <br/>
                 <span className="text-gradient">Unified & Instant.</span>
               </h1>
-              <p className="text-xl lg:text-2xl text-white/50 mb-14 max-w-xl leading-relaxed">
+              <p className="text-lg lg:text-xl text-white/50 mb-12 max-w-xl leading-relaxed font-medium">
                 Empowering businesses and creators with the infrastructure to move value anywhere, anytime. One platform for cards, accounts, and global liquidity.
               </p>
               
-              <div className="flex flex-wrap gap-5 lg:gap-8 mb-20">
-                <button className="btn btn-primary btn-lg px-12 py-5 rounded-2xl group w-full sm:w-auto text-lg shadow-[0_20px_40px_rgba(99,102,241,0.3)]" onClick={onAuth}>
+              <div className="flex flex-wrap gap-5 lg:gap-6 mb-16">
+                <button className="btn btn-primary btn-lg px-14 py-5 rounded-2xl group w-full sm:w-auto text-lg shadow-[0_20px_40px_rgba(99,102,241,0.3)]" onClick={onAuth}>
                   Get Started <ArrowRight size={22} className="group-hover:translate-x-1 transition-transform" />
                 </button>
                 <button className="btn btn-outline btn-lg px-12 py-5 rounded-2xl w-full sm:w-auto text-lg border-white/10 hover:bg-white/5">
@@ -94,62 +94,62 @@ const LandingV2: React.FC<LandingV2Props> = ({ onAuth }) => {
                 </button>
               </div>
 
-              <div className="grid grid-cols-3 gap-8 border-t border-white/5 pt-12">
+              <div className="flex items-center gap-16 border-t border-white/5 pt-10">
                 <div>
-                  <div className="text-4xl lg:text-5xl font-black text-white tracking-tighter">50+</div>
-                  <div className="text-[10px] uppercase tracking-[0.2em] text-white/30 font-black mt-2">Countries</div>
+                  <div className="text-4xl font-black text-white tracking-tighter">50+</div>
+                  <div className="text-[10px] uppercase tracking-[0.3em] text-white/30 font-black mt-2">Countries</div>
                 </div>
                 <div>
-                  <div className="text-4xl lg:text-5xl font-black text-white tracking-tighter">120ms</div>
-                  <div className="text-[10px] uppercase tracking-[0.2em] text-white/30 font-black mt-2">API Latency</div>
+                  <div className="text-4xl font-black text-white tracking-tighter">120ms</div>
+                  <div className="text-[10px] uppercase tracking-[0.3em] text-white/30 font-black mt-2">API Latency</div>
                 </div>
                 <div>
-                  <div className="text-4xl lg:text-5xl font-black text-white tracking-tighter">99.9%</div>
-                  <div className="text-[10px] uppercase tracking-[0.2em] text-white/30 font-black mt-2">Reliability</div>
+                  <div className="text-4xl font-black text-white tracking-tighter">99.9%</div>
+                  <div className="text-[10px] uppercase tracking-[0.3em] text-white/30 font-black mt-2">Reliability</div>
                 </div>
               </div>
             </motion.div>
 
             {/* Dynamic Animated Hero Visual */}
-            <div className="lg:col-span-6 relative h-[500px] lg:h-[700px]">
-              <div className="absolute inset-0 flex items-center justify-center">
+            <div className="lg:col-span-5 relative h-[550px] lg:h-[750px] flex items-center justify-center">
+              <div className="relative w-full h-full max-h-[650px]">
                 <AnimatePresence mode="wait">
                   <motion.div
                     key={currentHeroImage}
-                    initial={{ opacity: 0, scale: 0.9, rotateY: 15 }}
-                    animate={{ opacity: 1, scale: 1, rotateY: 0 }}
-                    exit={{ opacity: 0, scale: 1.05, rotateY: -15 }}
-                    transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-                    className="relative w-full h-full hero-image-container premium-border shadow-[0_50px_100px_rgba(0,0,0,0.5)]"
+                    initial={{ opacity: 0, scale: 0.95, rotateY: 10, x: 20 }}
+                    animate={{ opacity: 1, scale: 1, rotateY: 0, x: 0 }}
+                    exit={{ opacity: 0, scale: 1.05, rotateY: -10, x: -20 }}
+                    transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+                    className="relative w-full h-full hero-image-container premium-border shadow-[0_60px_120px_rgba(0,0,0,0.6)]"
                   >
                     <img 
                       src={heroImages[currentHeroImage].src} 
-                      alt="" // Decorative for the visual layout
-                      className="w-full h-full object-cover rounded-[56px]"
+                      alt="" 
+                      className="w-full h-full object-cover rounded-[48px]"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent rounded-[56px]" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent rounded-[48px]" />
                     
-                    <div className="absolute bottom-12 left-12 right-12 flex justify-between items-end">
+                    <div className="absolute bottom-10 left-10 right-10 flex justify-between items-end">
                       <div>
-                        <div className="text-xs uppercase tracking-[0.3em] text-white/40 font-black mb-3">Live Environment</div>
-                        <div className="text-3xl font-black text-white tracking-tight">
+                        <div className="text-[10px] uppercase tracking-[0.4em] text-white/40 font-black mb-2">Live Node</div>
+                        <div className="text-2xl font-black text-white tracking-tight italic uppercase">
                           {heroImages[currentHeroImage].label}
                         </div>
                       </div>
-                      <div className="badge py-2 px-4 bg-white/10 backdrop-blur-xl border-white/20 text-white font-bold text-[10px] tracking-widest uppercase">
-                        SECURE Rails
+                      <div className="badge py-2 px-4 bg-emerald-500/10 backdrop-blur-xl border-emerald-500/20 text-emerald-400 font-black text-[9px] tracking-widest uppercase">
+                        ACTIVE Rails
                       </div>
                     </div>
                   </motion.div>
                 </AnimatePresence>
 
                 {/* Floating Indicators */}
-                <div className="absolute -right-8 top-1/2 -translate-y-1/2 flex flex-col gap-4">
+                <div className="absolute -right-10 top-1/2 -translate-y-1/2 flex flex-col gap-5">
                   {heroImages.map((_, i) => (
                     <button 
                       key={i}
                       onClick={() => setCurrentHeroImage(i)}
-                      className={`w-1 h-16 rounded-full transition-all duration-700 ${currentHeroImage === i ? 'bg-primary h-24' : 'bg-white/5 hover:bg-white/20'}`}
+                      className={`w-1 h-12 rounded-full transition-all duration-700 ${currentHeroImage === i ? 'bg-primary h-20' : 'bg-white/5 hover:bg-white/20'}`}
                     />
                   ))}
                 </div>
