@@ -41,8 +41,13 @@ export const createCustomer = async (firstName: string, lastName: string, email:
     return response.data.data;
   } catch (error: any) {
     if (error.response) {
-        console.error('[MAPLERAD DEBUG] Full Error Response:', JSON.stringify(error.response.data));
+        if (error.response.status === 407) {
+           console.error('🛑 [MAPLERAD PROXY ERROR] 407 Proxy Authentication Required. Your proxy credentials in MAPLERAD_PROXY_URL are incorrect or expired.');
+        } else {
+           console.error('[MAPLERAD DEBUG] Full Error Response:', JSON.stringify(error.response.data));
+        }
     }
+
     const errorMsg = error.response?.data?.message || '';
     if (errorMsg.toLowerCase().includes('already exist') || errorMsg.toLowerCase().includes('already enrolled')) {
         // If Maplerad returned the customer in the error response, use it
