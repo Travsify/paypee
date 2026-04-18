@@ -158,16 +158,24 @@ export class IbanService {
 
       // 5. Fetch external transactions (latest 50) for this specific customer
       const externalTxs = await Maplerad.getTransactions(customer.id);
-      if (!Array.isArray(externalTxs)) return;
+      if (!Array.isArray(externalTxs)) {
+        console.log(`[RECONCILE] Maplerad returned non-array transactions:`, externalTxs);
+        return;
+      }
+
+      console.log(`[RECONCILE] Raw external transactions found: ${externalTxs.length}`);
+      if (externalTxs.length > 0) {
+        console.log(`[RECONCILE] Sample TX statuses: ${externalTxs.slice(0, 3).map((t: any) => t.status).join(', ')}`);
+      }
 
       // Filter transactions that belong to this user's accounts
       const userAccNumbers = externalAccounts.map((a: any) => a.account_number);
       const relevantTxs = externalTxs.filter((tx: any) => 
-        tx.status === 'SUCCESSFUL' && 
-        userAccNumbers.includes(tx.account_number)
+        userAccNumbers.includes(tx.account_number) || 
+        userAccNumbers.includes(tx.virtual_account_number)
       );
 
-      console.log(`[RECONCILE] Found ${relevantTxs.length} relevant external transactions for user.`);
+      console.log(`[RECONCILE] Found ${relevantTxs.length} relevant transactions for this user's accounts.`);
 
       for (const tx of relevantTxs) {
         await prisma.$transaction(async (txPrisma) => {
