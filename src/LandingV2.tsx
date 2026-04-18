@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
 import { 
   Zap, ArrowRight, Globe, Cpu, Shield, Activity, 
-  CreditCard, Wallet, Repeat, Terminal, Users, Lock,
+  CreditCard, Wallet, Repeat, Terminal, Users, Lock, Building2,
   ChevronRight, Smartphone, ArrowUpRight, BarChart3,
   Bot, ShieldCheck, Code2, Link as LinkIcon
 } from 'lucide-react';
