@@ -175,7 +175,7 @@ const PayoutModal: React.FC<PayoutModalProps> = ({ isOpen, onClose, onComplete, 
               >
                 <Building2 size={18} color="var(--primary)" />
                 <div style={{ ...inputStyle, display: 'flex', alignItems: 'center', color: bankCode ? '#fff' : '#475569' }}>
-                  {banks.find(b => b.bank_code === bankCode)?.name || (isMoMo ? 'Choose Provider' : 'Select Bank')}
+                  {banks.find(b => (b.bank_code || b.code || b.bankCode) === bankCode)?.name || (isMoMo ? 'Choose Provider' : 'Select Bank')}
                 </div>
                 <ChevronDown size={18} style={{ marginLeft: 'auto', transform: isBankDropdownOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
               </div>
@@ -198,22 +198,25 @@ const PayoutModal: React.FC<PayoutModalProps> = ({ isOpen, onClose, onComplete, 
                         style={{ width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid #1e293b', borderRadius: '10px', padding: '0.6rem 1rem', color: '#fff', fontSize: '0.9rem', outline: 'none' }}
                       />
                     </div>
-                    {filteredBanks.map(b => (
-                      <div 
-                        key={b.bank_code} 
-                        onClick={(e) => { 
-                          e.stopPropagation();
-                          setBankCode(b.bank_code); 
-                          setIsBankDropdownOpen(false); 
-                          setBankSearch(''); 
-                        }}
-                        style={{ padding: '1rem', cursor: 'pointer', transition: 'background 0.2s', borderBottom: '1px solid rgba(255,255,255,0.03)', fontSize: '0.95rem', background: bankCode === b.bank_code ? 'rgba(99, 102, 241, 0.1)' : 'transparent' }}
-                        onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.05)'}
-                        onMouseLeave={(e) => e.currentTarget.style.background = bankCode === b.bank_code ? 'rgba(99, 102, 241, 0.1)' : 'transparent'}
-                      >
-                        {b.name}
-                      </div>
-                    ))}
+                    {filteredBanks.map((b, idx) => {
+                      const currentCode = b.bank_code || b.code || b.bankCode;
+                      return (
+                        <div 
+                          key={currentCode || idx} 
+                          onClick={(e) => { 
+                            e.stopPropagation();
+                            setBankCode(currentCode); 
+                            setIsBankDropdownOpen(false); 
+                            setBankSearch(''); 
+                          }}
+                          style={{ padding: '1rem', cursor: 'pointer', transition: 'background 0.2s', borderBottom: '1px solid rgba(255,255,255,0.03)', fontSize: '0.95rem', background: bankCode === currentCode ? 'rgba(99, 102, 241, 0.1)' : 'transparent' }}
+                          onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.05)'}
+                          onMouseLeave={(e) => e.currentTarget.style.background = bankCode === currentCode ? 'rgba(99, 102, 241, 0.1)' : 'transparent'}
+                        >
+                          {b.name}
+                        </div>
+                      );
+                    })}
                     {filteredBanks.length === 0 && (
                       <div style={{ padding: '2rem', textAlign: 'center', color: '#475569', fontSize: '0.9rem' }}>No providers found</div>
                     )}
