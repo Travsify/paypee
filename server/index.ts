@@ -155,8 +155,12 @@ app.get('/api/users/me', authenticateToken, async (req: any, res: any): Promise<
     // Fetch associated wallets
     let wallets = await prisma.wallet.findMany({ where: { userId: user.id } });
 
-    // AUTO-SYNC: If any wallet is missing metadata, try to provision/patch it now
+    // AUTO-SYNC: If any wallet is missing metadata or balance needs healing, trigger reconciliation
     const needsSync = wallets.some(w => !w.metadata);
+    
+    // Trigger reconciliation (background)
+    IbanService.reconcileUserWallets(user.id).catch(err => console.error('[BG-RECONCILE] Error:', err));
+
     if (needsSync) {
        console.log(`🔄 Auto-syncing metadata for user ${user.id}...`);
        await Promise.all(wallets.map(w => {
