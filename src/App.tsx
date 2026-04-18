@@ -230,6 +230,7 @@ const App = () => {
 
   return (
     <div className="app-shell">
+      {landingView !== 'main' && (
       <header style={{ position: 'sticky', top: 0, zIndex: 2000, background: 'rgba(2, 6, 23, 0.98)', backdropFilter: 'blur(10px)', borderBottom: '1px solid var(--border)' }}>
         <div className="container" style={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center', height: '72px' }}>
           <motion.button 
@@ -254,8 +255,8 @@ const App = () => {
             <button className="btn btn-primary" onClick={() => setView('auth')} style={{ padding: '0.5rem 0.8rem', fontSize: '0.75rem' }}>Get Started</button>
           </div>
         </div>
-        
       </header>
+      )}
 
       <main>
         {landingView === 'main' && <LandingV2 onAuth={() => setView('auth')} />}
@@ -270,6 +271,7 @@ const App = () => {
       
       <MobileBottomNav />
 
+      {landingView !== 'main' && (
       <footer style={{ padding: '6rem 0 3rem', borderTop: '1px solid var(--border)', marginBottom: '5rem' }}>
         <div className="container">
           <div className="info-row" style={{ alignItems: 'flex-start' }}>
@@ -323,6 +325,7 @@ const App = () => {
           </div>
         </div>
       </footer>
+      )}
     </div>
   );
 };
