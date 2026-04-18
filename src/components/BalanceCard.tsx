@@ -74,105 +74,92 @@ const getBankName = (details: any) => {
 };
 
 const BalanceCard: React.FC<BalanceCardProps> = ({ currency, symbol, amount, gradient, details, userName, type = 'INDIVIDUAL', onDelete }) => {
-  const [isFlipped, setIsFlipped] = useState(false);
   const accNo = getAccountNumber(details);
   const bank = getBankName(details);
   
-  // Use specialized account name, or passed userName, or generic fallback
   let accName = details?.accountInformation?.accountName || details?.accountName || details?.accountHolder;
   if (!accName || accName === "Valued Customer" || accName === "Paypee / TechStream Ltd") {
     accName = userName || "Valued Customer";
   }
   
   return (
-    <div style={{ perspective: '1000px', minWidth: '320px', height: '200px', cursor: 'pointer' }} onClick={() => setIsFlipped(!isFlipped)}>
+    <div style={{ perspective: '1000px', minWidth: '320px', height: '220px', position: 'relative' }}>
       <motion.div
-        initial={false}
-        animate={{ rotateY: isFlipped ? 180 : 0 }}
-        transition={{ duration: 0.6, type: 'spring', stiffness: 260, damping: 20 }}
-        style={{ width: '100%', height: '100%', transformStyle: 'preserve-3d', position: 'relative' }}
+        whileHover={{ y: -5, scale: 1.02 }}
+        transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+        style={{ 
+          width: '100%', height: '100%', 
+          padding: '1.5rem', borderRadius: '24px', 
+          background: gradient, color: '#fff', 
+          boxShadow: '0 20px 40px -10px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.2)', 
+          border: '1px solid rgba(255,255,255,0.1)',
+          display: 'flex', flexDirection: 'column', justifyContent: 'space-between', 
+          overflow: 'hidden', position: 'relative'
+        }}
       >
-        {/* FRONT: Balance View */}
-        <div style={{ 
-          position: 'absolute', width: '100%', height: '100%', backfaceVisibility: 'hidden',
-          padding: '2rem', borderRadius: '24px', background: gradient, color: '#fff', 
-          boxShadow: '0 20px 40px -10px rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.1)',
-          display: 'flex', flexDirection: 'column', justifyContent: 'space-between', overflow: 'hidden'
-        }}>
-          <div style={{ position: 'absolute', top: '-10%', right: '-10%', opacity: 0.1 }}><Wallet size={120} /></div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', position: 'relative' }}>
-            <div style={{ fontWeight: 800, fontSize: '0.75rem', letterSpacing: '1px', opacity: 0.9 }}>{currency} {type} WALLET</div>
-            <div style={{ background: 'rgba(255,255,255,0.2)', padding: '0.4rem 0.8rem', borderRadius: '10px', fontSize: '0.65rem', fontWeight: 800 }}>TAP TO VIEW INFO</div>
+        {/* Decorative background elements */}
+        <div style={{ position: 'absolute', top: '-20%', right: '-10%', opacity: 0.05, transform: 'rotate(15deg)' }}>
+          <Wallet size={160} />
+        </div>
+        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '40%', background: 'linear-gradient(180deg, rgba(255,255,255,0.15) 0%, transparent 100%)', pointerEvents: 'none' }} />
+
+        {/* Header */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', position: 'relative', zIndex: 10 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <div style={{ width: 32, height: 32, borderRadius: '10px', background: 'rgba(255,255,255,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(10px)' }}>
+              <span style={{ fontWeight: 900, fontSize: '1rem' }}>{symbol}</span>
+            </div>
+            <div style={{ fontWeight: 800, fontSize: '0.8rem', letterSpacing: '1px', opacity: 0.9 }}>{currency} {type}</div>
           </div>
-          <div style={{ fontSize: '2.4rem', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '0.5rem', position: 'relative' }}>
-            <span style={{ fontSize: '1.2rem', opacity: 0.7 }}>{symbol}</span>
-            {amount}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', background: 'rgba(0,0,0,0.2)', padding: '0.4rem 0.6rem', borderRadius: '10px', backdropFilter: 'blur(10px)' }}>
+            <ShieldCheck size={14} color="#34d399" />
+            <span style={{ fontSize: '0.6rem', fontWeight: 800, letterSpacing: '0.5px' }}>SECURED</span>
           </div>
-          <div style={{ fontSize: '0.8rem', opacity: 0.8, fontWeight: 600 }}>•••• {accNo ? accNo.slice(-4) : 'REFRESH'}</div>
         </div>
 
-        {/* BACK: Account Details View */}
+        {/* Balance */}
+        <div style={{ position: 'relative', zIndex: 10, marginTop: '1rem' }}>
+          <div style={{ fontSize: '0.75rem', fontWeight: 600, opacity: 0.8, marginBottom: '0.2rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Available Balance</div>
+          <div style={{ fontSize: '2.5rem', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '0.2rem', letterSpacing: '-1px' }}>
+            <span style={{ fontSize: '1.5rem', opacity: 0.8 }}>{symbol}</span>
+            {amount}
+          </div>
+        </div>
+
+        {/* Account Details Footer */}
         <div style={{ 
-          position: 'absolute', width: '100%', height: '100%', backfaceVisibility: 'hidden', transform: 'rotateY(180deg)',
-          padding: '1.5rem', borderRadius: '24px', background: '#ffffff', color: '#0f172a', 
-          boxShadow: '0 20px 40px -10px rgba(0,0,0,0.3)', border: '1px solid #e2e8f0',
-          display: 'flex', flexDirection: 'column', gap: '0.8rem'
+          marginTop: 'auto', paddingTop: '1rem', borderTop: '1px solid rgba(255,255,255,0.1)', 
+          position: 'relative', zIndex: 10, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end'
         }}>
-           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-             <div style={{ fontSize: '0.6rem', fontWeight: 800, color: 'var(--primary)', letterSpacing: '1px' }}>VIRTUAL SETTLEMENT NODE</div>
-             <ShieldCheck size={18} color="var(--primary)" />
-           </div>
-           
-           <div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.2rem' }}>
-                <div style={{ fontSize: '0.6rem', opacity: 0.5, fontWeight: 700, textTransform: 'uppercase' }}>Account Name</div>
-                <CopyButton text={accName} label="Account Name" />
+          <div>
+            <div style={{ fontSize: '0.65rem', fontWeight: 600, opacity: 0.7, marginBottom: '0.2rem', textTransform: 'uppercase', letterSpacing: '1px' }}>
+              {bank || 'Provisioning Account...'}
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <div style={{ fontSize: '1.1rem', fontWeight: 800, fontFamily: 'monospace', letterSpacing: '1px' }}>
+                {accNo ? accNo.match(/.{1,4}/g)?.join(' ') : '•••• •••• ••••'}
               </div>
-              <div style={{ fontSize: '0.9rem', fontWeight: 800 }}>{accName}</div>
-           </div>
-
-           <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '1rem' }}>
-              <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.2rem' }}>
-                  <div style={{ fontSize: '0.6rem', opacity: 0.5, fontWeight: 700, textTransform: 'uppercase' }}>Account Number</div>
-                  <CopyButton text={accNo || ""} label="Account Number" />
-                </div>
-                <div style={{ fontSize: '0.95rem', fontWeight: 900, fontFamily: 'monospace' }}>{accNo || 'GENERATING...'}</div>
-              </div>
-              <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.2rem' }}>
-                  <div style={{ fontSize: '0.6rem', opacity: 0.5, fontWeight: 700, textTransform: 'uppercase' }}>Bank Name</div>
-                  <CopyButton text={bank || ""} label="Bank Name" />
-                </div>
-                <div style={{ fontSize: '0.85rem', fontWeight: 800 }}>{bank || 'Provisioning...'}</div>
-              </div>
-           </div>
-
-           <div style={{ marginTop: 'auto', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', width: '60%' }}>
-                 <div style={{ width: '100%', height: '30px', background: 'repeating-linear-gradient(90deg, #000 0px, #000 2px, transparent 2px, transparent 4px)', opacity: 0.3 }} />
-                 <motion.button 
-                   whileHover={{ scale: 1.1, color: '#f43f5e' }}
-                   whileTap={{ scale: 0.9 }}
-                   onClick={(e) => {
-                      e.stopPropagation();
-                      if (onDelete && details?.walletId) {
-                         if (confirm('Are you sure you want to terminate this rail? All associated data will be archived.')) {
-                            onDelete(details.walletId);
-                         }
-                      } else if (onDelete && details?.id) {
-                         if (confirm('Are you sure you want to terminate this rail? All associated data will be archived.')) {
-                            onDelete(details.id);
-                         }
-                      }
-                   }}
-                   style={{ background: 'rgba(244, 63, 94, 0.05)', border: '1px solid rgba(244, 63, 94, 0.1)', padding: '0.4rem', borderRadius: '8px', cursor: 'pointer', color: 'rgba(15, 23, 42, 0.3)' }}
-                 >
-                   <Trash2 size={16} />
-                 </motion.button>
-              </div>
-              <div style={{ fontSize: '0.5rem', fontWeight: 800, opacity: 0.4 }}>SECURE_PAYPEE_LEDGER</div>
-           </div>
+              {accNo && <CopyButton text={accNo} label="Copy Account" />}
+            </div>
+            <div style={{ fontSize: '0.7rem', fontWeight: 600, opacity: 0.9, marginTop: '0.2rem' }}>{accName}</div>
+          </div>
+          
+          {onDelete && (
+            <motion.button 
+              whileHover={{ scale: 1.1, background: 'rgba(244, 63, 94, 0.2)' }}
+              whileTap={{ scale: 0.9 }}
+              onClick={(e) => {
+                 e.stopPropagation();
+                 const targetId = details?.walletId || details?.id;
+                 if (targetId && confirm('Are you sure you want to terminate this rail?')) {
+                    onDelete(targetId);
+                 }
+              }}
+              style={{ background: 'rgba(0,0,0,0.1)', border: 'none', padding: '0.5rem', borderRadius: '10px', cursor: 'pointer', color: '#fff', backdropFilter: 'blur(5px)' }}
+            >
+              <Trash2 size={16} />
+            </motion.button>
+          )}
         </div>
       </motion.div>
     </div>
