@@ -30,24 +30,31 @@ const glassPanel = {
 
 // --- COMPONENTS ---
 
-const Nav = ({ onAuth }: { onAuth: () => void }) => (
-  <nav style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 1000, padding: '1.5rem 2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(2, 6, 23, 0.7)', backdropFilter: 'blur(20px)', borderBottom: `1px solid ${theme.glassBorder}` }}>
-    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-       <div style={{ width: 32, height: 32, background: `linear-gradient(135deg, ${theme.primary}, ${theme.purple})`, borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <Zap size={18} color="#fff" />
+const Nav = ({ onAuth, onNavigate }: { onAuth: () => void, onNavigate: (page: string) => void }) => (
+  <nav style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 1000, padding: '1rem 2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(2, 6, 23, 0.7)', backdropFilter: 'blur(20px)', borderBottom: `1px solid ${theme.glassBorder}` }}>
+    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', cursor: 'pointer' }} onClick={() => onNavigate('home')}>
+       <div style={{ width: 28, height: 28, background: `linear-gradient(135deg, ${theme.primary}, ${theme.purple})`, borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <Zap size={16} color="#fff" />
        </div>
-       <span style={{ fontSize: '1.25rem', fontWeight: 900, letterSpacing: '-0.02em', color: theme.text1 }}>Paypee</span>
+       <span style={{ fontSize: '1.2rem', fontWeight: 900, letterSpacing: '-0.02em', color: theme.text1 }}>Paypee</span>
     </div>
     <div className="desktop-only" style={{ display: 'flex', gap: '2.5rem', alignItems: 'center' }}>
        {['Features', 'Wallets', 'Cards', 'Crypto', 'For Who'].map(item => (
-         <a key={item} href={`#${item.toLowerCase().replace(' ', '')}`} style={{ color: theme.text2, textDecoration: 'none', fontSize: '0.9rem', fontWeight: 600, transition: 'color 0.2s' }} onMouseEnter={e => e.currentTarget.style.color = theme.text1} onMouseLeave={e => e.currentTarget.style.color = theme.text2}>{item}</a>
+         <button key={item} onClick={() => onNavigate(item.toLowerCase().replace(' ', ''))} style={{ background: 'transparent', border: 'none', color: theme.text2, fontSize: '0.85rem', fontWeight: 600, transition: 'color 0.2s', cursor: 'pointer', padding: 0 }} onMouseEnter={e => e.currentTarget.style.color = theme.text1} onMouseLeave={e => e.currentTarget.style.color = theme.text2}>{item}</button>
        ))}
     </div>
     <div style={{ display: 'flex', gap: '1rem' }}>
-       <button onClick={onAuth} style={{ background: 'transparent', color: theme.text1, border: 'none', fontWeight: 700, fontSize: '0.9rem', cursor: 'pointer' }}>Sign In</button>
-       <button onClick={onAuth} style={{ background: `linear-gradient(135deg, ${theme.primary}, ${theme.cyan})`, color: '#fff', border: 'none', padding: '0.75rem 1.5rem', borderRadius: '12px', fontWeight: 800, fontSize: '0.9rem', cursor: 'pointer', boxShadow: `0 0 20px rgba(99, 102, 241, 0.4)` }}>Get Started</button>
+       <button onClick={onAuth} style={{ background: 'transparent', color: theme.text1, border: 'none', fontWeight: 700, fontSize: '0.85rem', cursor: 'pointer' }}>Sign In</button>
+       <button onClick={onAuth} style={{ background: `linear-gradient(135deg, ${theme.primary}, ${theme.cyan})`, color: '#fff', border: 'none', padding: '0.6rem 1.2rem', borderRadius: '12px', fontWeight: 800, fontSize: '0.85rem', cursor: 'pointer', boxShadow: `0 0 20px rgba(99, 102, 241, 0.4)` }}>Get Started</button>
     </div>
   </nav>
+);
+
+const InnerHero = ({ title, subtitle }: { title: string, subtitle: string }) => (
+   <section style={{ padding: '8rem 0 2rem', textAlign: 'center', background: `radial-gradient(circle at top center, rgba(99, 102, 241, 0.1) 0%, transparent 70%)` }}>
+      <h1 style={{ fontSize: 'clamp(2.5rem, 5vw, 3.5rem)', fontWeight: 800, color: theme.text1, letterSpacing: '-0.03em', marginBottom: '1rem' }}>{title}</h1>
+      <p style={{ fontSize: '1.1rem', color: theme.text2, maxWidth: '600px', margin: '0 auto' }}>{subtitle}</p>
+   </section>
 );
 
 // 1. Hero Section
@@ -61,11 +68,11 @@ const HeroSection = ({ onAuth }: { onAuth: () => void }) => {
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.75rem', padding: '0.5rem 1.2rem', ...glassPanel, borderRadius: '99px', color: theme.cyan, fontSize: '0.85rem', fontWeight: 800, letterSpacing: '0.05em', marginBottom: '2.5rem' }}>
              <Activity size={14} /> GLOBAL FINANCE OS
           </div>
-          <h1 style={{ fontSize: 'clamp(3rem, 6vw, 4.5rem)', fontWeight: 800, letterSpacing: '-0.03em', lineHeight: 1.1, marginBottom: '1.5rem', color: theme.text1 }}>
+          <h1 style={{ fontSize: 'clamp(2.5rem, 5vw, 3.5rem)', fontWeight: 800, letterSpacing: '-0.03em', lineHeight: 1.1, marginBottom: '1rem', color: theme.text1 }}>
              Global Finance.<br />
              <span style={{ color: theme.text1 }}>Unified & Instant.</span>
           </h1>
-          <p style={{ fontSize: '1.25rem', color: theme.text2, maxWidth: '650px', margin: '0 auto 2.5rem', lineHeight: 1.6, fontWeight: 400 }}>
+          <p style={{ fontSize: '1.1rem', color: theme.text2, maxWidth: '600px', margin: '0 auto 2rem', lineHeight: 1.6, fontWeight: 400 }}>
              Hold any currency, send money worldwide in seconds, swap crypto and let AI manage your finances — all from one beautifully simple app.
           </p>
           <div style={{ display: 'flex', gap: '1.5rem', justifyContent: 'center', flexWrap: 'wrap' }}>
@@ -95,10 +102,10 @@ const HeroSection = ({ onAuth }: { onAuth: () => void }) => {
 // 2. Live Financial Preview
 const LivePreview = () => (
   <section style={{ padding: '4rem 0', position: 'relative', zIndex: 20 }}>
-    <div className="container" style={{ textAlign: 'center', marginBottom: '3rem' }}>
-       <div style={{ color: theme.text2, fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase', marginBottom: '1rem', fontSize: '0.85rem' }}>Live Preview</div>
-       <h2 style={{ fontSize: 'clamp(2rem, 4vw, 3rem)', fontWeight: 800, color: theme.text1, letterSpacing: '-0.02em', marginBottom: '1rem' }}>Real balances, real charts.</h2>
-       <p style={{ color: theme.text2, fontSize: '1.125rem', maxWidth: '600px', margin: '0 auto' }}>Everything you need in one calm dashboard.</p>
+    <div className="container" style={{ textAlign: 'center', marginBottom: '2rem' }}>
+       <div style={{ color: theme.text2, fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase', marginBottom: '0.5rem', fontSize: '0.8rem' }}>Live Preview</div>
+       <h2 style={{ fontSize: 'clamp(1.8rem, 3vw, 2.5rem)', fontWeight: 800, color: theme.text1, letterSpacing: '-0.02em', marginBottom: '1rem' }}>Real balances, real charts.</h2>
+       <p style={{ color: theme.text2, fontSize: '1rem', maxWidth: '600px', margin: '0 auto' }}>Everything you need in one calm dashboard.</p>
     </div>
     <div className="container" style={{ display: 'flex', justifyContent: 'center' }}>
        <motion.div initial={{ opacity: 0, y: 50, rotateX: 20 }} whileInView={{ opacity: 1, y: 0, rotateX: 0 }} viewport={{ once: true, margin: "-100px" }} transition={{ duration: 1, type: "spring" }} style={{ width: '100%', maxWidth: '1000px', ...glassPanel, background: `linear-gradient(180deg, rgba(10, 15, 44, 0.8) 0%, rgba(2, 6, 23, 0.9) 100%)`, overflow: 'hidden', position: 'relative', boxShadow: `0 30px 100px rgba(0,0,0,0.8), 0 0 0 1px ${theme.glassBorder}` }}>
@@ -140,11 +147,11 @@ const LivePreview = () => (
 
 // 3. Core Capabilities
 const Capabilities = () => (
-  <section id="features" style={{ padding: '8rem 0' }}>
+  <section id="features" style={{ padding: '4rem 0' }}>
     <div className="container">
-       <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
-          <div style={{ color: theme.text2, fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase', marginBottom: '1rem', fontSize: '0.85rem' }}>Features</div>
-          <h2 style={{ fontSize: 'clamp(2rem, 4vw, 3rem)', fontWeight: 800, color: theme.text1, letterSpacing: '-0.02em' }}>Everything you need</h2>
+       <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
+          <div style={{ color: theme.text2, fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase', marginBottom: '0.5rem', fontSize: '0.8rem' }}>Features</div>
+          <h2 style={{ fontSize: 'clamp(1.8rem, 3vw, 2.5rem)', fontWeight: 800, color: theme.text1, letterSpacing: '-0.02em' }}>Everything you need</h2>
        </div>
        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem' }}>
           {[
@@ -169,13 +176,13 @@ const Capabilities = () => (
 
 // 4. Multi-Currency System
 const MultiCurrency = () => (
-  <section id="wallets" style={{ padding: '8rem 0', background: theme.bg2, borderTop: `1px solid ${theme.glassBorder}` }}>
+  <section id="wallets" style={{ padding: '4rem 0', background: theme.bg2, borderTop: `1px solid ${theme.glassBorder}` }}>
      <div className="container">
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '4rem', alignItems: 'center' }}>
            <div>
-              <div style={{ color: theme.cyan, fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase', marginBottom: '1rem', fontSize: '0.85rem' }}>Multi-currency wallet</div>
-              <h2 style={{ fontSize: 'clamp(2rem, 4vw, 3rem)', fontWeight: 800, color: theme.text1, marginBottom: '1.5rem', lineHeight: 1.1, letterSpacing: '-0.02em' }}>Every currency.<br/>One balance you can trust.</h2>
-              <p style={{ color: theme.text2, fontSize: '1.125rem', lineHeight: 1.6 }}>Switch between fiat and crypto in a single tap. No hidden fees, no spreads — just clean, real-time balances wherever you are.</p>
+              <div style={{ color: theme.cyan, fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase', marginBottom: '0.5rem', fontSize: '0.8rem' }}>Multi-currency wallet</div>
+              <h2 style={{ fontSize: 'clamp(1.8rem, 3vw, 2.5rem)', fontWeight: 800, color: theme.text1, marginBottom: '1rem', lineHeight: 1.1, letterSpacing: '-0.02em' }}>Every currency.<br/>One balance you can trust.</h2>
+              <p style={{ color: theme.text2, fontSize: '1rem', lineHeight: 1.6 }}>Switch between fiat and crypto in a single tap. No hidden fees, no spreads — just clean, real-time balances wherever you are.</p>
            </div>
            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
               {[
@@ -199,11 +206,11 @@ const MultiCurrency = () => (
 
 // 5. Virtual Cards Experience
 const VirtualCards = () => (
-  <section id="cards" style={{ padding: '8rem 0', overflow: 'hidden' }}>
+  <section id="cards" style={{ padding: '4rem 0', overflow: 'hidden' }}>
      <div className="container">
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '6rem', alignItems: 'center' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '4rem', alignItems: 'center' }}>
            {/* Left side: Cards Stack */}
-           <div style={{ position: 'relative', height: '400px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+           <div style={{ position: 'relative', height: '350px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               
               {/* Back Card */}
               <motion.div animate={{ rotate: -15, x: -60, y: 20 }} style={{ position: 'absolute', zIndex: 1, width: '320px', height: '200px', background: `linear-gradient(135deg, ${theme.purple}, #c084fc)`, borderRadius: '16px', padding: '1.5rem', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', boxShadow: `0 20px 40px rgba(0,0,0,0.4)` }}>
@@ -271,9 +278,9 @@ const VirtualCards = () => (
 
            {/* Right side: Text Content */}
            <div>
-              <div style={{ color: theme.purple, fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase', marginBottom: '1rem', fontSize: '0.85rem' }}>Virtual cards</div>
-              <h2 style={{ fontSize: 'clamp(2rem, 4vw, 3rem)', fontWeight: 800, color: theme.text1, marginBottom: '1.5rem', lineHeight: 1.1, letterSpacing: '-0.02em' }}>Beautiful cards.<br/>Total control.</h2>
-              <p style={{ color: theme.text2, fontSize: '1.125rem', marginBottom: '3rem', lineHeight: 1.6 }}>Spin up unlimited virtual cards for subscriptions, travel or business. Freeze, unfreeze and set spending limits — instantly.</p>
+              <div style={{ color: theme.purple, fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase', marginBottom: '0.5rem', fontSize: '0.8rem' }}>Virtual cards</div>
+              <h2 style={{ fontSize: 'clamp(1.8rem, 3vw, 2.5rem)', fontWeight: 800, color: theme.text1, marginBottom: '1rem', lineHeight: 1.1, letterSpacing: '-0.02em' }}>Beautiful cards.<br/>Total control.</h2>
+              <p style={{ color: theme.text2, fontSize: '1rem', marginBottom: '2rem', lineHeight: 1.6 }}>Spin up unlimited virtual cards for subscriptions, travel or business. Freeze, unfreeze and set spending limits — instantly.</p>
               
               <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap' }}>
                  <div style={{ ...glassPanel, padding: '1.5rem', display: 'flex', alignItems: 'center', gap: '1rem', flex: 1, minWidth: '240px' }}>
@@ -304,9 +311,9 @@ const VirtualCards = () => (
 
 // 6. Global Transfers
 const GlobalTransfers = () => (
-  <section style={{ padding: '8rem 0', background: theme.bg2, borderTop: `1px solid ${theme.glassBorder}` }}>
+  <section style={{ padding: '4rem 0', background: theme.bg2, borderTop: `1px solid ${theme.glassBorder}` }}>
      <div className="container">
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '6rem', alignItems: 'center' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '4rem', alignItems: 'center' }}>
            <div style={{ ...glassPanel, padding: '2.5rem', background: 'rgba(2, 6, 23, 0.9)' }}>
               <div style={{ ...glassPanel, padding: '1rem', marginBottom: '1rem' }}>
                  <div style={{ color: theme.text2, fontSize: '0.8rem' }}>Recipient</div>
@@ -329,9 +336,9 @@ const GlobalTransfers = () => (
               <button style={{ width: '100%', padding: '1rem', background: theme.primary, color: '#fff', border: 'none', borderRadius: '12px', fontWeight: 800, fontSize: '1rem' }}>Send Now</button>
            </div>
            <div>
-              <div style={{ color: theme.primary, fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase', marginBottom: '1rem', fontSize: '0.85rem' }}>Global transfers</div>
-              <h2 style={{ fontSize: 'clamp(2rem, 4vw, 3rem)', fontWeight: 800, color: theme.text1, marginBottom: '1.5rem', lineHeight: 1.1, letterSpacing: '-0.02em' }}>Send money like sending a text.</h2>
-              <p style={{ color: theme.text2, fontSize: '1.125rem', lineHeight: 1.6 }}>80+ countries. 40+ currencies. No banking jargon — just a recipient, an amount, and done.</p>
+              <div style={{ color: theme.primary, fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase', marginBottom: '0.5rem', fontSize: '0.8rem' }}>Global transfers</div>
+              <h2 style={{ fontSize: 'clamp(1.8rem, 3vw, 2.5rem)', fontWeight: 800, color: theme.text1, marginBottom: '1rem', lineHeight: 1.1, letterSpacing: '-0.02em' }}>Send money like sending a text.</h2>
+              <p style={{ color: theme.text2, fontSize: '1rem', lineHeight: 1.6 }}>80+ countries. 40+ currencies. No banking jargon — just a recipient, an amount, and done.</p>
            </div>
         </div>
      </div>
@@ -340,11 +347,11 @@ const GlobalTransfers = () => (
 
 // 7. Crypto & Swap Engine
 const CryptoSwap = () => (
-   <section id="crypto" style={{ padding: '8rem 0' }}>
+   <section id="crypto" style={{ padding: '4rem 0' }}>
       <div className="container" style={{ textAlign: 'center' }}>
-         <div style={{ color: theme.cyan, fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase', marginBottom: '1rem', fontSize: '0.85rem' }}>Crypto & swap</div>
-         <h2 style={{ fontSize: 'clamp(2rem, 4vw, 3rem)', fontWeight: 800, color: theme.text1, marginBottom: '1.5rem', letterSpacing: '-0.02em' }}>Trade fiat & crypto in a tap.</h2>
-         <p style={{ color: theme.text2, fontSize: '1.125rem', maxWidth: '600px', margin: '0 auto 4rem' }}>Aggregated liquidity from top exchanges gives you the best price every time — no spreads, no surprises.</p>
+         <div style={{ color: theme.cyan, fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase', marginBottom: '0.5rem', fontSize: '0.8rem' }}>Crypto & swap</div>
+         <h2 style={{ fontSize: 'clamp(1.8rem, 3vw, 2.5rem)', fontWeight: 800, color: theme.text1, marginBottom: '1rem', letterSpacing: '-0.02em' }}>Trade fiat & crypto in a tap.</h2>
+         <p style={{ color: theme.text2, fontSize: '1rem', maxWidth: '600px', margin: '0 auto 3rem' }}>Aggregated liquidity from top exchanges gives you the best price every time — no spreads, no surprises.</p>
          
          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '2rem', flexWrap: 'wrap' }}>
             <div style={{ ...glassPanel, padding: '2rem', width: '280px', textAlign: 'left' }}>
@@ -369,12 +376,12 @@ const CryptoSwap = () => (
 
 // 8. Paypee AI
 const PaypeeAI = () => (
-   <section style={{ padding: '8rem 0', background: `linear-gradient(180deg, ${theme.bg}, rgba(167, 139, 250, 0.1), ${theme.bg})`, borderTop: `1px solid ${theme.glassBorder}` }}>
+   <section style={{ padding: '4rem 0', background: `linear-gradient(180deg, ${theme.bg}, rgba(167, 139, 250, 0.05), ${theme.bg})`, borderTop: `1px solid ${theme.glassBorder}` }}>
       <div className="container">
-         <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
-            <Bot size={48} color={theme.purple} style={{ margin: '0 auto 1.5rem' }} />
-            <h2 style={{ fontSize: 'clamp(2rem, 4vw, 3rem)', fontWeight: 800, color: theme.text1, marginBottom: '1.5rem', letterSpacing: '-0.02em' }}>An assistant that grows your money quietly.</h2>
-            <p style={{ color: theme.text2, fontSize: '1.125rem', maxWidth: '600px', margin: '0 auto' }}>Paypee AI watches markets, currencies and your spending — then acts on your behalf. Like having a private banker in your pocket.</p>
+         <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
+            <Bot size={40} color={theme.purple} style={{ margin: '0 auto 1rem' }} />
+            <h2 style={{ fontSize: 'clamp(1.8rem, 3vw, 2.5rem)', fontWeight: 800, color: theme.text1, marginBottom: '1rem', letterSpacing: '-0.02em' }}>An assistant that grows your money quietly.</h2>
+            <p style={{ color: theme.text2, fontSize: '1rem', maxWidth: '600px', margin: '0 auto' }}>Paypee AI watches markets, currencies and your spending — then acts on your behalf. Like having a private banker in your pocket.</p>
          </div>
          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem' }}>
             <div style={{ ...glassPanel, padding: '2rem' }}>
@@ -396,12 +403,12 @@ const PaypeeAI = () => (
 
 // 9. Security & Trust
 const Security = () => (
-   <section style={{ padding: '8rem 0' }}>
-      <div className="container" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '4rem', alignItems: 'center' }}>
+   <section style={{ padding: '4rem 0' }}>
+      <div className="container" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '3rem', alignItems: 'center' }}>
          <div>
-            <div style={{ color: theme.primary, fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase', marginBottom: '1rem', fontSize: '0.85rem' }}>Security</div>
-            <h2 style={{ fontSize: 'clamp(2rem, 4vw, 3rem)', fontWeight: 800, color: theme.text1, marginBottom: '1.5rem', lineHeight: 1.1, letterSpacing: '-0.02em' }}>Built like a vault.<br/>Feels like silk.</h2>
-            <p style={{ color: theme.text2, fontSize: '1.125rem', lineHeight: 1.6 }}>Your money and data are protected by the same systems trusted by global banks. Every layer hardened. Every action audited.</p>
+            <div style={{ color: theme.primary, fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase', marginBottom: '0.5rem', fontSize: '0.8rem' }}>Security</div>
+            <h2 style={{ fontSize: 'clamp(1.8rem, 3vw, 2.5rem)', fontWeight: 800, color: theme.text1, marginBottom: '1rem', lineHeight: 1.1, letterSpacing: '-0.02em' }}>Built like a vault.<br/>Feels like silk.</h2>
+            <p style={{ color: theme.text2, fontSize: '1rem', lineHeight: 1.6 }}>Your money and data are protected by the same systems trusted by global banks. Every layer hardened. Every action audited.</p>
          </div>
          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
             <div>
@@ -431,11 +438,11 @@ const Security = () => (
 
 // 10. For Who Section
 const ForWho = ({ onAuth }: { onAuth: () => void }) => (
-   <section id="forwho" style={{ padding: '8rem 0', background: theme.bg2, borderTop: `1px solid ${theme.glassBorder}` }}>
+   <section id="forwho" style={{ padding: '4rem 0', background: theme.bg2, borderTop: `1px solid ${theme.glassBorder}` }}>
       <div className="container">
-         <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
-            <div style={{ color: theme.cyan, fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase', marginBottom: '1rem', fontSize: '0.85rem' }}>For who</div>
-            <h2 style={{ fontSize: 'clamp(2rem, 4vw, 3rem)', fontWeight: 800, color: theme.text1, letterSpacing: '-0.02em' }}>Built for everyone.</h2>
+         <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
+            <div style={{ color: theme.cyan, fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase', marginBottom: '0.5rem', fontSize: '0.8rem' }}>For who</div>
+            <h2 style={{ fontSize: 'clamp(1.8rem, 3vw, 2.5rem)', fontWeight: 800, color: theme.text1, letterSpacing: '-0.02em' }}>Built for everyone.</h2>
          </div>
          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '2rem' }}>
             <div style={{ ...glassPanel, padding: '3rem 2rem', display: 'flex', flexDirection: 'column' }}>
@@ -475,13 +482,13 @@ const ForWho = ({ onAuth }: { onAuth: () => void }) => (
 
 // 11. Social Proof
 const SocialProof = () => (
-   <section style={{ padding: '8rem 0' }}>
+   <section style={{ padding: '4rem 0' }}>
       <div className="container">
-         <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '4rem', marginBottom: '6rem', textAlign: 'center' }}>
-            <div><div style={{ fontSize: '3rem', fontWeight: 900, color: theme.primary }}>2.4M+</div><div style={{ color: theme.text2, fontWeight: 700 }}>Active users</div></div>
-            <div><div style={{ fontSize: '3rem', fontWeight: 900, color: theme.cyan }}>$18B</div><div style={{ color: theme.text2, fontWeight: 700 }}>Processed yearly</div></div>
-            <div><div style={{ fontSize: '3rem', fontWeight: 900, color: theme.purple }}>80+</div><div style={{ color: theme.text2, fontWeight: 700 }}>Countries</div></div>
-            <div><div style={{ fontSize: '3rem', fontWeight: 900, color: theme.text1 }}>4.9★</div><div style={{ color: theme.text2, fontWeight: 700 }}>App rating</div></div>
+         <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '3rem', marginBottom: '4rem', textAlign: 'center' }}>
+            <div><div style={{ fontSize: '2.5rem', fontWeight: 900, color: theme.primary }}>2.4M+</div><div style={{ color: theme.text2, fontWeight: 700, fontSize: '0.85rem' }}>Active users</div></div>
+            <div><div style={{ fontSize: '2.5rem', fontWeight: 900, color: theme.cyan }}>$18B</div><div style={{ color: theme.text2, fontWeight: 700, fontSize: '0.85rem' }}>Processed yearly</div></div>
+            <div><div style={{ fontSize: '2.5rem', fontWeight: 900, color: theme.purple }}>80+</div><div style={{ color: theme.text2, fontWeight: 700, fontSize: '0.85rem' }}>Countries</div></div>
+            <div><div style={{ fontSize: '2.5rem', fontWeight: 900, color: theme.text1 }}>4.9★</div><div style={{ color: theme.text2, fontWeight: 700, fontSize: '0.85rem' }}>App rating</div></div>
          </div>
          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem' }}>
             <div style={{ ...glassPanel, padding: '2.5rem' }}>
@@ -506,12 +513,12 @@ const SocialProof = () => (
 
 // 12. CTA
 const CTA = ({ onAuth }: { onAuth: () => void }) => (
-   <section style={{ padding: '8rem 0', position: 'relative', overflow: 'hidden' }}>
-      <div style={{ position: 'absolute', inset: 0, background: `radial-gradient(circle at center, ${theme.primary}40 0%, transparent 70%)` }} />
-      <div className="container" style={{ textAlign: 'center', position: 'relative', zIndex: 10, ...glassPanel, padding: '6rem 2rem' }}>
-         <h2 style={{ fontSize: 'clamp(2rem, 4vw, 3rem)', fontWeight: 800, color: theme.text1, marginBottom: '1.5rem', letterSpacing: '-0.02em' }}>Join millions building a better financial life with Paypee.</h2>
-         <p style={{ color: theme.text2, fontSize: '1.125rem', marginBottom: '3rem' }}>Setup takes under 60 seconds.</p>
-         <button onClick={onAuth} style={{ background: theme.text1, color: theme.bg, border: 'none', padding: '1.5rem 4rem', borderRadius: '20px', fontWeight: 900, fontSize: '1.2rem', cursor: 'pointer' }}>
+   <section style={{ padding: '4rem 0', position: 'relative', overflow: 'hidden' }}>
+      <div style={{ position: 'absolute', inset: 0, background: `radial-gradient(circle at center, ${theme.primary}30 0%, transparent 60%)` }} />
+      <div className="container" style={{ textAlign: 'center', position: 'relative', zIndex: 10, ...glassPanel, padding: '4rem 2rem' }}>
+         <h2 style={{ fontSize: 'clamp(1.8rem, 3vw, 2.5rem)', fontWeight: 800, color: theme.text1, marginBottom: '1rem', letterSpacing: '-0.02em' }}>Join millions building a better financial life with Paypee.</h2>
+         <p style={{ color: theme.text2, fontSize: '1rem', marginBottom: '2rem' }}>Setup takes under 60 seconds.</p>
+         <button onClick={onAuth} style={{ background: theme.text1, color: theme.bg, border: 'none', padding: '1rem 3rem', borderRadius: '16px', fontWeight: 900, fontSize: '1rem', cursor: 'pointer' }}>
             Get Started
          </button>
       </div>
@@ -520,23 +527,74 @@ const CTA = ({ onAuth }: { onAuth: () => void }) => (
 
 // --- MAIN PAGE COMPONENT ---
 const LandingV2 = ({ onAuth }: { onAuth: () => void }) => {
+  const [page, setPage] = useState('home');
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [page]);
+
   return (
     <div style={{ background: theme.bg, color: theme.text1, minHeight: '100vh', fontFamily: 'Inter, sans-serif' }}>
-      <Nav onAuth={onAuth} />
-      <HeroSection onAuth={onAuth} />
-      <LivePreview />
-      <Capabilities />
-      <MultiCurrency />
-      <VirtualCards />
-      <GlobalTransfers />
-      <CryptoSwap />
-      <PaypeeAI />
-      <Security />
-      <ForWho onAuth={onAuth} />
-      <SocialProof />
+      <Nav onAuth={onAuth} onNavigate={setPage} />
+      
+      {page === 'home' && (
+        <>
+          <HeroSection onAuth={onAuth} />
+          <LivePreview />
+          <Capabilities />
+          <MultiCurrency />
+          <VirtualCards />
+          <GlobalTransfers />
+          <CryptoSwap />
+          <PaypeeAI />
+          <Security />
+          <ForWho onAuth={onAuth} />
+          <SocialProof />
+        </>
+      )}
+
+      {page === 'features' && (
+        <>
+          <InnerHero title="Features" subtitle="Everything you need in one powerful financial platform." />
+          <Capabilities />
+          <Security />
+        </>
+      )}
+
+      {page === 'wallets' && (
+        <>
+          <InnerHero title="Multi-Currency Wallets" subtitle="Every currency. One balance you can trust." />
+          <MultiCurrency />
+          <GlobalTransfers />
+        </>
+      )}
+
+      {page === 'cards' && (
+        <>
+          <InnerHero title="Virtual Cards" subtitle="Beautiful cards. Total control." />
+          <VirtualCards />
+        </>
+      )}
+
+      {page === 'crypto' && (
+        <>
+          <InnerHero title="Crypto & Swap" subtitle="Trade fiat & crypto in a tap." />
+          <CryptoSwap />
+          <PaypeeAI />
+        </>
+      )}
+
+      {page === 'forwho' && (
+        <>
+          <InnerHero title="Built for Everyone" subtitle="Whether you are an individual, business, or developer." />
+          <ForWho onAuth={onAuth} />
+          <SocialProof />
+        </>
+      )}
+
       <CTA onAuth={onAuth} />
       
-      <footer style={{ padding: '6rem 0 3rem', borderTop: `1px solid ${theme.glassBorder}`, background: theme.bg }}>
+      <footer style={{ padding: '4rem 0 2rem', borderTop: `1px solid ${theme.glassBorder}`, background: theme.bg }}>
         <div className="container">
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '3rem', marginBottom: '4rem' }}>
             <div style={{ gridColumn: '1 / -1', maxWidth: '300px', marginBottom: '2rem' }}>
@@ -544,9 +602,9 @@ const LandingV2 = ({ onAuth }: { onAuth: () => void }) => {
                  <div style={{ width: 32, height: 32, background: `linear-gradient(135deg, ${theme.primary}, ${theme.purple})`, borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     <Zap size={18} color="#fff" />
                  </div>
-                 <span style={{ fontSize: '1.25rem', fontWeight: 900, letterSpacing: '-0.02em', color: theme.text1 }}>Paypee</span>
+                 <span style={{ fontSize: '1.25rem', fontWeight: 900, letterSpacing: '-0.02em', color: theme.text1, cursor: 'pointer' }} onClick={() => setPage('home')}>Paypee</span>
               </div>
-              <p style={{ color: theme.text2, lineHeight: 1.6 }}>An advanced finance app made simple for everyone. Hold, send, spend and grow money — globally.</p>
+              <p style={{ color: theme.text2, lineHeight: 1.6, fontSize: '0.9rem' }}>An advanced finance app made simple for everyone. Hold, send, spend and grow money — globally.</p>
             </div>
             
             <div>
