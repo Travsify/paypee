@@ -8,6 +8,13 @@ import {
   Wifi, Snowflake, SlidersHorizontal
 } from 'lucide-react';
 
+import LandingWallets from './landing-pages/LandingWallets';
+import LandingCards from './landing-pages/LandingCards';
+import LandingTransfers from './landing-pages/LandingTransfers';
+import LandingCrypto from './landing-pages/LandingCrypto';
+import LandingAI from './landing-pages/LandingAI';
+import LandingPayments from './landing-pages/LandingPayments';
+
 // --- STYLES ---
 const theme = {
   bg: '#020617',
@@ -39,7 +46,7 @@ const Nav = ({ onAuth, onNavigate }: { onAuth: () => void, onNavigate: (page: st
        <span style={{ fontSize: '1.2rem', fontWeight: 900, letterSpacing: '-0.02em', color: theme.text1 }}>Paypee</span>
     </div>
     <div className="desktop-only" style={{ display: 'flex', gap: '2.5rem', alignItems: 'center' }}>
-       {['Features', 'Wallets', 'Cards', 'Crypto', 'For Who'].map(item => (
+       {['Features', 'Wallets', 'Cards', 'Transfers', 'Crypto', 'AI', 'Payments'].map(item => (
          <button key={item} onClick={() => onNavigate(item.toLowerCase().replace(' ', ''))} style={{ background: 'transparent', border: 'none', color: theme.text2, fontSize: '0.85rem', fontWeight: 600, transition: 'color 0.2s', cursor: 'pointer', padding: 0 }} onMouseEnter={e => e.currentTarget.style.color = theme.text1} onMouseLeave={e => e.currentTarget.style.color = theme.text2}>{item}</button>
        ))}
     </div>
@@ -564,31 +571,42 @@ const LandingV2 = ({ onAuth }: { onAuth: () => void }) => {
       {page === 'wallets' && (
         <>
           <InnerHero title="Multi-Currency Wallets" subtitle="Every currency. One balance you can trust." />
-          <MultiCurrency />
-          <GlobalTransfers />
+          <LandingWallets />
         </>
       )}
 
       {page === 'cards' && (
         <>
           <InnerHero title="Virtual Cards" subtitle="Beautiful cards. Total control." />
-          <VirtualCards />
+          <LandingCards />
+        </>
+      )}
+
+      {page === 'transfers' && (
+        <>
+          <InnerHero title="Global Transfers" subtitle="Send money like sending a text." />
+          <LandingTransfers />
         </>
       )}
 
       {page === 'crypto' && (
         <>
           <InnerHero title="Crypto & Swap" subtitle="Trade fiat & crypto in a tap." />
-          <CryptoSwap />
-          <PaypeeAI />
+          <LandingCrypto />
         </>
       )}
 
-      {page === 'forwho' && (
+      {page === 'ai' && (
         <>
-          <InnerHero title="Built for Everyone" subtitle="Whether you are an individual, business, or developer." />
-          <ForWho onAuth={onAuth} />
-          <SocialProof />
+          <InnerHero title="Paypee AI" subtitle="An assistant that grows your money quietly." />
+          <LandingAI />
+        </>
+      )}
+
+      {page === 'payments' && (
+        <>
+          <InnerHero title="Bill Payments" subtitle="Pay bills instantly, never miss a due date." />
+          <LandingPayments />
         </>
       )}
 
