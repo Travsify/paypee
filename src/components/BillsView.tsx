@@ -212,7 +212,7 @@ const BillsView = () => {
                     boxShadow: activeCategory === cat.id ? `0 0 20px ${cat.color}40` : 'none',
                     transition: 'all 0.3s'
                   }}>
-                    {React.cloneElement(cat.icon as React.ReactElement, { size: 28 })}
+                    {React.cloneElement(cat.icon as any, { size: 28 })}
                   </div>
                   <div style={{ fontWeight: 700, fontSize: '1.05rem', color: activeCategory === cat.id ? '#fff' : '#94a3b8' }}>{cat.name}</div>
                 </motion.div>
