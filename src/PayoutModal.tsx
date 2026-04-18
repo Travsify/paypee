@@ -64,6 +64,12 @@ const PayoutModal: React.FC<PayoutModalProps> = ({ isOpen, onClose, onComplete, 
   }, [isOpen]);
 
   useEffect(() => {
+    if (!selectedWalletId && wallets.length > 0) {
+      setSelectedWalletId(wallets[0].id);
+    }
+  }, [wallets, selectedWalletId]);
+
+  useEffect(() => {
     if (isOpen && targetCurrency) {
       fetchBanks(targetCurrency);
     }
