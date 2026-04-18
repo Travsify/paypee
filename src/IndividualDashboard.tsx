@@ -274,7 +274,7 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
                    <div style={{ display: 'flex', gap: '1.5rem', overflowX: 'auto', paddingBottom: '1rem' }}>
                       {userData?.wallets?.map((w: any) => (
                          <div key={w.id} style={{ minWidth: '280px', flex: 1, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '24px', padding: '1.5rem', position: 'relative', overflow: 'hidden', boxShadow: '0 20px 40px rgba(0,0,0,0.5)' }}>
-                            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '40px', background: \`linear-gradient(180deg, rgba(255,255,255,0.05) 0%, transparent 100%)\` }} />
+                            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '40px', background: 'linear-gradient(180deg, rgba(255,255,255,0.05) 0%, transparent 100%)' }} />
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', position: 'relative', zIndex: 1 }}>
                                <div style={{ fontWeight: 700, color: '#94a3b8' }}>{w.currency}</div>
                                <div style={{ width: 32, height: 32, background: 'rgba(255,255,255,0.1)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -292,7 +292,7 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
                       )}
                       {/* Fake BTC Wallet for visual parity */}
                       <div style={{ minWidth: '280px', flex: 1, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '24px', padding: '1.5rem', position: 'relative', overflow: 'hidden', boxShadow: '0 20px 40px rgba(0,0,0,0.5)' }}>
-                         <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '40px', background: \`linear-gradient(180deg, rgba(167, 139, 250, 0.1) 0%, transparent 100%)\` }} />
+                         <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '40px', background: 'linear-gradient(180deg, rgba(167, 139, 250, 0.1) 0%, transparent 100%)' }} />
                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', position: 'relative', zIndex: 1 }}>
                             <div style={{ fontWeight: 700, color: '#94a3b8' }}>BTC</div>
                             <div style={{ width: 32, height: 32, background: 'rgba(167, 139, 250, 0.2)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -316,7 +316,7 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
                          </div>
                       </div>
                       <div style={{ flex: 1, position: 'relative', minHeight: '200px', display: 'flex', alignItems: 'flex-end' }}>
-                         <div style={{ position: 'absolute', inset: 0, background: \`linear-gradient(to top, rgba(34, 211, 238, 0.1), transparent)\`, borderBottom: \`2px solid #22d3ee\` }}>
+                         <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(34, 211, 238, 0.1), transparent)', borderBottom: '2px solid #22d3ee' }}>
                             <svg width="100%" height="100%" preserveAspectRatio="none" viewBox="0 0 100 100">
                               <path d="M0,100 Q10,90 20,95 T40,80 T60,85 T80,50 T100,20" fill="none" stroke="#22d3ee" strokeWidth="2" vectorEffect="non-scaling-stroke" />
                             </svg>
@@ -325,7 +325,7 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
                    </div>
 
                    {/* 5. AI Copilot */}
-                   <div style={{ background: \`linear-gradient(135deg, rgba(167, 139, 250, 0.05) 0%, rgba(99, 102, 241, 0.05) 100%)\`, border: '1px solid rgba(167, 139, 250, 0.1)', borderRadius: '24px', padding: '2rem', flex: 1 }}>
+                   <div style={{ background: 'linear-gradient(135deg, rgba(167, 139, 250, 0.05) 0%, rgba(99, 102, 241, 0.05) 100%)', border: '1px solid rgba(167, 139, 250, 0.1)', borderRadius: '24px', padding: '2rem', flex: 1 }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '2rem' }}>
                          <div style={{ width: 40, height: 40, borderRadius: '12px', background: 'rgba(167, 139, 250, 0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                             <Bot size={20} color="#a78bfa" />
