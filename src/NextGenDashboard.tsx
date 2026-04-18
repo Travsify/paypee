@@ -25,7 +25,9 @@ import {
   MoreVertical,
   CheckCircle2,
   Clock,
-  ArrowRight
+  ArrowRight,
+  Building2,
+  Users
 } from 'lucide-react';
 import SwapModule from './components/NextGen/SwapModule';
 import CardsModule from './components/NextGen/CardsModule';
@@ -507,7 +509,7 @@ const NextGenDashboard: React.FC = () => {
                      ].map((v, i) => (
                        <div key={i} className="glass-panel p-8 group cursor-pointer hover:border-primary/50 transition-all">
                           <div className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                             <Lock size={22} style={{ color: v.color }} />
+                             <Shield size={22} style={{ color: v.color }} />
                           </div>
                           <h4 className="text-lg font-black italic uppercase mb-2">{v.name}</h4>
                           <div className="text-2xl font-black mb-6">${v.balance}</div>

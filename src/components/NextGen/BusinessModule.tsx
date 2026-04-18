@@ -11,7 +11,8 @@ import {
   Plus,
   Zap,
   Briefcase,
-  LayoutGrid
+  LayoutGrid,
+  Send
 } from 'lucide-react';
 
 const BusinessModule: React.FC = () => {
