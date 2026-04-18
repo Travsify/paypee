@@ -258,7 +258,6 @@ const App = () => {
       </header>
 
       <main>
-      <main>
         {landingView === 'main' && <LandingV2 onAuth={() => setView('auth')} />}
         
         {landingView === 'individual' && <LandingIndividual onAuth={() => setView('auth')} />}
