@@ -47,6 +47,8 @@ interface BalanceCardProps {
   userName?: string;
   type?: 'INDIVIDUAL' | 'BUSINESS' | 'DEVELOPER';
   onDelete?: (id: string) => void;
+  onSwap?: () => void;
+  onPayout?: () => void;
 }
 
 const getAccountNumber = (details: any) => {
@@ -81,7 +83,18 @@ const getBankName = (details: any) => {
   return data.bankName || data.bank_name || data.bank || data.provider;
 };
 
-const BalanceCard: React.FC<BalanceCardProps> = ({ currency, symbol, amount, gradient, details, userName, type = 'INDIVIDUAL', onDelete }) => {
+const BalanceCard: React.FC<BalanceCardProps> = ({ 
+  currency, 
+  symbol, 
+  amount, 
+  gradient, 
+  details, 
+  userName, 
+  type = 'INDIVIDUAL', 
+  onDelete,
+  onSwap,
+  onPayout
+}) => {
   const accNo = getAccountNumber(details);
   const bank = getBankName(details);
   
@@ -134,7 +147,30 @@ const BalanceCard: React.FC<BalanceCardProps> = ({ currency, symbol, amount, gra
           </div>
         </div>
 
+        {/* Actions */}
+        {(onSwap || onPayout) && (
+          <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1.5rem', position: 'relative', zIndex: 10 }}>
+            {onSwap && (
+              <button 
+                onClick={(e) => { e.stopPropagation(); onSwap(); }}
+                style={{ flex: 1, background: 'rgba(255,255,255,0.2)', border: 'none', color: '#fff', padding: '0.6rem', borderRadius: '12px', fontWeight: 700, cursor: 'pointer', fontSize: '0.8rem', backdropFilter: 'blur(10px)' }}
+              >
+                Convert
+              </button>
+            )}
+            {onPayout && (
+              <button 
+                onClick={(e) => { e.stopPropagation(); onPayout(); }}
+                style={{ flex: 1, background: '#fff', border: 'none', color: '#000', padding: '0.6rem', borderRadius: '12px', fontWeight: 700, cursor: 'pointer', fontSize: '0.8rem' }}
+              >
+                Withdraw
+              </button>
+            )}
+          </div>
+        )}
+
         {/* Account Details Footer */}
+
         <div style={{ 
           marginTop: 'auto', paddingTop: '1rem', borderTop: '1px solid rgba(255,255,255,0.1)', 
           position: 'relative', zIndex: 10, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end'

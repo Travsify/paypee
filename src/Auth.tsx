@@ -14,6 +14,8 @@ import {
   Lock,
   ChevronLeft
 } from 'lucide-react';
+import { API_BASE } from './config';
+
 
 interface AuthProps {
   onComplete: (type: 'individual' | 'business' | 'developer') => void;
