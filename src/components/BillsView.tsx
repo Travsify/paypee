@@ -43,6 +43,26 @@ const BillsView = () => {
   const [products, setProducts] = useState<any[]>([]);
   const [selectedProductId, setSelectedProductId] = useState('');
 
+  // Map known Nigerian networks to real logos
+  const getNetworkLogo = (name: string) => {
+    const n = name.toLowerCase();
+    if (n.includes('mtn')) return 'https://upload.wikimedia.org/wikipedia/commons/a/a5/MTN_Logo.svg';
+    if (n.includes('airtel')) return 'https://upload.wikimedia.org/wikipedia/commons/f/fb/Airtel_logo_logotype.png';
+    if (n.includes('glo')) return 'https://upload.wikimedia.org/wikipedia/commons/8/87/Glo_button.png';
+    if (n.includes('9mobile') || n.includes('etisalat')) return 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/9mobile_Logo.png/600px-9mobile_Logo.png';
+    if (n.includes('smile')) return 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/81/Smile_Communications_logo.svg/512px-Smile_Communications_logo.svg.png';
+    if (n.includes('spectranet')) return 'https://spectranet.com.ng/assets/images/spectranet-logo.png';
+    if (n.includes('dstv')) return 'https://upload.wikimedia.org/wikipedia/commons/5/5e/DStv_Logo_2012.svg';
+    if (n.includes('gotv')) return 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/25/GOtv_Logo.svg/512px-GOtv_Logo.svg.png';
+    if (n.includes('startimes')) return 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/cb/StarTimes_logo.svg/512px-StarTimes_logo.svg.png';
+    if (n.includes('ikeja') || n.includes('ikedc')) return 'https://upload.wikimedia.org/wikipedia/en/thumb/8/8e/Ikeja_Electric_logo.png/220px-Ikeja_Electric_logo.png';
+    if (n.includes('ibadan') || n.includes('ibedc')) return 'https://upload.wikimedia.org/wikipedia/en/thumb/0/0d/IBEDC_logo.jpg/220px-IBEDC_logo.jpg';
+    if (n.includes('eko') || n.includes('ekedc')) return 'https://upload.wikimedia.org/wikipedia/en/thumb/a/ad/Eko_Electricity_Distribution_Company_logo.png/220px-Eko_Electricity_Distribution_Company_logo.png';
+    
+    // Fallback to beautiful gradient initials if no match
+    return `https://api.dicebear.com/7.x/initials/svg?seed=${name}&backgroundColor=020617,1e293b&textColor=ffffff`;
+  };
+
   const fetchProviders = async (cat: string) => {
     setLoading(true);
     setProviders([]);
@@ -159,62 +179,91 @@ const BillsView = () => {
           <motion.div key="categories" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, x: -20 }}>
             <h3 style={{ fontSize: '1.2rem', fontWeight: 800, marginBottom: '1.5rem', textAlign: 'center' }}>What do you need to pay?</h3>
             
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.5rem', marginBottom: '3rem' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '1rem', marginBottom: '3rem' }}>
               {categories.map((cat) => (
                 <motion.div
                   key={cat.id}
-                  whileHover={{ y: -5, scale: 1.02, background: 'rgba(255,255,255,0.05)' }}
+                  whileHover={{ y: -5, scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   onClick={() => setActiveCategory(cat.id)}
                   style={{ 
-                    background: activeCategory === cat.id ? `linear-gradient(135deg, ${cat.color}22 0%, transparent 100%)` : 'rgba(255,255,255,0.02)', 
-                    border: '1px solid ' + (activeCategory === cat.id ? cat.color : 'rgba(255,255,255,0.05)'),
+                    background: activeCategory === cat.id ? `linear-gradient(145deg, ${cat.color}20, ${cat.color}05)` : 'rgba(255,255,255,0.02)', 
+                    border: '1px solid ' + (activeCategory === cat.id ? `${cat.color}50` : 'rgba(255,255,255,0.05)'),
                     borderRadius: '24px',
-                    padding: '2rem 1.5rem',
+                    padding: '1.5rem',
                     textAlign: 'center',
                     cursor: 'pointer',
-                    boxShadow: activeCategory === cat.id ? `0 10px 30px ${cat.color}22` : 'none',
-                    transition: 'all 0.3s'
+                    boxShadow: activeCategory === cat.id ? `0 10px 30px ${cat.color}22, inset 0 1px 0 ${cat.color}40` : 'inset 0 1px 0 rgba(255,255,255,0.05)',
+                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                    position: 'relative',
+                    overflow: 'hidden'
                   }}
                 >
-                  <div style={{ width: 64, height: 64, background: `${cat.color}22`, borderRadius: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem', color: cat.color }}>
-                    {cat.icon}
+                  {/* Glass highlight effect */}
+                  {activeCategory === cat.id && (
+                    <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '50%', background: 'linear-gradient(to bottom, rgba(255,255,255,0.1), transparent)', opacity: 0.5, pointerEvents: 'none' }} />
+                  )}
+                  
+                  <div style={{ 
+                    width: 56, height: 56, 
+                    background: activeCategory === cat.id ? `${cat.color}30` : 'rgba(255,255,255,0.03)', 
+                    borderRadius: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center', 
+                    margin: '0 auto 1rem', color: activeCategory === cat.id ? cat.color : '#64748b',
+                    boxShadow: activeCategory === cat.id ? `0 0 20px ${cat.color}40` : 'none',
+                    transition: 'all 0.3s'
+                  }}>
+                    {React.cloneElement(cat.icon as React.ReactElement, { size: 28 })}
                   </div>
-                  <div style={{ fontWeight: 800, fontSize: '1.1rem', marginBottom: '0.25rem', color: activeCategory === cat.id ? '#fff' : '#e2e8f0' }}>{cat.name}</div>
+                  <div style={{ fontWeight: 700, fontSize: '1.05rem', color: activeCategory === cat.id ? '#fff' : '#94a3b8' }}>{cat.name}</div>
                 </motion.div>
               ))}
             </div>
 
-            <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '32px', padding: '2.5rem' }}>
+            <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '32px', padding: '2.5rem', boxShadow: '0 20px 40px rgba(0,0,0,0.2)' }}>
                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
                  <h3 style={{ fontSize: '1.2rem', fontWeight: 800 }}>Select a Provider</h3>
                  <div style={{ position: 'relative', width: '250px' }} className="desktop-only">
-                   <Search size={16} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
-                   <input type="text" placeholder="Search..." style={{ width: '100%', background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', padding: '0.75rem 1rem 0.75rem 2.5rem', color: '#fff', outline: 'none' }} />
+                   <Search size={16} style={{ position: 'absolute', left: '1.25rem', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
+                   <input type="text" placeholder="Search providers..." style={{ width: '100%', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '14px', padding: '0.85rem 1rem 0.85rem 3rem', color: '#fff', outline: 'none', transition: 'all 0.3s', boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.1)' }} />
                  </div>
                </div>
 
                {loading ? (
                   <div style={{ display: 'flex', justifyContent: 'center', padding: '4rem' }}><div className="spinner" /></div>
                ) : providers.length === 0 ? (
-                 <div style={{ textAlign: 'center', padding: '4rem', background: 'rgba(0,0,0,0.2)', borderRadius: '24px', border: '1px dashed rgba(255,255,255,0.1)' }}>
-                   <Activity size={40} style={{ opacity: 0.2, margin: '0 auto 1rem' }} />
-                   <div style={{ color: '#94a3b8', fontWeight: 600 }}>No live providers found in this region.</div>
+                 <div style={{ textAlign: 'center', padding: '5rem 2rem', background: 'rgba(0,0,0,0.2)', borderRadius: '24px', border: '1px dashed rgba(255,255,255,0.1)' }}>
+                   <div style={{ width: 80, height: 80, background: 'rgba(255,255,255,0.02)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem' }}>
+                     <Activity size={32} style={{ color: '#64748b' }} />
+                   </div>
+                   <div style={{ color: '#e2e8f0', fontWeight: 700, fontSize: '1.1rem', marginBottom: '0.5rem' }}>No providers available</div>
+                   <div style={{ color: '#64748b', fontSize: '0.9rem' }}>Providers for this category are currently offline.</div>
                  </div>
-               ) : (
-                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '1.5rem' }}>
+                ) : (
+                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: '1.25rem' }}>
                    {providers.map((p) => (
                      <motion.div
                        key={p.id}
-                       whileHover={{ scale: 1.05, y: -5 }}
+                       whileHover={{ scale: 1.05, y: -5, borderColor: 'rgba(255,255,255,0.2)' }}
                        whileTap={{ scale: 0.95 }}
                        onClick={() => setSelectedProvider(p)}
-                       style={{ background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '20px', padding: '1.5rem', cursor: 'pointer', textAlign: 'center', transition: 'all 0.2s', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}
+                       style={{ 
+                         background: 'rgba(255,255,255,0.02)', 
+                         border: '1px solid rgba(255,255,255,0.05)', 
+                         borderRadius: '20px', padding: '1.5rem 1rem', 
+                         cursor: 'pointer', textAlign: 'center', transition: 'all 0.2s', 
+                         display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem',
+                         boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.05), 0 4px 20px rgba(0,0,0,0.1)'
+                       }}
                      >
-                       <div style={{ width: 56, height: 56, background: '#fff', borderRadius: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
-                         <img src={p.logo || `https://api.dicebear.com/7.x/initials/svg?seed=${p.name}`} alt={p.name} style={{ width: '80%', height: '80%', objectFit: 'contain' }} />
+                       <div style={{ 
+                         width: 64, height: 64, 
+                         background: '#fff', borderRadius: '16px', display: 'flex', alignItems: 'center', 
+                         justifyContent: 'center', overflow: 'hidden', padding: '0.5rem',
+                         boxShadow: '0 8px 16px rgba(0,0,0,0.2)' 
+                       }}>
+                         <img src={p.logo || getNetworkLogo(p.name)} alt={p.name} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
                        </div>
-                       <div style={{ fontWeight: 700, fontSize: '0.9rem', color: '#e2e8f0' }}>{p.name}</div>
+                       <div style={{ fontWeight: 700, fontSize: '0.9rem', color: '#f8fafc' }}>{p.name}</div>
                      </motion.div>
                    ))}
                  </div>
@@ -227,8 +276,8 @@ const BillsView = () => {
                <button onClick={() => setSelectedProvider(null)} style={{ position: 'absolute', top: '2rem', right: '2rem', background: 'rgba(255,255,255,0.05)', border: 'none', color: '#fff', width: 40, height: 40, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}><X size={20} /></button>
                
                <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', marginBottom: '3rem' }}>
-                  <div style={{ width: 80, height: 80, background: '#fff', borderRadius: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', boxShadow: '0 10px 20px rgba(0,0,0,0.2)' }}>
-                     <img src={selectedProvider.logo || `https://api.dicebear.com/7.x/initials/svg?seed=${selectedProvider.name}`} alt={selectedProvider.name} style={{ width: '80%', height: '80%', objectFit: 'contain' }} />
+                  <div style={{ width: 80, height: 80, background: '#fff', borderRadius: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', boxShadow: '0 10px 20px rgba(0,0,0,0.2)', padding: '0.75rem' }}>
+                     <img src={selectedProvider.logo || getNetworkLogo(selectedProvider.name)} alt={selectedProvider.name} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
                   </div>
                   <div>
                     <div style={{ color: '#22d3ee', fontSize: '0.8rem', fontWeight: 800, letterSpacing: '1px', marginBottom: '0.25rem' }}>SECURE PAYMENT</div>
@@ -239,36 +288,87 @@ const BillsView = () => {
                <form onSubmit={handlePayBill}>
                   <div style={{ marginBottom: '1.5rem' }}>
                     <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: '#94a3b8', marginBottom: '0.75rem', letterSpacing: '1px' }}>SOURCE WALLET</label>
-                    <select value={selectedWalletId} onChange={(e) => setSelectedWalletId(e.target.value)} required style={{ width: '100%', background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '16px', padding: '1.25rem', color: '#fff', fontSize: '1rem', outline: 'none', appearance: 'none', cursor: 'pointer' }}>
-                      <option value="" disabled>Select Wallet to Pay From</option>
-                      {wallets.map(w => (
-                        <option key={w.id} value={w.id}>{w.currency} - {parseFloat(w.balance).toFixed(2)}</option>
-                      ))}
-                    </select>
+                    <div style={{ position: 'relative' }}>
+                      <select value={selectedWalletId} onChange={(e) => setSelectedWalletId(e.target.value)} required style={{ 
+                        width: '100%', background: 'rgba(255,255,255,0.03)', 
+                        border: '1px solid rgba(255,255,255,0.1)', borderRadius: '16px', 
+                        padding: '1.25rem 1.5rem', color: '#fff', fontSize: '1.05rem', 
+                        fontWeight: 600, outline: 'none', appearance: 'none', cursor: 'pointer',
+                        boxShadow: 'inset 0 2px 5px rgba(0,0,0,0.2)',
+                        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+                      }}>
+                        <option value="" disabled style={{ background: '#0f172a', color: '#fff' }}>Select Wallet to Pay From</option>
+                        {wallets.map(w => (
+                          <option key={w.id} value={w.id} style={{ background: '#0f172a', color: '#fff' }}>{w.currency} Wallet - ₦{parseFloat(w.balance).toLocaleString('en-US', {minimumFractionDigits: 2})}</option>
+                        ))}
+                      </select>
+                      <ChevronRight size={18} color="#94a3b8" style={{ position: 'absolute', right: '1.5rem', top: '50%', transform: 'translateY(-50%) rotate(90deg)', pointerEvents: 'none' }} />
+                    </div>
                   </div>
 
                   {products.length > 0 && (
                     <div style={{ marginBottom: '1.5rem' }}>
                       <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: '#94a3b8', marginBottom: '0.75rem', letterSpacing: '1px' }}>SELECT PACKAGE / PRODUCT</label>
-                      <select value={selectedProductId} onChange={(e) => { setSelectedProductId(e.target.value); const p = products.find(prod => prod.id === e.target.value); if (p && p.amount) setAmount(p.amount.toString()); }} required style={{ width: '100%', background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '16px', padding: '1.25rem', color: '#fff', fontSize: '1rem', outline: 'none', appearance: 'none', cursor: 'pointer' }}>
-                        <option value="" disabled>Select a Plan</option>
-                        {products.map(p => (
-                          <option key={p.id} value={p.id}>{p.name} {p.amount ? `- ₦${p.amount}` : ''}</option>
-                        ))}
-                      </select>
+                      <div style={{ position: 'relative' }}>
+                        <select value={selectedProductId} onChange={(e) => { setSelectedProductId(e.target.value); const p = products.find(prod => prod.id === e.target.value); if (p && p.amount) setAmount(p.amount.toString()); }} required style={{ 
+                          width: '100%', background: 'rgba(255,255,255,0.03)', 
+                          border: '1px solid rgba(255,255,255,0.1)', borderRadius: '16px', 
+                          padding: '1.25rem 1.5rem', color: '#fff', fontSize: '1.05rem', 
+                          fontWeight: 600, outline: 'none', appearance: 'none', cursor: 'pointer',
+                          boxShadow: 'inset 0 2px 5px rgba(0,0,0,0.2)',
+                          transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+                        }}>
+                          <option value="" disabled style={{ background: '#0f172a', color: '#fff' }}>Select a Plan</option>
+                          {products.map(p => (
+                            <option key={p.id} value={p.id} style={{ background: '#0f172a', color: '#fff' }}>{p.name} {p.amount ? `- ₦${parseFloat(p.amount).toLocaleString('en-US')}` : ''}</option>
+                          ))}
+                        </select>
+                        <ChevronRight size={18} color="#94a3b8" style={{ position: 'absolute', right: '1.5rem', top: '50%', transform: 'translateY(-50%) rotate(90deg)', pointerEvents: 'none' }} />
+                      </div>
                     </div>
                   )}
 
                   <div style={{ marginBottom: '1.5rem' }}>
-                    <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: '#94a3b8', marginBottom: '0.75rem', letterSpacing: '1px' }}>{activeCategory === 'AIRTIME' || activeCategory === 'DATA' ? 'PHONE NUMBER' : 'CUSTOMER / METER ID'}</label>
-                    <input type="text" value={customerId} onChange={(e) => setCustomerId(e.target.value)} placeholder={activeCategory === 'AIRTIME' ? 'e.g. 08012345678' : 'Enter ID number'} required style={{ width: '100%', background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '16px', padding: '1.25rem', color: '#fff', fontSize: '1.1rem', outline: 'none' }} />
+                    <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: '#94a3b8', marginBottom: '0.75rem', letterSpacing: '1px' }}>
+                      {activeCategory === 'electricity' ? 'METER NUMBER' : activeCategory === 'cable' ? 'SMARTCARD NUMBER' : 'PHONE NUMBER'}
+                    </label>
+                    <input 
+                      type="text" 
+                      value={customerId} 
+                      onChange={(e) => setCustomerId(e.target.value)} 
+                      placeholder={activeCategory === 'electricity' ? 'Enter meter number' : activeCategory === 'cable' ? 'Enter smartcard number' : 'e.g. 08012345678'} 
+                      required 
+                      style={{ 
+                        width: '100%', background: 'rgba(255,255,255,0.03)', 
+                        border: '1px solid rgba(255,255,255,0.1)', borderRadius: '16px', 
+                        padding: '1.25rem 1.5rem', color: '#fff', fontSize: '1.1rem', 
+                        fontWeight: 600, outline: 'none', letterSpacing: '1px',
+                        boxShadow: 'inset 0 2px 5px rgba(0,0,0,0.2)',
+                        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+                      }} 
+                    />
                   </div>
 
-                  <div style={{ marginBottom: '2.5rem' }}>
+                  <div style={{ marginBottom: '3rem' }}>
                     <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: '#94a3b8', marginBottom: '0.75rem', letterSpacing: '1px' }}>AMOUNT TO PAY</label>
                     <div style={{ position: 'relative' }}>
-                      <span style={{ position: 'absolute', left: '1.5rem', top: '50%', transform: 'translateY(-50%)', fontSize: '1.5rem', fontWeight: 900, color: '#94a3b8' }}>₦</span>
-                      <input type="number" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="0.00" required style={{ width: '100%', background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '16px', padding: '1.25rem 1.25rem 1.25rem 3.5rem', color: '#fff', fontSize: '1.8rem', fontWeight: 900, outline: 'none' }} />
+                      <span style={{ position: 'absolute', left: '1.5rem', top: '50%', transform: 'translateY(-50%)', fontSize: '1.6rem', fontWeight: 900, color: '#94a3b8' }}>₦</span>
+                      <input 
+                        type="number" 
+                        value={amount} 
+                        onChange={(e) => setAmount(e.target.value)} 
+                        placeholder="0.00" 
+                        required 
+                        style={{ 
+                          width: '100%', background: 'rgba(255,255,255,0.03)', 
+                          border: '1px solid rgba(255,255,255,0.1)', borderRadius: '16px', 
+                          padding: '1.25rem 1.25rem 1.25rem 3.5rem', color: '#fff', 
+                          fontSize: '2rem', fontWeight: 900, outline: 'none',
+                          boxShadow: 'inset 0 2px 5px rgba(0,0,0,0.2)',
+                          transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                          letterSpacing: '-1px'
+                        }} 
+                      />
                     </div>
                   </div>
 
