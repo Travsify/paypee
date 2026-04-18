@@ -156,8 +156,8 @@ export class IbanService {
         }
       }
 
-      // 5. Fetch external transactions (latest 50)
-      const externalTxs = await Maplerad.getTransactions();
+      // 5. Fetch external transactions (latest 50) for this specific customer
+      const externalTxs = await Maplerad.getTransactions(customer.id);
       if (!Array.isArray(externalTxs)) return;
 
       // Filter transactions that belong to this user's accounts

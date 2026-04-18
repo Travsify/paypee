@@ -835,12 +835,18 @@ const createNotification = async (userId: string, title: string, message: string
 // Get KYC Status + Notifications
 app.get('/api/verify/status', authenticateToken, async (req: any, res: any): Promise<any> => {
   try {
+    const userId = req.user.userId;
+    
+    // Trigger background reconciliation to catch missed payments/metadata
+    // We don't await this so the status response remains fast
+    IbanService.reconcileUserWallets(userId).catch(err => console.error('[BG-RECONCILE] Error:', err));
+
     const user = await prisma.user.findUnique({
-      where: { id: req.user.userId },
+      where: { id: userId },
       select: { kycStatus: true, email: true, firstName: true }
     });
     const notifications = await prisma.notification.findMany({
-      where: { userId: req.user.userId },
+      where: { userId },
       orderBy: { createdAt: 'desc' },
       take: 20
     });
