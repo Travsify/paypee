@@ -424,15 +424,10 @@ export const payBill = async (payload: {
       body.identifier = payload.biller_id || payload.identifier;
     }
     // Cable TV needs smartcard_number + identifier  
-    else if (categoryPath === 'cabletv') {
+    else if (categoryPath === 'cable') {
       body.smartcard_number = payload.smartcard_number || payload.phone_number;
       body.identifier = payload.biller_id || payload.identifier;
       if (payload.product_id) body.product_id = payload.product_id;
-    }
-    // Internet & Betting
-    else {
-      body.phone_number = payload.phone_number || payload.meter_number;
-      body.identifier = payload.biller_id || payload.identifier;
     }
 
     console.log(`[MAPLERAD] Paying bill via POST /bills/${categoryPath}:`, JSON.stringify(body));
@@ -454,12 +449,9 @@ function mapCategoryToPath(category: string): string {
     'electricity': 'electricity',
     'utility': 'electricity',
     'power': 'electricity',
-    'cable': 'cabletv',
-    'cabletv': 'cabletv',
-    'tv': 'cabletv',
-    'internet': 'internet',
-    'betting': 'betting',
-    'education': 'education'
+    'cable': 'cable',
+    'cabletv': 'cable',
+    'tv': 'cable'
   };
   return map[category.toLowerCase()] || category.toLowerCase();
 }
