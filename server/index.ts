@@ -1656,6 +1656,45 @@ app.post('/api/webhooks/maplerad', async (req: Request, res: Response) => {
   }
 });
 
+app.get('/api/admin/fix-swaps', async (req: any, res: any) => {
+  try {
+    const swaps = await prisma.fxSwap.findMany({
+      where: { targetAmount: 0, status: 'COMPLETED' },
+      orderBy: { createdAt: 'desc' }
+    });
+    
+    let fixedCount = 0;
+    const details = [];
+
+    for (const swap of swaps) {
+      if (Number(swap.targetAmount) === 0) {
+        const correctTargetAmount = Number(swap.sourceAmount) * Number(swap.rate);
+        
+        await prisma.fxSwap.update({
+          where: { id: swap.id },
+          data: { targetAmount: correctTargetAmount }
+        });
+        
+        const wallet = await prisma.wallet.findFirst({
+          where: { userId: swap.userId, currency: swap.targetCurrency as any }
+        });
+        
+        if (wallet) {
+          await prisma.wallet.update({
+            where: { id: wallet.id },
+            data: { balance: { increment: correctTargetAmount } }
+          });
+          details.push(`Swap ${swap.id} fixed: Credited ${correctTargetAmount} to wallet ${wallet.id}`);
+        }
+        fixedCount++;
+      }
+    }
+    res.json({ message: `Fixed ${fixedCount} swaps`, details });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`🚀 Paypee Core API running on http://localhost:${PORT}`);
 });
