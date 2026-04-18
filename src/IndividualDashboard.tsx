@@ -20,7 +20,8 @@ import {
   Bot,
   Bell,
   Menu,
-  X
+  X,
+  Repeat
 } from 'lucide-react';
 import CardsDashboard from './CardsDashboard';
 import AiAdvisor from './AiAdvisor';
@@ -234,55 +235,196 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
             transition={{ duration: 0.2 }}
           >
             {activeSection === 'overview' && (
-              <div>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: '2rem', marginBottom: '4rem' }}>
-                  {userData?.wallets?.map((w: any) => (
-                    <BalanceCard 
-                      key={w.id}
-                      currency={w.currency}
-                      amount={parseFloat(w.balance).toFixed(2)}
-                      onSwap={() => setIsSwapOpen(true)}
-                      onPayout={() => setIsPayoutOpen(true)}
-                      accountDetails={w.metadata}
-                    />
-                  ))}
-                  <motion.div 
-                    onClick={() => setIsAccountModalOpen(true)}
-                    whileHover={{ scale: 1.02 }}
-                    style={{ background: 'rgba(255,255,255,0.02)', border: '2px dashed var(--border)', borderRadius: '28px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', padding: '2rem', minHeight: '260px' }}
-                  >
-                    <div style={{ width: 50, height: 50, background: 'rgba(99,102,241,0.1)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1.5rem', color: 'var(--primary)' }}>
-                      <Plus size={24} />
-                    </div>
-                    <div style={{ fontWeight: 800, fontSize: '1.1rem' }}>Open New Wallet</div>
-                    <div style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginTop: '0.5rem' }}>NGN, USD, EUR, or GBP</div>
-                  </motion.div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
+                
+                {/* 1. Master Summary */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '2rem' }}>
+                   <div>
+                      <div style={{ color: 'var(--text-muted)', textTransform: 'uppercase', fontSize: '0.8rem', letterSpacing: '2px', marginBottom: '0.5rem' }}>Total Net Worth</div>
+                      <div style={{ fontSize: 'clamp(2.5rem, 5vw, 4rem)', fontWeight: 900, lineHeight: 1, marginBottom: '0.5rem' }}>$128,450.20</div>
+                      <div style={{ color: '#22d3ee', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                         <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#22d3ee', boxShadow: '0 0 10px #22d3ee' }}></div>
+                         +$2,340 this week
+                      </div>
+                   </div>
+                   
+                   {/* 2. Quick Actions */}
+                   <div style={{ display: 'flex', gap: '1rem' }} className="desktop-only">
+                      <button onClick={() => setIsPayoutOpen(true)} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.8rem 1.5rem', background: '#6366f1', color: '#fff', border: 'none', borderRadius: '12px', fontWeight: 800, cursor: 'pointer', boxShadow: '0 10px 20px -5px rgba(99, 102, 241, 0.5)' }}>
+                         <Send size={16} /> Send
+                      </button>
+                      <button style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.8rem 1.5rem', background: 'rgba(255,255,255,0.05)', color: '#fff', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', fontWeight: 700, cursor: 'pointer' }}>
+                         <ArrowDownLeft size={16} /> Receive
+                      </button>
+                      <button onClick={() => setIsSwapOpen(true)} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.8rem 1.5rem', background: 'rgba(255,255,255,0.05)', color: '#fff', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', fontWeight: 700, cursor: 'pointer' }}>
+                         <Repeat size={16} /> Swap
+                      </button>
+                      <button onClick={() => setIsAccountModalOpen(true)} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.8rem 1.5rem', background: 'rgba(255,255,255,0.05)', color: '#fff', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', fontWeight: 700, cursor: 'pointer' }}>
+                         <Plus size={16} /> Add Money
+                      </button>
+                   </div>
                 </div>
 
-                <div className="glass-card">
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem' }}>
-                    <h3 style={{ fontSize: '1.5rem', fontWeight: 900 }}>Recent Settlements</h3>
-                    <button onClick={() => navigate('history')} className="btn btn-outline" style={{ fontSize: '0.8rem', padding: '0.5rem 1rem' }}>View All Activity</button>
-                  </div>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                    {transactions.slice(0, 5).map(tx => (
-                      <div key={tx.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1.25rem', background: 'rgba(255,255,255,0.02)', borderRadius: '20px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                         <div style={{ display: 'flex', gap: '1.25rem', alignItems: 'center' }}>
-                            <div style={{ width: 44, height: 44, borderRadius: '14px', background: tx.type === 'DEPOSIT' ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.1)', color: tx.type === 'DEPOSIT' ? '#10b981' : '#ef4444', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                               {tx.type === 'DEPOSIT' ? <ArrowDownLeft size={20} /> : <ArrowUpRight size={20} />}
+                {/* 3. Global Wallets */}
+                <div>
+                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                      <h3 style={{ fontSize: '1.2rem', fontWeight: 800 }}>Global Wallets</h3>
+                      <button onClick={() => navigate('wallets')} style={{ background: 'transparent', border: 'none', color: '#94a3b8', fontSize: '0.9rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>View All <ChevronRight size={14} /></button>
+                   </div>
+                   <div style={{ display: 'flex', gap: '1.5rem', overflowX: 'auto', paddingBottom: '1rem' }}>
+                      {userData?.wallets?.map((w: any) => (
+                         <div key={w.id} style={{ minWidth: '280px', flex: 1, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '24px', padding: '1.5rem', position: 'relative', overflow: 'hidden', boxShadow: '0 20px 40px rgba(0,0,0,0.5)' }}>
+                            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '40px', background: \`linear-gradient(180deg, rgba(255,255,255,0.05) 0%, transparent 100%)\` }} />
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', position: 'relative', zIndex: 1 }}>
+                               <div style={{ fontWeight: 700, color: '#94a3b8' }}>{w.currency}</div>
+                               <div style={{ width: 32, height: 32, background: 'rgba(255,255,255,0.1)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                  <Wallet size={16} color="#fff" />
+                               </div>
                             </div>
-                            <div>
-                               <div style={{ fontWeight: 800, fontSize: '1rem' }}>{tx.desc || (tx.type === 'DEPOSIT' ? 'Incoming Settlement' : 'Transfer Payout')}</div>
-                               <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>{new Date(tx.createdAt).toLocaleDateString()} · {tx.status}</div>
+                            <div style={{ fontSize: '1.8rem', fontWeight: 900 }}>{w.currency === 'USD' ? '$' : w.currency === 'EUR' ? '€' : w.currency === 'GBP' ? '£' : '₦'}{parseFloat(w.balance).toFixed(2)}</div>
+                         </div>
+                      ))}
+                      {!userData?.wallets?.length && (
+                         <div style={{ minWidth: '280px', flex: 1, background: 'rgba(255,255,255,0.03)', border: '1px dashed rgba(255,255,255,0.1)', borderRadius: '24px', padding: '1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', cursor: 'pointer' }} onClick={() => setIsAccountModalOpen(true)}>
+                            <Plus size={24} color="#94a3b8" style={{ marginBottom: '0.5rem' }} />
+                            <div style={{ color: '#94a3b8', fontWeight: 600 }}>Create Wallet</div>
+                         </div>
+                      )}
+                      {/* Fake BTC Wallet for visual parity */}
+                      <div style={{ minWidth: '280px', flex: 1, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '24px', padding: '1.5rem', position: 'relative', overflow: 'hidden', boxShadow: '0 20px 40px rgba(0,0,0,0.5)' }}>
+                         <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '40px', background: \`linear-gradient(180deg, rgba(167, 139, 250, 0.1) 0%, transparent 100%)\` }} />
+                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', position: 'relative', zIndex: 1 }}>
+                            <div style={{ fontWeight: 700, color: '#94a3b8' }}>BTC</div>
+                            <div style={{ width: 32, height: 32, background: 'rgba(167, 139, 250, 0.2)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                               <span style={{ color: '#a78bfa', fontWeight: 900 }}>₿</span>
                             </div>
                          </div>
-                         <div style={{ textAlign: 'right' }}>
-                            <div style={{ fontWeight: 900, fontSize: '1.1rem', color: tx.type === 'DEPOSIT' ? '#10b981' : '#fff' }}>{tx.type === 'DEPOSIT' ? '+' : '-'}{tx.currency} {parseFloat(tx.amount).toFixed(2)}</div>
+                         <div style={{ fontSize: '1.8rem', fontWeight: 900 }}>0.8421</div>
+                      </div>
+                   </div>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem' }}>
+                   {/* 4. Financial Pulse (Chart) */}
+                   <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '24px', padding: '2rem', flex: 2, display: 'flex', flexDirection: 'column' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+                         <h3 style={{ fontSize: '1.2rem', fontWeight: 800 }}>Financial Pulse</h3>
+                         <div style={{ display: 'flex', background: 'rgba(0,0,0,0.5)', padding: '0.25rem', borderRadius: '8px' }}>
+                            {['1D', '1W', '1M', '1Y'].map(t => (
+                               <button key={t} style={{ background: t === '1W' ? '#6366f1' : 'transparent', color: t === '1W' ? '#fff' : '#94a3b8', border: 'none', padding: '0.4rem 0.8rem', borderRadius: '6px', fontSize: '0.8rem', fontWeight: 700, cursor: 'pointer' }}>{t}</button>
+                            ))}
                          </div>
                       </div>
-                    ))}
-                  </div>
+                      <div style={{ flex: 1, position: 'relative', minHeight: '200px', display: 'flex', alignItems: 'flex-end' }}>
+                         <div style={{ position: 'absolute', inset: 0, background: \`linear-gradient(to top, rgba(34, 211, 238, 0.1), transparent)\`, borderBottom: \`2px solid #22d3ee\` }}>
+                            <svg width="100%" height="100%" preserveAspectRatio="none" viewBox="0 0 100 100">
+                              <path d="M0,100 Q10,90 20,95 T40,80 T60,85 T80,50 T100,20" fill="none" stroke="#22d3ee" strokeWidth="2" vectorEffect="non-scaling-stroke" />
+                            </svg>
+                         </div>
+                      </div>
+                   </div>
+
+                   {/* 5. AI Copilot */}
+                   <div style={{ background: \`linear-gradient(135deg, rgba(167, 139, 250, 0.05) 0%, rgba(99, 102, 241, 0.05) 100%)\`, border: '1px solid rgba(167, 139, 250, 0.1)', borderRadius: '24px', padding: '2rem', flex: 1 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '2rem' }}>
+                         <div style={{ width: 40, height: 40, borderRadius: '12px', background: 'rgba(167, 139, 250, 0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <Bot size={20} color="#a78bfa" />
+                         </div>
+                         <h3 style={{ fontSize: '1.2rem', fontWeight: 800 }}>Copilot Insights</h3>
+                      </div>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                         <div style={{ background: 'rgba(0,0,0,0.3)', padding: '1.25rem', borderRadius: '16px', borderLeft: '3px solid #22d3ee' }}>
+                            <p style={{ color: '#fff', fontSize: '0.95rem', lineHeight: 1.5, marginBottom: '1rem' }}>You are holding ₦2.4M while NGN has dropped 1.2%. Convert to USD?</p>
+                            <button style={{ padding: '0.6rem 1rem', background: '#6366f1', color: '#fff', border: 'none', borderRadius: '8px', fontSize: '0.85rem', fontWeight: 700, cursor: 'pointer' }}>Convert to USD</button>
+                         </div>
+                         <div style={{ background: 'rgba(0,0,0,0.3)', padding: '1.25rem', borderRadius: '16px', borderLeft: '3px solid #a78bfa' }}>
+                            <p style={{ color: '#fff', fontSize: '0.95rem', lineHeight: 1.5 }}>You spent 18% less on subscriptions this month.</p>
+                         </div>
+                      </div>
+                   </div>
                 </div>
+
+                {/* 6. Recent Activity */}
+                <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '24px', padding: '2rem' }}>
+                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+                      <h3 style={{ fontSize: '1.2rem', fontWeight: 800 }}>Recent Activity</h3>
+                      <button onClick={() => navigate('history')} style={{ background: 'transparent', border: 'none', color: '#94a3b8', fontSize: '0.9rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>View All <ChevronRight size={14} /></button>
+                   </div>
+                   
+                   <div style={{ width: '100%', overflowX: 'auto' }}>
+                      <table style={{ width: '100%', minWidth: '600px', borderCollapse: 'collapse' }}>
+                         <thead>
+                            <tr style={{ color: '#94a3b8', fontSize: '0.85rem', textAlign: 'left', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                               <th style={{ paddingBottom: '1rem', fontWeight: 600 }}>Transaction</th>
+                               <th style={{ paddingBottom: '1rem', fontWeight: 600 }}>Date/Time</th>
+                               <th style={{ paddingBottom: '1rem', fontWeight: 600 }}>Status</th>
+                               <th style={{ paddingBottom: '1rem', fontWeight: 600, textAlign: 'right' }}>Amount</th>
+                            </tr>
+                         </thead>
+                         <tbody>
+                            {transactions.length > 0 ? transactions.slice(0, 4).map(tx => (
+                               <tr key={tx.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.02)' }}>
+                                  <td style={{ padding: '1rem 0' }}>
+                                     <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                                        <div style={{ width: 36, height: 36, borderRadius: '10px', background: tx.type === 'DEPOSIT' ? 'rgba(34,211,238,0.1)' : 'rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                           {tx.type === 'DEPOSIT' ? <ArrowDownLeft size={16} color="#22d3ee" /> : <ArrowUpRight size={16} color="#fff" />}
+                                        </div>
+                                        <div style={{ fontWeight: 700 }}>{tx.desc || (tx.type === 'DEPOSIT' ? 'Incoming Settlement' : 'Transfer Payout')}</div>
+                                     </div>
+                                  </td>
+                                  <td style={{ padding: '1rem 0', color: '#94a3b8', fontSize: '0.9rem' }}>{new Date(tx.createdAt).toLocaleDateString()}</td>
+                                  <td style={{ padding: '1rem 0' }}>
+                                     <span style={{ padding: '0.25rem 0.5rem', background: tx.status === 'SUCCESS' || tx.status === 'COMPLETED' ? 'rgba(34,211,238,0.1)' : 'rgba(255,255,255,0.1)', color: tx.status === 'SUCCESS' || tx.status === 'COMPLETED' ? '#22d3ee' : '#fff', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 700 }}>
+                                        {tx.status}
+                                     </span>
+                                  </td>
+                                  <td style={{ padding: '1rem 0', textAlign: 'right', fontWeight: 800, color: tx.type === 'DEPOSIT' ? '#22d3ee' : '#fff' }}>
+                                     {tx.type === 'DEPOSIT' ? '+' : '-'}{tx.currency} {parseFloat(tx.amount).toFixed(2)}
+                                  </td>
+                               </tr>
+                            )) : (
+                               <>
+                                  {/* Dummy transactions for $1B visual parity */}
+                                  <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.02)' }}>
+                                     <td style={{ padding: '1rem 0' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                                           <div style={{ width: 36, height: 36, borderRadius: '10px', background: 'rgba(34,211,238,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><ArrowDownLeft size={16} color="#22d3ee" /></div>
+                                           <div style={{ fontWeight: 700 }}>Stripe Payout</div>
+                                        </div>
+                                     </td>
+                                     <td style={{ padding: '1rem 0', color: '#94a3b8', fontSize: '0.9rem' }}>Today, 10:24 AM</td>
+                                     <td style={{ padding: '1rem 0' }}><span style={{ padding: '0.25rem 0.5rem', background: 'rgba(34,211,238,0.1)', color: '#22d3ee', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 700 }}>SUCCESS</span></td>
+                                     <td style={{ padding: '1rem 0', textAlign: 'right', fontWeight: 800, color: '#22d3ee' }}>+$2,400.00</td>
+                                  </tr>
+                                  <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.02)' }}>
+                                     <td style={{ padding: '1rem 0' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                                           <div style={{ width: 36, height: 36, borderRadius: '10px', background: 'rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><ArrowUpRight size={16} color="#fff" /></div>
+                                           <div style={{ fontWeight: 700 }}>Netflix Subscription</div>
+                                        </div>
+                                     </td>
+                                     <td style={{ padding: '1rem 0', color: '#94a3b8', fontSize: '0.9rem' }}>Yesterday</td>
+                                     <td style={{ padding: '1rem 0' }}><span style={{ padding: '0.25rem 0.5rem', background: 'rgba(34,211,238,0.1)', color: '#22d3ee', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 700 }}>SUCCESS</span></td>
+                                     <td style={{ padding: '1rem 0', textAlign: 'right', fontWeight: 800, color: '#fff' }}>-$15.99</td>
+                                  </tr>
+                                  <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.02)' }}>
+                                     <td style={{ padding: '1rem 0' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                                           <div style={{ width: 36, height: 36, borderRadius: '10px', background: 'rgba(167, 139, 250, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Repeat size={16} color="#a78bfa" /></div>
+                                           <div style={{ fontWeight: 700 }}>Crypto Swap → BTC</div>
+                                        </div>
+                                     </td>
+                                     <td style={{ padding: '1rem 0', color: '#94a3b8', fontSize: '0.9rem' }}>Mar 12, 2026</td>
+                                     <td style={{ padding: '1rem 0' }}><span style={{ padding: '0.25rem 0.5rem', background: 'rgba(34,211,238,0.1)', color: '#22d3ee', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 700 }}>SUCCESS</span></td>
+                                     <td style={{ padding: '1rem 0', textAlign: 'right', fontWeight: 800, color: '#fff' }}>-$1,000.00</td>
+                                  </tr>
+                               </>
+                            )}
+                         </tbody>
+                      </table>
+                   </div>
+                </div>
+
               </div>
             )}
 
