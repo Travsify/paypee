@@ -1,157 +1,332 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Globe, 
   Cpu, 
-  ShieldCheck, 
   Zap, 
   ArrowRight, 
-  Terminal, 
-  Lock, 
-  Layout, 
-  Activity,
-  Box,
+  Code2,
+  BarChart4,
+  Star,
   ChevronRight,
-  Database,
-  BarChart4
+  ShieldCheck,
+  CreditCard,
+  Wallet,
+  Bitcoin
 } from 'lucide-react';
 
-const LandingV2 = ({ onAuth }: { onAuth: () => void }) => {
-  const [activeFeature, setActiveFeature] = useState(0);
+interface LandingV2Props {
+  onAuth: () => void;
+}
 
-  const features = [
-    { title: "Autonomous Hedging", desc: "Our AI Volatility Shield automatically protects your NGN capital by hedging into USD during market flips.", icon: <Cpu />, color: "#6366f1" },
-    { title: "Global Collection", desc: "Local bank accounts in 50+ countries. Receive EUR, GBP, and CNY as a local business.", icon: <Globe />, color: "#10b981" },
-    { title: "Smart Vaults", desc: "Institutional-grade custody for digital and fiat assets with automated yield generation.", icon: <Lock />, color: "#f59e0b" },
-    { title: "Unified SDK", desc: "Embed payments, cards, and treasury logic with exactly 12 lines of code.", icon: <Terminal />, color: "#ef4444" }
+const LandingV2: React.FC<LandingV2Props> = ({ onAuth }) => {
+  const [activeTab, setActiveTab] = useState(0);
+  const [currentHeroImage, setCurrentHeroImage] = useState(0);
+
+  const heroImages = [
+    { src: "/hero_finance_africa_1776472358279.png", label: "Global Finance" },
+    { src: "/virtual_card_paypee_1776472492359.png", label: "Virtual Power" },
+    { src: "/diverse_people_paypee_1776472528598.png", label: "Inclusive Banking" }
+  ];
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentHeroImage((prev) => (prev + 1) % heroImages.length);
+    }, 5000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const tabs = [
+    { 
+      title: "Global Liquidity", 
+      desc: "Instant access to local and international currency liquidity across 50+ countries.",
+      icon: <Globe size={24} />,
+      gradient: "from-primary to-indigo-400"
+    },
+    { 
+      title: "Unified Infrastructure", 
+      desc: "A single API for cards, accounts, and cross-border settlement rails.",
+      icon: <Cpu size={24} />,
+      gradient: "from-emerald-400 to-teal-500"
+    },
+    { 
+      title: "Digital Assets", 
+      desc: "Seamlessly bridge traditional finance with next-gen digital asset liquidity.",
+      icon: <Bitcoin size={24} />,
+      gradient: "from-pink-500 to-rose-400"
+    }
   ];
 
   return (
-    <div style={{ background: '#020617', color: '#fff', minHeight: '100vh', fontFamily: 'Inter, sans-serif' }}>
-      {/* Hero 2.0 */}
-      <section style={{ height: '90vh', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', overflow: 'hidden' }}>
-        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: 'radial-gradient(circle at 50% 50%, rgba(99, 102, 241, 0.15) 0%, transparent 50%)', zIndex: 0 }} />
+    <div className="landing-v2">
+      {/* Premium Multi-Image Hero Section */}
+      <section className="relative min-h-[100vh] lg:min-h-[95vh] flex items-center pt-24 overflow-hidden">
+        <div className="hero-glow"></div>
         
-        <div className="container" style={{ position: 'relative', zIndex: 1, textAlign: 'center' }}>
-          <motion.div 
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-          >
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', background: 'rgba(99, 102, 241, 0.1)', padding: '0.6rem 1.2rem', borderRadius: '99px', color: 'var(--primary)', fontWeight: 800, fontSize: '0.85rem', marginBottom: '2.5rem', border: '1px solid rgba(99, 102, 241, 0.2)' }}>
-               <Zap size={14} /> PAYPEE V2.0: THE FINTECH OPERATING SYSTEM
-            </div>
-            <h1 style={{ fontSize: '5.5rem', fontWeight: 900, letterSpacing: '-0.04em', lineHeight: 1, marginBottom: '2rem' }}>
-              Global Liquidity.<br /> 
-              <span style={{ background: 'linear-gradient(to right, #6366f1, #a855f7)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Autonomous Banking.</span>
-            </h1>
-            <p style={{ fontSize: '1.4rem', color: '#64748b', maxWidth: '700px', margin: '0 auto 3.5rem', lineHeight: 1.6 }}>
-               Building the primary infrastructure for cross-border capital flow across Africa and emerging markets.
-            </p>
-            <div style={{ display: 'flex', gap: '1.5rem', justifyContent: 'center' }}>
-               <button onClick={onAuth} style={{ background: '#fff', color: '#020617', border: 'none', padding: '1.2rem 3rem', borderRadius: '16px', fontWeight: 800, fontSize: '1.1rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                  Start Building <ArrowRight size={20} />
-               </button>
-               <button style={{ background: 'rgba(255,255,255,0.05)', color: '#fff', border: '1px solid #1e293b', padding: '1.2rem 3rem', borderRadius: '16px', fontWeight: 800, fontSize: '1.1rem', cursor: 'pointer' }}>
+        <div className="container relative z-10">
+          <div className="grid grid-cols-1 lg:grid-cols-12 items-center gap-12 lg:gap-16">
+            <motion.div 
+              initial={{ opacity: 0, x: -60 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
+              className="lg:col-span-6 stagger-load"
+            >
+              <div className="badge mb-8 animate-pulse">
+                <Star size={14} className="fill-current text-primary" /> 
+                <span className="ml-2">The Fintech Operating System</span>
+              </div>
+              <h1 className="mb-8 leading-[0.95] tracking-tighter">
+                Global Finance. <br/>
+                <span className="text-gradient">Unified & Instant.</span>
+              </h1>
+              <p className="text-xl lg:text-2xl text-white/50 mb-12 max-w-xl leading-relaxed">
+                Empowering businesses and creators with the infrastructure to move value anywhere, anytime. One platform for cards, accounts, and global liquidity.
+              </p>
+              
+              <div className="flex flex-wrap gap-4 lg:gap-6 mb-16">
+                <button className="btn btn-primary btn-lg group w-full sm:w-auto" onClick={onAuth}>
+                  Get Started <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
+                </button>
+                <button className="btn btn-outline btn-lg w-full sm:w-auto">
                   API Reference
-               </button>
-            </div>
-          </motion.div>
-        </div>
+                </button>
+              </div>
 
-        {/* Global Node Visual */}
-        <div style={{ position: 'absolute', bottom: '-10%', left: '50%', transform: 'translateX(-50%)', width: '100%', maxWidth: '1200px', height: '400px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '100% 100% 0 0', zIndex: 0 }} />
-      </section>
+              <div className="flex items-center gap-12 border-t border-white/5 pt-12">
+                <div>
+                  <div className="text-2xl font-black text-white">50+</div>
+                  <div className="text-xs uppercase tracking-widest text-white/30 font-bold">Countries</div>
+                </div>
+                <div>
+                  <div className="text-2xl font-black text-white">120ms</div>
+                  <div className="text-xs uppercase tracking-widest text-white/30 font-bold">API Latency</div>
+                </div>
+                <div>
+                  <div className="text-2xl font-black text-white">99.9%</div>
+                  <div className="text-xs uppercase tracking-widest text-white/30 font-bold">Reliability</div>
+                </div>
+              </div>
+            </motion.div>
 
-      {/* Feature Grid - Interactive */}
-      <section style={{ padding: '8rem 0' }}>
-         <div className="container">
-            <div style={{ textAlign: 'center', marginBottom: '5rem' }}>
-               <h2 style={{ fontSize: '3rem', fontWeight: 800, marginBottom: '1.5rem' }}>Scale Without Boundaries.</h2>
-               <p style={{ color: '#64748b', fontSize: '1.2rem' }}>Every tool you need to manage global capital in one unified system.</p>
-            </div>
+            {/* Dynamic Animated Hero Visual */}
+            <div className="lg:col-span-6 relative h-[450px] lg:h-[650px]">
+              <div className="absolute inset-0 flex items-center justify-center">
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={currentHeroImage}
+                    initial={{ opacity: 0, scale: 0.8, rotateY: 20 }}
+                    animate={{ opacity: 1, scale: 1, rotateY: 0 }}
+                    exit={{ opacity: 0, scale: 1.1, rotateY: -20 }}
+                    transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+                    className="relative w-full h-full hero-image-container"
+                  >
+                    <img 
+                      src={heroImages[currentHeroImage].src} 
+                      alt={heroImages[currentHeroImage].label}
+                      className="w-full h-full object-cover rounded-[64px]"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent rounded-[64px]" />
+                    <div className="absolute bottom-10 left-10">
+                      <div className="badge bg-white/10 backdrop-blur-md border-white/20 text-white">
+                        {heroImages[currentHeroImage].label}
+                      </div>
+                    </div>
+                  </motion.div>
+                </AnimatePresence>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.5fr', gap: '4rem', alignItems: 'center' }}>
-               <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                  {features.map((f, i) => (
-                     <div 
-                        key={i} 
-                        onClick={() => setActiveFeature(i)}
-                        style={{ 
-                           padding: '2rem', 
-                           borderRadius: '24px', 
-                           background: activeFeature === i ? 'rgba(255,255,255,0.03)' : 'transparent',
-                           border: `1px solid ${activeFeature === i ? '#1e293b' : 'transparent'}`,
-                           cursor: 'pointer',
-                           transition: 'all 0.3s'
-                        }}
-                     >
-                        <h3 style={{ fontSize: '1.4rem', fontWeight: 800, marginBottom: '0.75rem', color: activeFeature === i ? '#fff' : '#475569' }}>{f.title}</h3>
-                        <p style={{ color: '#64748b', fontSize: '1rem', display: activeFeature === i ? 'block' : 'none' }}>{f.desc}</p>
-                     </div>
+                {/* Floating Indicators */}
+                <div className="absolute -right-4 top-1/2 -translate-y-1/2 flex flex-col gap-3">
+                  {heroImages.map((_, i) => (
+                    <button 
+                      key={i}
+                      onClick={() => setCurrentHeroImage(i)}
+                      className={`w-1.5 h-12 rounded-full transition-all duration-500 ${currentHeroImage === i ? 'bg-primary h-20' : 'bg-white/10'}`}
+                    />
                   ))}
-               </div>
+                </div>
 
-               <div style={{ background: '#0a0f1e', border: '1px solid #1e293b', borderRadius: '40px', padding: '4rem', position: 'relative', overflow: 'hidden', minHeight: '500px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                   <AnimatePresence mode="wait">
-                      <motion.div 
-                        key={activeFeature}
-                        initial={{ opacity: 0, scale: 0.9 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 1.1 }}
-                        style={{ fontSize: '8rem', color: features[activeFeature].color, filter: 'drop-shadow(0 0 50px rgba(99, 102, 241, 0.3))' }}
-                      >
-                         {features[activeFeature].icon}
-                      </motion.div>
-                   </AnimatePresence>
-                   <div style={{ position: 'absolute', bottom: '2rem', left: '2rem', fontSize: '0.8rem', color: '#475569', fontWeight: 700, letterSpacing: '2px' }}>PRO SYSTEM ACTIVE</div>
-               </div>
+                {/* Micro-Interaction: Live Transaction Feed */}
+                <motion.div 
+                  initial={{ opacity: 0, x: 40 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 1 }}
+                  className="absolute -bottom-6 -left-6 glass-card p-6 min-w-[280px] hidden sm:block"
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 rounded-xl bg-emerald-500/20 flex items-center justify-center text-emerald-400">
+                      <Zap size={20} />
+                    </div>
+                    <div>
+                      <div className="text-sm font-bold">Instant Swap</div>
+                      <div className="text-[10px] text-white/40 uppercase tracking-widest font-bold">NGN &rarr; USD Successful</div>
+                    </div>
+                  </div>
+                </motion.div>
+
+                {/* Micro-Interaction: Global Nodes */}
+                <motion.div 
+                  initial={{ opacity: 0, y: -40 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 1.2 }}
+                  className="absolute -top-6 -right-6 glass-card p-6 min-w-[240px] hidden sm:block"
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center text-primary">
+                      <Globe size={20} />
+                    </div>
+                    <div>
+                      <div className="text-sm font-bold">Universal Reach</div>
+                      <div className="text-[10px] text-white/40 uppercase tracking-widest font-bold">54+ Nodes Active</div>
+                    </div>
+                  </div>
+                </motion.div>
+              </div>
             </div>
-         </div>
+          </div>
+        </div>
       </section>
 
-      {/* Developer Experience Area */}
-      <section style={{ padding: '8rem 0', background: 'rgba(255,255,255,0.01)' }}>
-         <div className="container">
-            <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '6rem', alignItems: 'center' }}>
-               <div>
-                  <h2 style={{ fontSize: '3.5rem', fontWeight: 900, marginBottom: '2rem' }}>Built for the <br /> 10x Engineer.</h2>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem', marginBottom: '3rem' }}>
-                      <div>
-                         <div style={{ fontSize: '2.5rem', fontWeight: 900 }}>99.99%</div>
-                         <div style={{ color: '#64748b' }}>Uptime Reliability</div>
-                      </div>
-                      <div>
-                         <div style={{ fontSize: '2.5rem', fontWeight: 900 }}>120ms</div>
-                         <div style={{ color: '#64748b' }}>API Latency (Global)</div>
-                      </div>
-                  </div>
-                  <button style={{ background: 'var(--primary)', color: '#fff', border: 'none', padding: '1.2rem 2.5rem', borderRadius: '14px', fontWeight: 800, cursor: 'pointer' }}>View API Docs</button>
-               </div>
-               <div style={{ background: '#000', borderRadius: '32px', border: '1px solid #1e293b', padding: '2rem', fontFamily: 'monospace', color: '#10b981', boxShadow: '0 40px 100px -20px rgba(0,0,0,0.8)' }}>
-                  <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem' }}>
-                     <div style={{ width: 12, height: 12, borderRadius: '50%', background: '#ef4444' }} />
-                     <div style={{ width: 12, height: 12, borderRadius: '50%', background: '#f59e0b' }} />
-                     <div style={{ width: 12, height: 12, borderRadius: '50%', background: '#10b981' }} />
-                  </div>
-                  <div style={{ lineHeight: 1.6 }}>
-                     <span style={{ color: '#6366f1' }}>import</span> Paypee <span style={{ color: '#6366f1' }}>from</span> <span style={{ color: '#f59e0b' }}>'@paypee/sdk'</span>;<br /><br />
-                     <span style={{ color: '#64748b' }}>// Initialize liquidity client</span><br />
-                     <span style={{ color: '#6366f1' }}>const</span> paypee = <span style={{ color: '#6366f1' }}>new</span> Paypee(<span style={{ color: '#f59e0b' }}>'sk_live_...'</span>);<br /><br />
-                     <span style={{ color: '#64748b' }}>// Provision EUR IBAN instantly</span><br />
-                     <span style={{ color: '#6366f1' }}>const</span> account = <span style={{ color: '#6366f1' }}>await</span> paypee.createGlobalAccount(<span style={{ color: '#f59e0b' }}>'EUR'</span>);<br /><br />
-                     <span style={{ color: '#64748b' }}>// Enable AI hedging</span><br />
-                     <span style={{ color: '#6366f1' }}>await</span> paypee.triggerAutoHedge();
-                  </div>
-               </div>
-            </div>
-         </div>
+      {/* Ecosystem Capabilities Section */}
+      <section className="section-padding relative overflow-hidden">
+        <div className="container">
+          <div className="text-center mb-24 stagger-load">
+            <div className="badge mx-auto mb-6">Capabilities</div>
+            <h2 className="mb-6 leading-tight">Everything you need to <br/> <span className="text-gradient">Scale Global Finance.</span></h2>
+            <p className="text-white/40 max-w-2xl mx-auto text-lg">From individual wallets to enterprise-grade treasury systems, we provide the full stack.</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {[
+              { 
+                title: "Multi-Currency Wallets", 
+                desc: "Hold, manage, and settle in 50+ fiat currencies and digital assets in one unified ledger.",
+                icon: <Wallet size={32} />,
+                color: "var(--primary)"
+              },
+              { 
+                title: "Global Payouts", 
+                desc: "Disburse funds to billions of bank accounts and mobile wallets globally with T+0 settlement.",
+                icon: <Zap size={32} />,
+                color: "#10b981"
+              },
+              { 
+                title: "Virtual Card Issuing", 
+                desc: "Issue USD and NGN virtual cards instantly for global subscriptions and ad spend.",
+                icon: <CreditCard size={32} />,
+                color: "#ec4899"
+              },
+              { 
+                title: "Digital Asset Liquidity", 
+                desc: "Access institutional-grade liquidity for digital assets with seamless fiat on/off-ramps.",
+                icon: <Bitcoin size={32} />,
+                color: "#f59e0b"
+              },
+              { 
+                title: "Autonomous Compliance", 
+                desc: "Built-in KYC/KYB and AML monitoring that scales with your volume automatically.",
+                icon: <ShieldCheck size={32} />,
+                color: "#8b5cf6"
+              },
+              { 
+                title: "Unified SDKs", 
+                desc: "Integrate our entire financial stack with a single, elegant API and robust documentation.",
+                icon: <Code2 size={32} />,
+                color: "#3b82f6"
+              }
+            ].map((feature, i) => (
+              <motion.div 
+                key={i}
+                whileHover={{ y: -12 }}
+                className="glass-card p-12 group transition-all duration-500 hover:bg-white/[0.05]"
+              >
+                <div className="w-16 h-16 rounded-3xl mb-10 flex items-center justify-center transition-transform group-hover:scale-110 group-hover:rotate-3" style={{ background: `${feature.color}15`, color: feature.color, border: `1px solid ${feature.color}30` }}>
+                  {feature.icon}
+                </div>
+                <h3 className="text-2xl mb-6 group-hover:text-white transition-colors">{feature.title}</h3>
+                <p className="text-white/40 leading-relaxed text-base">{feature.desc}</p>
+                <div className="mt-8 flex items-center gap-2 text-sm font-bold text-white/20 group-hover:text-primary transition-colors cursor-pointer">
+                  Learn more <ChevronRight size={16} />
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
       </section>
 
-      {/* CTA 2.0 */}
-      <section style={{ padding: '10rem 0', textAlign: 'center' }}>
-         <h2 style={{ fontSize: '4.5rem', fontWeight: 900, marginBottom: '3rem' }}>Ready to Scale?</h2>
-         <button onClick={onAuth} style={{ background: '#fff', color: '#020617', border: 'none', padding: '1.5rem 4rem', borderRadius: '20px', fontWeight: 900, fontSize: '1.5rem', cursor: 'pointer', boxShadow: '0 0 50px rgba(255,255,255,0.2)' }}>Get API Keys Now</button>
+      {/* Trust & Infrastructure Section */}
+      <section className="section-padding bg-surface/30 relative">
+        <div className="container">
+          <div className="glass-card p-12 lg:p-24 relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-primary/5 to-transparent pointer-events-none" />
+            
+            <div className="grid grid-cols-1 lg:grid-cols-2 items-center gap-20">
+              <div className="stagger-load">
+                <div className="badge mb-8">Infrastructure</div>
+                <h2 className="mb-8 leading-tight">Built for extreme <br/> reliability and scale.</h2>
+                <p className="text-white/40 mb-12 text-lg leading-relaxed">
+                  We've engineered our platform to handle billions in volume with zero downtime. Our hybrid architecture blends traditional banking with high-speed digital rails.
+                </p>
+                
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
+                  {[
+                    { label: "Uptime", value: "99.99%", desc: "High availability" },
+                    { label: "Settlement", value: "T+0", desc: "Instant funding" },
+                    { label: "Security", value: "MPC", desc: "Multi-party custody" },
+                    { label: "Latency", value: "120ms", desc: "Global average" }
+                  ].map((stat, i) => (
+                    <div key={i} className="border-l-2 border-primary/20 pl-6">
+                      <div className="text-3xl font-black mb-1">{stat.value}</div>
+                      <div className="text-xs uppercase tracking-widest text-white/30 font-bold mb-1">{stat.label}</div>
+                      <div className="text-sm text-white/20">{stat.desc}</div>
+                    </div>
+                  ))}
+                </div>
+
+                <button className="btn btn-primary mt-16 px-10">
+                  Read API Docs
+                </button>
+              </div>
+
+              <div className="relative">
+                <div className="hero-image-container people-mask">
+                  <img 
+                    src="/diverse_people_paypee_1776472528598.png" 
+                    alt="Scale" 
+                    className="w-full h-auto opacity-80"
+                  />
+                </div>
+                {/* Floating trust badges */}
+                <div className="absolute top-10 -left-10 glass-card p-6 animate-float">
+                  <ShieldCheck className="text-emerald-400 mb-2" size={32} />
+                  <div className="text-sm font-bold">SOC2 COMPLIANT</div>
+                </div>
+                <div className="absolute bottom-10 -right-10 glass-card p-6 animate-float" style={{ animationDelay: '2s' }}>
+                  <Globe className="text-primary mb-2" size={32} />
+                  <div className="text-sm font-bold">PCI-DSS LEVEL 1</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Final Premium CTA */}
+      <section className="section-padding text-center relative overflow-hidden">
+        <div className="hero-glow opacity-30"></div>
+        <div className="container stagger-load relative z-10">
+          <h2 className="text-6xl lg:text-8xl mb-12 font-black tracking-tighter">Ready to Build?</h2>
+          <p className="text-white/40 max-w-2xl mx-auto text-xl mb-16 leading-relaxed">
+            Join thousands of developers and businesses using Paypee to power the future of global commerce.
+          </p>
+          <div className="flex flex-col sm:flex-row justify-center gap-6">
+            <button className="btn btn-primary btn-lg px-20 text-xl" onClick={onAuth}>
+              Get API Keys
+            </button>
+            <button className="btn btn-outline btn-lg px-20 text-xl">
+              Talk to Sales
+            </button>
+          </div>
+        </div>
       </section>
     </div>
   );
