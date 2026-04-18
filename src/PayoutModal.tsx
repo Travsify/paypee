@@ -11,6 +11,7 @@ import {
   Wallet,
   Globe
 } from 'lucide-react';
+import { API_BASE } from './config';
 
 interface PayoutModalProps {
   isOpen: boolean;
@@ -77,7 +78,7 @@ const PayoutModal: React.FC<PayoutModalProps> = ({ isOpen, onClose, onComplete, 
     if (isOpen && sourceCurrency && targetCurrency && sourceCurrency !== targetCurrency) {
       const fetchRate = async () => {
         try {
-          const res = await fetch(`https://paypee-api-kmhv.onrender.com/api/fx/rates?source=${sourceCurrency}&target=${targetCurrency}`, {
+          const res = await fetch(`${API_BASE}/api/fx/rates?source=${sourceCurrency}&target=${targetCurrency}`, {
             headers: { 'Authorization': `Bearer ${localStorage.getItem('paypee_token')}` }
           });
           const data = await res.json();
@@ -96,7 +97,7 @@ const PayoutModal: React.FC<PayoutModalProps> = ({ isOpen, onClose, onComplete, 
 
   const fetchBanks = async (currency: string) => {
     try {
-      const response = await fetch(`https://paypee-api-kmhv.onrender.com/api/payouts/banks?currency=${currency}`, {
+      const response = await fetch(`${API_BASE}/api/payouts/banks?currency=${currency}`, {
         headers: { 'Authorization': `Bearer ${localStorage.getItem('paypee_token')}` }
       });
       const data = await response.json();
@@ -112,7 +113,7 @@ const PayoutModal: React.FC<PayoutModalProps> = ({ isOpen, onClose, onComplete, 
     setLoading(true);
     setError('');
     try {
-      const response = await fetch('https://paypee-api-kmhv.onrender.com/api/payouts/transfer', {
+      const response = await fetch(`${API_BASE}/api/payouts/transfer`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
