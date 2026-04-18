@@ -345,7 +345,6 @@ const LandingV2: React.FC<LandingV2Props> = ({ onAuth, setLandingView }) => {
           </div>
         </div>
       </section>
-     </section>
 
       {/* 6. GLOBAL TREASURY: 50+ Currencies */}
       <section className="section-padding relative overflow-hidden bg-white/[0.01] z-10">
