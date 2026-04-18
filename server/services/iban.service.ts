@@ -184,11 +184,24 @@ export class IbanService {
       }
 
       // Filter transactions that belong to this user's accounts
-      const userAccNumbers = externalAccounts.map((a: any) => a.account_number);
-      const relevantTxs = externalTxs.filter((tx: any) => 
-        userAccNumbers.includes(tx.account_number) || 
-        userAccNumbers.includes(tx.virtual_account_number)
-      );
+      const userAccNumbers = externalAccounts.map((a: any) => String(a.account_number));
+      console.log(`[RECONCILE] DEBUG: Scanning ${externalTxs.length} TXs for matches against: ${userAccNumbers.join(', ')}`);
+
+      const relevantTxs = externalTxs.filter((tx: any) => {
+        const txAcc = String(tx.account_number || tx.virtual_account_number || tx.virtual_account?.account_number || tx.meta?.account_number || tx.meta?.virtual_account_number || '');
+        const isMatch = userAccNumbers.includes(txAcc);
+        
+        if (!isMatch && tx.type === 'COLLECTION') {
+            // For collection transactions, sometimes they just belong to the customer
+            // If the user has only one account for this currency, we can safely attribute it
+            const userCurrencyAccounts = externalAccounts.filter((a: any) => a.currency === tx.currency);
+            if (userCurrencyAccounts.length === 1) {
+                console.log(`[RECONCILE] Match found by currency attribution for ${tx.currency} collection.`);
+                return true;
+            }
+        }
+        return isMatch;
+      });
 
       console.log(`[RECONCILE] Found ${relevantTxs.length} relevant transactions for this user's accounts.`);
 
