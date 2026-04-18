@@ -245,9 +245,9 @@ const App = () => {
             </motion.button>
             
             <div className="desktop-only" style={{ display: 'flex', gap: '3rem' }}>
-               <button onClick={() => { setView('landing'); setLandingView('individual'); }} style={{ background: 'transparent', border: 'none', color: landingView === 'individual' ? '#fff' : 'var(--text-muted)', fontSize: '0.9rem', cursor: 'pointer', fontWeight: 700 }}>Individuals</button>
-               <button onClick={() => { setView('landing'); setLandingView('business'); }} style={{ background: 'transparent', border: 'none', color: landingView === 'business' ? '#fff' : 'var(--text-muted)', fontSize: '0.9rem', cursor: 'pointer', fontWeight: 700 }}>Businesses</button>
-               <button onClick={() => { setView('landing'); setLandingView('developer'); }} style={{ background: 'transparent', border: 'none', color: landingView === 'developer' ? '#fff' : 'var(--text-muted)', fontSize: '0.9rem', cursor: 'pointer', fontWeight: 700 }}>Developers</button>
+               <button onClick={() => { setView('landing'); setLandingView('individual'); }} style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', fontSize: '0.9rem', cursor: 'pointer', fontWeight: 700 }}>Individuals</button>
+               <button onClick={() => { setView('landing'); setLandingView('business'); }} style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', fontSize: '0.9rem', cursor: 'pointer', fontWeight: 700 }}>Businesses</button>
+               <button onClick={() => { setView('landing'); setLandingView('developer'); }} style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', fontSize: '0.9rem', cursor: 'pointer', fontWeight: 700 }}>Developers</button>
             </div>
 
             <div style={{ display: 'flex', gap: '0.6rem', alignItems: 'center' }}>
