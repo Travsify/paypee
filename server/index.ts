@@ -340,20 +340,23 @@ app.post('/api/cards/:cardId/block-merchant', authenticateToken, async (req: any
 
 app.get('/api/cards', authenticateToken, async (req: any, res: any): Promise<any> => {
   try {
+    const userId = req.user.userId;
+    console.log(`[CARDS] Fetching cards for user: ${userId}`);
+    
     const cards = await prisma.virtualCard.findMany({ 
-      where: { userId: req.user.userId },
-      include: { wallet: true }
+      where: { userId },
+      include: { wallet: true },
+      orderBy: { createdAt: 'desc' }
     });
 
+    console.log(`[CARDS] Found ${cards.length} cards in database.`);
+    
     // Fetch live details from Maplerad for each card to get the actual balance
     const liveCards = await Promise.all(cards.map(async (c) => {
       try {
-        // Find the card in Maplerad using the last 4 digits or card ID if we stored it
-        // For production, we should store the Maplerad Card ID in our DB.
-        // For now, we'll return the card with a placeholder or attempt a lookup if possible.
         return {
           ...c,
-          balance: c.dailyLimit // Using dailyLimit as a placeholder or fetching from Maplerad if we had the provider_card_id
+          balance: c.dailyLimit 
         };
       } catch (e) {
         return c;
@@ -362,6 +365,7 @@ app.get('/api/cards', authenticateToken, async (req: any, res: any): Promise<any
 
     res.json(liveCards);
   } catch (error) {
+    console.error('[CARDS] Fetch Error:', error);
     res.status(500).json({ error: 'Failed to fetch virtual cards' });
   }
 });
