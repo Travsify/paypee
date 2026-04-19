@@ -16,7 +16,10 @@ const currencyConfig: Record<string, { symbol: string; icon: string; color: stri
   GBP: { symbol: '£', icon: '🇬🇧', color: '#8b5cf6' },
   USDT: { symbol: '₮', icon: '💵', color: '#26a17b' },
   USDC: { symbol: '$', icon: '🔵', color: '#2775ca' },
+  BTC: { symbol: '₿', icon: '₿', color: '#f59e0b' },
 };
+
+const ALL_SUPPORTED_CURRENCIES = ['NGN', 'USD', 'EUR', 'GBP', 'USDT', 'USDC'];
 
 import { API_BASE } from './config';
 
@@ -34,8 +37,8 @@ const SwapModal: React.FC<SwapModalProps> = ({ isOpen, onClose, onComplete, wall
   const [pin, setPin] = useState('');
   const timerRef = useRef<any>(null);
 
-  const availableCurrencies = wallets
-    .filter((w: any) => ['NGN', 'USD', 'EUR', 'GBP', 'USDT', 'USDC'].includes(w.currency))
+  const userOwnedCurrencies = wallets
+    .filter((w: any) => ALL_SUPPORTED_CURRENCIES.includes(w.currency))
     .map((w: any) => w.currency);
 
   const getBalance = (currency: string) => {
@@ -217,7 +220,7 @@ const SwapModal: React.FC<SwapModalProps> = ({ isOpen, onClose, onComplete, wall
                       <div style={{ position: 'relative', flex: '0 0 140px' }}>
                         <select value={fromCurrency} onChange={e => setFromCurrency(e.target.value)} style={selectStyle}>
                           <option value="" style={{ background: '#0a0f1e' }}>Select</option>
-                          {availableCurrencies.map((c: string) => (
+                          {userOwnedCurrencies.map((c: string) => (
                             <option key={c} value={c} style={{ background: '#0a0f1e', color: '#fff' }}>{currencyConfig[c]?.icon} {c}</option>
                           ))}
                         </select>
@@ -249,7 +252,7 @@ const SwapModal: React.FC<SwapModalProps> = ({ isOpen, onClose, onComplete, wall
                     <div style={{ position: 'relative' }}>
                       <select value={toCurrency} onChange={e => setToCurrency(e.target.value)} style={selectStyle}>
                         <option value="" style={{ background: '#0a0f1e' }}>Select target currency</option>
-                        {availableCurrencies.filter((c: string) => c !== fromCurrency).map((c: string) => (
+                        {ALL_SUPPORTED_CURRENCIES.filter((c: string) => c !== fromCurrency).map((c: string) => (
                           <option key={c} value={c} style={{ background: '#0a0f1e' }}>{currencyConfig[c]?.icon} {c}</option>
                         ))}
                       </select>

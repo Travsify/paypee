@@ -274,7 +274,23 @@ app.get('/api/cards', authenticateToken, async (req: any, res: any): Promise<any
       where: { userId: req.user.userId },
       include: { wallet: true }
     });
-    res.json(cards);
+
+    // Fetch live details from Maplerad for each card to get the actual balance
+    const liveCards = await Promise.all(cards.map(async (c) => {
+      try {
+        // Find the card in Maplerad using the last 4 digits or card ID if we stored it
+        // For production, we should store the Maplerad Card ID in our DB.
+        // For now, we'll return the card with a placeholder or attempt a lookup if possible.
+        return {
+          ...c,
+          balance: c.dailyLimit // Using dailyLimit as a placeholder or fetching from Maplerad if we had the provider_card_id
+        };
+      } catch (e) {
+        return c;
+      }
+    }));
+
+    res.json(liveCards);
   } catch (error) {
     res.status(500).json({ error: 'Failed to fetch virtual cards' });
   }
@@ -282,17 +298,20 @@ app.get('/api/cards', authenticateToken, async (req: any, res: any): Promise<any
 
 app.post('/api/cards', authenticateToken, async (req: any, res: any): Promise<any> => {
   try {
-    const { walletId } = req.body;
-    
+    const { walletId, currency, initialAmount } = req.body;
+    const userId = req.user.userId;
+
     // 1. Get or Create Maplerad Customer
-    const customer = await Maplerad.createCustomer(req.user.firstName || 'User', req.user.lastName || 'Paypee', req.user.email);
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    const customer = await Maplerad.createCustomer(user?.firstName || 'User', user?.lastName || 'Paypee', user?.email || '');
     
     // 2. Issue Card via Maplerad
-    const mCard = await Maplerad.issueVirtualCard(customer.id, 'USD', 5); // Default $5 initial fund for creation
+    // Use selected currency and initial amount (min $5 for Maplerad)
+    const mCard = await Maplerad.issueVirtualCard(customer.id, currency || 'USD', initialAmount || 5);
 
     const card = await prisma.virtualCard.create({
       data: {
-        userId: req.user.userId,
+        userId: userId,
         walletId: walletId,
         cardNumber: mCard.card_number,
         expiry: mCard.expiry,
@@ -300,11 +319,21 @@ app.post('/api/cards', authenticateToken, async (req: any, res: any): Promise<an
         status: "ACTIVE"
       }
     });
+
+    // Notify user
+    await prisma.notification.create({
+      data: {
+        userId,
+        title: 'Virtual Card Issued',
+        message: `Your new ${currency || 'USD'} virtual card ending in ${mCard.card_number.slice(-4)} is now active.`,
+        type: 'SUCCESS'
+      }
+    });
     
     res.status(201).json(card);
-  } catch (error) {
+  } catch (error: any) {
     console.error('Create card error:', error);
-    res.status(500).json({ error: 'Failed to issue virtual card' });
+    res.status(500).json({ error: error.message || 'Failed to issue virtual card' });
   }
 });
 

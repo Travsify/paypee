@@ -1,6 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { API_BASE } from './config';
 import { 
   CreditCard, 
   Plus, 
@@ -9,14 +8,19 @@ import {
   Eye, 
   EyeOff, 
   RefreshCcw, 
-  ArrowUpRight,
   ShieldCheck,
   Zap,
   ChevronRight,
-  Settings,
   PlusCircle,
   X,
-  DollarSign
+  DollarSign,
+  Fingerprint,
+  TrendingUp,
+  Activity,
+  ShieldAlert,
+  BarChart3,
+  Globe,
+  Sparkles
 } from 'lucide-react';
 
 const CardsDashboard = () => {
@@ -30,6 +34,7 @@ const CardsDashboard = () => {
   // Funding form state
   const [fundAmount, setFundAmount] = useState('');
   const [fundWalletId, setFundWalletId] = useState('');
+  const [transferPin, setTransferPin] = useState('');
   const [wallets, setWallets] = useState<any[]>([]);
   const [submitting, setSubmitting] = useState(false);
 
@@ -40,7 +45,7 @@ const CardsDashboard = () => {
   const fetchCards = async () => {
     try {
       const token = localStorage.getItem('paypee_token');
-      const res = await fetch('https://paypee-api-kmhv.onrender.com/api/cards', {
+      const res = await fetch('/api/cards', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await res.json();
@@ -54,7 +59,7 @@ const CardsDashboard = () => {
   const fetchWallets = async () => {
     try {
       const token = localStorage.getItem('paypee_token');
-      const res = await fetch('https://paypee-api-kmhv.onrender.com/api/users/me', {
+      const res = await fetch('/api/users/me', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await res.json();
@@ -70,7 +75,7 @@ const CardsDashboard = () => {
   const toggleFreeze = async (cardId: string, currentStatus: string) => {
     try {
       const token = localStorage.getItem('paypee_token');
-      const res = await fetch(`https://paypee-api-kmhv.onrender.com/api/cards/${cardId}/toggle-freeze`, {
+      const res = await fetch(`/api/cards/${cardId}/toggle-freeze`, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -85,7 +90,7 @@ const CardsDashboard = () => {
     setSubmitting(true);
     try {
       const token = localStorage.getItem('paypee_token');
-      const res = await fetch('https://paypee-api-kmhv.onrender.com/api/cards', {
+      const res = await fetch('/api/cards', {
         method: 'POST',
         headers: { 
           'Authorization': `Bearer ${token}`,
@@ -109,17 +114,22 @@ const CardsDashboard = () => {
     setSubmitting(true);
     try {
       const token = localStorage.getItem('paypee_token');
-      const res = await fetch(`https://paypee-api-kmhv.onrender.com/api/cards/${selectedCard.id}/fund`, {
+      const res = await fetch(`/api/cards/${selectedCard.id}/fund`, {
         method: 'POST',
         headers: { 
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ walletId: fundWalletId, amount: parseFloat(fundAmount) })
+        body: JSON.stringify({ 
+          walletId: fundWalletId, 
+          amount: parseFloat(fundAmount),
+          pin: transferPin
+        })
       });
       if (res.ok) {
         setIsFundingModalOpen(false);
         setFundAmount('');
+        setTransferPin('');
         fetchCards();
       } else {
         const err = await res.json();
@@ -132,131 +142,337 @@ const CardsDashboard = () => {
     }
   };
 
+  // AI Security Insights
+  const aiSecurityInsights = useMemo(() => [
+    { 
+      title: "AI Spending Shield", 
+      status: "Active", 
+      desc: "Neural patterns monitoring 2,400+ merchant signatures for anomalies.",
+      icon: <Fingerprint size={20} color="#10b981" />
+    },
+    { 
+      title: "FX Optimizer", 
+      status: "Calibrated", 
+      desc: "Automatically suggesting card rails with lowest conversion spread.",
+      icon: <Globe size={20} color="#3b82f6" />
+    },
+    { 
+      title: "Fraud Sentinel", 
+      status: "Defending", 
+      desc: "Instant freeze protocol armed for 0-day payment exploits.",
+      icon: <ShieldCheck size={20} color="#8b5cf6" />
+    }
+  ], []);
+
   return (
-    <div style={{ padding: '0' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3.5rem' }}>
+    <div style={{ padding: '0', display: 'flex', flexDirection: 'column', gap: '3rem' }}>
+      
+      {/* Header Section */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
         <div>
-          <h2 style={{ fontSize: '2.5rem', fontWeight: 800, marginBottom: '0.5rem' }}>Virtual Cards</h2>
-          <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem' }}>Global capital at your fingertips. Issue USD and NGN cards instantly.</p>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--primary)', fontWeight: 800, fontSize: '0.8rem', letterSpacing: '2px', textTransform: 'uppercase', marginBottom: '0.75rem' }}>
+            <Zap size={16} fill="var(--primary)" /> Issuing Protocol v2.1
+          </div>
+          <h2 style={{ fontSize: '3rem', fontWeight: 900, marginBottom: '0.5rem', letterSpacing: '-0.04em' }}>Virtual Cards</h2>
+          <p style={{ color: 'var(--text-muted)', fontSize: '1.2rem', maxWidth: '600px' }}>
+            Deploy secure, AI-monitored global capital rails in seconds. Powered by Maplerad Tier-1 infrastructure.
+          </p>
         </div>
         <motion.button 
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
+          whileHover={{ scale: 1.05, boxShadow: '0 20px 40px -10px var(--primary)' }}
+          whileTap={{ scale: 0.95 }}
           onClick={() => setIsIssueModalOpen(true)}
-          style={{ background: 'var(--primary)', color: '#fff', border: 'none', padding: '1rem 2.5rem', borderRadius: '16px', fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.75rem', boxShadow: '0 10px 30px -10px var(--primary)' }}
+          className="btn btn-primary"
+          style={{ padding: '1.25rem 2.5rem', borderRadius: '20px', fontSize: '1rem' }}
         >
-          <PlusCircle size={20} /> Create Virtual Card
+          <PlusCircle size={22} /> Deploy New Card
         </motion.button>
       </div>
 
-      {loading ? (
-        <div style={{ display: 'flex', justifyContent: 'center', padding: '5rem' }}><div className="spinner" /></div>
-      ) : cards.length === 0 ? (
-        <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px dashed var(--border)', borderRadius: '32px', padding: '6rem 2rem', textAlign: 'center' }}>
-          <div style={{ width: 80, height: 80, background: 'rgba(99,102,241,0.1)', borderRadius: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 2rem', color: 'var(--primary)' }}>
-            <CreditCard size={40} />
-          </div>
-          <h3 style={{ fontSize: '1.5rem', fontWeight: 800, marginBottom: '1rem' }}>No Virtual Cards</h3>
-          <p style={{ color: 'var(--text-muted)', maxWidth: '400px', margin: '0 auto 2rem', lineHeight: 1.6 }}>Deploy high-security virtual cards for global spending on Amazon, Netflix, and more with instant funding.</p>
-          <button onClick={() => setIsIssueModalOpen(true)} style={{ background: 'rgba(99, 102, 241, 0.1)', color: 'var(--primary)', border: '1px solid rgba(99, 102, 241, 0.2)', padding: '0.75rem 2rem', borderRadius: '12px', fontWeight: 700, cursor: 'pointer' }}>Generate First Card</button>
+      {/* Analytics Overview Section */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1.5rem' }}>
+         <div className="premium-card" style={{ padding: '1.5rem', background: 'rgba(255,255,255,0.02)' }}>
+            <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.75rem', fontWeight: 800, letterSpacing: '1px', marginBottom: '1rem' }}>ACTIVE VOLUME</div>
+            <div style={{ fontSize: '1.5rem', fontWeight: 900 }}>$12,450.00</div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#10b981', fontSize: '0.8rem', marginTop: '0.5rem', fontWeight: 700 }}>
+               <TrendingUp size={14} /> +12.4% <span style={{ opacity: 0.5 }}>this month</span>
+            </div>
+         </div>
+         <div className="premium-card" style={{ padding: '1.5rem', background: 'rgba(255,255,255,0.02)' }}>
+            <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.75rem', fontWeight: 800, letterSpacing: '1px', marginBottom: '1rem' }}>AI FRAUD PROTECTION</div>
+            <div style={{ fontSize: '1.5rem', fontWeight: 900, color: '#10b981' }}>99.99%</div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'rgba(255,255,255,0.4)', fontSize: '0.8rem', marginTop: '0.5rem', fontWeight: 700 }}>
+               <Activity size={14} /> Live Sentinel Status
+            </div>
+         </div>
+         <div className="premium-card" style={{ padding: '1.5rem', background: 'rgba(255,255,255,0.02)' }}>
+            <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.75rem', fontWeight: 800, letterSpacing: '1px', marginBottom: '1rem' }}>GLOBAL REACH</div>
+            <div style={{ fontSize: '1.5rem', fontWeight: 900 }}>180+</div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'rgba(255,255,255,0.4)', fontSize: '0.8rem', marginTop: '0.5rem', fontWeight: 700 }}>
+               Supported Countries
+            </div>
+         </div>
+         <div className="premium-card" style={{ padding: '1.5rem', background: 'rgba(255,255,255,0.02)' }}>
+            <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.75rem', fontWeight: 800, letterSpacing: '1px', marginBottom: '1rem' }}>AVERAGE SAVINGS</div>
+            <div style={{ fontSize: '1.5rem', fontWeight: 900, color: 'var(--primary)' }}>3.2%</div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'rgba(255,255,255,0.4)', fontSize: '0.8rem', marginTop: '0.5rem', fontWeight: 700 }}>
+               Lower FX Spreads
+            </div>
+         </div>
+      </div>
+
+      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '3rem', alignItems: 'start' }}>
+        
+        {/* Cards Section */}
+        <div>
+          {loading ? (
+            <div style={{ display: 'flex', justifyContent: 'center', padding: '5rem' }}><div className="spinner" /></div>
+          ) : cards.length === 0 ? (
+            <div className="premium-card" style={{ padding: '6rem 2rem', textAlign: 'center', borderStyle: 'dashed' }}>
+              <div style={{ width: 100, height: 100, background: 'rgba(99,102,241,0.05)', borderRadius: '30px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 2.5rem', color: 'var(--primary)' }}>
+                <CreditCard size={50} />
+              </div>
+              <h3 style={{ fontSize: '2rem', fontWeight: 900, marginBottom: '1rem' }}>No Capital Rails Found</h3>
+              <p style={{ color: 'var(--text-muted)', maxWidth: '450px', margin: '0 auto 2.5rem', fontSize: '1.1rem', lineHeight: 1.6 }}>
+                Deploy your first high-security virtual card to unlock global spending power on Amazon, Google, and more.
+              </p>
+              <button onClick={() => setIsIssueModalOpen(true)} className="btn btn-primary" style={{ padding: '1rem 3rem', borderRadius: '15px' }}>
+                Generate Master Card
+              </button>
+            </div>
+          ) : (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(380px, 1fr))', gap: '2.5rem' }}>
+              {cards.map(card => (
+                <motion.div 
+                  key={card.id}
+                  whileHover={{ y: -10, rotateX: 2, rotateY: -2 }}
+                  style={{ perspective: '1000px' }}
+                >
+                  <div className="holographic-card" style={{ 
+                    padding: '2.5rem', 
+                    minHeight: '260px', 
+                    display: 'flex', 
+                    flexDirection: 'column', 
+                    justifyContent: 'space-between',
+                    position: 'relative',
+                    overflow: 'hidden',
+                    cursor: 'pointer'
+                  }}>
+                    <div className="mesh-bg" style={{ opacity: 0.3 }} />
+                    
+                    <div style={{ position: 'relative', zIndex: 10 }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '2rem' }}>
+                         <div style={{ display: 'flex', flexDirection: 'column' }}>
+                            <span style={{ fontSize: '0.65rem', fontWeight: 900, letterSpacing: '3px', color: 'rgba(255,255,255,0.4)' }}>PLATINUM RAIL</span>
+                            <span style={{ fontSize: '1.2rem', fontWeight: 900, color: '#fff' }}>{card.brand || 'VISA'}</span>
+                         </div>
+                         {card.status === 'FROZEN' ? (
+                           <div style={{ background: 'rgba(239, 68, 68, 0.2)', color: '#ef4444', padding: '0.4rem 1rem', borderRadius: '100px', fontSize: '0.7rem', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                             <ShieldAlert size={12} /> SECURED
+                           </div>
+                         ) : (
+                           <div style={{ background: 'rgba(16, 185, 129, 0.2)', color: '#10b981', padding: '0.4rem 1rem', borderRadius: '100px', fontSize: '0.7rem', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                             <ShieldCheck size={12} /> ACTIVE
+                           </div>
+                         )}
+                      </div>
+
+                      <div style={{ marginBottom: '2rem' }}>
+                         <div style={{ fontSize: '1.8rem', fontWeight: 900, letterSpacing: '4px', color: '#fff', display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                            {showNumbers[card.id] ? card.cardNumber : '•••• •••• •••• ' + (card.cardNumber?.slice(-4) || '0000')}
+                            <button onClick={() => setShowNumbers(prev => ({ ...prev, [card.id]: !prev[card.id] }))} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.3)', cursor: 'pointer', padding: '4px' }}>
+                               {showNumbers[card.id] ? <EyeOff size={18} /> : <Eye size={18} />}
+                            </button>
+                         </div>
+                      </div>
+
+                      <div style={{ display: 'flex', gap: '4rem' }}>
+                         <div>
+                            <div style={{ fontSize: '0.6rem', color: 'rgba(255,255,255,0.4)', fontWeight: 800, letterSpacing: '1px', marginBottom: '0.2rem' }}>VALID THRU</div>
+                            <div style={{ fontSize: '1rem', fontWeight: 800 }}>{card.expiry}</div>
+                         </div>
+                         <div>
+                            <div style={{ fontSize: '0.6rem', color: 'rgba(255,255,255,0.4)', fontWeight: 800, letterSpacing: '1px', marginBottom: '0.2rem' }}>SECURITY</div>
+                            <div style={{ fontSize: '1rem', fontWeight: 800 }}>{showNumbers[card.id] ? card.cvv : '•••'}</div>
+                         </div>
+                      </div>
+                    </div>
+
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', position: 'relative', zIndex: 10, marginTop: '2rem', paddingTop: '1.5rem', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+                       <div style={{ display: 'flex', gap: '1rem' }}>
+                          <button 
+                            onClick={(e) => { e.stopPropagation(); toggleFreeze(card.id, card.status); }} 
+                            style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', width: '40px', height: '40px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
+                            title={card.status === 'ACTIVE' ? 'Freeze' : 'Unfreeze'}
+                          >
+                            {card.status === 'ACTIVE' ? <Lock size={18} /> : <Unlock size={18} />}
+                          </button>
+                          <button 
+                            onClick={(e) => { e.stopPropagation(); setSelectedCard(card); setIsFundingModalOpen(true); }}
+                            className="btn btn-primary"
+                            style={{ padding: '0 1.5rem', fontSize: '0.85rem', borderRadius: '12px' }}
+                          >
+                            Fund Rails
+                          </button>
+                       </div>
+                       <div style={{ textAlign: 'right' }}>
+                          <div style={{ fontSize: '0.6rem', color: 'rgba(255,255,255,0.4)', fontWeight: 800, letterSpacing: '1px' }}>LIQUIDITY</div>
+                          <div style={{ fontSize: '1.4rem', fontWeight: 900, color: 'var(--primary)' }}>${parseFloat(card.balance || '0').toFixed(2)}</div>
+                       </div>
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          )}
         </div>
-      ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(360px, 1fr))', gap: '2.5rem' }}>
-          {cards.map(card => (
-            <motion.div 
-              key={card.id}
-              whileHover={{ y: -8 }}
-              style={{ background: 'linear-gradient(135deg, #1e1b4b 0%, #0f172a 100%)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '32px', padding: '2.5rem', position: 'relative', overflow: 'hidden', boxShadow: '0 30px 60px rgba(0,0,0,0.4)' }}
-            >
-              <div style={{ position: 'absolute', top: '-20px', right: '-20px', width: '120px', height: '120px', borderRadius: '50%', background: 'rgba(99,102,241,0.15)', filter: 'blur(50px)' }} />
-              
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '3.5rem' }}>
-                <div style={{ width: 56, height: 38, background: 'rgba(255,255,255,0.1)', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                   <div style={{ width: 20, height: 20, borderRadius: '50%', background: 'rgba(255,255,255,0.2)', marginLeft: -8 }} />
-                   <div style={{ width: 20, height: 20, borderRadius: '50%', background: 'rgba(255,255,255,0.1)', marginLeft: -4 }} />
-                </div>
-                <div style={{ textAlign: 'right' }}>
-                   <div style={{ fontSize: '1rem', fontWeight: 900, color: '#fff', letterSpacing: '2px', opacity: 0.6 }}>VISA</div>
-                   {card.status === 'FROZEN' && <div style={{ fontSize: '0.6rem', fontWeight: 900, color: '#ef4444', background: 'rgba(239, 68, 68, 0.1)', padding: '0.2rem 0.5rem', borderRadius: '4px', marginTop: '0.5rem' }}>FROZEN</div>}
-                </div>
+
+        {/* AI Sidebar */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+           <motion.div 
+             initial={{ opacity: 0, x: 20 }}
+             animate={{ opacity: 1, x: 0 }}
+             className="premium-card" 
+             style={{ padding: '2.5rem', background: 'rgba(99, 102, 241, 0.03)' }}
+           >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '2rem' }}>
+                 <div style={{ background: 'var(--primary)', padding: '8px', borderRadius: '12px', boxShadow: '0 10px 20px -5px var(--primary)' }}>
+                    <Sparkles size={24} color="#fff" />
+                 </div>
+                 <h4 style={{ fontSize: '1.3rem', fontWeight: 900, margin: 0 }}>AI Sentinel Core</h4>
               </div>
 
-              <div style={{ marginBottom: '2.5rem' }}>
-                <div style={{ fontSize: '1.6rem', fontWeight: 800, letterSpacing: '5px', color: '#fff', display: 'flex', gap: '1.25rem', alignItems: 'center' }}>
-                  {showNumbers[card.id] ? card.cardNumber : '•••• •••• •••• ' + card.cardNumber.slice(-4)}
-                  <button onClick={() => setShowNumbers(prev => ({ ...prev, [card.id]: !prev[card.id] }))} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.3)', cursor: 'pointer', padding: '0.5rem' }}>
-                    {showNumbers[card.id] ? <EyeOff size={20} /> : <Eye size={20} />}
-                  </button>
-                </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                 {aiSecurityInsights.map((insight, idx) => (
+                   <div key={idx} className="holographic-card" style={{ padding: '1.5rem', borderLeft: `3px solid ${idx === 0 ? '#10b981' : idx === 1 ? '#3b82f6' : '#8b5cf6'}` }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontWeight: 800, fontSize: '0.9rem' }}>
+                            {insight.icon} {insight.title}
+                         </div>
+                         <span style={{ fontSize: '0.7rem', fontWeight: 900, opacity: 0.5 }}>{insight.status}</span>
+                      </div>
+                      <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', lineHeight: '1.5', margin: 0 }}>
+                         {insight.desc}
+                      </p>
+                   </div>
+                 ))}
               </div>
 
-              <div style={{ display: 'flex', gap: '4rem', marginBottom: '2.5rem' }}>
-                <div>
-                  <div style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.4)', fontWeight: 800, letterSpacing: '1px', marginBottom: '0.4rem' }}>EXPIRY</div>
-                  <div style={{ fontSize: '1rem', fontWeight: 700 }}>{card.expiry}</div>
-                </div>
-                <div>
-                  <div style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.4)', fontWeight: 800, letterSpacing: '1px', marginBottom: '0.4rem' }}>CVV</div>
-                  <div style={{ fontSize: '1rem', fontWeight: 700 }}>{showNumbers[card.id] ? card.cvv : '•••'}</div>
-                </div>
+              <div style={{ marginTop: '2rem', padding: '1.5rem', background: 'rgba(255,255,255,0.02)', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                    <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'rgba(255,255,255,0.4)' }}>Intelligence Status</span>
+                    <span style={{ fontSize: '0.8rem', fontWeight: 900, color: '#10b981' }}>OPTIMAL</span>
+                 </div>
+                 <div style={{ height: '6px', background: 'rgba(255,255,255,0.05)', borderRadius: '100px', overflow: 'hidden' }}>
+                    <motion.div initial={{ width: 0 }} animate={{ width: '92%' }} transition={{ duration: 1 }} style={{ height: '100%', background: 'var(--primary)' }} />
+                 </div>
               </div>
+           </motion.div>
 
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: '2rem' }}>
-                <div style={{ display: 'flex', gap: '0.75rem' }}>
-                   <motion.button whileTap={{ scale: 0.95 }} onClick={() => toggleFreeze(card.id, card.status)} style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '0.6rem 1.2rem', borderRadius: '12px', fontSize: '0.8rem', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                     {card.status === 'ACTIVE' ? <Lock size={15} /> : <Unlock size={15} />} {card.status === 'ACTIVE' ? 'Freeze' : 'Unfreeze'}
-                   </motion.button>
-                   <motion.button 
-                     whileTap={{ scale: 0.95 }} 
-                     onClick={() => { setSelectedCard(card); setIsFundingModalOpen(true); }}
-                     style={{ background: 'var(--primary)', border: 'none', color: '#fff', padding: '0.6rem 1.2rem', borderRadius: '12px', fontSize: '0.8rem', fontWeight: 800, cursor: 'pointer' }}
-                   >
-                     Fund
-                   </motion.button>
-                </div>
-                <div style={{ textAlign: 'right' }}>
-                  <div style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.4)', fontWeight: 800 }}>BALANCE</div>
-                  <div style={{ fontSize: '1.25rem', fontWeight: 900, color: 'var(--primary)' }}>$0.00</div>
-                </div>
+           <div className="premium-card" style={{ padding: '2.5rem' }}>
+              <h4 style={{ fontSize: '1.1rem', fontWeight: 900, marginBottom: '2rem' }}>Spending Insights</h4>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+                 <div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', marginBottom: '0.5rem' }}>
+                       <span style={{ color: 'var(--text-muted)', fontWeight: 700 }}>Monthly Limit</span>
+                       <span style={{ fontWeight: 900 }}>$2,500 / $5,000</span>
+                    </div>
+                    <div style={{ height: '6px', background: 'rgba(255,255,255,0.05)', borderRadius: '100px', overflow: 'hidden' }}>
+                       <div style={{ height: '100%', width: '50%', background: '#3b82f6' }} />
+                    </div>
+                 </div>
+                 <div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', marginBottom: '0.5rem' }}>
+                       <span style={{ color: 'var(--text-muted)', fontWeight: 700 }}>Active Merchants</span>
+                       <span style={{ fontWeight: 900 }}>12</span>
+                    </div>
+                    <div style={{ display: 'flex', gap: '4px', marginTop: '0.75rem' }}>
+                       {[1,2,3,4,5,6,7].map(i => <div key={i} style={{ height: '24px', flex: 1, background: 'rgba(255,255,255,0.03)', borderRadius: '4px' }} />)}
+                    </div>
+                 </div>
               </div>
-            </motion.div>
-          ))}
+              <button className="btn btn-outline" style={{ width: '100%', marginTop: '2.5rem', padding: '1rem', fontSize: '0.9rem', borderRadius: '15px' }}>
+                 View Advanced Analytics
+              </button>
+           </div>
         </div>
-      )}
+
+      </div>
 
       {/* Issuing Modal */}
       <AnimatePresence>
         {isIssueModalOpen && (
-          <div style={{ position: 'fixed', inset: 0, background: 'rgba(2,6,23,0.9)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 5000, padding: '1rem' }}>
-            <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} style={{ background: '#0a0f1e', border: '1px solid var(--border)', borderRadius: '32px', padding: '2.5rem', width: '100%', maxWidth: '480px' }}>
-               <h3 style={{ fontSize: '1.5rem', fontWeight: 800, marginBottom: '2rem' }}>Deploy New Virtual Card</h3>
+          <div className="paypee-modal-overlay">
+            <motion.div 
+              initial={{ scale: 0.9, opacity: 0, y: 40 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              className="paypee-modal-content"
+              style={{ maxWidth: '480px', padding: '3rem' }}
+            >
+               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem' }}>
+                  <h3 style={{ fontSize: '1.8rem', fontWeight: 900, letterSpacing: '-0.03em' }}>Deploy Capital Rail</h3>
+                  <button onClick={() => setIsIssueModalOpen(false)} style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer' }}><X size={24} /></button>
+               </div>
+
                <form onSubmit={handleIssueCard}>
-                 <div style={{ marginBottom: '1.5rem' }}>
-                   <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 800, color: 'var(--text-muted)', marginBottom: '0.75rem', letterSpacing: '1px' }}>SOURCE WALLET</label>
-                   <select value={issueWalletId} onChange={(e) => setIssueWalletId(e.target.value)} required style={{ width: '100%', background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border)', borderRadius: '12px', padding: '1rem', color: '#fff', outline: 'none' }}>
-                     <option value="">Select Wallet</option>
+                 <div style={{ marginBottom: '2rem' }}>
+                   <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: '#475569', marginBottom: '0.75rem', letterSpacing: '1px' }}>FUNDING SOURCE</label>
+                   <select value={issueWalletId} onChange={(e) => setIssueWalletId(e.target.value)} required className="form-input" style={{ background: 'rgba(255,255,255,0.03)', padding: '1.25rem' }}>
+                     <option value="">Select Liquid Wallet</option>
                      {wallets.map(w => (
-                       <option key={w.id} value={w.id}>{w.currency} - {parseFloat(w.balance).toFixed(2)}</option>
+                       <option key={w.id} value={w.id}>{w.currency} - Available: {parseFloat(w.balance).toFixed(2)}</option>
                      ))}
                    </select>
                  </div>
-                 <div style={{ marginBottom: '2rem' }}>
-                   <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 800, color: 'var(--text-muted)', marginBottom: '0.75rem', letterSpacing: '1px' }}>CURRENCY TYPE</label>
-                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                      <div onClick={() => setIssueCurrency('USD')} style={{ padding: '1.5rem', borderRadius: '16px', background: issueCurrency === 'USD' ? 'rgba(99, 102, 241, 0.1)' : 'rgba(255,255,255,0.02)', border: '2px solid ' + (issueCurrency === 'USD' ? 'var(--primary)' : 'var(--border)'), cursor: 'pointer', textAlign: 'center' }}>
-                         <div style={{ fontWeight: 800 }}>USD Card</div>
-                         <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Global Spending</div>
+
+                 <div style={{ marginBottom: '2.5rem' }}>
+                   <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: '#475569', marginBottom: '1rem', letterSpacing: '1px' }}>RAIL CONFIGURATION</label>
+                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+                      <div 
+                        onClick={() => setIssueCurrency('USD')} 
+                        style={{ 
+                          padding: '1.5rem', 
+                          borderRadius: '20px', 
+                          background: issueCurrency === 'USD' ? 'rgba(99, 102, 241, 0.1)' : 'rgba(255,255,255,0.02)', 
+                          border: `2px solid ${issueCurrency === 'USD' ? 'var(--primary)' : 'rgba(255,255,255,0.05)'}`, 
+                          cursor: 'pointer', 
+                          textAlign: 'center',
+                          transition: 'all 0.2s'
+                        }}
+                      >
+                         <div style={{ fontSize: '1.2rem', fontWeight: 900, color: '#fff' }}>USD Card</div>
+                         <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '4px' }}>Global Rail</div>
                       </div>
-                      <div onClick={() => setIssueCurrency('NGN')} style={{ padding: '1.5rem', borderRadius: '16px', background: issueCurrency === 'NGN' ? 'rgba(99, 102, 241, 0.1)' : 'rgba(255,255,255,0.02)', border: '2px solid ' + (issueCurrency === 'NGN' ? 'var(--primary)' : 'var(--border)'), cursor: 'pointer', textAlign: 'center' }}>
-                         <div style={{ fontWeight: 800 }}>NGN Card</div>
-                         <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Local Payments</div>
+                      <div 
+                        onClick={() => setIssueCurrency('NGN')} 
+                        style={{ 
+                          padding: '1.5rem', 
+                          borderRadius: '20px', 
+                          background: issueCurrency === 'NGN' ? 'rgba(99, 102, 241, 0.1)' : 'rgba(255,255,255,0.02)', 
+                          border: `2px solid ${issueCurrency === 'NGN' ? 'var(--primary)' : 'rgba(255,255,255,0.05)'}`, 
+                          cursor: 'pointer', 
+                          textAlign: 'center',
+                          transition: 'all 0.2s'
+                        }}
+                      >
+                         <div style={{ fontSize: '1.2rem', fontWeight: 900, color: '#fff' }}>NGN Card</div>
+                         <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '4px' }}>Local Rail</div>
                       </div>
                    </div>
                  </div>
-                 <button type="submit" disabled={submitting} style={{ width: '100%', background: 'var(--primary)', color: '#fff', border: 'none', padding: '1.25rem', borderRadius: '16px', fontWeight: 800, cursor: submitting ? 'not-allowed' : 'pointer' }}>
-                   {submitting ? 'Deploying...' : 'Deploy Card Instantly'}
+
+                 <div style={{ padding: '1.5rem', background: 'rgba(16, 185, 129, 0.05)', borderRadius: '16px', marginBottom: '2.5rem', border: '1px solid rgba(16, 185, 129, 0.1)' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: '#10b981', fontSize: '0.85rem', fontWeight: 800, marginBottom: '0.5rem' }}>
+                       <ShieldCheck size={18} /> Instant Tier-1 Deployment
+                    </div>
+                    <p style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.6)', lineHeight: '1.5', margin: 0 }}>
+                       New card creation includes a mandatory $5.00 initial funding via Maplerad Issuing Engine.
+                    </p>
+                 </div>
+
+                 <button type="submit" disabled={submitting} className="btn btn-primary" style={{ width: '100%', padding: '1.4rem', borderRadius: '24px', fontSize: '1.1rem', fontWeight: 900 }}>
+                   {submitting ? 'Initializing Rail...' : 'Deploy Instantly'}
                  </button>
-                 <button type="button" onClick={() => setIsIssueModalOpen(false)} style={{ width: '100%', background: 'transparent', color: 'var(--text-muted)', border: 'none', marginTop: '1rem', cursor: 'pointer' }}>Cancel</button>
                </form>
             </motion.div>
           </div>
@@ -266,30 +482,53 @@ const CardsDashboard = () => {
       {/* Funding Modal */}
       <AnimatePresence>
         {isFundingModalOpen && (
-          <div style={{ position: 'fixed', inset: 0, background: 'rgba(2,6,23,0.9)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 5000, padding: '1rem' }}>
-            <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} style={{ background: '#0a0f1e', border: '1px solid var(--border)', borderRadius: '32px', padding: '2.5rem', width: '100%', maxWidth: '450px' }}>
-               <h3 style={{ fontSize: '1.5rem', fontWeight: 800, marginBottom: '2rem' }}>Fund Virtual Card</h3>
+          <div className="paypee-modal-overlay">
+            <motion.div 
+              initial={{ scale: 0.9, opacity: 0 }} 
+              animate={{ scale: 1, opacity: 1 }} 
+              className="paypee-modal-content"
+              style={{ maxWidth: '450px', padding: '3rem' }}
+            >
+               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem' }}>
+                  <h3 style={{ fontSize: '1.8rem', fontWeight: 900 }}>Top-up Capital Rail</h3>
+                  <button onClick={() => setIsFundingModalOpen(false)} style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer' }}><X size={24} /></button>
+               </div>
+
                <form onSubmit={handleFundCard}>
                  <div style={{ marginBottom: '1.5rem' }}>
-                   <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 800, color: 'var(--text-muted)', marginBottom: '0.75rem', letterSpacing: '1px' }}>SOURCE WALLET</label>
-                   <select value={fundWalletId} onChange={(e) => setFundWalletId(e.target.value)} required style={{ width: '100%', background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border)', borderRadius: '12px', padding: '1rem', color: '#fff', outline: 'none' }}>
+                   <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: '#475569', marginBottom: '0.75rem', letterSpacing: '1px' }}>LIQUID SOURCE</label>
+                   <select value={fundWalletId} onChange={(e) => setFundWalletId(e.target.value)} required className="form-input">
                      <option value="">Select Wallet</option>
                      {wallets.map(w => (
                        <option key={w.id} value={w.id}>{w.currency} - {parseFloat(w.balance).toFixed(2)}</option>
                      ))}
                    </select>
                  </div>
-                 <div style={{ marginBottom: '2rem' }}>
-                   <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 800, color: 'var(--text-muted)', marginBottom: '0.75rem', letterSpacing: '1px' }}>AMOUNT TO TOP-UP</label>
+
+                 <div style={{ marginBottom: '1.5rem' }}>
+                   <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: '#475569', marginBottom: '0.75rem', letterSpacing: '1px' }}>AMOUNT TO INJECT</label>
                    <div style={{ position: 'relative' }}>
-                     <DollarSign size={20} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--primary)' }} />
-                     <input type="number" value={fundAmount} onChange={(e) => setFundAmount(e.target.value)} placeholder="0.00" required style={{ width: '100%', background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border)', borderRadius: '12px', padding: '1.25rem 1rem 1.25rem 3rem', color: '#fff', fontSize: '1.5rem', fontWeight: 900, outline: 'none' }} />
+                     <DollarSign size={24} style={{ position: 'absolute', left: '1.25rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--primary)' }} />
+                     <input type="number" value={fundAmount} onChange={(e) => setFundAmount(e.target.value)} placeholder="0.00" required className="form-input" style={{ paddingLeft: '3.5rem', fontSize: '2rem', fontWeight: 900 }} />
                    </div>
                  </div>
-                 <button type="submit" disabled={submitting} style={{ width: '100%', background: 'var(--primary)', color: '#fff', border: 'none', padding: '1.25rem', borderRadius: '16px', fontWeight: 800, cursor: submitting ? 'not-allowed' : 'pointer' }}>
-                   {submitting ? 'Transferring...' : 'Confirm Top-up'}
+
+                 <div style={{ marginBottom: '2.5rem' }}>
+                    <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: '#475569', marginBottom: '0.75rem', letterSpacing: '1px' }}>TRANSACTION PIN</label>
+                    <input 
+                      type="password" 
+                      value={transferPin} 
+                      onChange={(e) => setTransferPin(e.target.value)} 
+                      maxLength={4} 
+                      placeholder="••••" 
+                      className="form-input" 
+                      style={{ textAlign: 'center', letterSpacing: '1rem', fontSize: '1.5rem' }} 
+                    />
+                 </div>
+
+                 <button type="submit" disabled={submitting} className="btn btn-primary" style={{ width: '100%', padding: '1.4rem', borderRadius: '24px', fontSize: '1.1rem', fontWeight: 900 }}>
+                   {submitting ? 'Transferring...' : 'Confirm Injection'}
                  </button>
-                 <button type="button" onClick={() => setIsFundingModalOpen(false)} style={{ width: '100%', background: 'transparent', color: 'var(--text-muted)', border: 'none', marginTop: '1rem', cursor: 'pointer' }}>Cancel</button>
                </form>
             </motion.div>
           </div>

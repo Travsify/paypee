@@ -83,22 +83,26 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [settingsTab, setSettingsTab] = useState('profile');
   const [selectedWalletId, setSelectedWalletId] = useState<string | null>(null);
+  const [vaults, setVaults] = useState<any[]>([]);
 
   const fetchUserData = async () => {
     const token = localStorage.getItem('paypee_token');
     const headers = { 'Authorization': `Bearer ${token}` };
     try {
-      const [uRes, txRes, notifRes] = await Promise.all([
+      const [uRes, txRes, notifRes, vaultRes] = await Promise.all([
         fetch(`${API_BASE}/api/users/me`, { headers }),
         fetch(`${API_BASE}/api/transactions`, { headers }),
-        fetch(`${API_BASE}/api/verify/status`, { headers })
+        fetch(`${API_BASE}/api/verify/status`, { headers }),
+        fetch(`${API_BASE}/api/vaults`, { headers })
       ]);
       const uData = await uRes.json();
       const txData = await txRes.json();
       const nData = await notifRes.json();
+      const vData = await vaultRes.json();
       
       if (!uData.error) setUserData(uData);
       if (Array.isArray(txData)) setTransactions(txData);
+      if (Array.isArray(vData)) setVaults(vData);
       if (nData.notifications) {
         setNotifications(nData.notifications);
         setUnreadCount(nData.notifications.filter((n: any) => !n.read).length);
@@ -825,6 +829,8 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
             {activeSection === 'wallets' && (
               <SmartWalletView 
                 wallets={userData?.wallets || []}
+                vaults={vaults}
+                fxRates={fxRates}
                 userData={userData}
                 showBalances={showBalances}
                 onSwap={() => setIsSwapOpen(true)}
