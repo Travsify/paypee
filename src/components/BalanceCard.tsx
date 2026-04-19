@@ -81,7 +81,7 @@ const getBankName = (details: any) => {
   if (typeof details === 'string') {
     try { data = JSON.parse(details); } catch (e) { return null; }
   }
-  return data.bankName || data.bank_name || data.bank || data.provider;
+  return data.bankName || data.bank_name || data.bank || data.provider || data.network || data?.data?.network;
 };
 
 const BalanceCard: React.FC<BalanceCardProps> = ({ 
@@ -192,7 +192,7 @@ const BalanceCard: React.FC<BalanceCardProps> = ({
           <div style={{ flex: 1 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.4rem' }}>
               <div style={{ fontSize: '0.65rem', fontWeight: 600, opacity: 0.7, textTransform: 'uppercase', letterSpacing: '1px' }}>
-                {bank || (['USDC', 'USDT', 'BTC'].includes(currency.toUpperCase()) ? 'Crypto Network' : 'Provisioning Account...')}
+                {bank ? (['USDC', 'USDT', 'BTC'].includes(currency.toUpperCase()) ? `${bank} Network` : bank) : (['USDC', 'USDT', 'BTC'].includes(currency.toUpperCase()) ? 'Crypto Network' : 'Provisioning Account...')}
               </div>
               {bank && <CopyButton text={bank} label={['USDC', 'USDT', 'BTC'].includes(currency.toUpperCase()) ? "Network" : "Bank Name"} />}
             </div>
