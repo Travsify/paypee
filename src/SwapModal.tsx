@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, ArrowRightLeft, RefreshCcw, ChevronDown, AlertTriangle, CheckCircle2, Clock, History } from 'lucide-react';
+import { X, ArrowRightLeft, RefreshCcw, ChevronDown, AlertTriangle, CheckCircle2, Clock, History, Lock } from 'lucide-react';
 
 interface SwapModalProps {
   isOpen: boolean;
@@ -316,11 +316,40 @@ const SwapModal: React.FC<SwapModalProps> = ({ isOpen, onClose, onComplete, wall
                     </div>
                   )}
 
-                  <div style={{ display: 'flex', gap: '0.75rem' }}>
+                  {/* Transaction PIN Section */}
+                  <div style={{ marginTop: '1.5rem', padding: '1.5rem', background: 'rgba(245, 158, 11, 0.05)', borderRadius: '20px', border: '1px solid rgba(245, 158, 11, 0.1)' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
+                      <Lock size={18} color="#f59e0b" />
+                      <span style={{ fontWeight: 800, fontSize: '0.9rem', letterSpacing: '-0.02em', color: '#fff' }}>AUTHORIZE SWAP</span>
+                    </div>
+                    <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '1.25rem' }}>Enter your 4-digit transaction PIN to confirm this swap.</p>
+                    <input 
+                      type="password" 
+                      maxLength={4} 
+                      placeholder="••••"
+                      value={pin}
+                      onChange={(e) => setPin(e.target.value.replace(/\D/g, ''))}
+                      style={{ 
+                        width: '100%', 
+                        background: '#000', 
+                        border: '1px solid #1e293b', 
+                        borderRadius: '12px', 
+                        padding: '1rem', 
+                        textAlign: 'center', 
+                        fontSize: '1.5rem', 
+                        letterSpacing: '1rem',
+                        fontWeight: 900,
+                        color: '#f59e0b',
+                        outline: 'none'
+                      }} 
+                    />
+                  </div>
+
+                  <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1.5rem' }}>
                     <button onClick={() => { setStep('form'); setCountdown(30); if (timerRef.current) clearInterval(timerRef.current); }}
                       style={{ flex: 1, padding: '1rem', background: 'rgba(255,255,255,0.05)', color: '#fff', border: '1px solid var(--border)', borderRadius: '16px', fontWeight: 700, cursor: 'pointer' }}>Back</button>
-                    <button onClick={executeSwap} disabled={isLoading || countdown <= 0}
-                      style={{ flex: 2, padding: '1rem', background: countdown <= 0 ? 'rgba(255,255,255,0.05)' : 'linear-gradient(135deg, #10b981, #059669)', color: countdown <= 0 ? '#64748b' : '#fff', border: 'none', borderRadius: '16px', fontWeight: 700, fontSize: '1rem', cursor: countdown <= 0 ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
+                    <button onClick={executeSwap} disabled={isLoading || countdown <= 0 || (pin.length < 4)}
+                      style={{ flex: 2, padding: '1rem', background: (countdown <= 0 || pin.length < 4) ? 'rgba(255,255,255,0.05)' : 'linear-gradient(135deg, #10b981, #059669)', color: (countdown <= 0 || pin.length < 4) ? '#64748b' : '#fff', border: 'none', borderRadius: '16px', fontWeight: 700, fontSize: '1rem', cursor: (countdown <= 0 || pin.length < 4) ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
                       {isLoading ? (<><motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1, ease: 'linear' }}><RefreshCcw size={18} /></motion.div> Swapping...</>) : (<>Confirm Swap <CheckCircle2 size={18} /></>)}
                     </button>
                   </div>

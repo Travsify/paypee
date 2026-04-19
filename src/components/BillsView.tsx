@@ -299,9 +299,22 @@ const BillsView = () => {
                         transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
                       }}>
                         <option value="" disabled style={{ background: '#0f172a', color: '#fff' }}>Select Wallet to Pay From</option>
-                        {wallets.map(w => (
-                          <option key={w.id} value={w.id} style={{ background: '#0f172a', color: '#fff' }}>{w.currency} Wallet - ₦{parseFloat(w.balance).toLocaleString('en-US', {minimumFractionDigits: 2})}</option>
-                        ))}
+                        {wallets.map(w => {
+                          const getCurrencySymbol = (currency: string) => {
+                            const symbols: any = { 
+                              NGN: '₦', USD: '$', EUR: '€', GBP: '£', 
+                              KES: 'KSh', GHS: 'GH₵', UGX: 'USh', RWF: 'RF', 
+                              XAF: 'FCFA', XOF: 'CFA', TZS: 'TSh',
+                              BTC: '₿', USDT: '₮', USDC: 'Ⓢ' 
+                            };
+                            return symbols[currency] || currency;
+                          };
+                          return (
+                            <option key={w.id} value={w.id} style={{ background: '#0f172a', color: '#fff' }}>
+                              {w.currency} Wallet - {getCurrencySymbol(w.currency)}{parseFloat(w.balance).toLocaleString('en-US', {minimumFractionDigits: 2})}
+                            </option>
+                          );
+                        })}
                       </select>
                       <ChevronRight size={18} color="#94a3b8" style={{ position: 'absolute', right: '1.5rem', top: '50%', transform: 'translateY(-50%) rotate(90deg)', pointerEvents: 'none' }} />
                     </div>
