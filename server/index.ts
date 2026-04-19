@@ -406,51 +406,55 @@ app.post('/api/cards', authenticateToken, async (req: any, res: any): Promise<an
     }
 
     // Maplerad sometimes returns card_no instead of card_number
-    const cardNumber = mCard.card_number || mCard.card_no;
+    const rawCardNumber = mCard.card_number || mCard.card_no;
+    const cardNumber = String(rawCardNumber).replace(/\s/g, ''); // Normalize: remove spaces
     const expiry = mCard.expiry || mCard.expiry_date || (mCard.expiry_month ? `${mCard.expiry_month}/${mCard.expiry_year}` : '12/2029');
     const cvv = mCard.cvv || mCard.cvv2 || '000';
+    const providerCardId = mCard.id || mCard.card_id || cardNumber;
+
+    console.log(`[MAPLERAD] Normalized Details: ${cardNumber} | ID: ${providerCardId}`);
 
     // 4. Atomic Balance Deduction & Card Creation
-    const [card] = await prisma.$transaction([
-      prisma.virtualCard.create({
-        data: {
-          userId,
-          walletId,
-          cardNumber,
-          expiry,
-          cvv,
-          status: "ACTIVE",
-          dailyLimit: cardInitialUSD
-        }
-      }),
-      prisma.wallet.update({
-        where: { id: walletId },
-        data: { balance: { decrement: costInWalletCurrency } }
-      }),
-      prisma.transaction.create({
-        data: {
-          userId,
-          walletId,
-          type: 'WITHDRAWAL',
-          amount: costInWalletCurrency,
-          currency: wallet.currency,
-          status: 'COMPLETED',
-          reference: `CARD_ISSUE_${Date.now()}`,
-          category: 'CARD',
-          desc: `Issued ${currency || 'USD'} Virtual Card (Initial: $${cardInitialUSD})`
-        }
-      }),
-      prisma.notification.create({
-        data: {
-          userId,
-          title: 'Virtual Card Issued',
-          message: `Your new ${currency || 'USD'} virtual card is active. Deducted ${costInWalletCurrency.toFixed(2)} ${wallet.currency} from your wallet.`,
-          type: 'SUCCESS'
-        }
-      })
-    ]);
-    
-    res.status(201).json(card);
+    try {
+      const [card] = await prisma.$transaction([
+        prisma.virtualCard.create({
+          data: {
+            userId,
+            walletId,
+            cardNumber,
+            expiry,
+            cvv,
+            providerCardId,
+            status: "ACTIVE",
+            dailyLimit: cardInitialUSD
+          }
+        }),
+        prisma.wallet.update({
+          where: { id: walletId },
+          data: { balance: { decrement: costInWalletCurrency } }
+        }),
+        prisma.transaction.create({
+          data: {
+            userId,
+            walletId,
+            type: 'WITHDRAWAL',
+            amount: costInWalletCurrency,
+            currency: wallet.currency,
+            status: 'COMPLETED',
+            reference: `CARD_ISSUE_${Date.now()}`,
+            category: 'CARD',
+            desc: `Issued ${currency || 'USD'} Virtual Card (Initial: $${cardInitialUSD})`
+          }
+        })
+      ]);
+      res.status(201).json(card);
+    } catch (prismaError: any) {
+      console.error('[PRISMA ERROR] Card Creation Failed:', prismaError);
+      if (prismaError.code === 'P2002') {
+        return res.status(400).json({ error: 'This card number already exists in our system. Provider returned a duplicate sandbox card.' });
+      }
+      throw prismaError;
+    }
   } catch (error: any) {
     console.error('Create card error:', error);
     res.status(500).json({ error: error.message || 'Failed to issue virtual card' });
