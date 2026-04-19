@@ -374,6 +374,7 @@ app.post('/api/cards', authenticateToken, async (req: any, res: any): Promise<an
   try {
     const { walletId, currency, initialAmount } = req.body;
     const userId = req.user.userId;
+    console.log(`[CARDS] Received issuance request: User=${userId}, Wallet=${walletId}, Rail=${currency}`);
     const cardInitialUSD = initialAmount || 1; // Default $1 for Virtual Cards as per new requirement
 
     // 1. Validate Wallet & Check Balance (with cross-currency support)
