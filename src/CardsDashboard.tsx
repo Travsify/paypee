@@ -22,6 +22,7 @@ import {
   Globe,
   Sparkles
 } from 'lucide-react';
+import { API_BASE } from './config';
 
 const CardsDashboard = ({ wallets: propWallets }: { wallets?: any[] }) => {
   const [cards, setCards] = useState<any[]>([]);
@@ -47,7 +48,7 @@ const CardsDashboard = ({ wallets: propWallets }: { wallets?: any[] }) => {
   const fetchCards = async () => {
     try {
       const token = localStorage.getItem('paypee_token');
-      const res = await fetch('/api/cards', {
+      const res = await fetch(`${API_BASE}/api/cards`, {
         headers: { 'Authorization': `Bearer ${token}` },
         cache: 'no-store'
       });
@@ -66,7 +67,7 @@ const CardsDashboard = ({ wallets: propWallets }: { wallets?: any[] }) => {
   const fetchSubscriptions = async (cardId: string) => {
     try {
       const token = localStorage.getItem('paypee_token');
-      const res = await fetch(`/api/cards/${cardId}/subscriptions`, {
+      const res = await fetch(`${API_BASE}/api/cards/${cardId}/subscriptions`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await res.json();
@@ -77,7 +78,7 @@ const CardsDashboard = ({ wallets: propWallets }: { wallets?: any[] }) => {
   const toggleBlock = async (cardId: string, merchantName: string) => {
     try {
       const token = localStorage.getItem('paypee_token');
-      const res = await fetch(`/api/cards/${cardId}/block-merchant`, {
+      const res = await fetch(`${API_BASE}/api/cards/${cardId}/block-merchant`, {
         method: 'POST',
         headers: { 
           'Authorization': `Bearer ${token}`,
@@ -92,7 +93,7 @@ const CardsDashboard = ({ wallets: propWallets }: { wallets?: any[] }) => {
   const fetchWallets = async () => {
     try {
       const token = localStorage.getItem('paypee_token');
-      const res = await fetch('/api/users/me', {
+      const res = await fetch(`${API_BASE}/api/users/me`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await res.json();
@@ -113,7 +114,7 @@ const CardsDashboard = ({ wallets: propWallets }: { wallets?: any[] }) => {
   const toggleFreeze = async (cardId: string, currentStatus: string) => {
     try {
       const token = localStorage.getItem('paypee_token');
-      const res = await fetch(`/api/cards/${cardId}/toggle-freeze`, {
+      const res = await fetch(`${API_BASE}/api/cards/${cardId}/toggle-freeze`, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -137,7 +138,7 @@ const CardsDashboard = ({ wallets: propWallets }: { wallets?: any[] }) => {
       const payload = { walletId: issueWalletId, currency: issueCurrency };
       console.log('[DEBUG] Sending Payload:', payload);
 
-      const res = await fetch('/api/cards', {
+      const res = await fetch(`${API_BASE}/api/cards`, {
         method: 'POST',
         headers: { 
           'Authorization': `Bearer ${token}`,
@@ -176,7 +177,7 @@ const CardsDashboard = ({ wallets: propWallets }: { wallets?: any[] }) => {
     setSubmitting(true);
     try {
       const token = localStorage.getItem('paypee_token');
-      const res = await fetch(`/api/cards/${selectedCard.id}/fund`, {
+      const res = await fetch(`${API_BASE}/api/cards/${selectedCard.id}/fund`, {
         method: 'POST',
         headers: { 
           'Authorization': `Bearer ${token}`,
@@ -209,7 +210,7 @@ const CardsDashboard = ({ wallets: propWallets }: { wallets?: any[] }) => {
     setSubmitting(true);
     try {
       const token = localStorage.getItem('paypee_token');
-      const res = await fetch(`/api/cards/${selectedCard.id}/withdraw`, {
+      const res = await fetch(`${API_BASE}/api/cards/${selectedCard.id}/withdraw`, {
         method: 'POST',
         headers: { 
           'Authorization': `Bearer ${token}`,
