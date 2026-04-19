@@ -53,12 +53,15 @@ const PayoutModal: React.FC<PayoutModalProps> = ({ isOpen, onClose, onComplete, 
   const [pin, setPin] = useState('');
 
   useEffect(() => {
-    if (accountNumber.length >= 10 && bankCode && targetCurrency === 'NGN') {
+    const isMoMo = ['KES', 'GHS', 'UGX', 'RWF'].includes(targetCurrency);
+    const minLen = (targetCurrency === 'NGN' || isMoMo) ? 8 : 6;
+    
+    if (accountNumber.length >= minLen && (bankCode || routingNumber || iban || swiftCode)) {
       const verify = async () => {
         setVerifying(true);
         setAccountName('');
         try {
-          const res = await fetch(`${API_BASE}/api/payouts/verify?accountNumber=${accountNumber}&bankCode=${bankCode}`, {
+          const res = await fetch(`${API_BASE}/api/payouts/verify?accountNumber=${accountNumber}&bankCode=${bankCode || routingNumber || iban || swiftCode}`, {
             headers: { 'Authorization': `Bearer ${localStorage.getItem('paypee_token')}` }
           });
           if (res.ok) {
@@ -77,7 +80,7 @@ const PayoutModal: React.FC<PayoutModalProps> = ({ isOpen, onClose, onComplete, 
     } else {
       setAccountName('');
     }
-  }, [accountNumber, bankCode, targetCurrency]);
+  }, [accountNumber, bankCode, routingNumber, iban, swiftCode, targetCurrency]);
 
   useEffect(() => {
     if (isOpen) {
@@ -272,16 +275,9 @@ const PayoutModal: React.FC<PayoutModalProps> = ({ isOpen, onClose, onComplete, 
                 Verifying account...
               </div>
             )}
-            {accountName && <div style={{ fontSize: '0.85rem', color: '#22d3ee', marginTop: '0.5rem', fontWeight: 700, background: 'rgba(34, 211, 238, 0.05)', padding: '0.5rem', borderRadius: '8px' }}>
-              Verified Name: {accountName}
-            </div>}
-            {(!verifying && accountNumber.length >= 8 && bankCode && !accountName) && (
-              <div style={{ marginTop: '1rem' }}>
-                <label style={{ ...labelStyle, color: '#f43f5e' }}>VERIFICATION FAILED: ENTER NAME MANUALLY</label>
-                <div style={inputWrapperStyle}>
-                  <User size={18} color="#f43f5e" />
-                  <input type="text" placeholder="Full Recipient Name" value={accountName} onChange={(e) => setAccountName(e.target.value)} style={inputStyle} />
-                </div>
+            {accountName && (
+              <div style={{ fontSize: '0.85rem', color: '#22d3ee', marginTop: '0.5rem', fontWeight: 700, background: 'rgba(34, 211, 238, 0.05)', padding: '0.5rem', borderRadius: '8px' }}>
+                Verified Name: {accountName}
               </div>
             )}
           </div>
@@ -328,13 +324,6 @@ const PayoutModal: React.FC<PayoutModalProps> = ({ isOpen, onClose, onComplete, 
             <div style={inputWrapperStyle}>
               <Building2 size={18} color="var(--primary)" />
               <input type="text" placeholder="SWIFT Code" value={swiftCode} onChange={(e) => setSwiftCode(e.target.value)} style={inputStyle} />
-            </div>
-          </div>
-          <div style={inputGroupStyle}>
-            <label style={labelStyle}>RECIPIENT FULL NAME</label>
-            <div style={inputWrapperStyle}>
-              <User size={18} color="var(--primary)" />
-              <input type="text" placeholder="John Doe" value={accountName} onChange={(e) => setAccountName(e.target.value)} style={inputStyle} />
             </div>
           </div>
         </>
