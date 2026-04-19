@@ -180,7 +180,7 @@ export const issueVirtualAccount = async (customerId: string, currency: string) 
     };
 
     if (isGlobal) {
-      payload.type = currency.toUpperCase() === 'USD' ? 'DOMICILIARY' : 'GLOBAL';
+      payload.type = 'DOMICILIARY';
     }
 
     console.log(`[MAPLERAD] Issuing ${currency} account for customer ${customerId} via ${url} (Payload: ${JSON.stringify(payload)})`);
