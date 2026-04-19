@@ -104,6 +104,16 @@ app.get('/api/fix-withdrawal', async (req: any, res: any) => {
   }
 });
 
+// Admin: Check Maplerad Business Balances
+app.get('/api/admin/maplerad-balances', authenticateToken, async (req: any, res: any): Promise<any> => {
+  try {
+    const wallets = await Maplerad.getWallets();
+    res.json(wallets);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Verify PIN for sensitive actions
 app.post('/api/users/verify-pin', authenticateToken, async (req: any, res: any): Promise<any> => {
   try {
