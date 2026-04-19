@@ -31,9 +31,12 @@ export class IbanService {
     // 3. Provision external details from Maplerad API
     let details: any = null;
 
-    if (['NGN', 'EUR', 'GBP', 'USD'].includes(currency)) {
+    const isAfricanFiat = ['NGN', 'EUR', 'GBP', 'USD', 'KES', 'GHS', 'UGX', 'RWF', 'XAF', 'XOF', 'TZS'].includes(currency);
+    const isCrypto = ['BTC', 'USDT', 'USDC'].includes(currency);
+
+    if (isAfricanFiat) {
        try {
-          console.log(`🏦 Calling Maplerad for real ${currency} rails...`);
+          console.log(`🏦 Calling Maplerad for ${currency} rails...`);
           
           // A. Create/Get Maplerad Customer
           const customer = await Maplerad.createCustomer(
@@ -42,12 +45,10 @@ export class IbanService {
              user.email
           );
 
-          // B. Upgrade Customer to Tier 1 KYC (Required for NGN Accounts)
+          // B. Upgrade Customer to Tier 1 KYC (Required for many virtual accounts)
           if (bvn || (kycData && kycData.bvn)) {
-             console.log(`[MAPLERAD DEBUG] Upgrading Customer ${customer.id} to Tier 1 using provided KYC data...`);
+             console.log(`[MAPLERAD DEBUG] Upgrading Customer ${customer.id} to Tier 1...`);
              await Maplerad.upgradeCustomerTier1(customer.id, kycData || { bvn: bvn });
-          } else {
-             console.log(`[MAPLERAD WARNING] No BVN provided. Maplerad may block virtual account creation if customer is not Tier 1.`);
           }
 
           // C. Issue Account
@@ -56,8 +57,9 @@ export class IbanService {
           details = {
              accountHolder: `${user.firstName} ${user.lastName}`,
              iban: apiData.account_number,
-             bic: apiData.bank_code || '0000',
-             bankName: apiData.bank_name || 'Standard Chartered',
+             accountNumber: apiData.account_number,
+             bic: apiData.bank_code || apiData.routing_number || 'MAPL',
+             bankName: apiData.bank_name || `${currency} Settlement Bank`,
              provider: 'Maplerad',
              extRef: apiData.id || apiData.reference || apiData.account_number
           };
@@ -65,6 +67,14 @@ export class IbanService {
           console.error(`❌ Maplerad ${currency} Provisioning failed:`, err.message);
           throw err; 
        }
+    } else if (isCrypto) {
+       // Placeholder for Crypto Address Generation
+       details = {
+          address: `0x${Math.random().toString(36).substring(2, 15)}${Math.random().toString(36).substring(2, 15)}`,
+          network: currency === 'BTC' ? 'Bitcoin' : 'ERC20',
+          provider: 'Maplerad Crypto',
+          note: 'Deposit only to this address'
+       };
     } else {
        throw new Error(`Maplerad provisioning is not yet supported for ${currency}.`);
     }

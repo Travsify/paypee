@@ -1097,7 +1097,7 @@ app.get('/api/ai/insights', authenticateToken, async (req: any, res: any) => {
 app.post('/api/accounts/provision', authenticateToken, async (req: any, res: any) => {
   try {
     const { currency, bvn, kycData } = req.body;
-    if (!['USD', 'EUR', 'GBP', 'NGN', 'BTC', 'USDT', 'USDC'].includes(currency)) {
+    if (!['USD', 'EUR', 'GBP', 'NGN', 'BTC', 'USDT', 'USDC', 'KES', 'GHS', 'UGX', 'RWF', 'XAF', 'XOF', 'TZS'].includes(currency)) {
       return res.status(400).json({ error: 'Unsupported currency for account generation.' });
     }
     const user = await prisma.user.findUnique({ where: { id: req.user.userId } });

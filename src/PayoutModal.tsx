@@ -29,7 +29,13 @@ const TARGET_CURRENCIES = [
   { code: 'KES', label: 'Kenya (KES)' },
   { code: 'GHS', label: 'Ghana (GHS)' },
   { code: 'UGX', label: 'Uganda (UGX)' },
-  { code: 'RWF', label: 'Rwanda (RWF)' }
+  { code: 'RWF', label: 'Rwanda (RWF)' },
+  { code: 'XAF', label: 'Central Africa (XAF)' },
+  { code: 'XOF', label: 'West Africa (XOF)' },
+  { code: 'TZS', label: 'Tanzania (TZS)' },
+  { code: 'BTC', label: 'Bitcoin (BTC)' },
+  { code: 'USDT', label: 'Tether (USDT)' },
+  { code: 'USDC', label: 'USD Coin (USDC)' }
 ];
 
 const PayoutModal: React.FC<PayoutModalProps> = ({ isOpen, onClose, onComplete, wallets }) => {

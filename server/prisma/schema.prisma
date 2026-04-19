@@ -45,6 +45,13 @@ enum Currency {
   BTC
   USDT
   USDC
+  KES
+  GHS
+  UGX
+  RWF
+  XAF
+  XOF
+  TZS
 }
 
 model User {

@@ -202,6 +202,8 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
     if (currency === 'EUR') return { symbol: '€', gradient: 'linear-gradient(135deg, #312e81 0%, #6366f1 100%)' };
     if (currency === 'GBP') return { symbol: '£', gradient: 'linear-gradient(135deg, #4c1d95 0%, #8b5cf6 100%)' };
     if (currency === 'BTC') return { symbol: '₿', gradient: 'linear-gradient(135deg, #b45309 0%, #f59e0b 100%)' };
+    if (['USDT', 'USDC'].includes(currency)) return { symbol: '₮', gradient: 'linear-gradient(135deg, #26a17b 0%, #00d395 100%)' };
+    if (['KES', 'GHS', 'UGX', 'RWF', 'XAF', 'XOF', 'TZS'].includes(currency)) return { symbol: currency, gradient: 'linear-gradient(135deg, #374151 0%, #111827 100%)' };
     return { symbol: '₦', gradient: 'linear-gradient(135deg, #064e3b 0%, #10b981 100%)' };
   };
 
