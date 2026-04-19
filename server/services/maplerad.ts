@@ -612,7 +612,7 @@ export const issueCryptoAddress = async (customerId: string, currency: string) =
   // Map Paypee currency codes to Maplerad's coin/chain format
   const coinMap: Record<string, { coin: string; chain: string }> = {
     'USDC': { coin: 'USDC', chain: 'solana' },
-    'USDT': { coin: 'USDT', chain: 'ethereum' }, // Changed from 'tron' due to API downtime
+    'USDT': { coin: 'USDT', chain: 'polygon' }, // Switched from ethereum to polygon due to API restrictions
     'BTC':  { coin: 'BTC',  chain: 'bitcoin' }
   };
 
