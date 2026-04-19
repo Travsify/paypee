@@ -529,12 +529,38 @@ const CardsDashboard = () => {
                <form onSubmit={handleIssueCard}>
                  <div style={{ marginBottom: '2rem' }}>
                    <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: '#475569', marginBottom: '0.75rem', letterSpacing: '1px' }}>FUNDING SOURCE</label>
-                   <select value={issueWalletId} onChange={(e) => setIssueWalletId(e.target.value)} required className="form-input" style={{ background: 'rgba(255,255,255,0.03)', padding: '1.25rem' }}>
-                     <option value="">Select Liquid Wallet</option>
-                     {wallets.map(w => (
-                       <option key={w.id} value={w.id}>{w.currency} - Available: {parseFloat(w.balance).toFixed(2)}</option>
-                     ))}
-                   </select>
+                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', maxHeight: '180px', overflowY: 'auto', padding: '0.5rem', background: 'rgba(255,255,255,0.02)', borderRadius: '16px' }}>
+                      {wallets.length === 0 ? (
+                        <div style={{ padding: '1.5rem', textAlign: 'center', fontSize: '0.85rem', color: 'var(--text-muted)' }}>No liquid wallets available.</div>
+                      ) : (
+                        wallets.map(w => (
+                          <div 
+                            key={w.id} 
+                            onClick={() => setIssueWalletId(w.id)}
+                            style={{ 
+                              padding: '1.25rem', 
+                              borderRadius: '12px', 
+                              background: issueWalletId === w.id ? 'rgba(99, 102, 241, 0.1)' : 'rgba(255,255,255,0.02)', 
+                              border: `1px solid ${issueWalletId === w.id ? 'var(--primary)' : 'rgba(255,255,255,0.05)'}`,
+                              cursor: 'pointer',
+                              display: 'flex',
+                              justifyContent: 'space-between',
+                              alignItems: 'center',
+                              transition: 'all 0.2s'
+                            }}
+                          >
+                             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                                <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem', fontWeight: 900 }}>{w.currency}</div>
+                                <div style={{ fontSize: '0.9rem', fontWeight: 700 }}>{w.currency} Wallet</div>
+                             </div>
+                             <div style={{ textAlign: 'right' }}>
+                                <div style={{ fontSize: '0.9rem', fontWeight: 900 }}>{parseFloat(w.balance).toLocaleString()}</div>
+                                <div style={{ fontSize: '0.6rem', color: 'var(--text-muted)', fontWeight: 800 }}>AVAILABLE</div>
+                             </div>
+                          </div>
+                        ))
+                      )}
+                   </div>
                  </div>
 
                  <div style={{ marginBottom: '2.5rem' }}>
@@ -553,7 +579,7 @@ const CardsDashboard = () => {
                         }}
                       >
                          <div style={{ fontSize: '1.2rem', fontWeight: 900, color: '#fff' }}>USD Card</div>
-                         <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '4px' }}>Global Rail</div>
+                         <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '4px', fontWeight: 800 }}>GLOBAL RAIL</div>
                       </div>
                       <div 
                         onClick={() => setIssueCurrency('NGN')} 
@@ -568,7 +594,7 @@ const CardsDashboard = () => {
                         }}
                       >
                          <div style={{ fontSize: '1.2rem', fontWeight: 900, color: '#fff' }}>NGN Card</div>
-                         <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '4px' }}>Local Rail</div>
+                         <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '4px', fontWeight: 800 }}>LOCAL RAIL</div>
                       </div>
                    </div>
                  </div>
@@ -582,7 +608,7 @@ const CardsDashboard = () => {
                     </p>
                  </div>
 
-                 <button type="submit" disabled={submitting} className="btn btn-primary" style={{ width: '100%', padding: '1.4rem', borderRadius: '24px', fontSize: '1.1rem', fontWeight: 900 }}>
+                 <button type="submit" disabled={submitting || !issueWalletId} className="btn btn-primary" style={{ width: '100%', padding: '1.4rem', borderRadius: '24px', fontSize: '1.1rem', fontWeight: 900 }}>
                    {submitting ? 'Initializing Rail...' : 'Deploy Instantly'}
                  </button>
                </form>
