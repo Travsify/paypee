@@ -578,8 +578,35 @@ export const getMapleradPayStatus = async (reference: string) => {
 };
 
 /**
- * Verifies the signature of an incoming Maplerad webhook.
+ * Issue a crypto address for a customer (BTC, USDT, etc.)
  */
+export const issueCryptoAddress = async (customerId: string, currency: string) => {
+  try {
+    const response = await makeRequest('post', '/issuing/addresses', {
+      customer_id: customerId,
+      currency: currency,
+      network: currency === 'BTC' ? 'BITCOIN' : 'ERC20' // Default to ERC20 for others, adjustable
+    });
+    return response.data.data;
+  } catch (error: any) {
+    console.error('[MAPLERAD] Crypto Issuing Error:', error.response?.data || error.message);
+    throw new Error(error.response?.data?.message || 'Failed to issue crypto address');
+  }
+};
+
+/**
+ * Get crypto addresses for a customer
+ */
+export const getCryptoAddresses = async (customerId: string) => {
+  try {
+    const response = await makeRequest('get', `/customers/${customerId}/addresses`);
+    return response.data.data;
+  } catch (error: any) {
+    console.error('[MAPLERAD] Get Crypto Addresses Error:', error.response?.data || error.message);
+    return [];
+  }
+};
+
 export const verifyWebhookSignature = (signature: string, payload: any) => {
   if (!signature || !MAPLERAD_SECRET_KEY) return false;
   const crypto = require('crypto');

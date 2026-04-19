@@ -16,6 +16,7 @@ import {
   Trophy,
   X
 } from 'lucide-react';
+import { API_BASE } from '../config';
 
 const BillsView = () => {
   const [activeCategory, setActiveCategory] = useState('airtime');
@@ -69,7 +70,7 @@ const BillsView = () => {
     try {
       const token = localStorage.getItem('paypee_token');
       // Maplerad category mapping
-      const res = await fetch(`https://paypee-api-kmhv.onrender.com/api/bills/providers?category=${cat}`, {
+      const res = await fetch(`${API_BASE}/api/bills/providers?category=${cat}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await res.json();
@@ -85,7 +86,7 @@ const BillsView = () => {
   const fetchProducts = async (billerId: string) => {
     try {
       const token = localStorage.getItem('paypee_token');
-      const res = await fetch(`https://paypee-api-kmhv.onrender.com/api/bills/products?billerId=${billerId}`, {
+      const res = await fetch(`${API_BASE}/api/bills/products?billerId=${billerId}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await res.json();
@@ -99,7 +100,7 @@ const BillsView = () => {
   const fetchWallets = async () => {
     try {
       const token = localStorage.getItem('paypee_token');
-      const res = await fetch('https://paypee-api-kmhv.onrender.com/api/users/me', {
+      const res = await fetch(`${API_BASE}/api/users/me`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await res.json();
@@ -126,7 +127,7 @@ const BillsView = () => {
     setSubmitting(true);
     try {
       const token = localStorage.getItem('paypee_token');
-      const res = await fetch('https://paypee-api-kmhv.onrender.com/api/bills/pay', {
+      const res = await fetch(`${API_BASE}/api/bills/pay`, {
         method: 'POST',
         headers: { 
           'Authorization': `Bearer ${token}`,

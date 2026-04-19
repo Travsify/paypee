@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Terminal, 
@@ -30,9 +30,10 @@ import {
   Bot,
   Plus,
   History,
-  Lock,
-  RefreshCcw
+  RefreshCcw,
+  Lock
 } from 'lucide-react';
+import { API_BASE } from './config';
 import SettingsView from './SettingsView';
 import VerificationGate from './VerificationGate';
 import AiAdvisor from './AiAdvisor';

@@ -17,6 +17,8 @@ import {
   Zap
 } from 'lucide-react';
 
+import { API_BASE } from '../config';
+
 interface Transaction {
   id: string;
   type: string;
@@ -42,7 +44,7 @@ const HistoryView: React.FC<HistoryViewProps> = ({ onTransactionClick }) => {
   const fetchTransactions = async () => {
     try {
       const token = localStorage.getItem('paypee_token');
-      const res = await fetch('https://paypee-api-kmhv.onrender.com/api/transactions', {
+      const res = await fetch(`${API_BASE}/api/transactions`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await res.json();

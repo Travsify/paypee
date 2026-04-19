@@ -5,7 +5,6 @@ import dotenv from 'dotenv';
 import { PrismaClient, AccountRole } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import { processCryptoPayout, createLightningInvoice } from './services/bitnob';
 import { AiIntelligenceService } from './services/ai.service';
 import { IbanService } from './services/iban.service';
 import { BillsService } from './services/bills.service';
@@ -353,19 +352,14 @@ app.post('/api/transactions', authenticateToken, async (req: any, res: any): Pro
     if (type === 'WITHDRAWAL' || type === 'PAYOUT') {
        if (wallet.balance < amount) return res.status(400).json({ error: 'Insufficient funds' });
        
-       if (currency === 'USD' && process.env.BITNOB_SECRET_KEY) {
+       if (process.env.MAPLERAD_SECRET_KEY) {
          try {
-           await processCryptoPayout(amount, req.body.destinationAddress || 'lightning_address');
-         } catch (err) {
-           console.warn('Bitnob failure:', err);
-         }
-       } else if (process.env.MAPLERAD_SECRET_KEY) {
-         try {
-           const destNumber = req.body.destinationAccount || '0123456789';
+           // We use Maplerad as the primary gateway for all crypto/fiat payouts
+           const destNumber = req.body.destinationAccount || req.body.destinationAddress || '0123456789';
            const destBank = req.body.bankCode || '058';
            await Maplerad.processPayout(amount, currency, { number: destNumber, bankCode: destBank });
          } catch (err) {
-           console.warn('Fincra failure:', err);
+           console.warn('Maplerad payout routing warning:', err);
          }
        }
        
@@ -374,9 +368,8 @@ app.post('/api/transactions', authenticateToken, async (req: any, res: any): Pro
         data: { balance: { decrement: amount } }
       });
     } else if (type === 'DEPOSIT') {
-       if (currency === 'USD' && process.env.BITNOB_SECRET_KEY) {
-         // Could generate lightning invoice here
-         await createLightningInvoice(amount, 'user@example.com').catch(console.warn);
+       if (currency === 'USD' || currency === 'BTC') {
+         // Maplerad handles crypto address generation via IbanService
        }
        await prisma.wallet.update({
         where: { id: walletId },
@@ -471,9 +464,10 @@ app.post('/api/payouts/transfer', authenticateToken, async (req: any, res: any) 
       console.log(`[PAYOUT] Executing local transfer of ${parsedAmount} ${payoutCurrency}`);
     }
 
-    // 3. Execute Maplerad Payout
-    // Add extra international fields if they exist
-    const isMoMo = ['KES', 'GHS', 'UGX', 'RWF'].includes(payoutCurrency);
+    // 3. Execute Maplerad Payout (Handles both Fiat and Crypto)
+    const isMoMo = ['KES', 'GHS', 'UGX', 'RWF', 'XAF', 'XOF', 'TZS'].includes(payoutCurrency);
+    const isCrypto = ['BTC', 'USDT', 'USDC'].includes(payoutCurrency);
+
     const accountDetails = {
       bankCode,
       number: accountNumber,
@@ -481,18 +475,18 @@ app.post('/api/payouts/transfer', authenticateToken, async (req: any, res: any) 
       swift_code: swiftCode,
       iban: iban,
       accountName: accountName,
-      beneficiary_type: isMoMo ? 'mobile_money' : 'bank_account'
+      beneficiary_type: isMoMo ? 'mobile_money' : (isCrypto ? 'crypto_address' : 'bank_account')
     };
 
     const payoutResult = await Maplerad.processPayout(payoutAmount, payoutCurrency, accountDetails);
 
-    // 4. Atomic DB update (Only deduct once, log the transfer)
+    // 4. Atomic DB update
     const reference = `PAYOUT_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
     
     await prisma.$transaction([
       prisma.wallet.update({
         where: { id: walletId },
-        data: { balance: { decrement: parsedAmount } } // Always deduct the source amount
+        data: { balance: { decrement: parsedAmount } }
       }),
       prisma.transaction.create({
         data: {
@@ -503,8 +497,8 @@ app.post('/api/payouts/transfer', authenticateToken, async (req: any, res: any) 
           currency: wallet.currency as any,
           status: 'COMPLETED',
           reference,
-          category: 'TRANSFER',
-          desc: `Transfer to ${accountName || 'Recipient'} • ${req.body.bankName || 'Local Bank'}`,
+          category: isCrypto ? 'CRYPTO' : 'TRANSFER',
+          desc: isCrypto ? `Crypto Transfer to ${accountNumber.substring(0, 8)}...` : `Transfer to ${accountName || 'Recipient'} • ${req.body.bankName || 'Local Bank'}`,
           metadata: {
             provider: 'MAPLERAD',
             providerReference: payoutResult?.id || null,
@@ -518,6 +512,8 @@ app.post('/api/payouts/transfer', authenticateToken, async (req: any, res: any) 
         }
       })
     ]);
+
+    console.log(`[PAYOUT SUCCESS] Transfer ${reference} recorded for User ${userId}`);
 
     res.status(200).json({ status: 'COMPLETED', reference, targetAmount: payoutAmount, targetCurrency: payoutCurrency });
 

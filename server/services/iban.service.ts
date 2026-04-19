@@ -68,13 +68,29 @@ export class IbanService {
           throw err; 
        }
     } else if (isCrypto) {
-       // Placeholder for Crypto Address Generation
-       details = {
-          address: `0x${Math.random().toString(36).substring(2, 15)}${Math.random().toString(36).substring(2, 15)}`,
-          network: currency === 'BTC' ? 'Bitcoin' : 'ERC20',
-          provider: 'Maplerad Crypto',
-          note: 'Deposit only to this address'
-       };
+       try {
+          console.log(`🏦 Calling Maplerad for ${currency} crypto address...`);
+          
+          // A. Create/Get Maplerad Customer
+          const customer = await Maplerad.createCustomer(
+             user.firstName || "Customer", 
+             user.lastName || userId.substring(0, 5), 
+             user.email
+          );
+
+          // B. Issue Crypto Address
+          const apiData = await Maplerad.issueCryptoAddress(customer.id, currency);
+          
+          details = {
+             address: apiData.address,
+             network: apiData.network || (currency === 'BTC' ? 'Bitcoin' : 'ERC20'),
+             provider: 'Maplerad Crypto',
+             note: 'Deposit only to this address'
+          };
+       } catch (err: any) {
+          console.error(`❌ Maplerad ${currency} Crypto Provisioning failed:`, err.message);
+          throw err;
+       }
     } else {
        throw new Error(`Maplerad provisioning is not yet supported for ${currency}.`);
     }
