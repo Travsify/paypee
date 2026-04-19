@@ -27,8 +27,7 @@ import {
   Repeat,
   ShieldCheck,
   Headphones,
-  Info,
-  ChevronRight
+  Info
 } from 'lucide-react';
 import CardsDashboard from './CardsDashboard';
 import AiAdvisor from './AiAdvisor';
