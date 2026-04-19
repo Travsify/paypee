@@ -259,12 +259,16 @@ export const issueVirtualAccount = async (customerId: string, currency: string) 
  */
 export const issueVirtualCard = async (customerId: string, currency: string, amount: number) => {
   try {
+    // Ensure minimum funding of $2.00 (200 cents) as per Maplerad default/minimum
+    const fundingAmount = Math.max(200, amount * 100);
+    
+    console.log(`[MAPLERAD] Issuing ${currency} card. Funding: ${fundingAmount} cents`);
+    
     const response = await makeRequest('post', '/issuing', {
       customer_id: customerId,
-      currency: currency,
-      amount: amount * 100, // Maplerad uses kobo/cents
+      currency: currency || 'USD',
       type: 'VIRTUAL',
-      brand: 'VISA',
+      amount: fundingAmount,
       auto_approve: true
     });
     return response.data.data;
