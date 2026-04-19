@@ -34,20 +34,29 @@ app.get('/api/admin/fix-card-withdraw', async (req: any, res: any) => {
   try {
     const badTx = await prisma.transaction.findFirst({
       where: {
-        category: 'CARD',
-        type: 'DEPOSIT',
         reference: { startsWith: 'CARD_WITHDRAW_' },
-        amount: 1000,
-        currency: 'NGN'
+        currency: 'NGN',
+        status: 'COMPLETED'
       },
       orderBy: { createdAt: 'desc' }
     });
 
-    if (!badTx) return res.json({ message: 'No incorrect withdrawal found to fix.' });
+    if (!badTx) {
+      // Look even broader
+      const txs = await prisma.transaction.findMany({ 
+        where: { userId: badTx?.userId }, 
+        take: 10, 
+        orderBy: { createdAt: 'desc' } 
+      });
+      return res.json({ message: 'No incorrect withdrawal found to fix.', recent_txs: txs });
+    }
 
     const rateData = await Maplerad.getExchangeRate('USD', 'NGN');
-    const correctAmount = 1000 * rateData.rate; 
-    const difference = correctAmount - 1000; 
+    const rate = rateData.rate || 1500; // Fallback to 1500 if API fails
+    const correctAmount = 1000 * rate; 
+    const difference = correctAmount - badTx.amount; 
+
+    if (difference <= 0) return res.json({ message: 'Transaction already looks correct or higher than expected.', tx: badTx });
 
     await prisma.$transaction([
       prisma.wallet.update({
@@ -58,18 +67,58 @@ app.get('/api/admin/fix-card-withdraw', async (req: any, res: any) => {
         where: { id: badTx.id },
         data: { 
           amount: correctAmount,
-          desc: `Withdrawal from Card (CORRECTED: $1000 USD @ ${rateData.rate.toFixed(2)})`
+          desc: `Withdrawal from Card (CORRECTED: $1000 USD @ ${rate.toFixed(2)})`
+        }
+      }),
+      prisma.notification.create({
+        data: {
+          userId: badTx.userId,
+          title: '💰 Balance Corrected',
+          message: `Your $1000 USD withdrawal has been corrected to ${correctAmount.toLocaleString()} NGN (+${difference.toLocaleString()} NGN added).`,
+          type: 'SUCCESS'
         }
       })
     ]);
 
     res.json({ 
       message: 'Balance corrected successfully',
-      original: '1000 NGN',
-      corrected: `${correctAmount.toFixed(2)} NGN`,
+      original: badTx.amount,
+      corrected: correctAmount,
       difference: `+${difference.toFixed(2)} NGN`,
-      rate: rateData.rate
+      rate: rate
     });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/cards/:cardId/toggle-freeze', authenticateToken, async (req: any, res: any): Promise<any> => {
+  try {
+    const { cardId } = req.params;
+    const card = await prisma.virtualCard.findUnique({ where: { id: cardId } });
+    if (!card || card.userId !== req.user.userId) return res.status(404).json({ error: 'Card not found' });
+
+    const newStatus = card.status === 'ACTIVE' ? 'FROZEN' : 'ACTIVE';
+    
+    // Call Maplerad if possible
+    if (card.providerCardId) {
+      try {
+        if (newStatus === 'FROZEN') {
+          await Maplerad.freezeCard(card.providerCardId);
+        } else {
+          await Maplerad.unfreezeCard(card.providerCardId);
+        }
+      } catch (e: any) {
+        console.error(`[CARDS] Provider toggle failed:`, e.message);
+      }
+    }
+
+    const updatedCard = await prisma.virtualCard.update({
+      where: { id: cardId },
+      data: { status: newStatus }
+    });
+
+    res.json(updatedCard);
   } catch (err: any) {
     res.status(500).json({ error: err.message });
   }
