@@ -235,6 +235,8 @@ export const processPayout = async (amount: number, currency: string, accountDet
     if (accountDetails.routing_number) payload.routing_number = accountDetails.routing_number;
     if (accountDetails.swift_code) payload.swift_code = accountDetails.swift_code;
     if (accountDetails.iban) payload.iban = accountDetails.iban;
+    if (accountDetails.accountName) payload.name = accountDetails.accountName;
+    if (accountDetails.beneficiary_type) payload.beneficiary_type = accountDetails.beneficiary_type;
 
     const response = await makeRequest('post', '/transfers', payload);
     return response.data.data;

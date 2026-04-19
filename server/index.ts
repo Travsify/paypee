@@ -473,12 +473,15 @@ app.post('/api/payouts/transfer', authenticateToken, async (req: any, res: any) 
 
     // 3. Execute Maplerad Payout
     // Add extra international fields if they exist
+    const isMoMo = ['KES', 'GHS', 'UGX', 'RWF'].includes(payoutCurrency);
     const accountDetails = {
       bankCode,
       number: accountNumber,
       routing_number: routingNumber,
       swift_code: swiftCode,
-      iban: iban
+      iban: iban,
+      accountName: accountName,
+      beneficiary_type: isMoMo ? 'mobile_money' : 'bank_account'
     };
 
     const payoutResult = await Maplerad.processPayout(payoutAmount, payoutCurrency, accountDetails);

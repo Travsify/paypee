@@ -266,13 +266,24 @@ const PayoutModal: React.FC<PayoutModalProps> = ({ isOpen, onClose, onComplete, 
               <User size={18} color="var(--primary)" />
               <input type="text" placeholder={isMoMo ? "e.g. 0541234567" : "0123456789"} value={accountNumber} onChange={(e) => setAccountNumber(e.target.value)} style={inputStyle} />
             </div>
-            {verifying && <div style={{ fontSize: '0.8rem', color: '#94a3b8', marginTop: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <div style={{ width: 12, height: 12, border: '2px solid rgba(255,255,255,0.1)', borderTopColor: '#22d3ee', borderRadius: '50%', animation: 'spin 1s linear infinite' }}></div>
-              Verifying account...
-            </div>}
+            {verifying && (
+              <div style={{ fontSize: '0.8rem', color: '#94a3b8', marginTop: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <div style={{ width: 12, height: 12, border: '2px solid rgba(255,255,255,0.1)', borderTopColor: '#22d3ee', borderRadius: '50%', animation: 'spin 1s linear infinite' }}></div>
+                Verifying account...
+              </div>
+            )}
             {accountName && <div style={{ fontSize: '0.85rem', color: '#22d3ee', marginTop: '0.5rem', fontWeight: 700, background: 'rgba(34, 211, 238, 0.05)', padding: '0.5rem', borderRadius: '8px' }}>
-              Account Name: {accountName}
+              Verified Name: {accountName}
             </div>}
+            {(!verifying && accountNumber.length >= 8 && bankCode && !accountName) && (
+              <div style={{ marginTop: '1rem' }}>
+                <label style={{ ...labelStyle, color: '#f43f5e' }}>VERIFICATION FAILED: ENTER NAME MANUALLY</label>
+                <div style={inputWrapperStyle}>
+                  <User size={18} color="#f43f5e" />
+                  <input type="text" placeholder="Full Recipient Name" value={accountName} onChange={(e) => setAccountName(e.target.value)} style={inputStyle} />
+                </div>
+              </div>
+            )}
           </div>
         </>
       );
@@ -286,6 +297,9 @@ const PayoutModal: React.FC<PayoutModalProps> = ({ isOpen, onClose, onComplete, 
             <div style={inputWrapperStyle}>
               <User size={18} color="var(--primary)" />
               <input type="text" placeholder="Account Number" value={accountNumber} onChange={(e) => setAccountNumber(e.target.value)} style={inputStyle} />
+            </div>
+          </div>
+              <input type="text" placeholder="John Doe" value={accountName} onChange={(e) => setAccountName(e.target.value)} style={inputStyle} />
             </div>
           </div>
           <div style={inputGroupStyle}>
@@ -316,13 +330,20 @@ const PayoutModal: React.FC<PayoutModalProps> = ({ isOpen, onClose, onComplete, 
               <input type="text" placeholder="SWIFT Code" value={swiftCode} onChange={(e) => setSwiftCode(e.target.value)} style={inputStyle} />
             </div>
           </div>
+          <div style={inputGroupStyle}>
+            <label style={labelStyle}>RECIPIENT FULL NAME</label>
+            <div style={inputWrapperStyle}>
+              <User size={18} color="var(--primary)" />
+              <input type="text" placeholder="John Doe" value={accountName} onChange={(e) => setAccountName(e.target.value)} style={inputStyle} />
+            </div>
+          </div>
         </>
       );
     }
   };
 
   const isStep1Valid = () => {
-    if (!selectedWalletId || !targetCurrency) return false;
+    if (!selectedWalletId || !targetCurrency || !accountName) return false;
     const isMoMo = ['KES', 'GHS', 'UGX', 'RWF'].includes(targetCurrency);
     if (targetCurrency === 'NGN' || isMoMo) {
       return bankCode && accountNumber.length >= 8;
