@@ -44,8 +44,10 @@ const TransactionReceiptModal: React.FC<TransactionReceiptModalProps> = ({ trans
           style={{
             background: '#fff',
             color: '#000',
-            width: '100%',
+            width: '95%',
             maxWidth: '450px',
+            maxHeight: '90vh',
+            overflowY: 'auto',
             borderRadius: '32px',
             padding: '2.5rem',
             position: 'relative',
