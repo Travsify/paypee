@@ -21,8 +21,9 @@ import {
   Bell,
   Menu,
   X,
-  Repeat,
-  RefreshCw
+  RefreshCw,
+  Eye,
+  EyeOff
 } from 'lucide-react';
 import CardsDashboard from './CardsDashboard';
 import AiAdvisor from './AiAdvisor';
@@ -67,6 +68,7 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
   const [showNotifications, setShowNotifications] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
   const [isPinModalOpen, setIsPinModalOpen] = useState(false);
+  const [showBalances, setShowBalances] = useState(true);
 
   const fetchUserData = async () => {
     const token = localStorage.getItem('paypee_token');
@@ -359,9 +361,17 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
                 {/* 1. Master Summary */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '2rem' }}>
                    <div>
-                      <div style={{ color: 'var(--text-muted)', textTransform: 'uppercase', fontSize: '0.8rem', letterSpacing: '2px', marginBottom: '0.5rem' }}>Total Liquid Capital</div>
+                      <div style={{ color: 'var(--text-muted)', textTransform: 'uppercase', fontSize: '0.8rem', letterSpacing: '2px', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                        Total Liquid Capital
+                        <button 
+                          onClick={() => setShowBalances(!showBalances)} 
+                          style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', display: 'flex', alignItems: 'center' }}
+                        >
+                          {showBalances ? <EyeOff size={16} /> : <Eye size={16} />}
+                        </button>
+                      </div>
                       <div style={{ fontSize: 'clamp(2.5rem, 5vw, 4rem)', fontWeight: 900, lineHeight: 1, marginBottom: '0.5rem' }}>
-                        ₦{calculateTotalNGN().toLocaleString(undefined, {minimumFractionDigits: 2})}
+                        {showBalances ? `₦${calculateTotalNGN().toLocaleString(undefined, {minimumFractionDigits: 2})}` : '₦••••••'}
                       </div>
                       <div style={{ color: '#22d3ee', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                          <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#22d3ee', boxShadow: '0 0 10px #22d3ee' }}></div>
@@ -576,6 +586,8 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
                        userName={userData?.firstName}
                        onSwap={() => setIsSwapOpen(true)}
                        onPayout={() => setIsPayoutOpen(true)}
+                       onRefresh={fetchUserData}
+                       hideBalance={!showBalances}
                      />
                    );
                 })}

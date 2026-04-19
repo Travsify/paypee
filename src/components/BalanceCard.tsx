@@ -50,6 +50,7 @@ interface BalanceCardProps {
   onSwap?: () => void;
   onPayout?: () => void;
   onRefresh?: () => void;
+  hideBalance?: boolean;
 }
 
 const getAccountNumber = (details: any) => {
@@ -95,7 +96,8 @@ const BalanceCard: React.FC<BalanceCardProps> = ({
   onDelete,
   onSwap,
   onPayout,
-  onRefresh
+  onRefresh,
+  hideBalance = false
 }) => {
   const accNo = getAccountNumber(details);
   const bank = getBankName(details);
@@ -156,7 +158,7 @@ const BalanceCard: React.FC<BalanceCardProps> = ({
           <div style={{ fontSize: '0.75rem', fontWeight: 600, opacity: 0.8, marginBottom: '0.2rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Available Balance</div>
           <div style={{ fontSize: '2.5rem', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '0.2rem', letterSpacing: '-1px' }}>
             <span style={{ fontSize: '1.5rem', opacity: 0.8 }}>{symbol}</span>
-            {amount}
+            {hideBalance ? '••••••' : amount}
           </div>
         </div>
 
