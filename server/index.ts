@@ -1731,46 +1731,51 @@ app.post('/api/webhooks/maplerad', async (req: Request, res: Response) => {
       
       // Maplerad webhook can have data at top level or nested
       const txData = data || payload;
-      const amount = Number(txData.amount || 0);
+      const amount = Number(txData.amount || txData.total_amount || 0);
       const currency = (txData.currency || txData.coin || '').toUpperCase();
-      const account_number = txData.account_number || txData.virtual_account_number || 
+      const account_number = String(txData.account_number || txData.virtual_account_number || 
                              txData.virtual_account?.account_number ||
                              txData.meta?.account_number || txData.meta?.virtual_account_number ||
-                             txData.address || txData.wallet_address || '';
+                             txData.address || txData.wallet_address || '').trim();
       
-      // Maplerad sends fiat amounts in minor units (kobo/cents). 
-      // Crypto amounts might already be in major units or have different decimal places.
-      // We assume if it's fiat, it's minor. For crypto, usually it's major or atomic (e.g. Satoshis).
-      // Given Paypee architecture, we unconditionally divide by 100 for fiat, but we shouldn't arbitrarily divide crypto.
+      const customer_id = txData.customer_id || txData.customer?.id || txData.meta?.customer_id;
+      
       const isCrypto = ['BTC', 'USDT', 'USDC'].includes(currency);
       let parsedAmount = amount;
       if (!isCrypto) {
           parsedAmount = amount / 100;
       }
       
-      console.log(`[MAPLERAD WEBHOOK] Processing deposit: ${parsedAmount} ${currency} for account/address ${account_number}`);
+      console.log(`[MAPLERAD WEBHOOK] Processing ${currency} deposit: ${parsedAmount} (Raw: ${amount}) for account/address: ${account_number}, Customer: ${customer_id}`);
 
-      // Find wallet by account_number or address in metadata
-      const wallets = await prisma.wallet.findMany();
-      const wallet = wallets.find(w => {
+      // Find user/wallet
+      const wallets = await prisma.wallet.findMany({ include: { user: true } });
+      
+      // 1. Try finding by account number/address
+      let resolvedWallet = wallets.find(w => {
          const meta = w.metadata as any;
          if (!meta) return false;
-         return meta.iban === account_number || 
-                meta.account_number === account_number || 
-                meta.accountNumber === account_number ||
-                meta.virtual_account_number === account_number ||
-                meta.nuban === account_number ||
-                meta.address === account_number ||
-                meta.wallet_address === account_number;
+         const walletAcc = String(meta.iban || meta.account_number || meta.accountNumber || 
+                                 meta.virtual_account_number || meta.nuban || 
+                                 meta.address || meta.wallet_address || '').trim();
+         return walletAcc === account_number && account_number !== '';
       });
 
-      // If no wallet found by account number, try matching by currency (single-wallet users)
-      let resolvedWallet = wallet;
+      // 2. Try finding by customer_id + currency
+      if (!resolvedWallet && customer_id && currency) {
+        resolvedWallet = wallets.find(w => {
+           const userMeta = w.user?.metadata as any;
+           return userMeta?.customerId === customer_id && w.currency === currency;
+        });
+        if (resolvedWallet) console.log(`[MAPLERAD WEBHOOK] Matched by customer_id and currency: ${currency}`);
+      }
+
+      // 3. Last resort: Match by currency if user has only one (risky, but useful for debugging)
       if (!resolvedWallet && currency) {
         const currencyWallets = wallets.filter(w => w.currency === currency);
         if (currencyWallets.length === 1) {
           resolvedWallet = currencyWallets[0];
-          console.log(`[MAPLERAD WEBHOOK] Matched by currency fallback: ${currency}`);
+          console.log(`[MAPLERAD WEBHOOK] Matched by unique currency fallback: ${currency}`);
         }
       }
 

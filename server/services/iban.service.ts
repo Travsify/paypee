@@ -237,10 +237,18 @@ export class IbanService {
 
       const relevantTxs = externalTxs.filter((tx: any) => {
         const txCurrency = tx.currency || tx.coin || '';
-        const txAcc = String(tx.account_number || tx.virtual_account_number || tx.virtual_account?.account_number || tx.meta?.account_number || tx.meta?.virtual_account_number || tx.address || tx.wallet_address || '');
-        const isMatch = userIdentifiers.includes(txAcc);
+        const txAcc = String(tx.account_number || tx.virtual_account_number || tx.virtual_account?.account_number || tx.meta?.account_number || tx.meta?.virtual_account_number || tx.address || tx.wallet_address || '').trim();
+        const txCustId = tx.customer_id || tx.customer?.id || tx.meta?.customer_id;
         
-        if (!isMatch && tx.type === 'COLLECTION') {
+        // Match by account number/address
+        const isAccMatch = userIdentifiers.includes(txAcc) && txAcc !== '';
+        
+        // Match by customer ID (highly reliable)
+        const isCustMatch = txCustId === user.metadata.customerId;
+        
+        if (isAccMatch || isCustMatch) return true;
+        
+        if (tx.type === 'COLLECTION') {
             // For collection transactions, sometimes they just belong to the customer
             // If the user has only one account for this currency, we can safely attribute it
             const userCurrencyAccounts = allAccounts.filter((a: any) => (a.currency || a.coin) === txCurrency);
@@ -249,7 +257,7 @@ export class IbanService {
                 return true;
             }
         }
-        return isMatch;
+        return false;
       });
 
       console.log(`[RECONCILE] Found ${relevantTxs.length} relevant transactions for this user's accounts.`);
