@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Wallet, ShieldCheck, Copy, Check, Trash2, RefreshCw } from 'lucide-react';
+import { QRCodeSVG } from 'qrcode.react';
 
 const CopyButton = ({ text, label }: { text: string, label: string }) => {
   const [copied, setCopied] = useState(false);
@@ -18,22 +19,20 @@ const CopyButton = ({ text, label }: { text: string, label: string }) => {
       whileHover={{ scale: 1.1 }}
       whileTap={{ scale: 0.9 }}
       onClick={handleCopy}
+      title={`Copy ${label}`}
       style={{ 
         display: 'flex', 
         alignItems: 'center', 
-        gap: '0.4rem', 
-        padding: '0.2rem 0.5rem', 
+        justifyContent: 'center',
+        width: '24px',
+        height: '24px',
         borderRadius: '6px', 
-        background: copied ? 'rgba(16, 185, 129, 0.1)' : 'rgba(0,0,0,0.05)',
+        background: copied ? 'rgba(16, 185, 129, 0.2)' : 'rgba(255,255,255,0.1)',
         cursor: 'pointer',
         transition: 'all 0.2s',
-        border: '1px solid rgba(0,0,0,0.05)'
       }}
     >
-      {copied ? <Check size={12} color="#10b981" /> : <Copy size={12} opacity={0.5} />}
-      <span style={{ fontSize: '0.6rem', fontWeight: 800, color: copied ? '#10b981' : 'inherit' }}>
-        {copied ? 'COPIED' : 'COPY'}
-      </span>
+      {copied ? <Check size={12} color="#10b981" /> : <Copy size={12} opacity={0.8} color="#fff" />}
     </motion.div>
   );
 };
@@ -108,7 +107,7 @@ const BalanceCard: React.FC<BalanceCardProps> = ({
   }
   
   return (
-    <div style={{ perspective: '1000px', minWidth: '320px', height: '220px', position: 'relative' }}>
+    <div style={{ perspective: '1000px', minWidth: '320px', height: '100%', minHeight: '260px', position: 'relative' }}>
       <motion.div
         whileHover={{ y: -5, scale: 1.02 }}
         transition={{ type: 'spring', stiffness: 300, damping: 20 }}
@@ -188,37 +187,53 @@ const BalanceCard: React.FC<BalanceCardProps> = ({
 
         <div style={{ 
           marginTop: 'auto', paddingTop: '1rem', borderTop: '1px solid rgba(255,255,255,0.1)', 
-          position: 'relative', zIndex: 10, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end'
+          position: 'relative', zIndex: 10, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '1rem'
         }}>
-          <div>
-            <div style={{ fontSize: '0.65rem', fontWeight: 600, opacity: 0.7, marginBottom: '0.2rem', textTransform: 'uppercase', letterSpacing: '1px' }}>
-              {bank || 'Provisioning Account...'}
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <div style={{ fontSize: '1.1rem', fontWeight: 800, fontFamily: 'monospace', letterSpacing: '1px' }}>
-                {accNo ? accNo.match(/.{1,4}/g)?.join(' ') : '•••• •••• ••••'}
+          <div style={{ flex: 1 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.4rem' }}>
+              <div style={{ fontSize: '0.65rem', fontWeight: 600, opacity: 0.7, textTransform: 'uppercase', letterSpacing: '1px' }}>
+                {bank || 'Provisioning Account...'}
               </div>
-              {accNo && <CopyButton text={accNo} label="Copy Account" />}
+              {bank && <CopyButton text={bank} label="Bank Name" />}
             </div>
-            <div style={{ fontSize: '0.7rem', fontWeight: 600, opacity: 0.9, marginTop: '0.2rem' }}>{accName}</div>
+            
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.6rem' }}>
+              <div style={{ fontSize: '1.1rem', fontWeight: 800, fontFamily: 'monospace', letterSpacing: '1px', wordBreak: 'break-all' }}>
+                {accNo ? (accNo.length > 20 ? accNo.slice(0, 10) + '...' + accNo.slice(-10) : accNo.match(/.{1,4}/g)?.join(' ')) : '•••• •••• ••••'}
+              </div>
+              {accNo && <CopyButton text={accNo} label="Account/Wallet Address" />}
+            </div>
+            
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <div style={{ fontSize: '0.75rem', fontWeight: 600, opacity: 0.9 }}>{accName}</div>
+              {accName && <CopyButton text={accName} label="Account Name" />}
+            </div>
           </div>
           
-          {onDelete && (
-            <motion.button 
-              whileHover={{ scale: 1.1, background: 'rgba(244, 63, 94, 0.2)' }}
-              whileTap={{ scale: 0.9 }}
-              onClick={(e) => {
-                 e.stopPropagation();
-                 const targetId = details?.walletId || details?.id;
-                 if (targetId && confirm('Are you sure you want to terminate this rail?')) {
-                    onDelete(targetId);
-                 }
-              }}
-              style={{ background: 'rgba(0,0,0,0.1)', border: 'none', padding: '0.5rem', borderRadius: '10px', cursor: 'pointer', color: '#fff', backdropFilter: 'blur(5px)' }}
-            >
-              <Trash2 size={16} />
-            </motion.button>
-          )}
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}>
+            {accNo && (
+              <div style={{ background: '#fff', padding: '0.3rem', borderRadius: '8px', flexShrink: 0 }}>
+                <QRCodeSVG value={accNo} size={64} />
+              </div>
+            )}
+            
+            {onDelete && (
+              <motion.button 
+                whileHover={{ scale: 1.1, background: 'rgba(244, 63, 94, 0.2)' }}
+                whileTap={{ scale: 0.9 }}
+                onClick={(e) => {
+                   e.stopPropagation();
+                   const targetId = details?.walletId || details?.id;
+                   if (targetId && confirm('Are you sure you want to terminate this rail?')) {
+                      onDelete(targetId);
+                   }
+                }}
+                style={{ background: 'rgba(0,0,0,0.2)', border: 'none', padding: '0.4rem', borderRadius: '8px', cursor: 'pointer', color: '#fff', backdropFilter: 'blur(5px)', width: '100%', display: 'flex', justifyContent: 'center' }}
+              >
+                <Trash2 size={14} />
+              </motion.button>
+            )}
+          </div>
         </div>
       </motion.div>
     </div>
