@@ -644,7 +644,7 @@ app.get('/api/cards', authenticateToken, async (req: any, res: any): Promise<any
           });
         }
 
-        const isUSD = (c.currency === 'USD');
+        const isUSD = (c.wallet.currency === 'USD');
         const addressLine1 = isUSD ? '16192 Coastal Highway' : (c.addressLine1 || mCard.address?.address || mCard.address_line1 || 'User Address Syncing...');
         const addressCity = isUSD ? 'Lewes' : (c.addressCity || mCard.address?.city || '');
         const addressState = isUSD ? 'DE' : (c.addressState || mCard.address?.state || '');
