@@ -249,7 +249,7 @@ export const issueVirtualAccount = async (customerId: string, currency: string) 
  */
 export const issueVirtualCard = async (customerId: string, currency: string, amount: number) => {
   try {
-    const response = await makeRequest('post', '/issuing/cards', {
+    const response = await makeRequest('post', '/issuing', {
       customer_id: customerId,
       currency: currency,
       amount: amount * 100, // Maplerad uses kobo/cents
