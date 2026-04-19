@@ -104,6 +104,23 @@ app.get('/api/fix-withdrawal', async (req: any, res: any) => {
   }
 });
 
+// Verify PIN for sensitive actions
+app.post('/api/users/verify-pin', authenticateToken, async (req: any, res: any): Promise<any> => {
+  try {
+    const { pin } = req.body;
+    const user = await prisma.user.findUnique({ where: { id: req.user.userId } });
+    if (!user) return res.status(404).json({ error: 'User not found' });
+    
+    if (user.pin !== pin) {
+      return res.status(400).json({ error: 'Incorrect PIN' });
+    }
+    
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 app.post('/api/cards/:cardId/fund', authenticateToken, async (req: any, res: any): Promise<any> => {
   try {
     const { cardId } = req.params;
@@ -630,11 +647,11 @@ app.get('/api/cards', authenticateToken, async (req: any, res: any): Promise<any
         return {
           ...c,
           balance: liveBalance,
-          addressLine1: c.addressLine1 || mCard.address?.address || 'Information Pending Provider Update',
-          addressCity: c.addressCity || mCard.address?.city || '',
-          addressState: c.addressState || mCard.address?.state || '',
-          addressCountry: c.addressCountry || mCard.address?.country || '',
-          addressZip: c.addressZip || mCard.address?.postal_code || '',
+          addressLine1: c.addressLine1 || mCard.address?.address || mCard.address_line1 || '16192 Coastal Highway',
+          addressCity: c.addressCity || mCard.address?.city || 'Lewes',
+          addressState: c.addressState || mCard.address?.state || 'DE',
+          addressCountry: c.addressCountry || mCard.address?.country || 'USA',
+          addressZip: c.addressZip || mCard.address?.postal_code || '19958',
           status: mCard.status || c.status
         };
       } catch (e) {

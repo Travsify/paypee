@@ -28,6 +28,10 @@ const CardsDashboard = ({ wallets: propWallets }: { wallets?: any[] }) => {
   const [cards, setCards] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [showNumbers, setShowNumbers] = useState<Record<string, boolean>>({});
+  const [isPinVerifyModalOpen, setIsPinVerifyModalOpen] = useState(false);
+  const [pinToVerify, setPinToVerify] = useState('');
+  const [cardToVerify, setCardToVerify] = useState<string | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
   const [isIssueModalOpen, setIsIssueModalOpen] = useState(false);
   const [isFundingModalOpen, setIsFundingModalOpen] = useState(false);
   const [isWithdrawModalOpen, setIsWithdrawModalOpen] = useState(false);
@@ -47,6 +51,7 @@ const CardsDashboard = ({ wallets: propWallets }: { wallets?: any[] }) => {
 
   const fetchCards = async () => {
     try {
+      setRefreshing(true);
       const token = localStorage.getItem('paypee_token');
       const res = await fetch(`${API_BASE}/api/cards`, {
         headers: { 'Authorization': `Bearer ${token}` },
@@ -59,8 +64,40 @@ const CardsDashboard = ({ wallets: propWallets }: { wallets?: any[] }) => {
         data.forEach(card => fetchSubscriptions(card.id));
       }
       setLoading(false);
+      setTimeout(() => setRefreshing(false), 800);
     } catch (err) {
       setLoading(false);
+      setRefreshing(false);
+    }
+  };
+
+  const handleVerifyPinAndShow = async (e: any) => {
+    e.preventDefault();
+    setSubmitting(true);
+    try {
+      const token = localStorage.getItem('paypee_token');
+      const res = await fetch(`${API_BASE}/api/users/verify-pin`, {
+        method: 'POST',
+        headers: { 
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ pin: pinToVerify })
+      });
+      if (res.ok) {
+        if (cardToVerify) {
+          setShowNumbers(prev => ({ ...prev, [cardToVerify]: true }));
+        }
+        setIsPinVerifyModalOpen(false);
+        setPinToVerify('');
+        setCardToVerify(null);
+      } else {
+        alert('INCORRECT PIN: Access Denied.');
+      }
+    } catch (err) {
+      alert('Verification Error');
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -322,7 +359,7 @@ const CardsDashboard = ({ wallets: propWallets }: { wallets?: any[] }) => {
               fontWeight: 700
             }}
           >
-            <RefreshCcw size={18} /> Refresh
+            <RefreshCcw size={18} className={refreshing ? 'spin-animation' : ''} /> {refreshing ? 'Syncing...' : 'Refresh'}
           </button>
           <motion.button 
             whileHover={{ scale: 1.05, boxShadow: '0 20px 40px -10px var(--primary)' }}
@@ -427,7 +464,7 @@ const CardsDashboard = ({ wallets: propWallets }: { wallets?: any[] }) => {
                       <div style={{ marginBottom: '2rem' }}>
                          <div style={{ fontSize: '1.8rem', fontWeight: 900, letterSpacing: '4px', color: '#fff', display: 'flex', alignItems: 'center', gap: '1rem' }}>
                             {showNumbers[card.id] ? card.cardNumber : '•••• •••• •••• ' + ((card.cardNumber || '0000').slice(-4))}
-                            <button onClick={() => setShowNumbers(prev => ({ ...prev, [card.id]: !prev[card.id] }))} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.3)', cursor: 'pointer', padding: '4px' }}>
+                            <button onClick={() => { setCardToVerify(card.id); setIsPinVerifyModalOpen(true); }} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.3)', cursor: 'pointer', padding: '4px' }}>
                                {showNumbers[card.id] ? <EyeOff size={18} /> : <Eye size={18} />}
                             </button>
                          </div>
@@ -824,6 +861,51 @@ const CardsDashboard = ({ wallets: propWallets }: { wallets?: any[] }) => {
                  <button type="submit" disabled={submitting} className="btn btn-primary" style={{ width: '100%', padding: '1.4rem', borderRadius: '24px', fontSize: '1.1rem', fontWeight: 900 }}>
                    {submitting ? 'Withdrawing...' : 'Confirm Withdrawal'}
                  </button>
+               </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+      {/* PIN Verification Modal */}
+      <AnimatePresence>
+        {isPinVerifyModalOpen && (
+          <div className="paypee-modal-overlay">
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              className="paypee-modal-content" 
+              style={{ maxWidth: '400px', padding: '3rem' }}
+            >
+               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+                  <h3 style={{ fontSize: '1.5rem', fontWeight: 900 }}>Enter Card PIN</h3>
+                  <button onClick={() => setIsPinVerifyModalOpen(false)} style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer' }}><X size={24} /></button>
+               </div>
+
+               <p style={{ color: 'var(--text-muted)', marginBottom: '2rem', fontSize: '0.9rem' }}>
+                  Please enter your 4-digit transaction PIN to reveal the full card details.
+               </p>
+
+               <form onSubmit={handleVerifyPinAndShow}>
+                  <div className="form-group">
+                     <label className="form-label">TRANSACTION PIN</label>
+                     <div style={{ position: 'relative' }}>
+                        <input 
+                          type="password" 
+                          maxLength={4}
+                          value={pinToVerify} 
+                          onChange={(e) => setPinToVerify(e.target.value)} 
+                          placeholder="••••" 
+                          required 
+                          className="form-input" 
+                          style={{ textAlign: 'center', fontSize: '2rem', letterSpacing: '1rem', padding: '1.5rem' }}
+                        />
+                     </div>
+                  </div>
+
+                  <button type="submit" className="btn btn-primary" style={{ width: '100%', marginTop: '1.5rem' }} disabled={submitting}>
+                     {submitting ? 'Verifying...' : 'Unlock Card Details'}
+                  </button>
                </form>
             </motion.div>
           </div>
