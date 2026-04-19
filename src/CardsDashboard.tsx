@@ -529,9 +529,24 @@ const CardsDashboard = () => {
                <form onSubmit={handleIssueCard}>
                  <div style={{ marginBottom: '2rem' }}>
                    <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: '#475569', marginBottom: '0.75rem', letterSpacing: '1px' }}>FUNDING SOURCE</label>
-                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', maxHeight: '180px', overflowY: 'auto', padding: '0.5rem', background: 'rgba(255,255,255,0.02)', borderRadius: '16px' }}>
+                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', maxHeight: '220px', overflowY: 'auto', padding: '0.5rem', background: 'rgba(255,255,255,0.02)', borderRadius: '16px' }}>
                       {wallets.length === 0 ? (
-                        <div style={{ padding: '1.5rem', textAlign: 'center', fontSize: '0.85rem', color: 'var(--text-muted)' }}>No liquid wallets available.</div>
+                        <div style={{ padding: '3rem 1.5rem', textAlign: 'center', background: 'rgba(255,255,255,0.01)', borderRadius: '12px', border: '1px dashed rgba(255,255,255,0.1)' }}>
+                           <div style={{ width: 40, height: 40, background: 'rgba(99,102,241,0.05)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1rem', color: 'var(--primary)' }}>
+                              <Plus size={20} />
+                           </div>
+                           <h4 style={{ fontSize: '1rem', fontWeight: 900, marginBottom: '0.5rem' }}>No Liquid Wallets</h4>
+                           <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '1.5rem', lineHeight: 1.5 }}>
+                              You need at least one active wallet with $5.00 to deploy a Capital Rail.
+                           </p>
+                           <button 
+                             type="button"
+                             onClick={() => { setIsIssueModalOpen(false); window.location.hash = '#overview'; }}
+                             style={{ background: 'var(--primary)', border: 'none', color: '#fff', padding: '0.6rem 1.2rem', borderRadius: '10px', fontSize: '0.75rem', fontWeight: 800, cursor: 'pointer' }}
+                           >
+                              Initialize My First Wallet
+                           </button>
+                        </div>
                       ) : (
                         wallets.map(w => (
                           <div 
