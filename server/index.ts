@@ -452,6 +452,7 @@ app.post('/api/cards', authenticateToken, async (req: any, res: any): Promise<an
           }
         })
       ]);
+      console.log(`[CARDS] Transaction Committed Successfully. CardID: ${card.id}`);
       res.status(201).json(card);
     } catch (prismaError: any) {
       console.error('[PRISMA ERROR] Card Creation Failed:', prismaError);
