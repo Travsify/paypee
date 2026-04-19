@@ -51,7 +51,9 @@ const TransactionReceiptModal: React.FC<TransactionReceiptModalProps> = ({ trans
             borderRadius: '32px',
             padding: '2.5rem',
             position: 'relative',
-            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)'
+            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
+            scrollbarWidth: 'thin',
+            scrollbarColor: '#6366f1 transparent'
           }}
         >
           <button 
