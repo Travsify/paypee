@@ -283,6 +283,7 @@ export const getBanks = async (currency: string = 'NGN') => {
 export const verifyAccountNumber = async (accountNumber: string, bankCode: string) => {
   try {
     const response = await makeRequest('get', `/identities/lookup?account_number=${accountNumber}&bank_code=${bankCode}`);
+    console.log('[MAPLERAD DEBUG] Verification Response:', JSON.stringify(response.data, null, 2));
     return response.data.data;
   } catch (error: any) {
     console.error('[MAPLERAD] Account Verification Error:', error.response?.data || error.message);

@@ -63,7 +63,8 @@ const PayoutModal: React.FC<PayoutModalProps> = ({ isOpen, onClose, onComplete, 
           });
           if (res.ok) {
             const data = await res.json();
-            setAccountName(data.name || data.account_name || data.accountName || '');
+            const name = data.name || data.account_name || data.accountName || data.full_name || data.fullName || data.customer_name || '';
+            setAccountName(name);
           }
         } catch (err) {
           console.error('Verification error');
