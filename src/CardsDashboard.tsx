@@ -650,7 +650,7 @@ const CardsDashboard = ({ wallets: propWallets }: { wallets?: any[] }) => {
                     </p>
                  </div>
 
-                 <button type="submit" disabled={submitting || !issueWalletId} className="btn btn-primary" style={{ width: '100%', padding: '1.4rem', borderRadius: '24px', fontSize: '1.1rem', fontWeight: 900 }}>
+                 <button type="button" onClick={handleIssueCard} disabled={submitting || !issueWalletId} className="btn btn-primary" style={{ width: '100%', padding: '1.4rem', borderRadius: '24px', fontSize: '1.1rem', fontWeight: 900 }}>
                    {submitting ? 'Initializing Rail...' : 'Deploy Instantly'}
                  </button>
                </form>
