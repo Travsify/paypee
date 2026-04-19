@@ -179,9 +179,7 @@ export const issueVirtualAccount = async (customerId: string, currency: string) 
       currency: currency.toUpperCase()
     };
 
-    if (isGlobal) {
-      payload.type = 'DOMICILIARY';
-    }
+    // No type specified as it might be causing 405 on some rails
 
     console.log(`[MAPLERAD] Issuing ${currency} account for customer ${customerId} via ${url} (Payload: ${JSON.stringify(payload)})`);
     const response = await makeRequest('post', url, payload);
