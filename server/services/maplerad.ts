@@ -605,15 +605,15 @@ export const getMapleradPayStatus = async (reference: string) => {
 
 /**
  * Issue a crypto wallet address for a customer (USDC, USDT, BTC)
- * Maplerad Crypto API: POST /crypto/wallet
- * Payload: { customer_id, coin, chain, offramp }
+ * Maplerad Crypto API: POST /crypto
+ * Payload: { customer_id, coin, chain }
  */
 export const issueCryptoAddress = async (customerId: string, currency: string) => {
   // Map Paypee currency codes to Maplerad's coin/chain format
   const coinMap: Record<string, { coin: string; chain: string }> = {
-    'USDC': { coin: 'usdc', chain: 'solana' },
-    'USDT': { coin: 'usdt', chain: 'tron' },
-    'BTC':  { coin: 'btc',  chain: 'bitcoin' }
+    'USDC': { coin: 'USDC', chain: 'solana' },
+    'USDT': { coin: 'USDT', chain: 'tron' },
+    'BTC':  { coin: 'BTC',  chain: 'bitcoin' }
   };
 
   const mapping = coinMap[currency];
@@ -621,11 +621,10 @@ export const issueCryptoAddress = async (customerId: string, currency: string) =
 
   try {
     console.log(`[MAPLERAD CRYPTO] Creating ${currency} wallet for customer ${customerId} (${mapping.coin}/${mapping.chain})`);
-    const response = await makeRequest('post', '/crypto/wallet', {
+    const response = await makeRequest('post', '/crypto', {
       customer_id: customerId,
       coin: mapping.coin,
-      chain: mapping.chain,
-      offramp: false
+      chain: mapping.chain
     });
     const data = response.data.data;
     return {
@@ -636,20 +635,8 @@ export const issueCryptoAddress = async (customerId: string, currency: string) =
     };
   } catch (error: any) {
     const errMsg = error.response?.data?.message || error.message;
-    console.warn(`[MAPLERAD CRYPTO] /crypto/wallet failed: ${errMsg}. Trying legacy endpoint...`);
-    
-    // Fallback: try /issuing/addresses (older Maplerad API)
-    try {
-      const response = await makeRequest('post', '/issuing/addresses', {
-        customer_id: customerId,
-        currency: currency,
-        network: currency === 'BTC' ? 'BITCOIN' : 'ERC20'
-      });
-      return response.data.data;
-    } catch (fallbackErr: any) {
-      console.error('[MAPLERAD] Crypto Wallet Creation Failed on all endpoints:', fallbackErr.response?.data || fallbackErr.message);
-      throw new Error(fallbackErr.response?.data?.message || 'Failed to create crypto wallet. Ensure crypto is enabled on your Maplerad account.');
-    }
+    console.error(`[MAPLERAD] Crypto Wallet Creation Failed:`, error.response?.data || errMsg);
+    throw new Error(error.response?.data?.message || 'Failed to issue crypto wallet');
   }
 };
 
