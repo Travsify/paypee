@@ -627,55 +627,53 @@ app.get('/api/cards', authenticateToken, async (req: any, res: any): Promise<any
     
     // Fetch live details from Maplerad for each card to get the actual balance
     const liveCards = await Promise.all(cards.map(async (c) => {
+      let liveBalance = parseFloat(c.dailyLimit.toString());
+      let mCard: any = null;
+
       try {
-        if (!c.providerCardId) return { ...c, balance: c.dailyLimit };
+        if (c.providerCardId) {
+          mCard = await Maplerad.getCard(c.providerCardId);
+          if (mCard) {
+            liveBalance = (mCard.amount || 0) / 100;
 
-        const mCard = await Maplerad.getCard(c.providerCardId);
-        if (!mCard) return { ...c, balance: c.dailyLimit };
-
-        // Calculate live balance (Maplerad returns amount in kobo/cents)
-        const liveBalance = (mCard.amount || 0) / 100;
-
-        // If DB is missing address info, update it now (Auto-migration for existing cards)
-        if (!c.addressLine1 && mCard.address) {
-          await prisma.virtualCard.update({
-            where: { id: c.id },
-            data: {
-              addressLine1: mCard.address.address,
-              addressCity: mCard.address.city,
-              addressState: mCard.address.state,
-              addressCountry: mCard.address.country || 'USA',
-              addressZip: mCard.address.postal_code
+            // Auto-migrate DB if missing address
+            if (!c.addressLine1 && mCard.address) {
+              await prisma.virtualCard.update({
+                where: { id: c.id },
+                data: {
+                  addressLine1: mCard.address.address,
+                  addressCity: mCard.address.city,
+                  addressState: mCard.address.state,
+                  addressCountry: mCard.address.country || 'USA',
+                  addressZip: mCard.address.postal_code
+                }
+              });
             }
-          });
+          }
         }
-
-        const currency = c.wallet.currency;
-        const isUSD = (currency === 'USD');
-        console.log(`[CARDS] Syncing card ${c.id}: Currency=${currency}, isUSD=${isUSD}`);
-
-        const addressLine1 = isUSD ? '16192 Coastal Highway' : (c.addressLine1 || mCard.address?.address || mCard.address_line1 || 'User Address Syncing...');
-        const addressCity = isUSD ? 'Lewes' : (c.addressCity || mCard.address?.city || '');
-        const addressState = isUSD ? 'DE' : (c.addressState || mCard.address?.state || '');
-        const addressCountry = isUSD ? 'USA' : (c.addressCountry || mCard.address?.country || 'NG');
-        const addressZip = isUSD ? '19958' : (c.addressZip || mCard.address?.postal_code || '');
-
-        console.log(`[CARDS] Applied Address: ${addressLine1}, ${addressCity}, ${addressCountry}`);
-
-        return {
-          ...c,
-          balance: liveBalance,
-          addressLine1,
-          addressCity,
-          addressState,
-          addressCountry,
-          addressZip,
-          status: mCard.status || c.status
-        };
       } catch (e) {
-        console.error(`[CARDS] Sync Error for ${c.id}:`, e);
-        return { ...c, balance: c.dailyLimit };
+        console.error(`[CARDS] Sync failed for ${c.id}, using DB defaults.`);
       }
+
+      const currency = c.wallet.currency;
+      const isUSD = (currency === 'USD');
+      
+      const addressLine1 = isUSD ? '16192 Coastal Highway' : (c.addressLine1 || mCard?.address?.address || mCard?.address_line1 || 'User Address Syncing...');
+      const addressCity = isUSD ? 'Lewes' : (c.addressCity || mCard?.address?.city || '');
+      const addressState = isUSD ? 'DE' : (c.addressState || mCard?.address?.state || '');
+      const addressCountry = isUSD ? 'USA' : (c.addressCountry || mCard?.address?.country || 'NG');
+      const addressZip = isUSD ? '19958' : (c.addressZip || mCard?.address?.postal_code || '');
+
+      return {
+        ...c,
+        balance: liveBalance,
+        addressLine1,
+        addressCity,
+        addressState,
+        addressCountry,
+        addressZip,
+        status: mCard?.status || c.status
+      };
     }));
 
     res.json(liveCards);
