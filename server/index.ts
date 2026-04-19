@@ -8,6 +8,7 @@ import jwt from 'jsonwebtoken';
 import { AiIntelligenceService } from './services/ai.service';
 import { IbanService } from './services/iban.service';
 import { BillsService } from './services/bills.service';
+import { NotificationService } from './services/notification.service';
 import * as Maplerad from './services/maplerad';
 
 dotenv.config();
@@ -567,6 +568,13 @@ app.post('/api/payouts/transfer', authenticateToken, async (req: any, res: any) 
 
     console.log(`[PAYOUT SUCCESS] Transfer ${reference} completed for User ${userId}`);
 
+    await NotificationService.create(
+      userId,
+      '💸 Transfer Successful',
+      `Your transfer of ${payoutAmount.toLocaleString()} ${payoutCurrency} to ${accountName || accountNumber} was successful.`,
+      'SUCCESS'
+    );
+
     res.status(200).json({ status: 'COMPLETED', reference, targetAmount: payoutAmount, targetCurrency: payoutCurrency });
 
   } catch (error: any) {
@@ -840,6 +848,13 @@ app.post('/api/vaults', authenticateToken, async (req: any, res: any): Promise<a
       })
     ]);
 
+    await NotificationService.create(
+      req.user.userId,
+      '🏦 Vault Funded',
+      `You have successfully moved ${amount} ${currency || wallet.currency} into your ${name} vault.`,
+      'SUCCESS'
+    );
+
     res.status(201).json(result[1]);
   } catch (error) {
     console.error('Vault creation error:', error);
@@ -1031,7 +1046,7 @@ app.post('/api/verify/identity', authenticateToken, async (req: any, res: any): 
       data: { kycStatus: 'PROCESSING' }
     });
 
-    await createNotification(userId, '🔄 Verification In Progress', 
+    await NotificationService.create(userId, '🔄 Verification In Progress', 
       `We have received your ${idType} submission and are performing a biometric face match. This usually takes 30-60 seconds.`,
       'INFO'
     );
@@ -1094,7 +1109,7 @@ app.post('/api/verify/identity', authenticateToken, async (req: any, res: any): 
       console.log('[KYC DEBUG] 🎉 Verification SUCCESS! Updating database...');
       await prisma.user.update({ where: { id: userId }, data: { kycStatus: 'VERIFIED' } });
 
-      await createNotification(userId, '✅ Verification Approved!', 
+      await NotificationService.create(userId, '✅ Verification Approved!', 
         'Your identity has been successfully verified via biometric match.',
         'SUCCESS'
       );
@@ -1280,6 +1295,13 @@ app.post('/api/cards/issue', authenticateToken, async (req: any, res: any) => {
         }
       })
     ]);
+    
+    await NotificationService.create(
+      userId,
+      '💳 Virtual Card Issued',
+      `Your new ${currency} virtual card has been issued and funded with ${amount} ${currency}.`,
+      'SUCCESS'
+    );
 
     res.status(201).json(card);
   } catch (error: any) {
@@ -1634,7 +1656,7 @@ app.post('/api/fx/swap', authenticateToken, async (req: any, res: any) => {
     ]);
 
     // 6. Send notification
-    await createNotification(
+    await NotificationService.create(
       userId,
       '💱 Currency Swap Completed',
       `Swapped ${srcAmount.toFixed(2)} ${src} → ${tgtAmount.toFixed(2)} ${tgt} at rate ${rate}`,
@@ -1643,7 +1665,7 @@ app.post('/api/fx/swap', authenticateToken, async (req: any, res: any) => {
 
     // 7. Send email notification
     if (user?.email) {
-      await sendEmail(
+      await NotificationService.sendEmail(
         user.email,
         '💱 Paypee — Currency Swap Confirmation',
         `<div style="font-family:sans-serif;max-width:500px;margin:0 auto;padding:2rem;">
@@ -1794,7 +1816,7 @@ app.post('/api/webhooks/maplerad', async (req: Request, res: Response) => {
               currency: currency || resolvedWallet.currency,
               status: 'COMPLETED',
               reference: webhookRef,
-              desc: `Deposit via ${account_number || 'Virtual Account'}`,
+              desc: txData.sender_name ? `Funds from ${txData.sender_name}` : `Deposit via ${account_number || 'Virtual Account'}`,
               category: 'BANK_TRANSFER',
               metadata: txData
             }
@@ -1850,16 +1872,15 @@ app.post('/api/webhooks/maplerad', async (req: Request, res: Response) => {
           prisma.transaction.update({
             where: { id: tx.id },
             data: { status: 'FAILED' }
-          }),
-          prisma.notification.create({
-            data: {
-              userId: tx.userId,
-              title: '❌ Transfer Failed',
-              message: `Your transfer of ${tx.amount} ${tx.currency} has been reversed.`,
-              type: 'ERROR'
-            }
           })
         ]);
+
+        await NotificationService.create(
+          tx.userId,
+          '❌ Transfer Failed',
+          `Your transfer of ${tx.amount} ${tx.currency} has been reversed.`,
+          'ERROR'
+        );
       }
     }
 

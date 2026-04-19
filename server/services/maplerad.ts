@@ -169,60 +169,79 @@ export const upgradeCustomerTier1 = async (customerId: string, kycData: any) => 
 
 /**
  * Provisions a virtual account for a customer.
+ * Intelligently switches between endpoints based on currency and partner rails.
  */
 export const issueVirtualAccount = async (customerId: string, currency: string) => {
-  try {
-    const isNGN = currency.toUpperCase() === 'NGN';
-    const url = (isNGN) ? '/collections/virtual-account' : '/accounts';
-    const payload: any = {
-      customer_id: customerId,
-      currency: currency.toUpperCase()
-    };
-
-    if (currency.toUpperCase() === 'GBP') {
-      payload.preferred_bank = 'STERLING';
+  const isNGN = currency.toUpperCase() === 'NGN';
+  
+  // NGN accounts use the collections endpoint usually
+  if (isNGN) {
+    try {
+      console.log(`[MAPLERAD] Issuing NGN account via /collections/virtual-account...`);
+      const response = await makeRequest('post', '/collections/virtual-account', {
+        customer_id: customerId,
+        currency: 'NGN'
+      });
+      return response.data.data;
+    } catch (e: any) {
+      console.warn(`[MAPLERAD] NGN provisioning failed, checking if already exists...`);
     }
+  }
 
-    // No type specified as it might be causing 405 on some rails
+  // Global Accounts (USD, EUR, GBP)
+  // Try multiple endpoints as Sandbox rails frequently change
+  const endpoints = [
+    { url: '/accounts', payload: { customer_id: customerId, currency: currency.toUpperCase() } },
+    { url: '/wallets', payload: { customer_id: customerId, Currency: currency.toUpperCase() } }, // Note: Uppercase 'Currency' for some older Go-based endpoints
+    { url: '/issuing/accounts', payload: { customer_id: customerId, currency: currency.toUpperCase() } }
+  ];
 
-    console.log(`[MAPLERAD] Issuing ${currency} account for customer ${customerId} via ${url} (Payload: ${JSON.stringify(payload)})`);
-    const response = await makeRequest('post', url, payload);
-    return response.data.data; 
-  } catch (error: any) {
-    const errorMsg = error.response?.data?.message || '';
-    
-    // If account already exists, try to fetch it
-    if (errorMsg.toLowerCase().includes('already') || error.response?.status === 400 || error.response?.status === 405) {
-      try {
-        console.log(`[MAPLERAD DEBUG] Checking for existing accounts for customer ${customerId}...`);
-        // Try multiple possible list endpoints
-        const listEndpoints = [
-          `/customers/${customerId}/virtual-accounts`,
-          `/customers/${customerId}/virtual-account`,
-          `/issuing`,
-          `/issuing/virtual-accounts?customer_id=${customerId}`
-        ];
-        
-        for (const listUrl of listEndpoints) {
-          try {
-            const existing = await makeRequest('get', listUrl);
-            const accounts = existing.data.data || [];
-            if (Array.isArray(accounts)) {
-              const match = accounts.find((a: any) => a.currency === currency.toUpperCase());
-              if (match) return match;
-            } else if (accounts && accounts.currency === currency.toUpperCase()) {
-              return accounts;
-            }
-          } catch (e) {}
-        }
-      } catch (fetchErr: any) {
-        console.warn('[MAPLERAD] Fallback account lookup failed:', fetchErr.message);
+  if (currency.toUpperCase() === 'GBP' || currency.toUpperCase() === 'EUR') {
+    endpoints.forEach(e => (e.payload as any).preferred_bank = 'STERLING');
+  }
+
+  let lastError: any = null;
+
+  for (const { url, payload } of endpoints) {
+    try {
+      console.log(`[MAPLERAD] Attempting ${currency} issuance via ${url}...`);
+      const response = await makeRequest('post', url, payload);
+      if (response.data.status) return response.data.data;
+    } catch (error: any) {
+      lastError = error;
+      const msg = error.response?.data?.message || '';
+      console.warn(`[MAPLERAD DEBUG] ${url} failed: ${msg}`);
+      
+      // If customer is already enrolled/has account, break and try to fetch
+      if (msg.toLowerCase().includes('already') || msg.toLowerCase().includes('duplicate')) {
+        break;
       }
     }
-
-    console.error('[MAPLERAD] Issue Account Error:', error.response?.data || error.message);
-    throw new Error(errorMsg || `Failed to issue ${currency} virtual account`);
   }
+
+  // Fallback: Try to find existing accounts
+  try {
+    console.log(`[MAPLERAD DEBUG] Searching for existing ${currency} accounts for customer ${customerId}...`);
+    const searchUrls = [
+      `/customers/${customerId}/virtual-accounts`,
+      `/issuing/accounts?customer_id=${customerId}`,
+      `/wallets?customer_id=${customerId}`
+    ];
+    
+    for (const sUrl of searchUrls) {
+      try {
+        const res = await makeRequest('get', sUrl);
+        const list = res.data.data || [];
+        const match = Array.isArray(list) 
+          ? list.find((a: any) => a.currency === currency.toUpperCase())
+          : (list.currency === currency.toUpperCase() ? list : null);
+        
+        if (match) return match;
+      } catch (e) {}
+    }
+  } catch (e) {}
+
+  throw new Error(lastError?.response?.data?.message || `Failed to provision ${currency} account after multiple attempts.`);
 };
 
 /**
@@ -671,7 +690,11 @@ export const getCryptoAddresses = async (customerId: string) => {
     const response = await makeRequest('get', `/crypto?customer_id=${customerId}`);
     return response.data.data || [];
   } catch (error: any) {
-    console.warn(`[MAPLERAD] Crypto lookup failed for ${customerId}:`, error.response?.data?.message || error.message);
+    if (error.response?.status === 405) {
+       console.log(`[MAPLERAD] Crypto lookup not allowed for ${customerId} (Method Not Allowed). Skipping.`);
+    } else {
+       console.warn(`[MAPLERAD] Crypto lookup failed for ${customerId}:`, error.response?.data?.message || error.message);
+    }
     return [];
   }
 };
@@ -711,6 +734,14 @@ export const SUPPORTED_FX_PAIRS = [
   { source: 'GBP', target: 'USD' },
   { source: 'EUR', target: 'GBP' },
   { source: 'GBP', target: 'EUR' },
+  { source: 'USDT', target: 'NGN' },
+  { source: 'NGN', target: 'USDT' },
+  { source: 'USDT', target: 'USD' },
+  { source: 'USD', target: 'USDT' },
+  { source: 'USDC', target: 'NGN' },
+  { source: 'NGN', target: 'USDC' },
+  { source: 'USDC', target: 'USD' },
+  { source: 'USD', target: 'USDC' },
 ];
 
 /**

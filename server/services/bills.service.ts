@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import * as Maplerad from './maplerad';
+import { NotificationService } from './notification.service';
 
 const prisma = new PrismaClient();
 
@@ -110,6 +111,13 @@ export class BillsService {
         console.error('[MAPLERAD BILL ERROR]:', err.message);
         throw new Error(err.message || 'Maplerad was unable to process this payment.');
       }
+
+      await NotificationService.create(
+        userId,
+        '🧾 Bill Payment Successful',
+        `Your payment of ${amount} NGN for ${category} was successful.`,
+        'SUCCESS'
+      );
 
       return transaction;
     });

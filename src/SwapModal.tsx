@@ -14,6 +14,8 @@ const currencyConfig: Record<string, { symbol: string; icon: string; color: stri
   USD: { symbol: '$', icon: '🇺🇸', color: '#3b82f6' },
   EUR: { symbol: '€', icon: '🇪🇺', color: '#6366f1' },
   GBP: { symbol: '£', icon: '🇬🇧', color: '#8b5cf6' },
+  USDT: { symbol: '₮', icon: '💵', color: '#26a17b' },
+  USDC: { symbol: '$', icon: '🔵', color: '#2775ca' },
 };
 
 import { API_BASE } from './config';
@@ -33,7 +35,7 @@ const SwapModal: React.FC<SwapModalProps> = ({ isOpen, onClose, onComplete, wall
   const timerRef = useRef<any>(null);
 
   const availableCurrencies = wallets
-    .filter((w: any) => ['NGN', 'USD', 'EUR', 'GBP'].includes(w.currency))
+    .filter((w: any) => ['NGN', 'USD', 'EUR', 'GBP', 'USDT', 'USDC'].includes(w.currency))
     .map((w: any) => w.currency);
 
   const getBalance = (currency: string) => {

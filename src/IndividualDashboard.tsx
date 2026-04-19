@@ -29,10 +29,14 @@ import {
   ShieldCheck,
   Headphones,
   Info,
-  Copy
+  Copy,
+  Mail
 } from 'lucide-react';
 import CardsDashboard from './CardsDashboard';
 import AiAdvisor from './AiAdvisor';
+import Docs from './Docs';
+import Checkout from './Checkout';
+import SmartWalletView from './SmartWalletView';
 import SettingsView from './SettingsView';
 import PayoutModal from './PayoutModal';
 import VerificationGate from './VerificationGate';
@@ -819,26 +823,15 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
             )}
 
             {activeSection === 'wallets' && (
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '2rem' }}>
-                {userData?.wallets?.map((w: any) => {
-                   const { symbol, gradient } = getCardProps(w.currency);
-                   return (
-                     <BalanceCard 
-                       key={w.id} 
-                       currency={w.currency} 
-                       symbol={symbol} 
-                       gradient={gradient} 
-                       details={w.metadata} 
-                       amount={parseFloat(w.balance).toFixed(2)} 
-                       userName={userData?.firstName}
-                       onSwap={() => setIsSwapOpen(true)}
-                       onPayout={() => setIsPayoutOpen(true)}
-                       onRefresh={fetchUserData}
-                       hideBalance={!showBalances}
-                     />
-                   );
-                })}
-              </div>
+              <SmartWalletView 
+                wallets={userData?.wallets || []}
+                userData={userData}
+                showBalances={showBalances}
+                onSwap={() => setIsSwapOpen(true)}
+                onPayout={() => setIsPayoutOpen(true)}
+                onRefresh={fetchUserData}
+                onCreateAccount={() => setIsAccountModalOpen(true)}
+              />
             )}
 
             {activeSection === 'cards' && <CardsDashboard />}
