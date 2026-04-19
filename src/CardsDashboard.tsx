@@ -145,7 +145,14 @@ const CardsDashboard = ({ wallets: propWallets }: { wallets?: any[] }) => {
         body: JSON.stringify(payload)
       });
       
-      const data = await res.json();
+      const text = await res.text();
+      let data: any = {};
+      try {
+        data = text ? JSON.parse(text) : {};
+      } catch (e) {
+        console.error('[DEBUG] JSON Parse Error:', text);
+      }
+
       console.log('[DEBUG] Server Response:', data);
 
       if (res.ok) {
@@ -153,7 +160,7 @@ const CardsDashboard = ({ wallets: propWallets }: { wallets?: any[] }) => {
         setIsIssueModalOpen(false);
         fetchCards();
       } else {
-        alert('SERVER ERROR: ' + (data.error || 'Unknown error occurred during card issuance'));
+        alert('SERVER ERROR (' + res.status + '): ' + (data.error || text || 'Unknown error occurred during card issuance'));
       }
     } catch (err: any) {
       console.error('[DEBUG] Fetch Exception:', err);
