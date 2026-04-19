@@ -29,6 +29,7 @@ const SwapModal: React.FC<SwapModalProps> = ({ isOpen, onClose, onComplete, wall
   const [countdown, setCountdown] = useState(30);
   const [swapHistory, setSwapHistory] = useState<any[]>([]);
   const [historyLoading, setHistoryLoading] = useState(false);
+  const [pin, setPin] = useState('');
   const timerRef = useRef<any>(null);
 
   const availableCurrencies = wallets
@@ -49,6 +50,7 @@ const SwapModal: React.FC<SwapModalProps> = ({ isOpen, onClose, onComplete, wall
     setError('');
     setIsLoading(false);
     setCountdown(30);
+    setPin('');
     if (timerRef.current) clearInterval(timerRef.current);
   };
 
@@ -109,7 +111,7 @@ const SwapModal: React.FC<SwapModalProps> = ({ isOpen, onClose, onComplete, wall
     try {
       const res = await fetch(`${API_BASE}/api/fx/swap`, {
         method: 'POST', headers: getAuthHeaders(),
-        body: JSON.stringify({ quoteReference: quote.reference })
+        body: JSON.stringify({ quoteReference: quote.reference, pin })
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Swap failed');

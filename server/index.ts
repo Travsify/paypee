@@ -134,49 +134,45 @@ app.post('/api/auth/login', async (req: Request, res: Response): Promise<any> =>
 // Protected User Data Routes
 // ==========================================
 
-app.get('/api/users/me', authenticateToken, async (req: any, res: any): Promise<any> => {
+app.get('/api/users/me', authenticateToken, async (req: any, res: any) => {
   try {
-    const user = await prisma.user.findUnique({ 
-      where: { id: req.user.userId },
-      select: { 
-        id: true, 
-        email: true, 
-        role: true, 
-        kycStatus: true, 
-        firstName: true,
-        lastName: true,
-        businessName: true,
-        createdAt: true 
-      }
+    const user = await prisma.user.findUnique({
+      where: { id: req.user.userId }
     });
-
     if (!user) return res.status(404).json({ error: 'User not found' });
     
-    // Fetch associated wallets
-    let wallets = await prisma.wallet.findMany({ where: { userId: user.id } });
-
-    // AUTO-SYNC: If any wallet is missing metadata or balance needs healing, trigger reconciliation
-    const needsSync = wallets.some(w => !w.metadata);
+    const { passwordHash, transferPin, ...safeUser } = user;
+    const wallets = await prisma.wallet.findMany({ where: { userId: user.id } });
     
-    // Trigger reconciliation (background)
+    // AUTO-SYNC: Trigger reconciliation (background)
     IbanService.reconcileUserWallets(user.id).catch(err => console.error('[BG-RECONCILE] Error:', err));
 
-    if (needsSync) {
-       console.log(`🔄 Auto-syncing metadata for user ${user.id}...`);
-       await Promise.all(wallets.map(w => {
-          if (!w.metadata) {
-             const name = user.businessName || `${user.firstName} ${user.lastName}`;
-             return IbanService.provisionGlobalAccount(user.id, w.currency, name);
-          }
-          return Promise.resolve();
-       }));
-       // Refetch wallets after sync
-       wallets = await prisma.wallet.findMany({ where: { userId: user.id } });
-    }
+    res.json({ ...safeUser, wallets, isPinSet: !!transferPin });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
 
-    res.json({ ...user, wallets });
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to fetch user profile' });
+app.post('/api/users/set-pin', authenticateToken, async (req: any, res: any) => {
+  try {
+    const { pin, password } = req.body;
+    if (!pin || pin.length !== 4) return res.status(400).json({ error: 'PIN must be 4 digits' });
+    
+    const user = await prisma.user.findUnique({ where: { id: req.user.userId } });
+    if (!user) return res.status(404).json({ error: 'User not found' });
+
+    const validPassword = await bcrypt.compare(password, user.passwordHash);
+    if (!validPassword) return res.status(401).json({ error: 'Invalid password' });
+
+    const hashedPin = await bcrypt.hash(pin, 10);
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { transferPin: hashedPin }
+    });
+
+    res.json({ message: 'Transaction PIN set successfully' });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
   }
 });
 
@@ -219,15 +215,25 @@ app.get('/api/cards/:cardId/pin', authenticateToken, async (req: any, res: any):
 app.post('/api/cards/:cardId/fund', authenticateToken, async (req: any, res: any): Promise<any> => {
    try {
       const { cardId } = req.params;
-      const { amount, walletId } = req.body;
+      const { amount, walletId, pin } = req.body;
       const userId = req.user.userId;
+
+      // Check balance
+      const user = await prisma.user.findUnique({ where: { id: userId }, include: { wallets: true } });
+      if (!user) return res.status(404).json({ error: 'User not found' });
+
+      if (user.transferPin) {
+        if (!pin) return res.status(400).json({ error: 'Transaction PIN is required' });
+        const validPin = await bcrypt.compare(pin, user.transferPin);
+        if (!validPin) return res.status(401).json({ error: 'Invalid Transaction PIN' });
+      }
 
       // 1. Validate Card & Wallet
       const card = await prisma.virtualCard.findUnique({ where: { id: cardId } });
       if (!card || card.userId !== userId) return res.status(404).json({ error: 'Card not found' });
 
-      const wallet = await prisma.wallet.findUnique({ where: { id: walletId } });
-      if (!wallet || wallet.userId !== userId || Number(wallet.balance) < amount) {
+      const wallet = user.wallets.find(w => w.id === walletId);
+      if (!wallet || Number(wallet.balance) < amount) {
          return res.status(400).json({ error: 'Insufficient funds or invalid wallet' });
       }
 
@@ -423,8 +429,18 @@ app.post('/api/payouts/transfer', authenticateToken, async (req: any, res: any) 
     }
 
     // Check balance
-    const wallet = await prisma.wallet.findUnique({ where: { id: walletId } });
-    if (!wallet || wallet.userId !== userId) {
+    const user = await prisma.user.findUnique({ where: { id: userId }, include: { wallets: true } });
+    if (!user) return res.status(404).json({ error: 'User not found' });
+
+    const { pin } = req.body;
+    if (user.transferPin) {
+       if (!pin) return res.status(400).json({ error: 'Transaction PIN is required' });
+       const validPin = await bcrypt.compare(pin, user.transferPin);
+       if (!validPin) return res.status(401).json({ error: 'Invalid Transaction PIN' });
+    }
+
+    const wallet = user.wallets.find(w => w.id === walletId);
+    if (!wallet) {
       return res.status(404).json({ error: 'Wallet not found' });
     }
 
@@ -1363,8 +1379,17 @@ app.post('/api/fx/quote', authenticateToken, async (req: any, res: any) => {
  */
 app.post('/api/fx/swap', authenticateToken, async (req: any, res: any) => {
   try {
-    const { quoteReference, sourceCurrency, targetCurrency, sourceAmount } = req.body;
+    const { quoteReference, sourceCurrency, targetCurrency, sourceAmount, pin } = req.body;
     const userId = req.user.userId;
+
+    // Verify PIN
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    if (!user) return res.status(404).json({ error: 'User not found' });
+    if (user.transferPin) {
+       if (!pin) return res.status(400).json({ error: 'Transaction PIN is required' });
+       const validPin = await bcrypt.compare(pin, user.transferPin);
+       if (!validPin) return res.status(401).json({ error: 'Invalid Transaction PIN' });
+    }
 
     if (!quoteReference) {
       return res.status(400).json({ error: 'quoteReference is required.' });

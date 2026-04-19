@@ -40,9 +40,6 @@ const VerificationGate: React.FC<VerificationGateProps> = ({ kycStatus: initialS
   const [idNumber, setIdNumber] = useState('');
   const [faceImage, setFaceImage] = useState<string | null>(null);
   const [error, setError] = useState('');
-  const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [showNotifications, setShowNotifications] = useState(false);
-  const [unreadCount, setUnreadCount] = useState(0);
 
   const videoRef = React.useRef<HTMLVideoElement>(null);
   const canvasRef = React.useRef<HTMLCanvasElement>(null);
@@ -58,10 +55,6 @@ const VerificationGate: React.FC<VerificationGateProps> = ({ kycStatus: initialS
       if (data.kycStatus && data.kycStatus !== kycStatus) {
         setKycStatus(data.kycStatus);
         if (onStatusChange) onStatusChange(data.kycStatus);
-      }
-      if (data.notifications) {
-        setNotifications(data.notifications);
-        setUnreadCount(data.notifications.filter((n: Notification) => !n.read).length);
       }
     } catch (_) {}
   }, [token, kycStatus, onStatusChange]);
@@ -106,11 +99,7 @@ const VerificationGate: React.FC<VerificationGateProps> = ({ kycStatus: initialS
   }, [kycStatus, fetchStatus]);
 
 
-  const handleMarkRead = async () => {
-    await fetch(`${API_BASE}/api/notifications/read`, { method: 'POST', headers });
-    setNotifications(prev => prev.map(n => ({ ...n, read: true })));
-    setUnreadCount(0);
-  };
+
 
   const handleNextStep = () => {
     setError('');
@@ -226,26 +215,7 @@ const VerificationGate: React.FC<VerificationGateProps> = ({ kycStatus: initialS
 
   const cfg = statusConfig[kycStatus as keyof typeof statusConfig];
 
-  // Fully unlocked — just render notification bell only
-  if (kycStatus === 'VERIFIED') {
-    if (notifications.length === 0 && unreadCount === 0) return null;
-    return (
-      <div style={{ position: 'fixed', top: '1rem', right: '2rem', zIndex: 1000 }}>
-        <button
-          onClick={() => { setShowNotifications(!showNotifications); if (unreadCount > 0) handleMarkRead(); }}
-          style={{ position: 'relative', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', padding: '0.6rem', cursor: 'pointer', color: '#fff' }}
-        >
-          <Bell size={20} />
-          {unreadCount > 0 && (
-            <div style={{ position: 'absolute', top: '-6px', right: '-6px', background: '#f43f5e', color: '#fff', borderRadius: '50%', width: '18px', height: '18px', fontSize: '0.65rem', fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              {unreadCount}
-            </div>
-          )}
-        </button>
-        <NotificationPanel notifications={notifications} show={showNotifications} onClose={() => setShowNotifications(false)} />
-      </div>
-    );
-  }
+  if (kycStatus === 'VERIFIED') return null;
 
   return (
     <>
@@ -277,18 +247,7 @@ const VerificationGate: React.FC<VerificationGateProps> = ({ kycStatus: initialS
         </div>
 
         <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
-          {/* Notification Bell */}
-          <button
-            onClick={() => { setShowNotifications(!showNotifications); if (unreadCount > 0) handleMarkRead(); }}
-            style={{ position: 'relative', background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.15)', borderRadius: '10px', padding: '0.4rem 0.6rem', cursor: 'pointer', color: '#fff', display: 'flex', alignItems: 'center' }}
-          >
-            <Bell size={16} />
-            {unreadCount > 0 && (
-              <div style={{ position: 'absolute', top: '-5px', right: '-5px', background: '#f43f5e', borderRadius: '50%', width: '16px', height: '16px', fontSize: '0.6rem', fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                {unreadCount}
-              </div>
-            )}
-          </button>
+
 
           {/* Action Button */}
           {(kycStatus === 'PENDING' || kycStatus === 'REJECTED') && (
@@ -302,8 +261,7 @@ const VerificationGate: React.FC<VerificationGateProps> = ({ kycStatus: initialS
         </div>
       </motion.div>
 
-      {/* Notification dropdown */}
-      <NotificationPanel notifications={notifications} show={showNotifications} onClose={() => setShowNotifications(false)} />
+
 
       {/* KYC Modal */}
       <AnimatePresence>

@@ -31,6 +31,8 @@ import PayoutModal from './PayoutModal';
 import VerificationGate from './VerificationGate';
 import BalanceCard from './components/BalanceCard';
 import TransactionReceiptModal from './components/TransactionReceiptModal';
+import NotificationPanel from './components/NotificationPanel';
+import PinSetupModal from './components/PinSetupModal';
 import SwapModal from './SwapModal';
 import WalletRailItem from './components/WalletRailItem';
 import AccountCreationModal from './AccountCreationModal';
@@ -61,19 +63,30 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
   const [selectedTx, setSelectedTx] = useState<any>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [fxRates, setFxRates] = useState<any>({});
+  const [notifications, setNotifications] = useState<any[]>([]);
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [isPinModalOpen, setIsPinModalOpen] = useState(false);
 
   const fetchUserData = async () => {
     const token = localStorage.getItem('paypee_token');
     const headers = { 'Authorization': `Bearer ${token}` };
     try {
-      const [uRes, txRes] = await Promise.all([
+      const [uRes, txRes, notifRes] = await Promise.all([
         fetch(`${API_BASE}/api/users/me`, { headers }),
-        fetch(`${API_BASE}/api/transactions`, { headers })
+        fetch(`${API_BASE}/api/transactions`, { headers }),
+        fetch(`${API_BASE}/api/verify/status`, { headers })
       ]);
       const uData = await uRes.json();
       const txData = await txRes.json();
+      const nData = await notifRes.json();
+      
       if (!uData.error) setUserData(uData);
       if (Array.isArray(txData)) setTransactions(txData);
+      if (nData.notifications) {
+        setNotifications(nData.notifications);
+        setUnreadCount(nData.notifications.filter((n: any) => !n.read).length);
+      }
     } catch (err) {}
   };
 
@@ -91,7 +104,7 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
           if (data.rate) rates[`${p}_NGN`] = data.rate;
         }));
         
-        setFxRates(prev => ({ ...prev, ...rates }));
+        setFxRates((prev: any) => ({ ...prev, ...rates }));
       } catch (err) {}
     };
 
@@ -121,6 +134,16 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
     }, 15000);
     return () => clearInterval(interval);
   }, []);
+
+  const handleMarkRead = async () => {
+    const token = localStorage.getItem('paypee_token');
+    await fetch(`${API_BASE}/api/notifications/read`, { 
+      method: 'POST', 
+      headers: { 'Authorization': `Bearer ${token}` } 
+    });
+    setNotifications((prev: any[]) => prev.map(n => ({ ...n, read: true })));
+    setUnreadCount(0);
+  };
 
   const handleCreateAccount = async (currency: string, bvn?: string, kycData?: any) => {
     setIsGenerating(true);
@@ -236,30 +259,51 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
 
       {/* Main Content Area */}
       <main className="dashboard-main">
-        {/* Modern Header */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4rem' }}>
+        {/* Sticky Modern Header */}
+        <div style={{ 
+          display: 'flex', 
+          justifyContent: 'space-between', 
+          alignItems: 'center', 
+          marginBottom: '2rem', 
+          position: 'sticky', 
+          top: 0, 
+          background: 'rgba(5, 8, 15, 0.8)', 
+          backdropFilter: 'blur(12px)', 
+          padding: '1.5rem 0',
+          zIndex: 100,
+          borderBottom: '1px solid rgba(255,255,255,0.02)'
+        }}>
            <div>
-             <h1 style={{ fontSize: '1.8rem', fontWeight: 900, marginBottom: '0.25rem' }}>
+             <h1 style={{ fontSize: '1.6rem', fontWeight: 900, marginBottom: '0.1rem' }}>
                Welcome back, <span className="text-gradient">{userData?.firstName || 'User'}</span>
              </h1>
-             <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem' }}>Monitor your global capital and settlements in real-time.</p>
+             <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Monitor your global capital and settlements in real-time.</p>
            </div>
            <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-              <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid var(--border)', borderRadius: '16px', padding: '0.75rem 1.25rem', display: 'flex', alignItems: 'center', gap: '0.75rem', width: '300px' }} className="desktop-only">
-                 <Search size={18} color="var(--text-muted)" />
+              <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid var(--border)', borderRadius: '16px', padding: '0.6rem 1rem', display: 'flex', alignItems: 'center', gap: '0.75rem', width: '300px' }} className="desktop-only">
+                 <Search size={16} color="var(--text-muted)" />
                  <input 
                     type="text" 
                     placeholder="Search transactions..." 
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    style={{ background: 'transparent', border: 'none', color: '#fff', outline: 'none', fontSize: '0.9rem', width: '100%' }} 
+                    style={{ background: 'transparent', border: 'none', color: '#fff', outline: 'none', fontSize: '0.85rem', width: '100%' }} 
                   />
               </div>
-              <button className="btn btn-outline" style={{ padding: '0.75rem', borderRadius: '16px' }}>
-                <Bell size={20} />
+              <button 
+                className="btn btn-outline" 
+                onClick={() => { setShowNotifications(!showNotifications); if (unreadCount > 0) handleMarkRead(); }}
+                style={{ padding: '0.6rem', borderRadius: '12px', position: 'relative' }}
+              >
+                <Bell size={18} />
+                {unreadCount > 0 && (
+                  <div style={{ position: 'absolute', top: '-4px', right: '-4px', background: '#f43f5e', color: '#fff', borderRadius: '50%', width: '16px', height: '16px', fontSize: '0.6rem', fontWeight: 900, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    {unreadCount}
+                  </div>
+                )}
               </button>
-              <div style={{ width: 44, height: 44, borderRadius: '16px', background: 'linear-gradient(135deg, #6366f1 0%, #a855f7 100%)', padding: '2px' }}>
-                 <div style={{ width: '100%', height: '100%', background: '#000', borderRadius: '14px', overflow: 'hidden' }}>
+              <div style={{ width: 40, height: 40, borderRadius: '12px', background: 'linear-gradient(135deg, #6366f1 0%, #a855f7 100%)', padding: '2px', cursor: 'pointer' }}>
+                 <div style={{ width: '100%', height: '100%', background: '#000', borderRadius: '10px', overflow: 'hidden' }}>
                     <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${userData?.email}`} alt="Avatar" />
                  </div>
               </div>
@@ -277,6 +321,40 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
           >
             {activeSection === 'overview' && (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
+                
+                {userData && !userData.isPinSet && (
+                  <motion.div 
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    style={{ 
+                      background: 'linear-gradient(90deg, rgba(99,102,241,0.1) 0%, rgba(168,85,247,0.1) 100%)', 
+                      border: '1px solid rgba(99,102,241,0.2)', 
+                      borderRadius: '24px', 
+                      padding: '1.5rem 2rem', 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      justifyContent: 'space-between',
+                      boxShadow: '0 10px 30px -10px rgba(99,102,241,0.2)'
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+                      <div style={{ width: 48, height: 48, background: 'rgba(99,102,241,0.2)', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <Lock size={24} color="#6366f1" />
+                      </div>
+                      <div>
+                        <h4 style={{ fontSize: '1.1rem', fontWeight: 800, marginBottom: '0.25rem' }}>Enhance Your Security</h4>
+                        <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>You haven't set a transaction PIN. Set one now to protect your funds.</p>
+                      </div>
+                    </div>
+                    <button 
+                      className="btn btn-primary" 
+                      onClick={() => setIsPinModalOpen(true)}
+                      style={{ padding: '0.75rem 1.5rem', borderRadius: '14px' }}
+                    >
+                      Set Security PIN
+                    </button>
+                  </motion.div>
+                )}
                 
                 {/* 1. Master Summary */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '2rem' }}>
@@ -547,14 +625,10 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
       {/* Global Modals */}
       <PayoutModal isOpen={isPayoutOpen} onClose={() => setIsPayoutOpen(false)} onComplete={fetchUserData} wallets={userData?.wallets || []} />
       <SwapModal isOpen={isSwapOpen} onClose={() => setIsSwapOpen(false)} wallets={userData?.wallets || []} onComplete={fetchUserData} />
-      <AccountCreationModal 
-        isOpen={isAccountModalOpen} 
-        onClose={() => setIsAccountModalOpen(false)} 
-        onSelect={handleCreateAccount}
-        isProcessing={isGenerating}
-        existingCurrencies={userData?.wallets?.map((w: any) => w.currency) || []}
-      />
+      <AccountCreationModal isOpen={isAccountModalOpen} onClose={() => setIsAccountModalOpen(false)} onComplete={fetchUserData} />
       <TransactionReceiptModal transaction={selectedTx} onClose={() => setSelectedTx(null)} />
+      <NotificationPanel notifications={notifications} show={showNotifications} onClose={() => setShowNotifications(false)} />
+      <PinSetupModal isOpen={isPinModalOpen} onClose={() => setIsPinModalOpen(false)} onSuccess={fetchUserData} />
     </div>
   );
 };

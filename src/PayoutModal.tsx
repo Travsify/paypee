@@ -49,6 +49,7 @@ const PayoutModal: React.FC<PayoutModalProps> = ({ isOpen, onClose, onComplete, 
   const [exchangeRate, setExchangeRate] = useState<number | null>(null);
   const [accountName, setAccountName] = useState('');
   const [verifying, setVerifying] = useState(false);
+  const [pin, setPin] = useState('');
 
   useEffect(() => {
     if (accountNumber.length >= 10 && bankCode && targetCurrency === 'NGN') {
@@ -59,9 +60,9 @@ const PayoutModal: React.FC<PayoutModalProps> = ({ isOpen, onClose, onComplete, 
           const res = await fetch(`${API_BASE}/api/payouts/verify?accountNumber=${accountNumber}&bankCode=${bankCode}`, {
             headers: { 'Authorization': `Bearer ${localStorage.getItem('paypee_token')}` }
           });
-          const data = await res.json();
-          if (data.account_name) {
-            setAccountName(data.account_name);
+          if (res.ok) {
+            const data = await res.json();
+            setAccountName(data.name || data.account_name || data.accountName || '');
           }
         } catch (err) {
           console.error('Verification error');
@@ -110,7 +111,6 @@ const PayoutModal: React.FC<PayoutModalProps> = ({ isOpen, onClose, onComplete, 
   const sourceCurrency = selectedWallet?.currency || 'USD';
 
   useEffect(() => {
-    // Fetch live rate if cross-currency
     if (isOpen && sourceCurrency && targetCurrency && sourceCurrency !== targetCurrency) {
       const fetchRate = async () => {
         try {
@@ -165,7 +165,8 @@ const PayoutModal: React.FC<PayoutModalProps> = ({ isOpen, onClose, onComplete, 
           swiftCode,
           iban,
           walletId: selectedWalletId,
-          accountName
+          accountName,
+          pin
         })
       });
 
@@ -436,7 +437,7 @@ const PayoutModal: React.FC<PayoutModalProps> = ({ isOpen, onClose, onComplete, 
                       <Building2 size={20} />
                     </div>
                     <div>
-                      <div style={{ fontWeight: 700, color: '#fff' }}>{accountName || 'Unnamed Recipient'}</div>
+                      <div style={{ fontWeight: 700, color: '#fff' }}>{accountName || 'Recipient Name'}</div>
                       <div style={{ fontSize: '0.85rem', color: '#94a3b8' }}>
                         {banks.find(b => (b.bank_code || b.code || b.bankCode) === bankCode)?.name || 'Local Bank'} • {accountNumber}
                       </div>
@@ -464,14 +465,43 @@ const PayoutModal: React.FC<PayoutModalProps> = ({ isOpen, onClose, onComplete, 
                   </div>
                 </div>
 
-                <div style={{ display: 'flex', gap: '1rem' }}>
+                {/* Transaction PIN Section */}
+                <div style={{ marginTop: '2.5rem', padding: '1.5rem', background: 'rgba(99, 102, 241, 0.05)', borderRadius: '20px', border: '1px solid rgba(99, 102, 241, 0.1)' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
+                    <Lock size={18} color="var(--primary)" />
+                    <span style={{ fontWeight: 800, fontSize: '0.9rem', letterSpacing: '-0.02em' }}>AUTHORIZE TRANSACTION</span>
+                  </div>
+                  <p style={{ fontSize: '0.85rem', color: '#94a3b8', marginBottom: '1.25rem' }}>Enter your 4-digit transaction PIN to confirm this transfer.</p>
+                  <input 
+                    type="password" 
+                    maxLength={4} 
+                    placeholder="••••"
+                    value={pin}
+                    onChange={(e) => setPin(e.target.value.replace(/\D/g, ''))}
+                    style={{ 
+                      width: '100%', 
+                      background: '#000', 
+                      border: '1px solid #1e293b', 
+                      borderRadius: '12px', 
+                      padding: '1rem', 
+                      textAlign: 'center', 
+                      fontSize: '1.5rem', 
+                      letterSpacing: '1rem',
+                      fontWeight: 900,
+                      color: '#6366f1',
+                      outline: 'none'
+                    }} 
+                  />
+                </div>
+
+                <div style={{ display: 'flex', gap: '1rem', marginTop: '2.5rem' }}>
                    <button onClick={() => setStep(1)} style={{ flex: 1, background: 'transparent', color: '#fff', border: '1px solid #1e293b', padding: '1.2rem', borderRadius: '16px', fontWeight: 700, cursor: 'pointer' }}>Back</button>
                    <button 
                      onClick={handlePayout}
-                     disabled={loading || !amount || parseFloat(amount) > balance}
-                     style={{ flex: 2, background: '#6366f1', color: '#fff', border: 'none', padding: '1.2rem', borderRadius: '16px', fontWeight: 700, cursor: 'pointer', opacity: (loading || !amount || parseFloat(amount) > balance) ? 0.5 : 1 }}
+                     disabled={loading || (pin.length < 4)}
+                     style={{ flex: 2, background: '#6366f1', color: '#fff', border: 'none', padding: '1.2rem', borderRadius: '16px', fontWeight: 700, cursor: 'pointer', opacity: (loading || pin.length < 4) ? 0.5 : 1 }}
                    >
-                     {loading ? 'Processing...' : 'Send Money'}
+                     {loading ? 'Processing...' : 'Confirm & Send'}
                    </button>
                 </div>
               </>

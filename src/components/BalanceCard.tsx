@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Wallet, ShieldCheck, Copy, Check, Trash2 } from 'lucide-react';
+import { Wallet, ShieldCheck, Copy, Check, Trash2, RefreshCw } from 'lucide-react';
 
 const CopyButton = ({ text, label }: { text: string, label: string }) => {
   const [copied, setCopied] = useState(false);
@@ -49,6 +49,7 @@ interface BalanceCardProps {
   onDelete?: (id: string) => void;
   onSwap?: () => void;
   onPayout?: () => void;
+  onRefresh?: () => void;
 }
 
 const getAccountNumber = (details: any) => {
@@ -93,7 +94,8 @@ const BalanceCard: React.FC<BalanceCardProps> = ({
   type = 'INDIVIDUAL', 
   onDelete,
   onSwap,
-  onPayout
+  onPayout,
+  onRefresh
 }) => {
   const accNo = getAccountNumber(details);
   const bank = getBankName(details);
@@ -132,9 +134,20 @@ const BalanceCard: React.FC<BalanceCardProps> = ({
             </div>
             <div style={{ fontWeight: 800, fontSize: '0.8rem', letterSpacing: '1px', opacity: 0.9 }}>{currency} {type}</div>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', background: 'rgba(0,0,0,0.2)', padding: '0.4rem 0.6rem', borderRadius: '10px', backdropFilter: 'blur(10px)' }}>
-            <ShieldCheck size={14} color="#34d399" />
-            <span style={{ fontSize: '0.6rem', fontWeight: 800, letterSpacing: '0.5px' }}>SECURED</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+            {onRefresh && (
+              <motion.button 
+                whileHover={{ rotate: 180 }}
+                onClick={(e) => { e.stopPropagation(); onRefresh(); }}
+                style={{ background: 'rgba(255,255,255,0.1)', border: 'none', padding: '0.4rem', borderRadius: '8px', cursor: 'pointer', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+              >
+                <RefreshCw size={14} />
+              </motion.button>
+            )}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', background: 'rgba(0,0,0,0.2)', padding: '0.4rem 0.6rem', borderRadius: '10px', backdropFilter: 'blur(10px)' }}>
+              <ShieldCheck size={14} color="#34d399" />
+              <span style={{ fontSize: '0.6rem', fontWeight: 800, letterSpacing: '0.5px' }}>SECURED</span>
+            </div>
           </div>
         </div>
 
