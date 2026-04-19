@@ -398,10 +398,22 @@ app.get('/api/payouts/banks', authenticateToken, async (req: any, res: any) => {
     res.status(500).json({ error: 'Failed to fetch banks' });
   }
 });
+app.get('/api/payouts/verify', authenticateToken, async (req: any, res: any) => {
+  try {
+    const { accountNumber, bankCode } = req.query;
+    if (!accountNumber || !bankCode) {
+      return res.status(400).json({ error: 'Account number and bank code are required' });
+    }
+    const data = await Maplerad.verifyAccountNumber(accountNumber as string, bankCode as string);
+    res.json(data);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
 
 app.post('/api/payouts/transfer', authenticateToken, async (req: any, res: any) => {
   try {
-    const { amount, sourceCurrency, targetCurrency, bankCode, accountNumber, routingNumber, swiftCode, iban, walletId } = req.body;
+    const { amount, sourceCurrency, targetCurrency, bankCode, accountNumber, routingNumber, swiftCode, iban, walletId, accountName } = req.body;
     const userId = req.user.userId;
     const parsedAmount = parseFloat(amount); // This is the amount in sourceCurrency to deduct
 
@@ -479,6 +491,7 @@ app.post('/api/payouts/transfer', authenticateToken, async (req: any, res: any) 
             providerReference: payoutResult?.id || null,
             bankCode,
             accountNumber,
+            accountName,
             targetCurrency: payoutCurrency,
             targetAmount: payoutAmount,
             fxRate: fxRate
@@ -1670,11 +1683,36 @@ app.get('/api/admin/fix-swaps', async (req: any, res: any) => {
       if (Number(swap.targetAmount) === 0) {
         const correctTargetAmount = Number(swap.sourceAmount) * Number(swap.rate);
         
+        // 1. Update FxSwap record
         await prisma.fxSwap.update({
           where: { id: swap.id },
           data: { targetAmount: correctTargetAmount }
         });
         
+        // 2. Find and update the credit transaction (DEPOSIT)
+        // Usually created right at the same time as the FxSwap
+        const creditTx = await prisma.transaction.findFirst({
+          where: {
+            userId: swap.userId,
+            walletId: swap.targetWalletId,
+            type: 'DEPOSIT',
+            amount: 0,
+            category: 'FX_SWAP',
+            createdAt: {
+              gte: new Date(swap.createdAt.getTime() - 5000), // Within 5 seconds
+              lte: new Date(swap.createdAt.getTime() + 5000)
+            }
+          }
+        });
+
+        if (creditTx) {
+          await prisma.transaction.update({
+            where: { id: creditTx.id },
+            data: { amount: correctTargetAmount }
+          });
+        }
+        
+        // 3. Update wallet balance
         const wallet = await prisma.wallet.findFirst({
           where: { userId: swap.userId, currency: swap.targetCurrency as any }
         });

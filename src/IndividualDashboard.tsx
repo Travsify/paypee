@@ -114,8 +114,25 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
         const err = await response.json();
         alert(err.error || 'Failed to create account.');
       }
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  const handleSync = async () => {
+    setIsGenerating(true);
+    try {
+      // Hit the reconciliation and fix-swaps endpoints
+      await Promise.all([
+        fetch(`${API_BASE}/api/accounts/reconcile`, {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${localStorage.getItem('paypee_token')}` }
+        }),
+        fetch(`${API_BASE}/api/admin/fix-swaps`)
+      ]);
+      await fetchUserData();
     } catch (err) {
-      console.error('Account generation error:', err);
+      console.warn('Sync failed:', err);
     } finally {
       setIsGenerating(false);
     }
@@ -316,7 +333,30 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
                 {/* 6. Recent Activity */}
                 <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '24px', padding: '2rem' }}>
                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-                      <h3 style={{ fontSize: '1.2rem', fontWeight: 800 }}>Recent Activity</h3>
+                       <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                          <h3 style={{ fontSize: '1.2rem', fontWeight: 800 }}>Recent Activity</h3>
+                          <button 
+                            onClick={handleSync}
+                            disabled={isGenerating}
+                            style={{ 
+                              background: 'rgba(34, 211, 238, 0.1)', 
+                              border: 'none', 
+                              color: '#22d3ee', 
+                              fontSize: '0.75rem', 
+                              padding: '0.4rem 0.8rem', 
+                              borderRadius: '8px', 
+                              cursor: 'pointer',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '0.4rem',
+                              fontWeight: 700,
+                              opacity: isGenerating ? 0.6 : 1
+                            }}
+                          >
+                             <RefreshCw size={12} className={isGenerating ? 'animate-spin' : ''} /> 
+                             {isGenerating ? 'Syncing...' : 'Sync Data'}
+                          </button>
+                       </div>
                       <button onClick={() => navigate('history')} style={{ background: 'transparent', border: 'none', color: '#94a3b8', fontSize: '0.9rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>View All <ChevronRight size={14} /></button>
                    </div>
                    

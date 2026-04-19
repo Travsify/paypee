@@ -45,6 +45,34 @@ const PayoutModal: React.FC<PayoutModalProps> = ({ isOpen, onClose, onComplete, 
   const [selectedWalletId, setSelectedWalletId] = useState('');
   const [banks, setBanks] = useState<any[]>([]);
   const [exchangeRate, setExchangeRate] = useState<number | null>(null);
+  const [accountName, setAccountName] = useState('');
+  const [verifying, setVerifying] = useState(false);
+
+  useEffect(() => {
+    if (accountNumber.length >= 10 && bankCode && targetCurrency === 'NGN') {
+      const verify = async () => {
+        setVerifying(true);
+        setAccountName('');
+        try {
+          const res = await fetch(`${API_BASE}/api/payouts/verify?accountNumber=${accountNumber}&bankCode=${bankCode}`, {
+            headers: { 'Authorization': `Bearer ${localStorage.getItem('paypee_token')}` }
+          });
+          const data = await res.json();
+          if (data.account_name) {
+            setAccountName(data.account_name);
+          }
+        } catch (err) {
+          console.error('Verification error');
+        } finally {
+          setVerifying(false);
+        }
+      };
+      const timer = setTimeout(verify, 800);
+      return () => clearTimeout(timer);
+    } else {
+      setAccountName('');
+    }
+  }, [accountNumber, bankCode, targetCurrency]);
 
   useEffect(() => {
     if (isOpen) {
@@ -134,7 +162,8 @@ const PayoutModal: React.FC<PayoutModalProps> = ({ isOpen, onClose, onComplete, 
           routingNumber,
           swiftCode,
           iban,
-          walletId: selectedWalletId
+          walletId: selectedWalletId,
+          accountName
         })
       });
 
@@ -231,6 +260,13 @@ const PayoutModal: React.FC<PayoutModalProps> = ({ isOpen, onClose, onComplete, 
               <User size={18} color="var(--primary)" />
               <input type="text" placeholder={isMoMo ? "e.g. 0541234567" : "0123456789"} value={accountNumber} onChange={(e) => setAccountNumber(e.target.value)} style={inputStyle} />
             </div>
+            {verifying && <div style={{ fontSize: '0.8rem', color: '#94a3b8', marginTop: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <div style={{ width: 12, height: 12, border: '2px solid rgba(255,255,255,0.1)', borderTopColor: '#22d3ee', borderRadius: '50%', animation: 'spin 1s linear infinite' }}></div>
+              Verifying account...
+            </div>}
+            {accountName && <div style={{ fontSize: '0.85rem', color: '#22d3ee', marginTop: '0.5rem', fontWeight: 700, background: 'rgba(34, 211, 238, 0.05)', padding: '0.5rem', borderRadius: '8px' }}>
+              Account Name: {accountName}
+            </div>}
           </div>
         </>
       );
@@ -390,6 +426,24 @@ const PayoutModal: React.FC<PayoutModalProps> = ({ isOpen, onClose, onComplete, 
                   <p style={{ color: '#94a3b8', marginTop: '1rem' }}>Available Balance: {balance.toFixed(2)} {sourceCurrency}</p>
                 </div>
 
+                <div style={{ background: 'rgba(255,255,255,0.02)', borderRadius: '20px', padding: '1.5rem', marginBottom: '1.5rem', border: '1px solid #1e293b' }}>
+                  <h4 style={{ fontSize: '0.75rem', color: '#94a3b8', marginBottom: '1rem', fontWeight: 800, letterSpacing: '0.05em' }}>RECIPIENT DETAILS</h4>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
+                    <div style={{ width: 40, height: 40, background: 'rgba(99, 102, 241, 0.1)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#6366f1' }}>
+                      <Building2 size={20} />
+                    </div>
+                    <div>
+                      <div style={{ fontWeight: 700, color: '#fff' }}>{accountName || 'Unnamed Recipient'}</div>
+                      <div style={{ fontSize: '0.85rem', color: '#94a3b8' }}>
+                        {banks.find(b => (b.bank_code || b.code || b.bankCode) === bankCode)?.name || 'Local Bank'} • {accountNumber}
+                      </div>
+                    </div>
+                  </div>
+                  {routingNumber && <div style={{ fontSize: '0.85rem', color: '#94a3b8', display: 'flex', justifyContent: 'space-between' }}><span>{targetCurrency === 'USD' ? 'Routing' : 'Sort Code'}</span><span style={{ color: '#fff' }}>{routingNumber}</span></div>}
+                  {swiftCode && <div style={{ fontSize: '0.85rem', color: '#94a3b8', display: 'flex', justifyContent: 'space-between' }}><span>SWIFT</span><span style={{ color: '#fff' }}>{swiftCode}</span></div>}
+                  {iban && <div style={{ fontSize: '0.85rem', color: '#94a3b8', display: 'flex', justifyContent: 'space-between' }}><span>IBAN</span><span style={{ color: '#fff', fontSize: '0.75rem' }}>{iban}</span></div>}
+                </div>
+
                 <div style={{ background: 'rgba(255,255,255,0.02)', borderRadius: '20px', padding: '1.5rem', marginBottom: '2.5rem', border: '1px solid #1e293b' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
                     <span style={{ color: '#94a3b8' }}>Transfer Fee</span>
@@ -398,7 +452,7 @@ const PayoutModal: React.FC<PayoutModalProps> = ({ isOpen, onClose, onComplete, 
                   {sourceCurrency !== targetCurrency && exchangeRate && (
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
                       <span style={{ color: '#94a3b8' }}>Recipient Gets (~{exchangeRate})</span>
-                      <span style={{ fontWeight: 600, color: '#6366f1' }}>{amount ? (parseFloat(amount) * exchangeRate).toFixed(2) : '0.00'} {targetCurrency}</span>
+                      <span style={{ fontWeight: 600, color: '#22d3ee' }}>{amount ? (parseFloat(amount) * exchangeRate).toFixed(2) : '0.00'} {targetCurrency}</span>
                     </div>
                   )}
                   <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px solid #1e293b', paddingTop: '1rem' }}>

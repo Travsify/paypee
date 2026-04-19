@@ -272,6 +272,19 @@ export const getBanks = async (currency: string = 'NGN') => {
 };
 
 /**
+ * Verify a bank account number
+ */
+export const verifyAccountNumber = async (accountNumber: string, bankCode: string) => {
+  try {
+    const response = await makeRequest('get', `/identities/lookup?account_number=${accountNumber}&bank_code=${bankCode}`);
+    return response.data.data;
+  } catch (error: any) {
+    console.error('[MAPLERAD] Account Verification Error:', error.response?.data || error.message);
+    throw new Error(error.response?.data?.message || 'Failed to verify account number');
+  }
+};
+
+/**
  * Generate an FX Quote (Step 1 of currency swap)
  */
 export const generateFxQuote = async (sourceCurrency: string, targetCurrency: string, amount: number) => {

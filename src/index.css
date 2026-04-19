@@ -231,6 +231,15 @@ h1, h2, h3, h4, h5, h6 {
   50% { opacity: 0.8; filter: blur(60px); }
 }
 
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
 .glow-overlay {
   position: absolute;
   top: 0; left: 0; right: 0; bottom: 0;
