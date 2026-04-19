@@ -75,6 +75,7 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
   const [showBalances, setShowBalances] = useState(true);
   const [chartInterval, setChartInterval] = useState('1W');
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [selectedWalletId, setSelectedWalletId] = useState<string | null>(null);
 
   const fetchUserData = async () => {
     const token = localStorage.getItem('paypee_token');
@@ -515,31 +516,87 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
                       <h3 style={{ fontSize: '1.2rem', fontWeight: 800 }}>Global Wallets</h3>
                       <button onClick={() => navigate('wallets')} style={{ background: 'transparent', border: 'none', color: '#94a3b8', fontSize: '0.9rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>View All <ChevronRight size={14} /></button>
                    </div>
-                   <div style={{ display: 'flex', gap: '1.5rem', overflowX: 'auto', paddingBottom: '1rem' }}>
+                   
+                   {/* Currency Selector Tabs */}
+                   <div style={{ display: 'flex', gap: '0.75rem', overflowX: 'auto', paddingBottom: '1rem', marginBottom: '1rem', msOverflowStyle: 'none', scrollbarWidth: 'none' }}>
                       {userData?.wallets?.map((w: any) => {
-                         const { symbol, gradient } = getCardProps(w.currency);
+                         const isActive = selectedWalletId ? selectedWalletId === w.id : userData.wallets[0].id === w.id;
                          return (
-                           <BalanceCard 
-                             key={w.id} 
-                             currency={w.currency} 
-                             symbol={symbol} 
-                             gradient={gradient} 
-                             details={w.metadata} 
-                             amount={parseFloat(w.balance).toFixed(2)} 
-                             userName={userData?.firstName}
-                           />
+                            <button 
+                               key={w.id} 
+                               onClick={() => setSelectedWalletId(w.id)}
+                               style={{ 
+                                  padding: '0.5rem 1.25rem', 
+                                  borderRadius: '24px', 
+                                  border: `1px solid ${isActive ? '#6366f1' : 'rgba(255,255,255,0.05)'}`, 
+                                  background: isActive ? 'rgba(99, 102, 241, 0.1)' : 'rgba(255,255,255,0.02)', 
+                                  color: isActive ? '#fff' : '#94a3b8', 
+                                  fontWeight: 700, 
+                                  cursor: 'pointer', 
+                                  whiteSpace: 'nowrap',
+                                  transition: 'all 0.2s',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  gap: '0.5rem'
+                               }}
+                            >
+                               <div style={{ width: 8, height: 8, borderRadius: '50%', background: isActive ? '#22d3ee' : 'transparent' }}></div>
+                               {w.currency} Wallet
+                            </button>
                          );
                       })}
-                      {!userData?.wallets?.length && (
-                         <div style={{ minWidth: '280px', flex: 1, background: 'rgba(255,255,255,0.03)', border: '1px dashed rgba(255,255,255,0.1)', borderRadius: '24px', padding: '1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', cursor: 'pointer' }} onClick={() => setIsAccountModalOpen(true)}>
-                            <Plus size={24} color="#94a3b8" style={{ marginBottom: '0.5rem' }} />
-                            <div style={{ color: '#94a3b8', fontWeight: 600 }}>Create Wallet</div>
-                         </div>
-                      )}
-                      <div style={{ minWidth: '280px', flex: 1, background: 'rgba(255,255,255,0.03)', border: '1px dashed rgba(255,255,255,0.1)', borderRadius: '24px', padding: '1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', cursor: 'pointer', transition: 'all 0.2s', boxShadow: '0 10px 30px rgba(0,0,0,0.3)' }} onClick={() => setIsAccountModalOpen(true)}>
-                         <Plus size={24} color="#94a3b8" style={{ marginBottom: '0.5rem' }} />
-                         <div style={{ color: '#94a3b8', fontWeight: 600 }}>Create New Wallet</div>
-                      </div>
+                      <button 
+                         onClick={() => setIsAccountModalOpen(true)} 
+                         style={{ 
+                            padding: '0.5rem 1.25rem', 
+                            borderRadius: '24px', 
+                            border: '1px dashed rgba(255,255,255,0.2)', 
+                            background: 'transparent', 
+                            color: '#94a3b8', 
+                            fontWeight: 600, 
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.5rem',
+                            whiteSpace: 'nowrap',
+                            transition: 'all 0.2s'
+                         }}
+                         onMouseEnter={(e) => { e.currentTarget.style.color = '#fff'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.5)'; }}
+                         onMouseLeave={(e) => { e.currentTarget.style.color = '#94a3b8'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.2)'; }}
+                      >
+                         <Plus size={14} /> New Wallet
+                      </button>
+                   </div>
+
+                   {/* Selected Wallet Display */}
+                   <div style={{ display: 'flex', justifyContent: 'flex-start' }}>
+                      {(() => {
+                         const activeWallet = selectedWalletId 
+                           ? userData?.wallets?.find((w: any) => w.id === selectedWalletId) 
+                           : userData?.wallets?.[0];
+                           
+                         if (!activeWallet) return (
+                           <div style={{ minWidth: '320px', background: 'rgba(255,255,255,0.02)', border: '1px dashed rgba(255,255,255,0.1)', borderRadius: '24px', padding: '2rem', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', cursor: 'pointer' }} onClick={() => setIsAccountModalOpen(true)}>
+                              <Plus size={32} color="#94a3b8" style={{ marginBottom: '1rem' }} />
+                              <div style={{ color: '#fff', fontWeight: 600, fontSize: '1.1rem' }}>Create Your First Wallet</div>
+                              <p style={{ color: '#94a3b8', fontSize: '0.85rem', marginTop: '0.5rem' }}>Get started with an NGN or USD account.</p>
+                           </div>
+                         );
+                         
+                         const { symbol, gradient } = getCardProps(activeWallet.currency);
+                         return (
+                           <div style={{ width: '100%', maxWidth: '380px' }}>
+                             <BalanceCard 
+                               currency={activeWallet.currency} 
+                               symbol={symbol} 
+                               gradient={gradient} 
+                               details={activeWallet.metadata} 
+                               amount={parseFloat(activeWallet.balance).toFixed(2)} 
+                               userName={userData?.firstName}
+                             />
+                           </div>
+                         );
+                      })()}
                    </div>
                 </div>
 
