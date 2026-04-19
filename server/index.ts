@@ -292,10 +292,27 @@ app.post('/api/cards/:cardId/withdraw', authenticateToken, async (req: any, res:
       const wallet = user.wallets.find(w => w.id === card.walletId);
       if (!wallet) return res.status(404).json({ error: 'Linked wallet not found' });
 
-      // Check card has enough balance — use dailyLimit as the DB-tracked balance
+      // Check card has enough balance
       const cardBalance = Number(card.dailyLimit);
       if (cardBalance < amount) {
         return res.status(400).json({ error: `Insufficient card balance. Available: $${cardBalance.toFixed(2)}` });
+      }
+
+      // FX Conversion: Card is always USD, wallet may be NGN/EUR/GBP etc.
+      const cardCurrency = 'USD'; // Virtual cards are issued in USD
+      let creditAmount = amount;
+      let conversionRate = 1;
+
+      if (wallet.currency !== cardCurrency) {
+        try {
+          const rateData = await Maplerad.getExchangeRate(cardCurrency, wallet.currency);
+          conversionRate = rateData.rate;
+          creditAmount = amount * conversionRate;
+          console.log(`[CARDS] FX Conversion: $${amount} USD × ${conversionRate} = ${creditAmount.toFixed(2)} ${wallet.currency}`);
+        } catch (fxErr: any) {
+          console.error(`[CARDS] FX rate fetch failed:`, fxErr.message);
+          return res.status(500).json({ error: 'Unable to fetch exchange rate for withdrawal. Please try again.' });
+        }
       }
 
       // Attempt provider-side withdrawal if card has a provider ID
@@ -305,15 +322,14 @@ app.post('/api/cards/:cardId/withdraw', authenticateToken, async (req: any, res:
           console.log(`[CARDS] Maplerad withdraw success for ${card.providerCardId}: $${amount}`);
         } catch (providerErr: any) {
           console.error(`[CARDS] Provider withdraw failed:`, providerErr.message);
-          // Continue with local balance update even if provider call fails (sandbox limitation)
         }
       }
 
-      // Atomic: Credit wallet + Debit card balance + Record transaction
+      // Atomic: Credit wallet (converted amount) + Debit card balance (USD) + Record transaction
       await prisma.$transaction([
          prisma.wallet.update({
             where: { id: card.walletId },
-            data: { balance: { increment: amount } }
+            data: { balance: { increment: creditAmount } }
          }),
          prisma.virtualCard.update({
             where: { id: cardId },
@@ -324,32 +340,83 @@ app.post('/api/cards/:cardId/withdraw', authenticateToken, async (req: any, res:
                userId,
                walletId: card.walletId,
                type: 'DEPOSIT',
-               amount,
+               amount: creditAmount,
                currency: wallet.currency,
                status: 'COMPLETED',
                reference: `CARD_WITHDRAW_${Date.now()}`,
                category: 'CARD',
-               desc: `Withdrawal from Card ending in ${card.cardNumber.slice(-4)}`
+               desc: `Withdrawal from Card ending in ${card.cardNumber.slice(-4)}${conversionRate !== 1 ? ` ($${amount} USD @ ${conversionRate.toFixed(2)})` : ''}`
             }
          })
       ]);
 
-      console.log(`[CARDS] Withdrawal complete: $${amount} from card ${cardId} -> wallet ${card.walletId}`);
+      console.log(`[CARDS] Withdrawal complete: $${amount} USD → ${creditAmount.toFixed(2)} ${wallet.currency} (rate: ${conversionRate})`);
 
-      // Send notification
       await NotificationService.create(
         userId,
         '💳 Card Withdrawal',
-        `$${amount.toFixed(2)} withdrawn from your card ending in ${card.cardNumber.slice(-4)} to your ${wallet.currency} wallet.`,
+        `$${amount.toFixed(2)} USD withdrawn → ${creditAmount.toFixed(2)} ${wallet.currency} credited to your wallet.`,
         'SUCCESS'
       );
 
-      res.status(200).json({ message: 'Withdrawal successful' });
+      res.status(200).json({ message: 'Withdrawal successful', credited: creditAmount, currency: wallet.currency, rate: conversionRate });
    } catch (error: any) {
       console.error('[CARDS] Withdraw Error:', error.message);
       res.status(500).json({ error: 'Failed to withdraw from card' });
    }
 });
+
+// One-time balance correction for the $1000 USD → NGN miscalculation
+app.get('/api/admin/fix-card-withdraw', async (req: any, res: any) => {
+  try {
+    // Find the bad transaction
+    const badTx = await prisma.transaction.findFirst({
+      where: {
+        category: 'CARD',
+        type: 'DEPOSIT',
+        reference: { startsWith: 'CARD_WITHDRAW_' },
+        amount: 1000,
+        currency: 'NGN'
+      },
+      orderBy: { createdAt: 'desc' }
+    });
+
+    if (!badTx) return res.json({ message: 'No incorrect withdrawal found to fix.' });
+
+    // Get live USD→NGN rate
+    const rateData = await Maplerad.getExchangeRate('USD', 'NGN');
+    const correctAmount = 1000 * rateData.rate; // $1000 × rate
+    const difference = correctAmount - 1000; // How much more to credit
+
+    console.log(`[FIX] Bad tx ${badTx.id}: credited 1000 NGN, should be ${correctAmount.toFixed(2)} NGN. Difference: ${difference.toFixed(2)}`);
+
+    // Credit the difference to the wallet and update the transaction record
+    await prisma.$transaction([
+      prisma.wallet.update({
+        where: { id: badTx.walletId },
+        data: { balance: { increment: difference } }
+      }),
+      prisma.transaction.update({
+        where: { id: badTx.id },
+        data: { 
+          amount: correctAmount,
+          desc: `Withdrawal from Card (CORRECTED: $1000 USD @ ${rateData.rate.toFixed(2)})`
+        }
+      })
+    ]);
+
+    res.json({ 
+      message: 'Balance corrected successfully',
+      original: '1000 NGN',
+      corrected: `${correctAmount.toFixed(2)} NGN`,
+      difference: `+${difference.toFixed(2)} NGN`,
+      rate: rateData.rate
+    });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 
 app.get('/api/cards/:cardId/subscriptions', authenticateToken, async (req: any, res: any): Promise<any> => {
   try {
