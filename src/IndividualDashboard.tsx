@@ -71,6 +71,7 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
   const [isPinModalOpen, setIsPinModalOpen] = useState(false);
   const [showBalances, setShowBalances] = useState(true);
   const [chartInterval, setChartInterval] = useState('1W');
+  const [showUserMenu, setShowUserMenu] = useState(false);
 
   const fetchUserData = async () => {
     const token = localStorage.getItem('paypee_token');
@@ -358,10 +359,53 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
                   </div>
                 )}
               </button>
-              <div style={{ width: 40, height: 40, borderRadius: '12px', background: 'linear-gradient(135deg, #6366f1 0%, #a855f7 100%)', padding: '2px', cursor: 'pointer' }}>
-                 <div style={{ width: '100%', height: '100%', background: '#000', borderRadius: '10px', overflow: 'hidden' }}>
-                    <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${userData?.email}`} alt="Avatar" />
-                 </div>
+              <div 
+                style={{ position: 'relative' }} 
+                onMouseEnter={() => setShowUserMenu(true)} 
+                onMouseLeave={() => setShowUserMenu(false)}
+              >
+                <div 
+                  onClick={() => setShowUserMenu(!showUserMenu)}
+                  style={{ width: 40, height: 40, borderRadius: '12px', background: 'linear-gradient(135deg, #6366f1 0%, #a855f7 100%)', padding: '2px', cursor: 'pointer' }}
+                >
+                   <div style={{ width: '100%', height: '100%', background: '#000', borderRadius: '10px', overflow: 'hidden' }}>
+                      <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${userData?.email}`} alt="Avatar" />
+                   </div>
+                </div>
+
+                <AnimatePresence>
+                  {showUserMenu && (
+                    <motion.div 
+                      initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                      style={{ 
+                        position: 'absolute', 
+                        top: '100%', 
+                        right: 0, 
+                        marginTop: '0.75rem', 
+                        background: '#0a0f1e', 
+                        border: '1px solid var(--border)', 
+                        borderRadius: '16px', 
+                        width: '240px', 
+                        padding: '1rem',
+                        boxShadow: '0 20px 40px rgba(0,0,0,0.5)',
+                        zIndex: 1000
+                      }}
+                    >
+                      <div style={{ marginBottom: '1rem', paddingBottom: '1rem', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                        <div style={{ fontWeight: 800, fontSize: '1rem', color: '#fff' }}>{userData?.firstName} {userData?.lastName}</div>
+                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', overflow: 'hidden', textOverflow: 'ellipsis' }}>{userData?.email}</div>
+                      </div>
+                      
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                        <UserMenuItem icon={LayoutDashboard} label="My Profile" onClick={() => { navigate('overview'); setShowUserMenu(false); }} />
+                        <UserMenuItem icon={Settings} label="Settings" onClick={() => { navigate('settings'); setShowUserMenu(false); }} />
+                        <UserMenuItem icon={LogOut} label="Log Out" onClick={onLogout} danger />
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
            </div>
         </div>
@@ -722,3 +766,26 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
 };
 
 export default IndividualDashboard;
+
+const UserMenuItem = ({ icon: Icon, label, onClick, danger = false }: any) => (
+  <div 
+    onClick={onClick}
+    style={{ 
+      display: 'flex', 
+      alignItems: 'center', 
+      gap: '0.75rem', 
+      padding: '0.75rem 1rem', 
+      borderRadius: '12px', 
+      cursor: 'pointer', 
+      transition: 'all 0.2s',
+      color: danger ? '#f43f5e' : '#fff',
+      fontSize: '0.9rem',
+      fontWeight: 600
+    }}
+    onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.05)'}
+    onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+  >
+    <Icon size={16} />
+    {label}
+  </div>
+);
