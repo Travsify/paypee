@@ -29,6 +29,52 @@ app.get('/api/health', (req: Request, res: Response) => {
   res.json({ status: 'live', service: 'paypee-core-api', timestamp: new Date() });
 });
 
+// One-time balance correction for the $1000 USD → NGN miscalculation
+app.get('/api/admin/fix-card-withdraw', async (req: any, res: any) => {
+  try {
+    const badTx = await prisma.transaction.findFirst({
+      where: {
+        category: 'CARD',
+        type: 'DEPOSIT',
+        reference: { startsWith: 'CARD_WITHDRAW_' },
+        amount: 1000,
+        currency: 'NGN'
+      },
+      orderBy: { createdAt: 'desc' }
+    });
+
+    if (!badTx) return res.json({ message: 'No incorrect withdrawal found to fix.' });
+
+    const rateData = await Maplerad.getExchangeRate('USD', 'NGN');
+    const correctAmount = 1000 * rateData.rate; 
+    const difference = correctAmount - 1000; 
+
+    await prisma.$transaction([
+      prisma.wallet.update({
+        where: { id: badTx.walletId },
+        data: { balance: { increment: difference } }
+      }),
+      prisma.transaction.update({
+        where: { id: badTx.id },
+        data: { 
+          amount: correctAmount,
+          desc: `Withdrawal from Card (CORRECTED: $1000 USD @ ${rateData.rate.toFixed(2)})`
+        }
+      })
+    ]);
+
+    res.json({ 
+      message: 'Balance corrected successfully',
+      original: '1000 NGN',
+      corrected: `${correctAmount.toFixed(2)} NGN`,
+      difference: `+${difference.toFixed(2)} NGN`,
+      rate: rateData.rate
+    });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // Authentication middleware
 const authenticateToken = (req: any, res: any, next: any) => {
   const authHeader = req.headers['authorization'];
@@ -366,56 +412,6 @@ app.post('/api/cards/:cardId/withdraw', authenticateToken, async (req: any, res:
    }
 });
 
-// One-time balance correction for the $1000 USD → NGN miscalculation
-app.get('/api/admin/fix-card-withdraw', async (req: any, res: any) => {
-  try {
-    // Find the bad transaction
-    const badTx = await prisma.transaction.findFirst({
-      where: {
-        category: 'CARD',
-        type: 'DEPOSIT',
-        reference: { startsWith: 'CARD_WITHDRAW_' },
-        amount: 1000,
-        currency: 'NGN'
-      },
-      orderBy: { createdAt: 'desc' }
-    });
-
-    if (!badTx) return res.json({ message: 'No incorrect withdrawal found to fix.' });
-
-    // Get live USD→NGN rate
-    const rateData = await Maplerad.getExchangeRate('USD', 'NGN');
-    const correctAmount = 1000 * rateData.rate; // $1000 × rate
-    const difference = correctAmount - 1000; // How much more to credit
-
-    console.log(`[FIX] Bad tx ${badTx.id}: credited 1000 NGN, should be ${correctAmount.toFixed(2)} NGN. Difference: ${difference.toFixed(2)}`);
-
-    // Credit the difference to the wallet and update the transaction record
-    await prisma.$transaction([
-      prisma.wallet.update({
-        where: { id: badTx.walletId },
-        data: { balance: { increment: difference } }
-      }),
-      prisma.transaction.update({
-        where: { id: badTx.id },
-        data: { 
-          amount: correctAmount,
-          desc: `Withdrawal from Card (CORRECTED: $1000 USD @ ${rateData.rate.toFixed(2)})`
-        }
-      })
-    ]);
-
-    res.json({ 
-      message: 'Balance corrected successfully',
-      original: '1000 NGN',
-      corrected: `${correctAmount.toFixed(2)} NGN`,
-      difference: `+${difference.toFixed(2)} NGN`,
-      rate: rateData.rate
-    });
-  } catch (err: any) {
-    res.status(500).json({ error: err.message });
-  }
-});
 
 
 app.get('/api/cards/:cardId/subscriptions', authenticateToken, async (req: any, res: any): Promise<any> => {
