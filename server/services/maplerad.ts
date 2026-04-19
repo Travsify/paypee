@@ -264,7 +264,8 @@ export const issueVirtualCard = async (customerId: string, currency: string, amo
       currency: currency,
       amount: amount * 100, // Maplerad uses kobo/cents
       type: 'VIRTUAL',
-      brand: 'VISA'
+      brand: 'VISA',
+      auto_approve: true
     });
     return response.data.data;
   } catch (error: any) {
