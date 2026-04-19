@@ -173,7 +173,7 @@ export const upgradeCustomerTier1 = async (customerId: string, kycData: any) => 
 export const issueVirtualAccount = async (customerId: string, currency: string) => {
   try {
     const isGlobal = ['USD', 'EUR', 'GBP'].includes(currency.toUpperCase());
-    const url = isGlobal ? '/issuing/virtual-account' : '/collections/virtual-account';
+    const url = isGlobal ? '/issuing' : '/collections/virtual-account';
     const payload: any = {
       customer_id: customerId,
       currency: currency.toUpperCase()
@@ -198,6 +198,7 @@ export const issueVirtualAccount = async (customerId: string, currency: string) 
         const listEndpoints = [
           `/customers/${customerId}/virtual-accounts`,
           `/customers/${customerId}/virtual-account`,
+          `/issuing`,
           `/issuing/virtual-accounts?customer_id=${customerId}`
         ];
         
