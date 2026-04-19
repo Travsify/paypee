@@ -21,7 +21,8 @@ import {
   Bell,
   Menu,
   X,
-  Repeat
+  Repeat,
+  RefreshCw
 } from 'lucide-react';
 import CardsDashboard from './CardsDashboard';
 import AiAdvisor from './AiAdvisor';
