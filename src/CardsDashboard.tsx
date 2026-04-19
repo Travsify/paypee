@@ -29,6 +29,7 @@ const CardsDashboard = () => {
   const [showNumbers, setShowNumbers] = useState<Record<string, boolean>>({});
   const [isIssueModalOpen, setIsIssueModalOpen] = useState(false);
   const [isFundingModalOpen, setIsFundingModalOpen] = useState(false);
+  const [isWithdrawModalOpen, setIsWithdrawModalOpen] = useState(false);
   const [selectedCard, setSelectedCard] = useState<any>(null);
   
   // Funding form state
@@ -128,6 +129,38 @@ const CardsDashboard = () => {
       });
       if (res.ok) {
         setIsFundingModalOpen(false);
+        setFundAmount('');
+        setTransferPin('');
+        fetchCards();
+      } else {
+        const err = await res.json();
+        alert(err.error);
+      }
+    } catch (err) {
+      alert('Network error');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleWithdraw = async (e: any) => {
+    e.preventDefault();
+    setSubmitting(true);
+    try {
+      const token = localStorage.getItem('paypee_token');
+      const res = await fetch(`/api/cards/${selectedCard.id}/withdraw`, {
+        method: 'POST',
+        headers: { 
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ 
+          amount: parseFloat(fundAmount),
+          pin: transferPin
+        })
+      });
+      if (res.ok) {
+        setIsWithdrawModalOpen(false);
         setFundAmount('');
         setTransferPin('');
         fetchCards();
@@ -312,13 +345,19 @@ const CardsDashboard = () => {
                     </div>
 
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', position: 'relative', zIndex: 10, marginTop: '2rem', paddingTop: '1.5rem', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
-                       <div style={{ display: 'flex', gap: '1rem' }}>
+                       <div style={{ display: 'flex', gap: '0.75rem' }}>
                           <button 
                             onClick={(e) => { e.stopPropagation(); toggleFreeze(card.id, card.status); }} 
                             style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', width: '40px', height: '40px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
                             title={card.status === 'ACTIVE' ? 'Freeze' : 'Unfreeze'}
                           >
                             {card.status === 'ACTIVE' ? <Lock size={18} /> : <Unlock size={18} />}
+                          </button>
+                          <button 
+                            onClick={(e) => { e.stopPropagation(); setSelectedCard(card); setIsWithdrawModalOpen(true); }}
+                            style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '0 1.2rem', borderRadius: '12px', fontSize: '0.8rem', fontWeight: 800, cursor: 'pointer' }}
+                          >
+                            Withdraw
                           </button>
                           <button 
                             onClick={(e) => { e.stopPropagation(); setSelectedCard(card); setIsFundingModalOpen(true); }}
@@ -541,6 +580,57 @@ const CardsDashboard = () => {
 
                  <button type="submit" disabled={submitting} className="btn btn-primary" style={{ width: '100%', padding: '1.4rem', borderRadius: '24px', fontSize: '1.1rem', fontWeight: 900 }}>
                    {submitting ? 'Transferring...' : 'Confirm Injection'}
+                 </button>
+               </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Withdrawal Modal */}
+      <AnimatePresence>
+        {isWithdrawModalOpen && (
+          <div className="paypee-modal-overlay">
+            <motion.div 
+              initial={{ scale: 0.9, opacity: 0 }} 
+              animate={{ scale: 1, opacity: 1 }} 
+              className="paypee-modal-content"
+              style={{ maxWidth: '450px', padding: '3rem' }}
+            >
+               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem' }}>
+                  <h3 style={{ fontSize: '1.8rem', fontWeight: 900 }}>Withdraw from Rail</h3>
+                  <button onClick={() => setIsWithdrawModalOpen(false)} style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer' }}><X size={24} /></button>
+               </div>
+
+               <form onSubmit={handleWithdraw}>
+                 <div style={{ background: 'rgba(99, 102, 241, 0.05)', padding: '1.5rem', borderRadius: '20px', marginBottom: '2rem', border: '1px solid rgba(99, 102, 241, 0.1)' }}>
+                    <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>FUNDS WILL RETURN TO</div>
+                    <div style={{ fontSize: '1.1rem', fontWeight: 800 }}>{selectedCard?.wallet?.currency} Liquid Wallet</div>
+                 </div>
+
+                 <div style={{ marginBottom: '1.5rem' }}>
+                   <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: '#475569', marginBottom: '0.75rem', letterSpacing: '1px' }}>AMOUNT TO WITHDRAW</label>
+                   <div style={{ position: 'relative' }}>
+                     <DollarSign size={24} style={{ position: 'absolute', left: '1.25rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--primary)' }} />
+                     <input type="number" value={fundAmount} onChange={(e) => setFundAmount(e.target.value)} placeholder="0.00" required className="form-input" style={{ paddingLeft: '3.5rem', fontSize: '2rem', fontWeight: 900 }} />
+                   </div>
+                 </div>
+
+                 <div style={{ marginBottom: '2.5rem' }}>
+                    <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: '#475569', marginBottom: '0.75rem', letterSpacing: '1px' }}>TRANSACTION PIN</label>
+                    <input 
+                      type="password" 
+                      value={transferPin} 
+                      onChange={(e) => setTransferPin(e.target.value)} 
+                      maxLength={4} 
+                      placeholder="••••" 
+                      className="form-input" 
+                      style={{ textAlign: 'center', letterSpacing: '1rem', fontSize: '1.5rem' }} 
+                    />
+                 </div>
+
+                 <button type="submit" disabled={submitting} className="btn btn-primary" style={{ width: '100%', padding: '1.4rem', borderRadius: '24px', fontSize: '1.1rem', fontWeight: 900 }}>
+                   {submitting ? 'Withdrawing...' : 'Confirm Withdrawal'}
                  </button>
                </form>
             </motion.div>

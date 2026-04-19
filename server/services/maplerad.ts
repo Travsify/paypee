@@ -480,6 +480,21 @@ export const fundCard = async (cardId: string, amount: number) => {
 };
 
 /**
+ * Withdraw funds from a virtual card back to the wallet
+ */
+export const withdrawFromCard = async (cardId: string, amount: number) => {
+  try {
+    const response = await makeRequest('post', `/issuing/cards/${cardId}/withdraw`, {
+      amount: Math.round(amount * 100)
+    });
+    return response.data.data;
+  } catch (error: any) {
+    console.error('[MAPLERAD] Withdraw Card Error:', error.response?.data || error.message);
+    throw new Error(error.response?.data?.message || 'Failed to withdraw from card');
+  }
+};
+
+/**
  * Freeze/Unfreeze a card
  */
 export const toggleCardStatus = async (cardId: string, status: 'FREEZE' | 'UNFREEZE') => {

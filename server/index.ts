@@ -264,6 +264,67 @@ app.post('/api/cards/:cardId/fund', authenticateToken, async (req: any, res: any
    }
 });
 
+app.post('/api/cards/:cardId/withdraw', authenticateToken, async (req: any, res: any): Promise<any> => {
+   try {
+      const { cardId } = req.params;
+      const { amount, pin } = req.body;
+      const userId = req.user.userId;
+
+      const user = await prisma.user.findUnique({ where: { id: userId } });
+      if (!user) return res.status(404).json({ error: 'User not found' });
+
+      if (user.transferPin) {
+        if (!pin) return res.status(400).json({ error: 'Transaction PIN is required' });
+        const validPin = await bcrypt.compare(pin, user.transferPin);
+        if (!validPin) return res.status(401).json({ error: 'Invalid Transaction PIN' });
+      }
+
+      // 1. Validate Card
+      const card = await prisma.virtualCard.findUnique({ 
+        where: { id: cardId },
+        include: { wallet: true }
+      });
+      if (!card || card.userId !== userId) return res.status(404).json({ error: 'Card not found' });
+
+      // 2. Maplerad Unfunding
+      await Maplerad.withdrawFromCard(cardId, amount);
+
+      // 3. Update Wallet & Record Transaction
+      await prisma.$transaction([
+         prisma.wallet.update({
+            where: { id: card.walletId },
+            data: { balance: { increment: amount } }
+         }),
+         prisma.transaction.create({
+            data: {
+               userId,
+               walletId: card.walletId,
+               type: 'DEPOSIT',
+               amount,
+               currency: card.wallet.currency,
+               status: 'COMPLETED',
+               reference: `CARD_WITHDRAW_${Date.now()}`,
+               category: 'CARD',
+               desc: `Withdrawal from Card ending in ${card.cardNumber.slice(-4)}`
+            }
+         }),
+         prisma.notification.create({
+            data: {
+               userId,
+               title: 'Funds Withdrawn from Card',
+               message: `Successfully moved ${amount} ${card.wallet.currency} from your card to your wallet.`,
+               type: 'SUCCESS'
+            }
+         })
+      ]);
+
+      res.status(200).json({ message: 'Funds withdrawn successfully' });
+   } catch (error: any) {
+      console.error('Withdrawal error:', error);
+      res.status(500).json({ error: error.message || 'Failed to withdraw from card' });
+   }
+});
+
 // ==========================================
 // Virtual Cards Routes
 // ==========================================
