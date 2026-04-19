@@ -719,25 +719,28 @@ app.post('/api/cards', authenticateToken, async (req: any, res: any): Promise<an
     const { walletId, currency, initialAmount } = req.body;
     const userId = req.user.userId;
     console.log(`[CARDS] Received issuance request: User=${userId}, Wallet=${walletId}, Rail=${currency}`);
-    const cardInitialUSD = initialAmount || 1; // Default $1 for Virtual Cards as per new requirement
+    const targetCurrency = currency || 'USD';
+    const cardInitialUSD = initialAmount || 1;
+    
+    // 💳 DEFINED ISSUANCE FEES (Total Cost to User)
+    const USD_TOTAL_COST = 5.00; // $5 USD total
+    const NGN_TOTAL_COST = 3500; // ₦3,500 NGN total
 
-    // 1. Validate Wallet & Check Balance (with cross-currency support)
+    // 1. Validate Wallet & Check Balance
     const wallet = await prisma.wallet.findFirst({ where: { id: walletId, userId } });
     if (!wallet) return res.status(404).json({ error: 'Source wallet not found' });
 
-    let costInWalletCurrency = cardInitialUSD;
-    let conversionRate = 1;
+    let costInWalletCurrency = (targetCurrency === 'USD') ? USD_TOTAL_COST : NGN_TOTAL_COST;
 
-    if (wallet.currency !== (currency || 'USD')) {
-      // Fetch live rate for conversion (e.g. USD to NGN)
-      const rateData = await Maplerad.getExchangeRate(currency || 'USD', wallet.currency);
-      conversionRate = rateData.rate;
-      costInWalletCurrency = cardInitialUSD * conversionRate;
+    // If user is paying with a different currency than the card's fee currency, convert it
+    if (wallet.currency !== (targetCurrency === 'USD' ? 'USD' : 'NGN')) {
+       const rateData = await Maplerad.getExchangeRate(targetCurrency === 'USD' ? 'USD' : 'NGN', wallet.currency);
+       costInWalletCurrency = costInWalletCurrency * rateData.rate;
     }
 
     if (parseFloat(wallet.balance.toString()) < costInWalletCurrency) {
       return res.status(400).json({ 
-        error: `Insufficient ${wallet.currency} balance. Need ${costInWalletCurrency.toFixed(2)} ${wallet.currency} to cover $${cardInitialUSD} initial funding.` 
+        error: `Insufficient balance. This card creation costs ${costInWalletCurrency.toLocaleString()} ${wallet.currency} (includes issuance fee + $1 funding).` 
       });
     }
 
