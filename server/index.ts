@@ -786,7 +786,7 @@ app.post('/api/cards', authenticateToken, async (req: any, res: any): Promise<an
     try {
       mCard = await Maplerad.issueVirtualCard(customer.id, targetCurrency, cardInitialUSD);
     } catch (err: any) {
-      // Re-fetch balances for a detailed error message
+      // Re-fetch balances for context
       const adminWallets = await Maplerad.getWallets();
       const usdW = adminWallets.find((w: any) => w.currency === 'USD');
       const ngnW = adminWallets.find((w: any) => w.currency === 'NGN');
@@ -794,7 +794,10 @@ app.post('/api/cards', authenticateToken, async (req: any, res: any): Promise<an
       const usdBalance = (usdW?.available_balance || usdW?.available || usdW?.balance || 0) / 100;
       const ngnBalance = (ngnW?.available_balance || ngnW?.available || ngnW?.balance || 0) / 100;
       
-      throw new Error(`Insufficient Platform Balance. Your Maplerad account has $${usdBalance.toFixed(2)} USD and ₦${ngnBalance.toFixed(2)} NGN. Please fund your USD or NGN business wallet.`);
+      const rawError = err.message || 'Unknown Provider Error';
+      console.error(`[MAPLERAD] Issuance Failed: ${rawError}`);
+
+      throw new Error(`Provider Error: "${rawError}". (Current Platform Balance: $${usdBalance.toFixed(2)} USD, ₦${ngnBalance.toFixed(2)} NGN)`);
     }
     console.log(`[MAPLERAD] Raw Provider Response:`, JSON.stringify(mCard));
 
