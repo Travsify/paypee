@@ -172,14 +172,18 @@ export const upgradeCustomerTier1 = async (customerId: string, kycData: any) => 
  */
 export const issueVirtualAccount = async (customerId: string, currency: string) => {
   try {
-    // Try using the collections endpoint for all currencies first, as Maplerad often unifies them
-    const url = '/collections/virtual-account';
+    const isGlobal = ['USD', 'EUR', 'GBP'].includes(currency.toUpperCase());
+    const url = isGlobal ? '/issuing/virtual-account' : '/collections/virtual-account';
     const payload: any = {
       customer_id: customerId,
       currency: currency.toUpperCase()
     };
 
-    console.log(`[MAPLERAD] Issuing ${currency} account for customer ${customerId} via ${url}...`);
+    if (isGlobal) {
+      payload.type = currency.toUpperCase() === 'USD' ? 'DOMICILIARY' : 'GLOBAL';
+    }
+
+    console.log(`[MAPLERAD] Issuing ${currency} account for customer ${customerId} via ${url} (Payload: ${JSON.stringify(payload)})`);
     const response = await makeRequest('post', url, payload);
     return response.data.data; 
   } catch (error: any) {
