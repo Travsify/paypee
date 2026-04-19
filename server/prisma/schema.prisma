@@ -102,7 +102,7 @@ model VirtualCard {
   cardNumber          String   @unique
   expiry              String
   cvv                 String
-  providerCardId      String?  @unique // ID from Maplerad/Provider
+  providerCardId      String? // ID from Maplerad/Provider
   status              String   @default("ACTIVE") 
   dailyLimit          Decimal  @default(1000.00)
   categoryRestriction String?  
