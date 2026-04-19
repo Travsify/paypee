@@ -111,7 +111,7 @@ app.post('/api/users/verify-pin', authenticateToken, async (req: any, res: any):
     const user = await prisma.user.findUnique({ where: { id: req.user.userId } });
     if (!user) return res.status(404).json({ error: 'User not found' });
     
-    if (user.pin !== pin) {
+    if (user.transferPin !== pin) {
       return res.status(400).json({ error: 'Incorrect PIN' });
     }
     
@@ -644,14 +644,21 @@ app.get('/api/cards', authenticateToken, async (req: any, res: any): Promise<any
           });
         }
 
+        const isUSD = (c.currency === 'USD');
+        const addressLine1 = isUSD ? '16192 Coastal Highway' : (c.addressLine1 || mCard.address?.address || mCard.address_line1 || 'User Address Syncing...');
+        const addressCity = isUSD ? 'Lewes' : (c.addressCity || mCard.address?.city || '');
+        const addressState = isUSD ? 'DE' : (c.addressState || mCard.address?.state || '');
+        const addressCountry = isUSD ? 'USA' : (c.addressCountry || mCard.address?.country || 'NG');
+        const addressZip = isUSD ? '19958' : (c.addressZip || mCard.address?.postal_code || '');
+
         return {
           ...c,
           balance: liveBalance,
-          addressLine1: c.addressLine1 || mCard.address?.address || mCard.address_line1 || '16192 Coastal Highway',
-          addressCity: c.addressCity || mCard.address?.city || 'Lewes',
-          addressState: c.addressState || mCard.address?.state || 'DE',
-          addressCountry: c.addressCountry || mCard.address?.country || 'USA',
-          addressZip: c.addressZip || mCard.address?.postal_code || '19958',
+          addressLine1,
+          addressCity,
+          addressState,
+          addressCountry,
+          addressZip,
           status: mCard.status || c.status
         };
       } catch (e) {
@@ -716,11 +723,23 @@ app.post('/api/cards', authenticateToken, async (req: any, res: any): Promise<an
 
     console.log(`[MAPLERAD] Normalized Details: ${cardNumber} | ID: ${providerCardId}`);
 
-    const addressLine1 = mCard.address?.address || mCard.address_line1 || '';
-    const addressCity = mCard.address?.city || mCard.city || '';
-    const addressState = mCard.address?.state || mCard.state || '';
-    const addressCountry = mCard.address?.country || mCard.country || 'USA'; // Default for virtual cards usually
-    const addressZip = mCard.address?.postal_code || mCard.zip_code || mCard.postal_code || '';
+    // Determine Billing Address based on currency
+    let addressLine1, addressCity, addressState, addressCountry, addressZip;
+
+    if ((currency || 'USD') === 'USD') {
+      addressLine1 = '16192 Coastal Highway';
+      addressCity = 'Lewes';
+      addressState = 'DE';
+      addressCountry = 'USA';
+      addressZip = '19958';
+    } else {
+      // For NGN or other cards, use provider-assigned (user's) address
+      addressLine1 = mCard.address?.address || mCard.address_line1 || 'User Address Syncing...';
+      addressCity = mCard.address?.city || mCard.city || '';
+      addressState = mCard.address?.state || mCard.state || '';
+      addressCountry = mCard.address?.country || mCard.country || 'NG';
+      addressZip = mCard.address?.postal_code || mCard.zip_code || mCard.postal_code || '';
+    }
 
     // 4. Atomic Balance Deduction & Card Creation
     try {
