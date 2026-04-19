@@ -356,12 +356,41 @@ app.get('/api/cards', authenticateToken, async (req: any, res: any): Promise<any
     // Fetch live details from Maplerad for each card to get the actual balance
     const liveCards = await Promise.all(cards.map(async (c) => {
       try {
+        if (!c.providerCardId) return { ...c, balance: c.dailyLimit };
+
+        const mCard = await Maplerad.getCard(c.providerCardId);
+        if (!mCard) return { ...c, balance: c.dailyLimit };
+
+        // Calculate live balance (Maplerad returns amount in kobo/cents)
+        const liveBalance = (mCard.amount || 0) / 100;
+
+        // If DB is missing address info, update it now (Auto-migration for existing cards)
+        if (!c.addressLine1 && mCard.address) {
+          await prisma.virtualCard.update({
+            where: { id: c.id },
+            data: {
+              addressLine1: mCard.address.address,
+              addressCity: mCard.address.city,
+              addressState: mCard.address.state,
+              addressCountry: mCard.address.country || 'USA',
+              addressZip: mCard.address.postal_code
+            }
+          });
+        }
+
         return {
           ...c,
-          balance: c.dailyLimit 
+          balance: liveBalance,
+          addressLine1: c.addressLine1 || mCard.address?.address,
+          addressCity: c.addressCity || mCard.address?.city,
+          addressState: c.addressState || mCard.address?.state,
+          addressCountry: c.addressCountry || mCard.address?.country,
+          addressZip: c.addressZip || mCard.address?.postal_code,
+          status: mCard.status || c.status
         };
       } catch (e) {
-        return c;
+        console.error(`[CARDS] Sync Error for ${c.id}:`, e);
+        return { ...c, balance: c.dailyLimit };
       }
     }));
 
@@ -421,6 +450,12 @@ app.post('/api/cards', authenticateToken, async (req: any, res: any): Promise<an
 
     console.log(`[MAPLERAD] Normalized Details: ${cardNumber} | ID: ${providerCardId}`);
 
+    const addressLine1 = mCard.address?.address || mCard.address_line1 || '';
+    const addressCity = mCard.address?.city || mCard.city || '';
+    const addressState = mCard.address?.state || mCard.state || '';
+    const addressCountry = mCard.address?.country || mCard.country || 'USA'; // Default for virtual cards usually
+    const addressZip = mCard.address?.postal_code || mCard.zip_code || mCard.postal_code || '';
+
     // 4. Atomic Balance Deduction & Card Creation
     try {
       const [card] = await prisma.$transaction([
@@ -433,7 +468,12 @@ app.post('/api/cards', authenticateToken, async (req: any, res: any): Promise<an
             cvv,
             providerCardId,
             status: "ACTIVE",
-            dailyLimit: cardInitialUSD
+            dailyLimit: cardInitialUSD,
+            addressLine1,
+            addressCity,
+            addressState,
+            addressCountry,
+            addressZip
           }
         }),
         prisma.wallet.update({

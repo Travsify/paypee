@@ -106,6 +106,11 @@ model VirtualCard {
   status              String   @default("ACTIVE") 
   dailyLimit          Decimal  @default(1000.00)
   categoryRestriction String?  
+  addressCity         String?
+  addressState        String?
+  addressCountry      String?
+  addressZip          String?
+  addressLine1        String?
   createdAt           DateTime @default(now())
   updatedAt           DateTime @updatedAt
 

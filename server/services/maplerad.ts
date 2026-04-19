@@ -264,6 +264,19 @@ export const issueVirtualCard = async (customerId: string, currency: string, amo
 };
 
 /**
+ * Get card details and balance from Maplerad
+ */
+export const getCard = async (cardId: string) => {
+  try {
+    const response = await makeRequest('get', `/issuing/cards/${cardId}`);
+    return response.data.data;
+  } catch (error: any) {
+    console.error(`[MAPLERAD] Get Card Error (${cardId}):`, error.response?.data || error.message);
+    return null;
+  }
+};
+
+/**
  * Process Transfers / Payouts
  */
 export const processPayout = async (amount: number, currency: string, accountDetails: any) => {
