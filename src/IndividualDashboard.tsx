@@ -30,6 +30,7 @@ import SettingsView from './SettingsView';
 import PayoutModal from './PayoutModal';
 import VerificationGate from './VerificationGate';
 import BalanceCard from './components/BalanceCard';
+import TransactionReceiptModal from './components/TransactionReceiptModal';
 import SwapModal from './SwapModal';
 import WalletRailItem from './components/WalletRailItem';
 import AccountCreationModal from './AccountCreationModal';
@@ -57,6 +58,9 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
   const [isSwapOpen, setIsSwapOpen] = useState(false);
   const [isAccountModalOpen, setIsAccountModalOpen] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [selectedTx, setSelectedTx] = useState<any>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [fxRates, setFxRates] = useState<any>({});
 
   const fetchUserData = async () => {
     const token = localStorage.getItem('paypee_token');
@@ -74,7 +78,25 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
   };
 
   useEffect(() => {
+    const fetchRates = async () => {
+      try {
+        const token = localStorage.getItem('paypee_token');
+        const headers = { 'Authorization': `Bearer ${token}` };
+        const pairs = ['USD', 'GBP', 'EUR'];
+        const rates: any = {};
+        
+        await Promise.all(pairs.map(async (p) => {
+          const res = await fetch(`${API_BASE}/api/fx/rates?source=${p}&target=NGN`, { headers });
+          const data = await res.json();
+          if (data.rate) rates[`${p}_NGN`] = data.rate;
+        }));
+        
+        setFxRates(prev => ({ ...prev, ...rates }));
+      } catch (err) {}
+    };
+
     fetchUserData();
+    fetchRates();
     
     // Auto-reconcile on mount to pick up any missed webhooks
     const reconcile = async () => {
@@ -93,7 +115,10 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
     };
     reconcile();
 
-    const interval = setInterval(fetchUserData, 15000);
+    const interval = setInterval(() => {
+      fetchUserData();
+      fetchRates();
+    }, 15000);
     return () => clearInterval(interval);
   }, []);
 
@@ -149,6 +174,29 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
     return { symbol: '₦', gradient: 'linear-gradient(135deg, #064e3b 0%, #10b981 100%)' };
   };
 
+  const calculateTotalNGN = () => {
+    if (!userData?.wallets) return 0;
+    return userData.wallets.reduce((acc: number, w: any) => {
+      const balance = parseFloat(w.balance);
+      if (w.currency === 'NGN') return acc + balance;
+      const rate = fxRates[`${w.currency}_NGN`];
+      if (rate) return acc + (balance * rate);
+      return acc + balance; 
+    }, 0);
+  };
+
+  const generateSparkline = () => {
+    if (!transactions || transactions.length === 0) return "M0,100 L100,100";
+    const data = [...transactions].filter(tx => tx.status === 'SUCCESS' || tx.status === 'COMPLETED').slice(0, 10).reverse();
+    if (data.length < 2) return "M0,50 L100,50";
+    const points = data.map((tx, i) => {
+      const amount = parseFloat(tx.amount);
+      const normalized = Math.min(amount / 10000, 70); 
+      return `${(i / (data.length - 1)) * 100},${90 - normalized}`;
+    });
+    return `M${points.join(' L')}`;
+  };
+
   return (
     <div className="dashboard-shell">
       {userData && (
@@ -199,7 +247,13 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
            <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
               <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid var(--border)', borderRadius: '16px', padding: '0.75rem 1.25rem', display: 'flex', alignItems: 'center', gap: '0.75rem', width: '300px' }} className="desktop-only">
                  <Search size={18} color="var(--text-muted)" />
-                 <input type="text" placeholder="Search transactions..." style={{ background: 'transparent', border: 'none', color: '#fff', outline: 'none', fontSize: '0.9rem', width: '100%' }} />
+                 <input 
+                    type="text" 
+                    placeholder="Search transactions..." 
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    style={{ background: 'transparent', border: 'none', color: '#fff', outline: 'none', fontSize: '0.9rem', width: '100%' }} 
+                  />
               </div>
               <button className="btn btn-outline" style={{ padding: '0.75rem', borderRadius: '16px' }}>
                 <Bell size={20} />
@@ -229,10 +283,7 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
                    <div>
                       <div style={{ color: 'var(--text-muted)', textTransform: 'uppercase', fontSize: '0.8rem', letterSpacing: '2px', marginBottom: '0.5rem' }}>Total Liquid Capital</div>
                       <div style={{ fontSize: 'clamp(2.5rem, 5vw, 4rem)', fontWeight: 900, lineHeight: 1, marginBottom: '0.5rem' }}>
-                        {userData?.wallets?.length > 0 
-                           ? `₦${userData.wallets.reduce((acc: number, w: any) => acc + parseFloat(w.balance), 0).toLocaleString(undefined, {minimumFractionDigits: 2})}` 
-                           : '₦0.00'
-                        }
+                        ₦{calculateTotalNGN().toLocaleString(undefined, {minimumFractionDigits: 2})}
                       </div>
                       <div style={{ color: '#22d3ee', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                          <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#22d3ee', boxShadow: '0 0 10px #22d3ee' }}></div>
@@ -305,7 +356,13 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
                       <div style={{ flex: 1, position: 'relative', minHeight: '200px', display: 'flex', alignItems: 'flex-end' }}>
                          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(34, 211, 238, 0.1), transparent)', borderBottom: '2px solid #22d3ee' }}>
                             <svg width="100%" height="100%" preserveAspectRatio="none" viewBox="0 0 100 100">
-                               <path d="M0,100 Q10,90 20,95 T40,80 T60,85 T80,50 T100,20" fill="none" stroke="#22d3ee" strokeWidth="2" vectorEffect="non-scaling-stroke" />
+                               <path 
+                                 d={generateSparkline()} 
+                                 fill="none" 
+                                 stroke="#22d3ee" 
+                                 strokeWidth="2" 
+                                 vectorEffect="non-scaling-stroke" 
+                               />
                             </svg>
                          </div>
                       </div>
@@ -320,12 +377,16 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
                          <h3 style={{ fontSize: '1.2rem', fontWeight: 800 }}>Copilot Insights</h3>
                       </div>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                         <div style={{ background: 'rgba(0,0,0,0.3)', padding: '1.25rem', borderRadius: '16px', borderLeft: '3px solid #22d3ee' }}>
-                            <p style={{ color: '#fff', fontSize: '0.95rem', lineHeight: 1.5, marginBottom: '1rem' }}>You are holding ₦2.4M while NGN has dropped 1.2%. Convert to USD?</p>
-                            <button style={{ padding: '0.6rem 1rem', background: '#6366f1', color: '#fff', border: 'none', borderRadius: '8px', fontSize: '0.85rem', fontWeight: 700, cursor: 'pointer' }}>Convert to USD</button>
-                         </div>
+                         {userData?.wallets?.find((w: any) => w.currency === 'NGN')?.balance > 1000000 && (
+                           <div style={{ background: 'rgba(0,0,0,0.3)', padding: '1.25rem', borderRadius: '16px', borderLeft: '3px solid #22d3ee' }}>
+                              <p style={{ color: '#fff', fontSize: '0.95rem', lineHeight: 1.5, marginBottom: '1rem' }}>You are holding ₦{(userData.wallets.find((w: any) => w.currency === 'NGN').balance / 1000000).toFixed(1)}M while NGN is volatile. Protect your capital in USD?</p>
+                              <button onClick={() => setIsSwapOpen(true)} style={{ padding: '0.6rem 1rem', background: '#6366f1', color: '#fff', border: 'none', borderRadius: '8px', fontSize: '0.85rem', fontWeight: 700, cursor: 'pointer' }}>Convert to USD</button>
+                           </div>
+                         )}
                          <div style={{ background: 'rgba(0,0,0,0.3)', padding: '1.25rem', borderRadius: '16px', borderLeft: '3px solid #a78bfa' }}>
-                            <p style={{ color: '#fff', fontSize: '0.95rem', lineHeight: 1.5 }}>You spent 18% less on subscriptions this month.</p>
+                            <p style={{ color: '#fff', fontSize: '0.95rem', lineHeight: 1.5 }}>
+                              {transactions.length > 5 ? 'Your transaction velocity has increased by 12% this week.' : 'Welcome! Start by funding your NGN wallet to begin global trading.'}
+                            </p>
                          </div>
                       </div>
                    </div>
@@ -372,8 +433,14 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
                             </tr>
                          </thead>
                          <tbody>
-                            {transactions.length > 0 ? transactions.slice(0, 5).map(tx => (
-                               <tr key={tx.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.02)' }}>
+                             {transactions.filter(tx => 
+                                (tx.desc || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+                                (tx.reference || '').toLowerCase().includes(searchQuery.toLowerCase())
+                             ).length > 0 ? transactions.filter(tx => 
+                                (tx.desc || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+                                (tx.reference || '').toLowerCase().includes(searchQuery.toLowerCase())
+                             ).slice(0, 5).map(tx => (
+                                <tr key={tx.id} onClick={() => setSelectedTx(tx)} style={{ borderBottom: '1px solid rgba(255,255,255,0.02)', cursor: 'pointer' }}>
                                   <td style={{ padding: '1rem 0' }}>
                                      <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                                         <div style={{ width: 36, height: 36, borderRadius: '10px', background: tx.type === 'DEPOSIT' ? 'rgba(34,211,238,0.1)' : 'rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -441,7 +508,7 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
             {activeSection === 'vaults' && <VaultsView />}
             {activeSection === 'bills' && <BillsView />}
             {activeSection === 'collections' && <CollectionsView />}
-            {activeSection === 'history' && <HistoryView />}
+            {activeSection === 'history' && <HistoryView onTransactionClick={(tx: any) => setSelectedTx(tx)} />}
             {activeSection === 'ai' && <AiAdvisor transactions={transactions} userName={userData?.firstName} />}
             {activeSection === 'settings' && <SettingsView />}
             {activeSection === 'transfers' && <div className="glass-card" style={{ textAlign: 'center', padding: '5rem 2rem' }}>
@@ -487,6 +554,7 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
         isProcessing={isGenerating}
         existingCurrencies={userData?.wallets?.map((w: any) => w.currency) || []}
       />
+      <TransactionReceiptModal transaction={selectedTx} onClose={() => setSelectedTx(null)} />
     </div>
   );
 };

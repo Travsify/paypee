@@ -29,7 +29,11 @@ interface Transaction {
   createdAt: string;
 }
 
-const HistoryView = () => {
+interface HistoryViewProps {
+  onTransactionClick?: (tx: any) => void;
+}
+
+const HistoryView: React.FC<HistoryViewProps> = ({ onTransactionClick }) => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
   const [filterType, setFilterType] = useState('ALL');
@@ -135,7 +139,13 @@ const HistoryView = () => {
             ) : filteredTransactions.length === 0 ? (
               <tr><td colSpan={5} style={{ padding: '6rem', textAlign: 'center', color: 'var(--text-muted)' }}>No transactions matching your criteria.</td></tr>
             ) : filteredTransactions.map((tx) => (
-              <tr key={tx.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.03)', transition: 'background 0.2s' }} onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.01)'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+              <tr 
+                key={tx.id} 
+                onClick={() => onTransactionClick?.(tx)}
+                style={{ borderBottom: '1px solid rgba(255,255,255,0.03)', transition: 'background 0.2s', cursor: onTransactionClick ? 'pointer' : 'default' }} 
+                onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.01)'} 
+                onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+              >
                 <td style={{ padding: '1.5rem 2rem' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
                     <div style={{ width: 44, height: 44, background: 'rgba(255,255,255,0.03)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
