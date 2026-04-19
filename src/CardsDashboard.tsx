@@ -231,12 +231,13 @@ const CardsDashboard = ({ wallets: propWallets }: { wallets?: any[] }) => {
         setFundAmount('');
         setTransferPin('');
         fetchCards();
+        alert('SUCCESS: Funds withdrawn back to your wallet.');
       } else {
         const err = await res.json();
-        alert(err.error);
+        alert(err.error || 'Failed to withdraw');
       }
     } catch (err) {
-      alert('Network error');
+      alert('Network error during withdrawal');
     } finally {
       setSubmitting(false);
     }
@@ -748,7 +749,7 @@ const CardsDashboard = ({ wallets: propWallets }: { wallets?: any[] }) => {
                    <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: '#475569', marginBottom: '0.75rem', letterSpacing: '1px' }}>AMOUNT TO INJECT</label>
                    <div style={{ position: 'relative' }}>
                      <DollarSign size={24} style={{ position: 'absolute', left: '1.25rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--primary)' }} />
-                     <input type="number" value={fundAmount} onChange={(e) => setFundAmount(e.target.value)} placeholder="0.00" required className="form-input" style={{ paddingLeft: '3.5rem', fontSize: '2rem', fontWeight: 900 }} />
+                     <input type="number" value={fundAmount} onChange={(e) => setFundAmount(e.target.value)} placeholder="0.00" required className="form-input" style={{ paddingLeft: '3.5rem', fontSize: '1.4rem', fontWeight: 900 }} />
                    </div>
                  </div>
 
@@ -799,7 +800,7 @@ const CardsDashboard = ({ wallets: propWallets }: { wallets?: any[] }) => {
                    <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: '#475569', marginBottom: '0.75rem', letterSpacing: '1px' }}>AMOUNT TO WITHDRAW</label>
                    <div style={{ position: 'relative' }}>
                      <DollarSign size={24} style={{ position: 'absolute', left: '1.25rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--primary)' }} />
-                     <input type="number" value={fundAmount} onChange={(e) => setFundAmount(e.target.value)} placeholder="0.00" required className="form-input" style={{ paddingLeft: '3.5rem', fontSize: '2rem', fontWeight: 900 }} />
+                     <input type="number" value={fundAmount} onChange={(e) => setFundAmount(e.target.value)} placeholder="0.00" required className="form-input" style={{ paddingLeft: '3.5rem', fontSize: '1.4rem', fontWeight: 900 }} />
                    </div>
                  </div>
 

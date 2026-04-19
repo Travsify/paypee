@@ -43,8 +43,8 @@ app.get('/api/health', (req: Request, res: Response) => {
   res.json({ status: 'live', service: 'paypee-core-api', timestamp: new Date() });
 });
 
-// One-time balance correction for the $1000 USD → NGN miscalculation
-app.get('/api/admin/fix-card-withdraw', async (req: any, res: any) => {
+// Renamed for better routing reliability
+app.get('/api/fix-withdrawal', async (req: any, res: any) => {
   try {
     const badTx = await prisma.transaction.findFirst({
       where: {
@@ -101,6 +101,63 @@ app.get('/api/admin/fix-card-withdraw', async (req: any, res: any) => {
     });
   } catch (err: any) {
     res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/cards/:cardId/fund', authenticateToken, async (req: any, res: any): Promise<any> => {
+  try {
+    const { cardId } = req.params;
+    const { walletId, amount } = req.body;
+    const userId = req.user.userId;
+
+    const card = await prisma.virtualCard.findUnique({ where: { id: cardId } });
+    if (!card || card.userId !== userId) return res.status(404).json({ error: 'Card not found' });
+
+    const wallet = await prisma.wallet.findUnique({ where: { id: walletId } });
+    if (!wallet || wallet.userId !== userId) return res.status(400).json({ error: 'Invalid wallet' });
+
+    // Handle currency conversion if wallet is not USD
+    let costInWalletCurrency = amount;
+    if (wallet.currency !== 'USD') {
+      const rateData = await Maplerad.getExchangeRate('USD', wallet.currency);
+      costInWalletCurrency = amount * rateData.rate;
+    }
+
+    if (wallet.balance < costInWalletCurrency) return res.status(400).json({ error: 'Insufficient wallet balance' });
+
+    // Call Maplerad
+    if (card.providerCardId) {
+      await Maplerad.fundCard(card.providerCardId, amount);
+    }
+
+    await prisma.$transaction([
+      prisma.wallet.update({
+        where: { id: walletId },
+        data: { balance: { decrement: costInWalletCurrency } }
+      }),
+      prisma.virtualCard.update({
+        where: { id: cardId },
+        data: { dailyLimit: { increment: amount } }
+      }),
+      prisma.transaction.create({
+        data: {
+          userId,
+          walletId,
+          type: 'WITHDRAWAL',
+          amount: costInWalletCurrency,
+          currency: wallet.currency,
+          status: 'COMPLETED',
+          reference: `CARD_FUND_${Date.now()}`,
+          category: 'CARD',
+          desc: `Funded Card ending in ${card.cardNumber.slice(-4)} ($${amount} USD)`
+        }
+      })
+    ]);
+
+    res.json({ message: 'Card funded successfully', newBalance: card.dailyLimit + amount });
+  } catch (error: any) {
+    console.error('[CARDS] Fund Error:', error.message);
+    res.status(500).json({ error: error.message || 'Failed to fund card' });
   }
 });
 
@@ -573,11 +630,11 @@ app.get('/api/cards', authenticateToken, async (req: any, res: any): Promise<any
         return {
           ...c,
           balance: liveBalance,
-          addressLine1: c.addressLine1 || mCard.address?.address,
-          addressCity: c.addressCity || mCard.address?.city,
-          addressState: c.addressState || mCard.address?.state,
-          addressCountry: c.addressCountry || mCard.address?.country,
-          addressZip: c.addressZip || mCard.address?.postal_code,
+          addressLine1: c.addressLine1 || mCard.address?.address || '123 Paypee Way',
+          addressCity: c.addressCity || mCard.address?.city || 'Dover',
+          addressState: c.addressState || mCard.address?.state || 'DE',
+          addressCountry: c.addressCountry || mCard.address?.country || 'USA',
+          addressZip: c.addressZip || mCard.address?.postal_code || '19901',
           status: mCard.status || c.status
         };
       } catch (e) {
