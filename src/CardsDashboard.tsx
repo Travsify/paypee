@@ -31,6 +31,7 @@ const CardsDashboard = () => {
   const [isFundingModalOpen, setIsFundingModalOpen] = useState(false);
   const [isWithdrawModalOpen, setIsWithdrawModalOpen] = useState(false);
   const [selectedCard, setSelectedCard] = useState<any>(null);
+  const [subscriptions, setSubscriptions] = useState<Record<string, any[]>>({});
   
   // Funding form state
   const [fundAmount, setFundAmount] = useState('');
@@ -50,11 +51,41 @@ const CardsDashboard = () => {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await res.json();
-      if (Array.isArray(data)) setCards(data);
+      if (Array.isArray(data)) {
+        setCards(data);
+        // Fetch subscriptions for each card
+        data.forEach(card => fetchSubscriptions(card.id));
+      }
       setLoading(false);
     } catch (err) {
       setLoading(false);
     }
+  };
+
+  const fetchSubscriptions = async (cardId: string) => {
+    try {
+      const token = localStorage.getItem('paypee_token');
+      const res = await fetch(`/api/cards/${cardId}/subscriptions`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await res.json();
+      setSubscriptions(prev => ({ ...prev, [cardId]: data }));
+    } catch (err) {}
+  };
+
+  const toggleBlock = async (cardId: string, merchantName: string) => {
+    try {
+      const token = localStorage.getItem('paypee_token');
+      const res = await fetch(`/api/cards/${cardId}/block-merchant`, {
+        method: 'POST',
+        headers: { 
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ merchantName })
+      });
+      if (res.ok) fetchSubscriptions(cardId);
+    } catch (err) {}
   };
 
   const fetchWallets = async () => {
@@ -207,6 +238,12 @@ const CardsDashboard = () => {
       status: "Defending", 
       desc: "Instant freeze protocol armed for 0-day payment exploits.",
       icon: <ShieldCheck size={20} color="#8b5cf6" />
+    },
+    { 
+      title: "Subscription Monitor", 
+      status: "Scanning", 
+      desc: "Detecting recurring trials. Netflix & Spotify expiring in 3 days.",
+      icon: <RefreshCcw size={20} color="#ec4899" />
     }
   ], []);
 
@@ -221,7 +258,7 @@ const CardsDashboard = () => {
           </div>
           <h2 style={{ fontSize: '3rem', fontWeight: 900, marginBottom: '0.5rem', letterSpacing: '-0.04em' }}>Virtual Cards</h2>
           <p style={{ color: 'var(--text-muted)', fontSize: '1.2rem', maxWidth: '600px' }}>
-            Deploy secure, AI-monitored global capital rails in seconds. Powered by Maplerad Tier-1 infrastructure.
+            Deploy secure, AI-monitored global capital rails in seconds. Fully white-labeled institutional infrastructure.
           </p>
         </div>
         <motion.button 
@@ -340,6 +377,29 @@ const CardsDashboard = () => {
                          <div>
                             <div style={{ fontSize: '0.6rem', color: 'rgba(255,255,255,0.4)', fontWeight: 800, letterSpacing: '1px', marginBottom: '0.2rem' }}>SECURITY</div>
                             <div style={{ fontSize: '1rem', fontWeight: 800 }}>{showNumbers[card.id] ? card.cvv : '•••'}</div>
+                         </div>
+                      </div>
+
+                      {/* Subscribed Platforms */}
+                      <div style={{ marginTop: '2rem' }}>
+                         <div style={{ fontSize: '0.6rem', color: 'rgba(255,255,255,0.3)', fontWeight: 800, letterSpacing: '1.5px', marginBottom: '1rem' }}>ACTIVE SUBSCRIPTIONS</div>
+                         <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+                            {subscriptions[card.id]?.length > 0 ? (
+                               subscriptions[card.id].map(sub => (
+                               <div key={sub.name} style={{ background: 'rgba(255,255,255,0.03)', padding: '0.4rem 0.8rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', gap: '0.5rem', opacity: sub.status === 'BLOCKED' ? 0.5 : 1 }}>
+                                  <div style={{ width: 8, height: 8, borderRadius: '50%', background: sub.status === 'BLOCKED' ? '#64748b' : '#ec4899' }} />
+                                  <span style={{ fontSize: '0.75rem', fontWeight: 800 }}>{sub.name}</span>
+                                  <button 
+                                    onClick={(e) => { e.stopPropagation(); toggleBlock(card.id, sub.name); }}
+                                    style={{ background: 'none', border: 'none', color: sub.status === 'BLOCKED' ? '#10b981' : '#ef4444', fontSize: '0.7rem', fontWeight: 900, cursor: 'pointer', marginLeft: '4px', padding: '2px' }}
+                                  >
+                                    {sub.status === 'BLOCKED' ? 'RESUME' : 'BLOCK'}
+                                  </button>
+                               </div>
+                            ))
+                            ) : (
+                              <div style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.2)', fontWeight: 700 }}>No subscriptions detected yet.</div>
+                            )}
                          </div>
                       </div>
                     </div>
@@ -518,7 +578,7 @@ const CardsDashboard = () => {
                        <ShieldCheck size={18} /> Instant Tier-1 Deployment
                     </div>
                     <p style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.6)', lineHeight: '1.5', margin: 0 }}>
-                       New card creation includes a mandatory $5.00 initial funding via Maplerad Issuing Engine.
+                       New card creation includes a mandatory $5.00 initial funding via our Secure Issuing Engine.
                     </p>
                  </div>
 

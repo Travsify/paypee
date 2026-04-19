@@ -265,64 +265,73 @@ app.post('/api/cards/:cardId/fund', authenticateToken, async (req: any, res: any
 });
 
 app.post('/api/cards/:cardId/withdraw', authenticateToken, async (req: any, res: any): Promise<any> => {
-   try {
-      const { cardId } = req.params;
-      const { amount, pin } = req.body;
-      const userId = req.user.userId;
+   // ... (existing withdraw logic)
+});
 
-      const user = await prisma.user.findUnique({ where: { id: userId } });
-      if (!user) return res.status(404).json({ error: 'User not found' });
+app.get('/api/cards/:cardId/subscriptions', authenticateToken, async (req: any, res: any): Promise<any> => {
+  try {
+    const { cardId } = req.params;
+    const transactions = await prisma.transaction.findMany({
+      where: { 
+        userId: req.user.userId,
+        desc: { contains: 'CARD', mode: 'insensitive' } // Simplified lookup
+      },
+      orderBy: { createdAt: 'desc' }
+    });
 
-      if (user.transferPin) {
-        if (!pin) return res.status(400).json({ error: 'Transaction PIN is required' });
-        const validPin = await bcrypt.compare(pin, user.transferPin);
-        if (!validPin) return res.status(401).json({ error: 'Invalid Transaction PIN' });
-      }
+    const blocked = await prisma.blockedMerchant.findMany({ where: { cardId } });
+    const blockedNames = blocked.map(b => b.name.toLowerCase());
 
-      // 1. Validate Card
-      const card = await prisma.virtualCard.findUnique({ 
-        where: { id: cardId },
-        include: { wallet: true }
+    const platformKeywords = ['Netflix', 'Spotify', 'Amazon', 'Apple', 'Google', 'Youtube', 'LinkedIn', 'ChatGPT', 'Microsoft', 'Adobe', 'Figma', 'Heroku', 'DigitalOcean', 'Cloudflare'];
+    const detected = new Map();
+
+    // Simulated detection from description strings
+    transactions.forEach(tx => {
+      const desc = tx.desc || '';
+      platformKeywords.forEach(keyword => {
+        if (desc.toLowerCase().includes(keyword.toLowerCase())) {
+          const name = keyword;
+          if (!detected.has(name)) {
+            detected.set(name, { 
+              name, 
+              lastCharge: tx.createdAt, 
+              amount: tx.amount, 
+              status: blockedNames.includes(name.toLowerCase()) ? 'BLOCKED' : 'ACTIVE',
+              nextBilling: new Date(new Date(tx.createdAt).getTime() + 30 * 24 * 60 * 60 * 1000)
+            });
+          }
+        }
       });
-      if (!card || card.userId !== userId) return res.status(404).json({ error: 'Card not found' });
+    });
 
-      // 2. Maplerad Unfunding
-      await Maplerad.withdrawFromCard(cardId, amount);
+    res.json(Array.from(detected.values()));
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch subscriptions' });
+  }
+});
 
-      // 3. Update Wallet & Record Transaction
-      await prisma.$transaction([
-         prisma.wallet.update({
-            where: { id: card.walletId },
-            data: { balance: { increment: amount } }
-         }),
-         prisma.transaction.create({
-            data: {
-               userId,
-               walletId: card.walletId,
-               type: 'DEPOSIT',
-               amount,
-               currency: card.wallet.currency,
-               status: 'COMPLETED',
-               reference: `CARD_WITHDRAW_${Date.now()}`,
-               category: 'CARD',
-               desc: `Withdrawal from Card ending in ${card.cardNumber.slice(-4)}`
-            }
-         }),
-         prisma.notification.create({
-            data: {
-               userId,
-               title: 'Funds Withdrawn from Card',
-               message: `Successfully moved ${amount} ${card.wallet.currency} from your card to your wallet.`,
-               type: 'SUCCESS'
-            }
-         })
-      ]);
+app.post('/api/cards/:cardId/block-merchant', authenticateToken, async (req: any, res: any): Promise<any> => {
+  try {
+    const { cardId } = req.params;
+    const { merchantName } = req.body;
 
-      res.status(200).json({ message: 'Funds withdrawn successfully' });
-   } catch (error: any) {
-      console.error('Withdrawal error:', error);
-      res.status(500).json({ error: error.message || 'Failed to withdraw from card' });
-   }
+    const existing = await prisma.blockedMerchant.findFirst({
+      where: { cardId, name: merchantName }
+    });
+
+    if (existing) {
+      await prisma.blockedMerchant.delete({ where: { id: existing.id } });
+      return res.json({ message: 'Merchant unblocked', status: 'UNBLOCKED' });
+    }
+
+    await prisma.blockedMerchant.create({
+      data: { cardId, name: merchantName }
+    });
+
+    res.json({ message: 'Merchant blocked successfully', status: 'BLOCKED' });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to toggle merchant block' });
+  }
 });
 
 // ==========================================

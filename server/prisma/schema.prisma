@@ -110,6 +110,7 @@ model VirtualCard {
 
   user                User     @relation(fields: [userId], references: [id])
   wallet              Wallet   @relation(fields: [walletId], references: [id])
+  blockedMerchants    BlockedMerchant[]
 }
 
 model PaymentLink {
@@ -208,4 +209,14 @@ model FxSwap {
   createdAt         DateTime @default(now())
 
   user              User     @relation(fields: [userId], references: [id])
+}
+
+model BlockedMerchant {
+  id        String   @id @default(uuid())
+  cardId    String
+  name      String   // e.g. "Netflix"
+  reason    String?
+  createdAt DateTime @default(now())
+
+  card      VirtualCard @relation(fields: [cardId], references: [id])
 }
