@@ -124,6 +124,15 @@ const CardsDashboard = ({ wallets: propWallets }: { wallets?: any[] }) => {
 
   const handleIssueCard = async (e: any) => {
     e.preventDefault();
+    console.log('[DEBUG] handleIssueCard triggered');
+    console.log('[DEBUG] issueWalletId:', issueWalletId);
+    console.log('[DEBUG] issueCurrency:', issueCurrency);
+    
+    if (!issueWalletId) {
+      alert('Please select a funding wallet first.');
+      return;
+    }
+
     setSubmitting(true);
     try {
       const token = localStorage.getItem('paypee_token');
@@ -135,7 +144,10 @@ const CardsDashboard = ({ wallets: propWallets }: { wallets?: any[] }) => {
         },
         body: JSON.stringify({ walletId: issueWalletId, currency: issueCurrency })
       });
+      
       const data = await res.json();
+      console.log('[DEBUG] Card Issuance Response:', data);
+
       if (res.ok) {
         setIsIssueModalOpen(false);
         fetchCards();
@@ -143,7 +155,7 @@ const CardsDashboard = ({ wallets: propWallets }: { wallets?: any[] }) => {
         alert(data.error || 'Failed to issue card');
       }
     } catch (err) {
-      console.error('Issue Card Error:', err);
+      console.error('[DEBUG] Fetch Error:', err);
       alert('Network error. Please try again.');
     } finally {
       setSubmitting(false);

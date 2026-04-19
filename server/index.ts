@@ -399,7 +399,16 @@ app.post('/api/cards', authenticateToken, async (req: any, res: any): Promise<an
     // 3. Issue Card via Maplerad
     console.log(`[MAPLERAD] Issuing ${currency || 'USD'} card for customer ${customer.id} with $${cardInitialUSD}...`);
     const mCard = await Maplerad.issueVirtualCard(customer.id, currency || 'USD', cardInitialUSD);
-    console.log(`[MAPLERAD] Card Issued Successfully: ${mCard.card_number || '****'}`);
+    console.log(`[MAPLERAD] Raw Provider Response:`, JSON.stringify(mCard));
+
+    if (!mCard || (!mCard.card_number && !mCard.card_no)) {
+      throw new Error('Provider failed to return valid card details.');
+    }
+
+    // Maplerad sometimes returns card_no instead of card_number
+    const cardNumber = mCard.card_number || mCard.card_no;
+    const expiry = mCard.expiry || mCard.expiry_date || (mCard.expiry_month ? `${mCard.expiry_month}/${mCard.expiry_year}` : '12/2029');
+    const cvv = mCard.cvv || mCard.cvv2 || '000';
 
     // 4. Atomic Balance Deduction & Card Creation
     const [card] = await prisma.$transaction([
@@ -407,11 +416,11 @@ app.post('/api/cards', authenticateToken, async (req: any, res: any): Promise<an
         data: {
           userId,
           walletId,
-          cardNumber: mCard.card_number,
-          expiry: mCard.expiry,
-          cvv: mCard.cvv,
+          cardNumber,
+          expiry,
+          cvv,
           status: "ACTIVE",
-          dailyLimit: cardInitialUSD // Store initial balance as a limit reference
+          dailyLimit: cardInitialUSD
         }
       }),
       prisma.wallet.update({
