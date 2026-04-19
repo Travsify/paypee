@@ -268,6 +268,7 @@ export const issueVirtualCard = async (customerId: string, currency: string, amo
       customer_id: customerId,
       currency: currency || 'USD',
       type: 'VIRTUAL',
+      brand: 'VISA',
       amount: fundingAmount,
       auto_approve: true
     });
