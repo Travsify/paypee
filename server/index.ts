@@ -1551,7 +1551,6 @@ app.post('/api/fx/swap', authenticateToken, async (req: any, res: any) => {
     );
 
     // 7. Send email notification
-    const user = await prisma.user.findUnique({ where: { id: userId } });
     if (user?.email) {
       await sendEmail(
         user.email,

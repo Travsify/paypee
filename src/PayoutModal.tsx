@@ -9,7 +9,8 @@ import {
   CheckCircle2,
   ChevronDown,
   Wallet,
-  Globe
+  Globe,
+  Lock
 } from 'lucide-react';
 import { API_BASE } from './config';
 

@@ -625,7 +625,13 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
       {/* Global Modals */}
       <PayoutModal isOpen={isPayoutOpen} onClose={() => setIsPayoutOpen(false)} onComplete={fetchUserData} wallets={userData?.wallets || []} />
       <SwapModal isOpen={isSwapOpen} onClose={() => setIsSwapOpen(false)} wallets={userData?.wallets || []} onComplete={fetchUserData} />
-      <AccountCreationModal isOpen={isAccountModalOpen} onClose={() => setIsAccountModalOpen(false)} onComplete={fetchUserData} />
+      <AccountCreationModal 
+        isOpen={isAccountModalOpen} 
+        onClose={() => setIsAccountModalOpen(false)} 
+        onSelect={handleCreateAccount} 
+        isProcessing={isGenerating} 
+        existingCurrencies={userData?.wallets?.map((w: any) => w.currency) || []} 
+      />
       <TransactionReceiptModal transaction={selectedTx} onClose={() => setSelectedTx(null)} />
       <NotificationPanel notifications={notifications} show={showNotifications} onClose={() => setShowNotifications(false)} />
       <PinSetupModal isOpen={isPinModalOpen} onClose={() => setIsPinModalOpen(false)} onSuccess={fetchUserData} />
