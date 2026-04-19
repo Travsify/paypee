@@ -60,7 +60,7 @@ const SwapModal: React.FC<SwapModalProps> = ({ isOpen, onClose, onComplete, wall
   useEffect(() => {
     if (step === 'quote' && countdown > 0) {
       timerRef.current = setInterval(() => {
-        setCountdown(prev => {
+        setCountdown((prev: number) => {
           if (prev <= 1) {
             clearInterval(timerRef.current);
             setError('Quote expired. Please get a new rate.');
