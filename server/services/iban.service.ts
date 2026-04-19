@@ -120,11 +120,23 @@ export class IbanService {
     };
   }
 
+  private static reconciliationCooldowns = new Map<string, number>();
+
   /**
    * Reconciles user wallets by fetching external transactions and verifying local state.
    * This is a "healing" function to catch missed webhooks or failed provisioning.
    */
   static async reconcileUserWallets(userId: string) {
+    const now = Date.now();
+    const lastRun = this.reconciliationCooldowns.get(userId) || 0;
+    const cooldown = 30 * 60 * 1000; // 30 minutes cooldown
+
+    if (now - lastRun < cooldown) {
+      // Skip if reconciled recently
+      return;
+    }
+
+    this.reconciliationCooldowns.set(userId, now);
     console.log(`[RECONCILE] Starting reconciliation for user ${userId}...`);
     
     try {
@@ -195,8 +207,6 @@ export class IbanService {
         return;
       }
 
-      console.log(`[RECONCILE] Total external transactions to scan: ${externalTxs.length}`);
-      
       console.log(`[RECONCILE] Total external transactions to scan: ${externalTxs.length}`);
 
       // Filter transactions that belong to this user's accounts
