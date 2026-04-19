@@ -300,35 +300,74 @@ app.post('/api/cards', authenticateToken, async (req: any, res: any): Promise<an
   try {
     const { walletId, currency, initialAmount } = req.body;
     const userId = req.user.userId;
+    const cardInitialUSD = initialAmount || 5; // Default $5 for Maplerad virtual cards
 
-    // 1. Get or Create Maplerad Customer
+    // 1. Validate Wallet & Check Balance (with cross-currency support)
+    const wallet = await prisma.wallet.findFirst({ where: { id: walletId, userId } });
+    if (!wallet) return res.status(404).json({ error: 'Source wallet not found' });
+
+    let costInWalletCurrency = cardInitialUSD;
+    let conversionRate = 1;
+
+    if (wallet.currency !== (currency || 'USD')) {
+      // Fetch live rate for conversion (e.g. USD to NGN)
+      const rateData = await Maplerad.getExchangeRate(currency || 'USD', wallet.currency);
+      conversionRate = rateData.rate;
+      costInWalletCurrency = cardInitialUSD * conversionRate;
+    }
+
+    if (parseFloat(wallet.balance.toString()) < costInWalletCurrency) {
+      return res.status(400).json({ 
+        error: `Insufficient ${wallet.currency} balance. Need ${costInWalletCurrency.toFixed(2)} ${wallet.currency} to cover $${cardInitialUSD} initial funding.` 
+      });
+    }
+
+    // 2. Get or Create Maplerad Customer
     const user = await prisma.user.findUnique({ where: { id: userId } });
     const customer = await Maplerad.createCustomer(user?.firstName || 'User', user?.lastName || 'Paypee', user?.email || '');
     
-    // 2. Issue Card via Maplerad
-    // Use selected currency and initial amount (min $5 for Maplerad)
-    const mCard = await Maplerad.issueVirtualCard(customer.id, currency || 'USD', initialAmount || 5);
+    // 3. Issue Card via Maplerad
+    const mCard = await Maplerad.issueVirtualCard(customer.id, currency || 'USD', cardInitialUSD);
 
-    const card = await prisma.virtualCard.create({
-      data: {
-        userId: userId,
-        walletId: walletId,
-        cardNumber: mCard.card_number,
-        expiry: mCard.expiry,
-        cvv: mCard.cvv,
-        status: "ACTIVE"
-      }
-    });
-
-    // Notify user
-    await prisma.notification.create({
-      data: {
-        userId,
-        title: 'Virtual Card Issued',
-        message: `Your new ${currency || 'USD'} virtual card ending in ${mCard.card_number.slice(-4)} is now active.`,
-        type: 'SUCCESS'
-      }
-    });
+    // 4. Atomic Balance Deduction & Card Creation
+    const [card] = await prisma.$transaction([
+      prisma.virtualCard.create({
+        data: {
+          userId,
+          walletId,
+          cardNumber: mCard.card_number,
+          expiry: mCard.expiry,
+          cvv: mCard.cvv,
+          status: "ACTIVE",
+          dailyLimit: cardInitialUSD // Store initial balance as a limit reference
+        }
+      }),
+      prisma.wallet.update({
+        where: { id: walletId },
+        data: { balance: { decrement: costInWalletCurrency } }
+      }),
+      prisma.transaction.create({
+        data: {
+          userId,
+          walletId,
+          type: 'WITHDRAWAL',
+          amount: costInWalletCurrency,
+          currency: wallet.currency,
+          status: 'COMPLETED',
+          reference: `CARD_ISSUE_${Date.now()}`,
+          category: 'CARD',
+          desc: `Issued ${currency || 'USD'} Virtual Card (Initial: $${cardInitialUSD})`
+        }
+      }),
+      prisma.notification.create({
+        data: {
+          userId,
+          title: 'Virtual Card Issued',
+          message: `Your new ${currency || 'USD'} virtual card is active. Deducted ${costInWalletCurrency.toFixed(2)} ${wallet.currency} from your wallet.`,
+          type: 'SUCCESS'
+        }
+      })
+    ]);
     
     res.status(201).json(card);
   } catch (error: any) {

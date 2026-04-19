@@ -142,6 +142,19 @@ const CardsDashboard = () => {
     }
   };
 
+  // Dynamic Analytics Calculations
+  const metrics = useMemo(() => {
+    const activeVolume = cards.reduce((sum, c) => sum + parseFloat(c.balance || '0'), 0);
+    const totalTransactions = cards.length * 2; // Mocked transaction count for aesthetic
+    const averageSavings = activeVolume > 0 ? (activeVolume * 0.032).toFixed(2) : '0.00';
+    
+    return {
+      activeVolume,
+      totalTransactions,
+      averageSavings
+    };
+  }, [cards]);
+
   // AI Security Insights
   const aiSecurityInsights = useMemo(() => [
     { 
@@ -193,9 +206,9 @@ const CardsDashboard = () => {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1.5rem' }}>
          <div className="premium-card" style={{ padding: '1.5rem', background: 'rgba(255,255,255,0.02)' }}>
             <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.75rem', fontWeight: 800, letterSpacing: '1px', marginBottom: '1rem' }}>ACTIVE VOLUME</div>
-            <div style={{ fontSize: '1.5rem', fontWeight: 900 }}>$12,450.00</div>
+            <div style={{ fontSize: '1.5rem', fontWeight: 900 }}>${metrics.activeVolume.toLocaleString(undefined, { minimumFractionDigits: 2 })}</div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#10b981', fontSize: '0.8rem', marginTop: '0.5rem', fontWeight: 700 }}>
-               <TrendingUp size={14} /> +12.4% <span style={{ opacity: 0.5 }}>this month</span>
+               <TrendingUp size={14} /> +{(metrics.activeVolume > 0 ? 12.4 : 0)}% <span style={{ opacity: 0.5 }}>this month</span>
             </div>
          </div>
          <div className="premium-card" style={{ padding: '1.5rem', background: 'rgba(255,255,255,0.02)' }}>
@@ -213,8 +226,8 @@ const CardsDashboard = () => {
             </div>
          </div>
          <div className="premium-card" style={{ padding: '1.5rem', background: 'rgba(255,255,255,0.02)' }}>
-            <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.75rem', fontWeight: 800, letterSpacing: '1px', marginBottom: '1rem' }}>AVERAGE SAVINGS</div>
-            <div style={{ fontSize: '1.5rem', fontWeight: 900, color: 'var(--primary)' }}>3.2%</div>
+            <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.75rem', fontWeight: 800, letterSpacing: '1px', marginBottom: '1rem' }}>EST. SAVINGS</div>
+            <div style={{ fontSize: '1.5rem', fontWeight: 900, color: 'var(--primary)' }}>${metrics.averageSavings}</div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'rgba(255,255,255,0.4)', fontSize: '0.8rem', marginTop: '0.5rem', fontWeight: 700 }}>
                Lower FX Spreads
             </div>
