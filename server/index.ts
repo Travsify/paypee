@@ -630,11 +630,11 @@ app.get('/api/cards', authenticateToken, async (req: any, res: any): Promise<any
         return {
           ...c,
           balance: liveBalance,
-          addressLine1: c.addressLine1 || mCard.address?.address || '123 Paypee Way',
-          addressCity: c.addressCity || mCard.address?.city || 'Dover',
-          addressState: c.addressState || mCard.address?.state || 'DE',
-          addressCountry: c.addressCountry || mCard.address?.country || 'USA',
-          addressZip: c.addressZip || mCard.address?.postal_code || '19901',
+          addressLine1: c.addressLine1 || mCard.address?.address || 'Information Pending Provider Update',
+          addressCity: c.addressCity || mCard.address?.city || '',
+          addressState: c.addressState || mCard.address?.state || '',
+          addressCountry: c.addressCountry || mCard.address?.country || '',
+          addressZip: c.addressZip || mCard.address?.postal_code || '',
           status: mCard.status || c.status
         };
       } catch (e) {

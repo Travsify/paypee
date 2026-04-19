@@ -450,8 +450,12 @@ const CardsDashboard = ({ wallets: propWallets }: { wallets?: any[] }) => {
                              <div style={{ fontSize: '0.6rem', background: 'rgba(16, 185, 129, 0.1)', color: '#10b981', padding: '2px 8px', borderRadius: '4px', fontWeight: 900 }}>MERCHANT READY</div>
                           </div>
                           <div style={{ fontSize: '0.8rem', fontWeight: 700, color: 'rgba(255,255,255,0.85)', lineHeight: 1.6 }}>
-                             <div>{card.addressLine1 || '123 Paypee Way'}</div>
-                             <div>{[card.addressCity || 'Dover', card.addressState || 'DE', card.addressZip || '19901'].filter(Boolean).join(', ')}</div>
+                             <div>{card.addressLine1 || 'Information Pending Sync...'}</div>
+                             {(card.addressCity || card.addressState || card.addressZip) ? (
+                                <div>{[card.addressCity, card.addressState, card.addressZip].filter(Boolean).join(', ')}</div>
+                             ) : (
+                                <div style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.3)' }}>City/State Syncing...</div>
+                             )}
                              <div>{card.addressCountry || 'USA'}</div>
                           </div>
                        </div>
