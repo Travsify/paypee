@@ -478,11 +478,10 @@ app.post('/api/payouts/transfer', authenticateToken, async (req: any, res: any) 
       beneficiary_type: isMoMo ? 'mobile_money' : (isCrypto ? 'crypto_address' : 'bank_account')
     };
 
-    const payoutResult = await Maplerad.processPayout(payoutAmount, payoutCurrency, accountDetails);
-
-    // 4. Atomic DB update
     const reference = `PAYOUT_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
-    
+
+    // 4. DEBIT FIRST — Reserve funds before calling external API
+    // This prevents the scenario where Maplerad succeeds but our DB never gets updated
     await prisma.$transaction([
       prisma.wallet.update({
         where: { id: walletId },
@@ -495,13 +494,12 @@ app.post('/api/payouts/transfer', authenticateToken, async (req: any, res: any) 
           type: 'WITHDRAWAL',
           amount: parsedAmount,
           currency: wallet.currency as any,
-          status: 'COMPLETED',
+          status: 'PENDING',
           reference,
           category: isCrypto ? 'CRYPTO' : 'TRANSFER',
           desc: isCrypto ? `Crypto Transfer to ${accountNumber.substring(0, 8)}...` : `Transfer to ${accountName || 'Recipient'} • ${req.body.bankName || 'Local Bank'}`,
           metadata: {
             provider: 'MAPLERAD',
-            providerReference: payoutResult?.id || null,
             bankCode,
             accountNumber,
             accountName,
@@ -513,7 +511,61 @@ app.post('/api/payouts/transfer', authenticateToken, async (req: any, res: any) 
       })
     ]);
 
-    console.log(`[PAYOUT SUCCESS] Transfer ${reference} recorded for User ${userId}`);
+    console.log(`[PAYOUT] Funds reserved. Executing Maplerad transfer...`);
+
+    // 5. Call Maplerad — if this fails, rollback the debit
+    let payoutResult: any;
+    try {
+      payoutResult = await Maplerad.processPayout(payoutAmount, payoutCurrency, accountDetails);
+    } catch (payoutErr: any) {
+      console.error(`[PAYOUT ROLLBACK] Maplerad failed, reversing debit for ${reference}:`, payoutErr.message);
+      
+      // Rollback: re-credit the wallet and mark transaction as FAILED
+      await prisma.$transaction([
+        prisma.wallet.update({
+          where: { id: walletId },
+          data: { balance: { increment: parsedAmount } }
+        }),
+        prisma.transaction.update({
+          where: { reference },
+          data: { 
+            status: 'FAILED',
+            metadata: {
+              provider: 'MAPLERAD',
+              bankCode,
+              accountNumber,
+              accountName,
+              targetCurrency: payoutCurrency,
+              targetAmount: payoutAmount,
+              fxRate: fxRate,
+              failureReason: payoutErr.message
+            }
+          }
+        })
+      ]);
+
+      throw payoutErr;
+    }
+
+    // 6. Finalize: mark transaction as COMPLETED with provider reference
+    await prisma.transaction.update({
+      where: { reference },
+      data: { 
+        status: 'COMPLETED',
+        metadata: {
+          provider: 'MAPLERAD',
+          providerReference: payoutResult?.id || null,
+          bankCode,
+          accountNumber,
+          accountName,
+          targetCurrency: payoutCurrency,
+          targetAmount: payoutAmount,
+          fxRate: fxRate
+        }
+      }
+    });
+
+    console.log(`[PAYOUT SUCCESS] Transfer ${reference} completed for User ${userId}`);
 
     res.status(200).json({ status: 'COMPLETED', reference, targetAmount: payoutAmount, targetCurrency: payoutCurrency });
 
