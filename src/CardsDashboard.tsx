@@ -48,7 +48,8 @@ const CardsDashboard = ({ wallets: propWallets }: { wallets?: any[] }) => {
     try {
       const token = localStorage.getItem('paypee_token');
       const res = await fetch('/api/cards', {
-        headers: { 'Authorization': `Bearer ${token}` }
+        headers: { 'Authorization': `Bearer ${token}` },
+        cache: 'no-store'
       });
       const data = await res.json();
       if (Array.isArray(data)) {
@@ -280,7 +281,7 @@ const CardsDashboard = ({ wallets: propWallets }: { wallets?: any[] }) => {
     <div style={{ padding: '0', display: 'flex', flexDirection: 'column', gap: '3rem' }}>
       
       {/* Header Section */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3rem' }}>
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--primary)', fontWeight: 800, fontSize: '0.8rem', letterSpacing: '2px', textTransform: 'uppercase', marginBottom: '0.75rem' }}>
             <Zap size={16} fill="var(--primary)" /> Issuing Protocol v2.1
@@ -290,15 +291,34 @@ const CardsDashboard = ({ wallets: propWallets }: { wallets?: any[] }) => {
             Deploy secure, AI-monitored global capital rails in seconds. Fully white-labeled institutional infrastructure.
           </p>
         </div>
-        <motion.button 
-          whileHover={{ scale: 1.05, boxShadow: '0 20px 40px -10px var(--primary)' }}
-          whileTap={{ scale: 0.95 }}
-          onClick={() => setIsIssueModalOpen(true)}
-          className="btn btn-primary"
-          style={{ padding: '1.25rem 2.5rem', borderRadius: '20px', fontSize: '1rem' }}
-        >
-          <PlusCircle size={22} /> Deploy New Card
-        </motion.button>
+        <div style={{ display: 'flex', gap: '1rem' }}>
+          <button 
+            onClick={fetchCards}
+            style={{ 
+              background: 'rgba(255,255,255,0.05)', 
+              border: '1px solid rgba(255,255,255,0.1)',
+              color: '#fff',
+              padding: '1rem 1.5rem',
+              borderRadius: '16px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              cursor: 'pointer',
+              fontWeight: 700
+            }}
+          >
+            <RefreshCw size={18} /> Refresh
+          </button>
+          <motion.button 
+            whileHover={{ scale: 1.05, boxShadow: '0 20px 40px -10px var(--primary)' }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => setIsIssueModalOpen(true)}
+            className="btn btn-primary"
+            style={{ padding: '1.25rem 2.5rem', borderRadius: '20px', fontSize: '1rem' }}
+          >
+            <PlusCircle size={22} /> Deploy New Card
+          </motion.button>
+        </div>
       </div>
 
       {/* Analytics Overview Section */}
@@ -391,7 +411,7 @@ const CardsDashboard = ({ wallets: propWallets }: { wallets?: any[] }) => {
 
                       <div style={{ marginBottom: '2rem' }}>
                          <div style={{ fontSize: '1.8rem', fontWeight: 900, letterSpacing: '4px', color: '#fff', display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                            {showNumbers[card.id] ? card.cardNumber : '•••• •••• •••• ' + (card.cardNumber?.slice(-4) || '0000')}
+                            {showNumbers[card.id] ? card.cardNumber : '•••• •••• •••• ' + ((card.cardNumber || '0000').slice(-4))}
                             <button onClick={() => setShowNumbers(prev => ({ ...prev, [card.id]: !prev[card.id] }))} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.3)', cursor: 'pointer', padding: '4px' }}>
                                {showNumbers[card.id] ? <EyeOff size={18} /> : <Eye size={18} />}
                             </button>
