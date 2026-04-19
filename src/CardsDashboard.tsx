@@ -307,7 +307,7 @@ const CardsDashboard = ({ wallets: propWallets }: { wallets?: any[] }) => {
               fontWeight: 700
             }}
           >
-            <RefreshCw size={18} /> Refresh
+            <RefreshCcw size={18} /> Refresh
           </button>
           <motion.button 
             whileHover={{ scale: 1.05, boxShadow: '0 20px 40px -10px var(--primary)' }}
