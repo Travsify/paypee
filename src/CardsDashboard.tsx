@@ -188,7 +188,7 @@ const CardsDashboard = ({ wallets: propWallets }: { wallets?: any[] }) => {
           pin: transferPin
         })
       });
-      if (res.ok) { if (data && data.id) setCards(prev => [data, ...prev]);
+      if (res.ok) {
         setIsFundingModalOpen(false);
         setFundAmount('');
         setTransferPin('');
@@ -220,7 +220,7 @@ const CardsDashboard = ({ wallets: propWallets }: { wallets?: any[] }) => {
           pin: transferPin
         })
       });
-      if (res.ok) { if (data && data.id) setCards(prev => [data, ...prev]);
+      if (res.ok) {
         setIsWithdrawModalOpen(false);
         setFundAmount('');
         setTransferPin('');
