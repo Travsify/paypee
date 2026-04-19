@@ -25,7 +25,8 @@ const mapleradClient = axios.create({
     'Content-Type': 'application/json'
   },
   httpsAgent: proxyAgent,
-  proxy: false 
+  proxy: false,
+  timeout: 1800000 // 30 minutes
 });
 
 // Direct client for fallback/testing
@@ -34,7 +35,8 @@ const directClient = axios.create({
   headers: {
     'Authorization': `Bearer ${MAPLERAD_SECRET_KEY}`,
     'Content-Type': 'application/json'
-  }
+  },
+  timeout: 1800000 // 30 minutes
 });
 
 // Helper for robust requests with proxy fallback

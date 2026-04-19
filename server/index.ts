@@ -1758,6 +1758,7 @@ app.get('/api/admin/fix-swaps', async (req: any, res: any) => {
   }
 });
 
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   console.log(`🚀 Paypee Core API running on http://localhost:${PORT}`);
 });
+server.timeout = 1800000; // 30 minutes
