@@ -148,37 +148,41 @@ export class IbanService {
 
       if (!user) throw new Error("User not found for reconciliation");
 
-      // 2. Fetch Maplerad Customer ID (idempotent)
-      const customer = await Maplerad.createCustomer(
-        user.firstName || "Customer",
-        user.lastName || "Paypee",
-        user.email
-      );
+      // 2. Fetch Maplerad Customer ID (Check metadata first to avoid redundant API calls)
+      let customerId = (user.metadata as any)?.customerId;
+      let customer: any = null;
 
-      if (!customer?.id) {
-        console.warn(`[RECONCILE] Could not find Maplerad customer for ${user.email}`);
-        return;
-      }
+      if (!customerId) {
+        customer = await Maplerad.createCustomer(
+          user.firstName || "Customer",
+          user.lastName || "Paypee",
+          user.email
+        );
+        customerId = customer.id;
 
-      // Save customerId to user metadata if not present
-      const userMeta = user.metadata as any || {};
-      if (userMeta.customerId !== customer.id) {
+        if (!customerId) {
+          console.warn(`[RECONCILE] Could not find Maplerad customer for ${user.email}`);
+          return;
+        }
+
+        // Save customerId to user metadata
+        const userMeta = user.metadata as any || {};
         await prisma.user.update({
           where: { id: userId },
           data: {
-            metadata: { ...userMeta, customerId: customer.id }
+            metadata: { ...userMeta, customerId }
           }
         });
-        (user as any).metadata = { ...userMeta, customerId: customer.id };
+        (user as any).metadata = { ...userMeta, customerId };
       }
 
       // 3. Fetch all virtual accounts & crypto wallets for this customer from Maplerad
-      console.log(`[RECONCILE] Fetching virtual accounts and crypto wallets for customer ${customer.id}...`);
-      const externalAccounts = await Maplerad.getCustomerVirtualAccounts(customer.id);
+      console.log(`[RECONCILE] Fetching virtual accounts and crypto wallets for customer ${customerId}...`);
+      const externalAccounts = await Maplerad.getCustomerVirtualAccounts(customerId);
       
       let cryptoAccounts: any[] = [];
       try {
-         cryptoAccounts = await Maplerad.getCryptoAddresses(customer.id);
+         cryptoAccounts = await Maplerad.getCryptoAddresses(customerId);
          console.log(`[RECONCILE] Found ${cryptoAccounts?.length || 0} crypto accounts.`);
       } catch (e: any) {
          console.warn(`[RECONCILE] Failed to fetch crypto accounts: ${e.message}`);
@@ -230,7 +234,7 @@ export class IbanService {
       }
 
       // 5. Fetch external transactions (latest 50) for this specific customer
-      let externalTxs = await Maplerad.getTransactions(customer.id);
+      let externalTxs = await Maplerad.getTransactions(customerId);
       
       if (!Array.isArray(externalTxs) || externalTxs.length === 0) {
         console.log(`[RECONCILE] Customer-specific lookup returned 0. Trying global platform lookup...`);
