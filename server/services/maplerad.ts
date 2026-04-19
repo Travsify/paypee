@@ -174,7 +174,7 @@ export const issueVirtualAccount = async (customerId: string, currency: string) 
   try {
     const isNGN = currency.toUpperCase() === 'NGN';
     const isUSD = currency.toUpperCase() === 'USD';
-    const url = (isNGN || isUSD) ? '/collections/virtual-account' : '/issuing/virtual-account';
+    const url = (isNGN) ? '/collections/virtual-account' : '/issuing/domiciliary';
     const payload: any = {
       customer_id: customerId,
       currency: currency.toUpperCase()
