@@ -259,10 +259,9 @@ export const issueVirtualAccount = async (customerId: string, currency: string) 
  */
 export const issueVirtualCard = async (customerId: string, currency: string, amount: number) => {
   try {
-    // Ensure minimum funding of $2.00 (200 cents) as per Maplerad default/minimum
+    // Attempt 1: Standard $2.00 funding
     const fundingAmount = Math.max(200, amount * 100);
-    
-    console.log(`[MAPLERAD] Issuing ${currency} card. Funding: ${fundingAmount} cents`);
+    console.log(`[MAPLERAD] Issuing ${currency} card. Attempting with ${fundingAmount} cents`);
     
     const response = await makeRequest('post', '/issuing', {
       customer_id: customerId,
@@ -274,6 +273,20 @@ export const issueVirtualCard = async (customerId: string, currency: string, amo
     });
     return response.data.data;
   } catch (error: any) {
+    // Attempt 2: Fallback to absolute minimum $1.00 if balance is tight
+    const errorMsg = error.response?.data?.message || '';
+    if (errorMsg.toLowerCase().includes('balance')) {
+       console.log(`[MAPLERAD] Balance low, retrying with absolute minimum $1.00 funding...`);
+       const response = await makeRequest('post', '/issuing', {
+         customer_id: customerId,
+         currency: currency || 'USD',
+         type: 'VIRTUAL',
+         brand: 'VISA',
+         amount: 100, // $1.00
+         auto_approve: true
+       });
+       return response.data.data;
+    }
     console.error('[MAPLERAD] Issue Card Error:', error.response?.data || error.message);
     throw new Error(error.response?.data?.message || 'Failed to issue virtual card via Maplerad');
   }
