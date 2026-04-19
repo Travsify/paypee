@@ -5,6 +5,7 @@ import dotenv from 'dotenv';
 import { PrismaClient, AccountRole } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import morgan from 'morgan';
 import { AiIntelligenceService } from './services/ai.service';
 import { IbanService } from './services/iban.service';
 import { BillsService } from './services/bills.service';
@@ -21,6 +22,7 @@ const JWT_SECRET = process.env.JWT_SECRET || 'paypee_super_secret_dev_key';
 app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ limit: '10mb', extended: true }));
+app.use(morgan('dev'));
 
 // Basic health check
 app.get('/api/health', (req: Request, res: Response) => {
