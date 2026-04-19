@@ -598,11 +598,49 @@ app.post('/api/webhooks/fincra', async (req: Request, res: Response) => {
 
     if (payload.event === 'payout.failed') {
        const reference = payload.data.reference;
-       // Refund logic could go here
        await prisma.transaction.update({
          where: { reference },
          data: { status: 'FAILED' }
        });
+    }
+
+    // Handle Incoming Payments (Deposits)
+    if (payload.event === 'collection.successful' || payload.event === 'charge.completed' || payload.event === 'virtual_account.credited') {
+       const { amount, currency, reference, customer } = payload.data;
+       const parsedAmount = Number(amount);
+       
+       // Find user by email or wallet by account reference
+       const user = await prisma.user.findFirst({ where: { email: customer.email } });
+       if (user) {
+         const wallet = await prisma.wallet.findFirst({ where: { userId: user.id, currency } });
+         if (wallet) {
+           await prisma.$transaction([
+             prisma.wallet.update({ where: { id: wallet.id }, data: { balance: { increment: parsedAmount } } }),
+             prisma.transaction.create({
+               data: {
+                 userId: user.id,
+                 walletId: wallet.id,
+                 type: 'DEPOSIT',
+                 amount: parsedAmount,
+                 currency,
+                 status: 'COMPLETED',
+                 reference: `FINCRA_${reference}`,
+                 desc: `Inbound Settlement (Fincra)`,
+                 category: 'BANK_TRANSFER'
+               }
+             }),
+             prisma.notification.create({
+               data: {
+                 userId: user.id,
+                 title: 'Funds Received',
+                 message: `Your ${currency} wallet has been credited with ${parsedAmount} via Fincra.`,
+                 type: 'SUCCESS'
+               }
+             })
+           ]);
+           console.log(`[FINCRA DEPOSIT] Processed ${parsedAmount} ${currency} for User ${user.id}`);
+         }
+       }
     }
 
     res.status(200).send('Webhook Processed');
@@ -1632,7 +1670,7 @@ app.post('/api/webhooks/maplerad', async (req: Request, res: Response) => {
     }
 
     // 2. Handle Inbound Payments
-    if (event === 'collection.success' || event === 'virtual_account.payment' || event === 'collection.successful') {
+    if (event === 'collection.success' || event === 'virtual_account.payment' || event === 'collection.successful' || event === 'virtual_account.credit') {
       const { amount, currency, account_number, reference } = data;
       
       // Maplerad sends amounts in minor units (kobo/cents)
@@ -1641,12 +1679,10 @@ app.post('/api/webhooks/maplerad', async (req: Request, res: Response) => {
       console.log(`[MAPLERAD WEBHOOK] Processing ${parsedAmount} ${currency} for account ${account_number}`);
 
       // Find wallet by account_number in metadata
-      // We search through wallets to find one with a matching account number in its metadata
       const wallets = await prisma.wallet.findMany();
       const wallet = wallets.find(w => {
          const meta = w.metadata as any;
          if (!meta) return false;
-         // Check various possible keys where we might have stored the account number
          return meta.iban === account_number || 
                 meta.account_number === account_number || 
                 meta.accountNumber === account_number ||
@@ -1655,12 +1691,10 @@ app.post('/api/webhooks/maplerad', async (req: Request, res: Response) => {
 
       if (wallet) {
         await prisma.$transaction([
-          // Increment wallet balance
           prisma.wallet.update({
             where: { id: wallet.id },
             data: { balance: { increment: parsedAmount } }
           }),
-          // Create transaction record
           prisma.transaction.create({
             data: {
               userId: wallet.userId,
@@ -1675,7 +1709,6 @@ app.post('/api/webhooks/maplerad', async (req: Request, res: Response) => {
               metadata: data
             }
           }),
-          // Notify user
           prisma.notification.create({
             data: {
               userId: wallet.userId,
@@ -1689,6 +1722,8 @@ app.post('/api/webhooks/maplerad', async (req: Request, res: Response) => {
       } else {
         console.warn(`[MAPLERAD WEBHOOK] No wallet found for account number: ${account_number}`);
       }
+    } else {
+      console.log(`[MAPLERAD WEBHOOK] Ignored event: ${event}`);
     }
 
     res.status(200).send('Webhook Processed');

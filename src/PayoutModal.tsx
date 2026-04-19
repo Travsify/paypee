@@ -64,13 +64,22 @@ const PayoutModal: React.FC<PayoutModalProps> = ({ isOpen, onClose, onComplete, 
           const res = await fetch(`${API_BASE}/api/payouts/verify?accountNumber=${accountNumber}&bankCode=${bankCode || routingNumber || iban || swiftCode}`, {
             headers: { 'Authorization': `Bearer ${localStorage.getItem('paypee_token')}` }
           });
+          const data = await res.json();
           if (res.ok) {
-            const data = await res.json();
-            const name = data.name || data.account_name || data.accountName || data.full_name || data.fullName || data.customer_name || '';
-            setAccountName(name);
+            // Maplerad often returns { name: '...' } inside data
+            const fetchedName = data.name || data.account_name || data.accountName || data.full_name || data.fullName || data.customer_name || data.account_holder_name || '';
+            if (fetchedName) {
+              setAccountName(fetchedName);
+              setError('');
+            } else {
+              setError('Could not verify account name. Please check details.');
+            }
+          } else {
+            setError(data.error || 'Verification failed. Please check the account number.');
           }
         } catch (err) {
           console.error('Verification error');
+          setError('Network error during verification.');
         } finally {
           setVerifying(false);
         }
