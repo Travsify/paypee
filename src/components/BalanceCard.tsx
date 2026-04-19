@@ -81,7 +81,8 @@ const getBankName = (details: any) => {
   if (typeof details === 'string') {
     try { data = JSON.parse(details); } catch (e) { return null; }
   }
-  return data.bankName || data.bank_name || data.bank || data.provider || data.network || data?.data?.network;
+  // Prioritize network for crypto assets, then bank name for fiat
+  return data.network || data.bankName || data.bank_name || data.bank || data.provider || data?.data?.network;
 };
 
 const BalanceCard: React.FC<BalanceCardProps> = ({ 
@@ -202,7 +203,7 @@ const BalanceCard: React.FC<BalanceCardProps> = ({
                 letterSpacing: '1px',
                 boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
               }}>
-                {bank ? (['USDC', 'USDT', 'BTC'].includes(currency.toUpperCase()) ? `${bank} Network` : bank) : (['USDC', 'USDT', 'BTC'].includes(currency.toUpperCase()) ? 'Crypto Network' : 'Provisioning Account...')}
+                {bank ? (['USDC', 'USDT', 'BTC'].includes(currency.toUpperCase()) ? `${bank.toUpperCase()} Network` : bank.toUpperCase()) : (['USDC', 'USDT', 'BTC'].includes(currency.toUpperCase()) ? 'Crypto Network' : 'Provisioning Account...')}
               </div>
               {bank && <CopyButton text={bank} label={['USDC', 'USDT', 'BTC'].includes(currency.toUpperCase()) ? "Network" : "Bank Name"} />}
             </div>

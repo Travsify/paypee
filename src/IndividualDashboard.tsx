@@ -587,8 +587,8 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
                          const { symbol, gradient } = getCardProps(activeWallet.currency);
                          const isCrypto = ['USDC', 'USDT', 'BTC'].includes(activeWallet.currency);
                          const meta = activeWallet.metadata || {};
-                         const accNo = meta.iban || meta.account_number || meta.accountNumber || meta.virtual_account_number || meta.address || meta.wallet_address || '---';
-                         const bank = meta.bankName || meta.bank_name || meta.bank || meta.provider || meta.network || (isCrypto ? 'Crypto Network' : '---');
+                         const accNo = meta.address || meta.wallet_address || meta.iban || meta.account_number || meta.accountNumber || meta.virtual_account_number || '---';
+                         const bank = meta.network || meta.bankName || meta.bank_name || meta.bank || meta.provider || (isCrypto ? 'Crypto Network' : '---');
                          const accName = meta.accountInformation?.accountName || meta.accountName || meta.accountHolder || userData?.firstName + ' ' + userData?.lastName;
 
                          return (

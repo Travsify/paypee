@@ -172,32 +172,42 @@ export const upgradeCustomerTier1 = async (customerId: string, kycData: any) => 
  */
 export const issueVirtualAccount = async (customerId: string, currency: string) => {
   try {
-    const response = await makeRequest('post', '/collections/virtual-account', {
+    const isGlobal = ['USD', 'EUR', 'GBP'].includes(currency.toUpperCase());
+    const url = isGlobal ? '/issuing/virtual-accounts' : '/collections/virtual-account';
+    const payload: any = {
       customer_id: customerId,
-      currency: currency
-    });
-    return response.data.data; // Returns account details (account_number, bank_name, etc.)
+      currency: currency.toUpperCase()
+    };
+
+    if (isGlobal) {
+      // USD is often DOMICILIARY, EUR/GBP are GLOBAL
+      payload.type = currency.toUpperCase() === 'USD' ? 'DOMICILIARY' : 'GLOBAL';
+    }
+
+    console.log(`[MAPLERAD] Issuing ${currency} account for customer ${customerId} via ${url}...`);
+    const response = await makeRequest('post', url, payload);
+    return response.data.data; 
   } catch (error: any) {
     const errorMsg = error.response?.data?.message || '';
-    if (errorMsg.toLowerCase().includes('already enrolled') || errorMsg.toLowerCase().includes('already exist')) {
+    
+    // If account already exists, try to fetch it
+    if (errorMsg.toLowerCase().includes('already') || error.response?.status === 400) {
       try {
-        console.log(`[MAPLERAD DEBUG] Customer already enrolled, fetching existing virtual accounts for ${customerId}...`);
-        const existing = await makeRequest('get', `/customers/${customerId}/virtual-account`);
-        const accounts = existing.data.data;
+        console.log(`[MAPLERAD DEBUG] Checking for existing accounts for customer ${customerId}...`);
+        // Maplerad has different endpoints for listing existing accounts
+        const listUrl = `/customers/${customerId}/virtual-accounts`; 
+        const existing = await makeRequest('get', listUrl);
+        const accounts = existing.data.data || [];
         
-        if (Array.isArray(accounts)) {
-          const match = accounts.find((a: any) => a.currency === currency);
-          if (match) return match;
-          if (accounts.length > 0) return accounts[0];
-        }
-        return accounts;
+        const match = accounts.find((a: any) => a.currency === currency.toUpperCase());
+        if (match) return match;
       } catch (fetchErr: any) {
-        console.error('[MAPLERAD] Failed to fetch existing account:', fetchErr.message);
+        console.warn('[MAPLERAD] Fallback account lookup failed:', fetchErr.message);
       }
     }
 
     console.error('[MAPLERAD] Issue Account Error:', error.response?.data || error.message);
-    throw new Error(errorMsg || 'Failed to issue virtual account via Maplerad');
+    throw new Error(errorMsg || `Failed to issue ${currency} virtual account`);
   }
 };
 
