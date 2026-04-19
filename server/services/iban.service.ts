@@ -160,36 +160,59 @@ export class IbanService {
         return;
       }
 
-      // 3. Fetch all virtual accounts for this customer from Maplerad
-      console.log(`[RECONCILE] Fetching virtual accounts for customer ${customer.id}...`);
+      // 3. Fetch all virtual accounts & crypto wallets for this customer from Maplerad
+      console.log(`[RECONCILE] Fetching virtual accounts and crypto wallets for customer ${customer.id}...`);
       const externalAccounts = await Maplerad.getCustomerVirtualAccounts(customer.id);
       
+      let cryptoAccounts: any[] = [];
+      try {
+         cryptoAccounts = await Maplerad.getCryptoAddresses(customer.id);
+         console.log(`[RECONCILE] Found ${cryptoAccounts?.length || 0} crypto accounts.`);
+      } catch (e: any) {
+         console.warn(`[RECONCILE] Failed to fetch crypto accounts: ${e.message}`);
+      }
+
+      const allAccounts = [...(externalAccounts || []), ...(cryptoAccounts || [])];
+
       // 4. Update missing metadata in local wallets
-      for (const extAcc of externalAccounts) {
-        const wallet = user.wallets.find(w => w.currency === extAcc.currency);
+      for (const extAcc of allAccounts) {
+        // Crypto uses `coin` or `currency`, Fiat uses `currency`
+        const accountCurrency = (extAcc.currency || extAcc.coin || '').toUpperCase();
+        if (!accountCurrency) continue;
+
+        const wallet = user.wallets.find(w => w.currency === accountCurrency);
         if (wallet) {
           const currentMeta = typeof wallet.metadata === 'string' ? JSON.parse(wallet.metadata) : wallet.metadata;
           
-          // If metadata is missing or account number is not there, update it
-          if (!currentMeta || (!currentMeta.iban && !currentMeta.account_number)) {
+          const isCrypto = ['BTC', 'USDT', 'USDC'].includes(accountCurrency);
+          const needsFiatUpdate = !isCrypto && (!currentMeta || (!currentMeta.iban && !currentMeta.account_number));
+          const needsCryptoUpdate = isCrypto && (!currentMeta || (!currentMeta.address && !currentMeta.wallet_address));
+
+          // If metadata is missing or account details are not there, update it
+          if (needsFiatUpdate || needsCryptoUpdate) {
             console.log(`[RECONCILE] Fixing missing metadata for ${wallet.currency} wallet...`);
+            
+            let newMeta = { ...currentMeta };
+            if (isCrypto) {
+                newMeta.address = extAcc.address || extAcc.wallet_address;
+                newMeta.network = extAcc.network || extAcc.chain;
+                newMeta.provider = 'Maplerad Crypto';
+            } else {
+                newMeta.accountHolder = `${user.firstName} ${user.lastName}`;
+                newMeta.iban = extAcc.account_number;
+                newMeta.account_number = extAcc.account_number;
+                newMeta.bankName = extAcc.bank_name;
+                newMeta.bankCode = extAcc.bank_code;
+                newMeta.provider = 'Maplerad';
+            }
+            newMeta.reconciledAt = new Date().toISOString();
+
             await prisma.wallet.update({
               where: { id: wallet.id },
-              data: {
-                metadata: {
-                  ...currentMeta,
-                  accountHolder: `${user.firstName} ${user.lastName}`,
-                  iban: extAcc.account_number,
-                  account_number: extAcc.account_number,
-                  bankName: extAcc.bank_name,
-                  bankCode: extAcc.bank_code,
-                  provider: 'Maplerad',
-                  reconciledAt: new Date().toISOString()
-                }
-              }
+              data: { metadata: newMeta }
             });
             // Update the local reference for the next step
-            wallet.metadata = { iban: extAcc.account_number, account_number: extAcc.account_number }; 
+            wallet.metadata = newMeta; 
           }
         }
       }
@@ -210,18 +233,19 @@ export class IbanService {
       console.log(`[RECONCILE] Total external transactions to scan: ${externalTxs.length}`);
 
       // Filter transactions that belong to this user's accounts
-      const userAccNumbers = externalAccounts.map((a: any) => String(a.account_number));
+      const userIdentifiers = allAccounts.map((a: any) => String(a.account_number || a.address || a.wallet_address));
 
       const relevantTxs = externalTxs.filter((tx: any) => {
-        const txAcc = String(tx.account_number || tx.virtual_account_number || tx.virtual_account?.account_number || tx.meta?.account_number || tx.meta?.virtual_account_number || '');
-        const isMatch = userAccNumbers.includes(txAcc);
+        const txCurrency = tx.currency || tx.coin || '';
+        const txAcc = String(tx.account_number || tx.virtual_account_number || tx.virtual_account?.account_number || tx.meta?.account_number || tx.meta?.virtual_account_number || tx.address || tx.wallet_address || '');
+        const isMatch = userIdentifiers.includes(txAcc);
         
         if (!isMatch && tx.type === 'COLLECTION') {
             // For collection transactions, sometimes they just belong to the customer
             // If the user has only one account for this currency, we can safely attribute it
-            const userCurrencyAccounts = externalAccounts.filter((a: any) => a.currency === tx.currency);
+            const userCurrencyAccounts = allAccounts.filter((a: any) => (a.currency || a.coin) === txCurrency);
             if (userCurrencyAccounts.length === 1) {
-                console.log(`[RECONCILE] Match found by currency attribution for ${tx.currency} collection.`);
+                console.log(`[RECONCILE] Match found by currency attribution for ${txCurrency} collection.`);
                 return true;
             }
         }
@@ -241,12 +265,18 @@ export class IbanService {
 
           if (existingTx) return;
 
-          const amount = tx.amount / 100;
-          const wallet = user.wallets.find(w => w.currency === tx.currency);
+          const txCurrency = (tx.currency || tx.coin || '').toUpperCase();
+          const isCrypto = ['BTC', 'USDT', 'USDC'].includes(txCurrency);
+          let amount = Number(tx.amount || 0);
+          if (!isCrypto) {
+              amount = amount / 100; // Maplerad fiat is always in minor units
+          }
+
+          const wallet = user.wallets.find(w => w.currency === txCurrency);
           
           if (!wallet) return;
 
-          console.log(`[RECONCILE] Processing missed transaction ${tx.id} for ${amount} ${tx.currency}`);
+          console.log(`[RECONCILE] Processing missed transaction ${tx.id} for ${amount} ${txCurrency}`);
 
           // Create transaction record
           await txPrisma.transaction.create({

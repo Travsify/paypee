@@ -156,7 +156,7 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
   const handleCreateAccount = async (currency: string, bvn?: string, kycData?: any) => {
     setIsGenerating(true);
     try {
-      const response = await fetch(`${API_BASE}/api/accounts`, {
+      const response = await fetch(`${API_BASE}/api/accounts/provision`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -1707,9 +1707,9 @@ app.post('/api/webhooks/maplerad', async (req: Request, res: Response) => {
   try {
     const signature = req.headers['maplerad-signature'] as string;
     const payload = req.body;
-    const { event, data } = payload;
+    const { event, id, data, status, reference } = payload;
 
-    console.log(`[MAPLERAD WEBHOOK] Received event: ${event}`);
+    console.log(`[MAPLERAD WEBHOOK] Received event: ${event}, id: ${id}, status: ${status}`);
 
     // 1. Verify Signature
     if (!Maplerad.verifyWebhookSignature(signature, payload)) {
@@ -1717,16 +1717,40 @@ app.post('/api/webhooks/maplerad', async (req: Request, res: Response) => {
       return res.status(401).send('Unauthorized');
     }
 
-    // 2. Handle Inbound Payments
-    if (event === 'collection.success' || event === 'virtual_account.payment' || event === 'collection.successful' || event === 'virtual_account.credit') {
-      const { amount, currency, account_number, reference } = data;
-      
-      // Maplerad sends amounts in minor units (kobo/cents)
-      const parsedAmount = Number(amount) / 100;
-      
-      console.log(`[MAPLERAD WEBHOOK] Processing ${parsedAmount} ${currency} for account ${account_number}`);
+    // 2. Idempotency check — skip if we already processed this webhook ID
+    const webhookRef = `MAPLE_WH_${id || reference || Date.now()}`;
+    const existingTx = await prisma.transaction.findFirst({ where: { reference: webhookRef } });
+    if (existingTx) {
+      console.log(`[MAPLERAD WEBHOOK] Already processed: ${webhookRef}. Skipping.`);
+      return res.status(200).send('Already processed');
+    }
 
-      // Find wallet by account_number in metadata
+    // 3. Handle Inbound Payments (Deposits into virtual accounts)
+    if (event === 'collection.successful' || event === 'collection.success' || 
+        event === 'virtual_account.payment' || event === 'virtual_account.credit') {
+      
+      // Maplerad webhook can have data at top level or nested
+      const txData = data || payload;
+      const amount = Number(txData.amount || 0);
+      const currency = (txData.currency || txData.coin || '').toUpperCase();
+      const account_number = txData.account_number || txData.virtual_account_number || 
+                             txData.virtual_account?.account_number ||
+                             txData.meta?.account_number || txData.meta?.virtual_account_number ||
+                             txData.address || txData.wallet_address || '';
+      
+      // Maplerad sends fiat amounts in minor units (kobo/cents). 
+      // Crypto amounts might already be in major units or have different decimal places.
+      // We assume if it's fiat, it's minor. For crypto, usually it's major or atomic (e.g. Satoshis).
+      // Given Paypee architecture, we unconditionally divide by 100 for fiat, but we shouldn't arbitrarily divide crypto.
+      const isCrypto = ['BTC', 'USDT', 'USDC'].includes(currency);
+      let parsedAmount = amount;
+      if (!isCrypto) {
+          parsedAmount = amount / 100;
+      }
+      
+      console.log(`[MAPLERAD WEBHOOK] Processing deposit: ${parsedAmount} ${currency} for account/address ${account_number}`);
+
+      // Find wallet by account_number or address in metadata
       const wallets = await prisma.wallet.findMany();
       const wallet = wallets.find(w => {
          const meta = w.metadata as any;
@@ -1734,44 +1758,108 @@ app.post('/api/webhooks/maplerad', async (req: Request, res: Response) => {
          return meta.iban === account_number || 
                 meta.account_number === account_number || 
                 meta.accountNumber === account_number ||
-                meta.virtual_account_number === account_number;
+                meta.virtual_account_number === account_number ||
+                meta.nuban === account_number ||
+                meta.address === account_number ||
+                meta.wallet_address === account_number;
       });
 
-      if (wallet) {
+      // If no wallet found by account number, try matching by currency (single-wallet users)
+      let resolvedWallet = wallet;
+      if (!resolvedWallet && currency) {
+        const currencyWallets = wallets.filter(w => w.currency === currency);
+        if (currencyWallets.length === 1) {
+          resolvedWallet = currencyWallets[0];
+          console.log(`[MAPLERAD WEBHOOK] Matched by currency fallback: ${currency}`);
+        }
+      }
+
+      if (resolvedWallet) {
         await prisma.$transaction([
           prisma.wallet.update({
-            where: { id: wallet.id },
+            where: { id: resolvedWallet.id },
             data: { balance: { increment: parsedAmount } }
           }),
           prisma.transaction.create({
             data: {
-              userId: wallet.userId,
-              walletId: wallet.id,
+              userId: resolvedWallet.userId,
+              walletId: resolvedWallet.id,
               type: 'DEPOSIT',
               amount: parsedAmount,
-              currency: currency || wallet.currency,
+              currency: currency || resolvedWallet.currency,
               status: 'COMPLETED',
-              reference: reference ? `MAPLE_${reference}` : `MAPLE_AUTO_${Date.now()}`,
-              desc: `Inbound Settlement: ${account_number}`,
+              reference: webhookRef,
+              desc: `Deposit via ${account_number || 'Virtual Account'}`,
               category: 'BANK_TRANSFER',
-              metadata: data
+              metadata: txData
             }
           }),
           prisma.notification.create({
             data: {
-              userId: wallet.userId,
-              title: 'Funds Received',
-              message: `Your ${currency || wallet.currency} wallet has been credited with ${parsedAmount}.`,
+              userId: resolvedWallet.userId,
+              title: '💰 Funds Received',
+              message: `Your ${currency || resolvedWallet.currency} wallet has been credited with ${parsedAmount.toLocaleString()}.`,
               type: 'SUCCESS'
             }
           })
         ]);
-        console.log(`[MAPLERAD WEBHOOK] Reconciled ${parsedAmount} ${currency} for User ${wallet.userId}`);
+        console.log(`[MAPLERAD WEBHOOK] ✅ Credited ${parsedAmount} ${currency} for User ${resolvedWallet.userId}`);
       } else {
-        console.warn(`[MAPLERAD WEBHOOK] No wallet found for account number: ${account_number}`);
+        console.warn(`[MAPLERAD WEBHOOK] ⚠️ No wallet found for account: ${account_number}, currency: ${currency}`);
       }
-    } else {
-      console.log(`[MAPLERAD WEBHOOK] Ignored event: ${event}`);
+    }
+
+    // 4. Handle Transfer Events (Payout status updates)
+    else if (event === 'transfer.successful') {
+      console.log(`[MAPLERAD WEBHOOK] Transfer succeeded: ${id}`);
+      // Try to find the matching pending transaction by provider reference
+      const tx = await prisma.transaction.findFirst({
+        where: {
+          status: 'PENDING',
+          metadata: { path: ['providerReference'], equals: id }
+        }
+      });
+      if (tx) {
+        await prisma.transaction.update({
+          where: { id: tx.id },
+          data: { status: 'COMPLETED' }
+        });
+      }
+    }
+
+    else if (event === 'transfer.failed') {
+      console.log(`[MAPLERAD WEBHOOK] Transfer failed: ${id}`);
+      const tx = await prisma.transaction.findFirst({
+        where: {
+          status: 'PENDING',
+          metadata: { path: ['providerReference'], equals: id }
+        }
+      });
+      if (tx) {
+        // Rollback the debit
+        await prisma.$transaction([
+          prisma.wallet.update({
+            where: { id: tx.walletId },
+            data: { balance: { increment: tx.amount } }
+          }),
+          prisma.transaction.update({
+            where: { id: tx.id },
+            data: { status: 'FAILED' }
+          }),
+          prisma.notification.create({
+            data: {
+              userId: tx.userId,
+              title: '❌ Transfer Failed',
+              message: `Your transfer of ${tx.amount} ${tx.currency} has been reversed.`,
+              type: 'ERROR'
+            }
+          })
+        ]);
+      }
+    }
+
+    else {
+      console.log(`[MAPLERAD WEBHOOK] Unhandled event: ${event}`);
     }
 
     res.status(200).send('Webhook Processed');

@@ -42,14 +42,32 @@ export class BillsService {
     return await prisma.$transaction(async (tx) => {
       // 1. Check wallet balance
       const wallet = await tx.wallet.findUnique({ where: { id: walletId } });
-      if (!wallet || Number(wallet.balance) < amount) {
-        throw new Error('Insufficient funds for bill payment');
+      if (!wallet) throw new Error('Wallet not found');
+
+      // 1b. Calculate deduction amount in wallet currency
+      // Note: Maplerad bill amounts (like airtime) are usually locally denominated (e.g. NGN)
+      // The 'amount' parameter is the NGN value to pay the biller.
+      let deductionAmount = amount;
+      if (wallet.currency !== 'NGN') {
+        console.log(`[BILLS] Wallet is ${wallet.currency}, Bill is NGN. Calculating FX equivalent for ${amount} NGN...`);
+        const fx = await Maplerad.getExchangeRate(wallet.currency, 'NGN');
+        
+        // Ensure rate is valid. If maplerad gives a rate of 1.0 (fallback) and we divide, it might be heavily skewed.
+        // But the user expects live conversion. Maplerad returns how much 1 source = target.
+        if (fx.rate <= 0) throw new Error('Invalid exchange rate received from provider');
+        
+        deductionAmount = Number((amount / fx.rate).toFixed(4));
+        console.log(`[BILLS] ${amount} NGN / ${fx.rate} = ${deductionAmount} ${wallet.currency}`);
       }
 
-      // 2. Debit wallet
+      if (Number(wallet.balance) < deductionAmount) {
+        throw new Error(`Insufficient funds. Required: ${deductionAmount} ${wallet.currency}`);
+      }
+
+      // 2. Debit wallet using the calculated deduction amount
       await tx.wallet.update({
         where: { id: walletId },
-        data: { balance: { decrement: amount } }
+        data: { balance: { decrement: deductionAmount } }
       });
 
       // 3. Create transaction record
@@ -58,7 +76,7 @@ export class BillsService {
           userId,
           walletId,
           type: 'WITHDRAWAL',
-          amount,
+          amount: deductionAmount, // Record the actual amount deducted from their wallet
           currency: wallet.currency,
           status: 'COMPLETED',
           reference: `BILL_${category}_${Date.now()}`,
@@ -67,7 +85,9 @@ export class BillsService {
              bill_type: category,
              provider_id: providerId,
              product_id: productId,
-             customer_identifier: customerId
+             customer_identifier: customerId,
+             local_amount_paid: amount,
+             local_currency: 'NGN'
           }
         }
       });

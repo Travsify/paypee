@@ -69,7 +69,7 @@ const makeRequest = async (method: 'get' | 'post' | 'put' | 'delete' | 'patch', 
  */
 export const getCustomers = async () => {
   try {
-    const response = await makeRequest('get', '/customers');
+    const response = await makeRequest('get', '/customers?limit=100');
     return response.data.data || [];
   } catch (error: any) {
     console.error('[MAPLERAD] Get Customers Error:', error.response?.data || error.message);
@@ -111,8 +111,9 @@ export const createCustomer = async (firstName: string, lastName: string, email:
         // Otherwise, fetch the customer list to find their ID
         console.log(`[MAPLERAD DEBUG] Customer already enrolled, fetching list to find ID for ${email}`);
         const customers = await getCustomers();
-        const existing = customers.find((c: any) => c.email === email);
+        const existing = customers.find((c: any) => c.email?.toLowerCase() === email?.toLowerCase());
         if (existing) return existing;
+        console.warn(`[MAPLERAD DEBUG] Could not find ${email} in first 100 customers. Pagination issue?`);
     }
     console.error('[MAPLERAD] Create Customer Error:', error.response?.data || error.message);
     throw new Error(error.response?.data?.message || 'Failed to create Maplerad customer. Check keys/whitelisting.');
@@ -284,7 +285,10 @@ export const getBanks = async (currency: string = 'NGN') => {
  */
 export const verifyAccountNumber = async (accountNumber: string, bankCode: string) => {
   try {
-    const response = await makeRequest('get', `/identities/lookup?account_number=${accountNumber}&bank_code=${bankCode}`);
+    const response = await makeRequest('post', '/institutions/resolve', {
+      account_number: accountNumber,
+      bank_code: bankCode
+    });
     console.log('[MAPLERAD DEBUG] Verification Response:', JSON.stringify(response.data, null, 2));
     return response.data.data;
   } catch (error: any) {
@@ -600,19 +604,52 @@ export const getMapleradPayStatus = async (reference: string) => {
 };
 
 /**
- * Issue a crypto address for a customer (BTC, USDT, etc.)
+ * Issue a crypto wallet address for a customer (USDC, USDT, BTC)
+ * Maplerad Crypto API: POST /crypto/wallet
+ * Payload: { customer_id, coin, chain, offramp }
  */
 export const issueCryptoAddress = async (customerId: string, currency: string) => {
+  // Map Paypee currency codes to Maplerad's coin/chain format
+  const coinMap: Record<string, { coin: string; chain: string }> = {
+    'USDC': { coin: 'usdc', chain: 'solana' },
+    'USDT': { coin: 'usdt', chain: 'tron' },
+    'BTC':  { coin: 'btc',  chain: 'bitcoin' }
+  };
+
+  const mapping = coinMap[currency];
+  if (!mapping) throw new Error(`Unsupported crypto currency: ${currency}`);
+
   try {
-    const response = await makeRequest('post', '/issuing/addresses', {
+    console.log(`[MAPLERAD CRYPTO] Creating ${currency} wallet for customer ${customerId} (${mapping.coin}/${mapping.chain})`);
+    const response = await makeRequest('post', '/crypto/wallet', {
       customer_id: customerId,
-      currency: currency,
-      network: currency === 'BTC' ? 'BITCOIN' : 'ERC20' // Default to ERC20 for others, adjustable
+      coin: mapping.coin,
+      chain: mapping.chain,
+      offramp: false
     });
-    return response.data.data;
+    const data = response.data.data;
+    return {
+      address: data.address || data.wallet_address,
+      network: data.chain || mapping.chain,
+      coin: data.coin || mapping.coin,
+      ...data
+    };
   } catch (error: any) {
-    console.error('[MAPLERAD] Crypto Issuing Error:', error.response?.data || error.message);
-    throw new Error(error.response?.data?.message || 'Failed to issue crypto address');
+    const errMsg = error.response?.data?.message || error.message;
+    console.warn(`[MAPLERAD CRYPTO] /crypto/wallet failed: ${errMsg}. Trying legacy endpoint...`);
+    
+    // Fallback: try /issuing/addresses (older Maplerad API)
+    try {
+      const response = await makeRequest('post', '/issuing/addresses', {
+        customer_id: customerId,
+        currency: currency,
+        network: currency === 'BTC' ? 'BITCOIN' : 'ERC20'
+      });
+      return response.data.data;
+    } catch (fallbackErr: any) {
+      console.error('[MAPLERAD] Crypto Wallet Creation Failed on all endpoints:', fallbackErr.response?.data || fallbackErr.message);
+      throw new Error(fallbackErr.response?.data?.message || 'Failed to create crypto wallet. Ensure crypto is enabled on your Maplerad account.');
+    }
   }
 };
 
@@ -625,6 +662,20 @@ export const getCryptoAddresses = async (customerId: string) => {
     return response.data.data;
   } catch (error: any) {
     console.error('[MAPLERAD] Get Crypto Addresses Error:', error.response?.data || error.message);
+    return [];
+  }
+};
+
+/**
+ * Get merchant wallets from Maplerad
+ * Returns all currency wallets and their balances on the Maplerad merchant account
+ */
+export const getWallets = async () => {
+  try {
+    const response = await makeRequest('get', '/wallets');
+    return response.data.data || [];
+  } catch (error: any) {
+    console.error('[MAPLERAD] Get Wallets Error:', error.response?.data || error.message);
     return [];
   }
 };
