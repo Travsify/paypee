@@ -840,7 +840,7 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
               />
             )}
 
-            {activeSection === 'cards' && <CardsDashboard />}
+            {activeSection === 'cards' && <CardsDashboard wallets={userData?.wallets || []} />}
             {activeSection === 'vaults' && <VaultsView />}
             {activeSection === 'bills' && <BillsView />}
             {activeSection === 'collections' && <CollectionsView />}

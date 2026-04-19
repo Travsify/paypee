@@ -23,7 +23,7 @@ import {
   Sparkles
 } from 'lucide-react';
 
-const CardsDashboard = () => {
+const CardsDashboard = ({ wallets: propWallets }: { wallets?: any[] }) => {
   const [cards, setCards] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [showNumbers, setShowNumbers] = useState<Record<string, boolean>>({});
@@ -37,7 +37,7 @@ const CardsDashboard = () => {
   const [fundAmount, setFundAmount] = useState('');
   const [fundWalletId, setFundWalletId] = useState('');
   const [transferPin, setTransferPin] = useState('');
-  const [wallets, setWallets] = useState<any[]>([]);
+  const [wallets, setWallets] = useState<any[]>(propWallets || []);
   const [submitting, setSubmitting] = useState(false);
 
   // Issue form state
@@ -101,8 +101,13 @@ const CardsDashboard = () => {
 
   useEffect(() => {
     fetchCards();
-    fetchWallets();
-  }, []);
+    if (!propWallets) fetchWallets();
+  }, [propWallets]);
+
+  // Update internal wallets state if propWallets changes
+  useEffect(() => {
+    if (propWallets) setWallets(propWallets);
+  }, [propWallets]);
 
   const toggleFreeze = async (cardId: string, currentStatus: string) => {
     try {
@@ -619,7 +624,7 @@ const CardsDashboard = () => {
                        <ShieldCheck size={18} /> Instant Tier-1 Deployment
                     </div>
                     <p style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.6)', lineHeight: '1.5', margin: 0 }}>
-                       New card creation includes a mandatory $5.00 initial funding via our Secure Issuing Engine.
+                       New card creation requires a mandatory $5.00 **Initial Capital Injection**. This is not a fee; the amount is instantly loaded onto your new card as its starting balance.
                     </p>
                  </div>
 
