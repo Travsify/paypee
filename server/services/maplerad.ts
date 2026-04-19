@@ -177,7 +177,7 @@ export const issueVirtualAccount = async (customerId: string, currency: string) 
     const url = (isNGN || isUSD) ? '/collections/virtual-account' : '/wallets';
     const payload: any = {
       customer_id: customerId,
-      currency: currency.toUpperCase()
+      Currency: currency.toUpperCase()
     };
 
     // No type specified as it might be causing 405 on some rails
