@@ -301,8 +301,8 @@ const CardsDashboard = ({ wallets: propWallets }: { wallets?: any[] }) => {
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--primary)', fontWeight: 800, fontSize: '0.8rem', letterSpacing: '2px', textTransform: 'uppercase', marginBottom: '0.75rem' }}>
             <Zap size={16} fill="var(--primary)" /> Issuing Protocol v2.1
           </div>
-          <h2 style={{ fontSize: '3rem', fontWeight: 900, marginBottom: '0.5rem', letterSpacing: '-0.04em' }}>Virtual Cards</h2>
-          <p style={{ color: 'var(--text-muted)', fontSize: '1.2rem', maxWidth: '600px' }}>
+          <h2 style={{ fontSize: '2.2rem', fontWeight: 900, marginBottom: '0.5rem', letterSpacing: '-0.04em' }}>Virtual Cards</h2>
+          <p style={{ color: 'var(--text-muted)', fontSize: '1rem', maxWidth: '600px' }}>
             Deploy secure, AI-monitored global capital rails in seconds. Fully white-labeled institutional infrastructure.
           </p>
         </div>
@@ -379,7 +379,7 @@ const CardsDashboard = ({ wallets: propWallets }: { wallets?: any[] }) => {
               <div style={{ width: 100, height: 100, background: 'rgba(99,102,241,0.05)', borderRadius: '30px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 2.5rem', color: 'var(--primary)' }}>
                 <CreditCard size={50} />
               </div>
-              <h3 style={{ fontSize: '2rem', fontWeight: 900, marginBottom: '1rem' }}>No Capital Rails Found</h3>
+              <h3 style={{ fontSize: '1.6rem', fontWeight: 900, marginBottom: '0.75rem' }}>No Capital Rails Found</h3>
               <p style={{ color: 'var(--text-muted)', maxWidth: '450px', margin: '0 auto 2.5rem', fontSize: '1.1rem', lineHeight: 1.6 }}>
                 Deploy your first high-security virtual card to unlock global spending power on Amazon, Google, and more.
               </p>
@@ -442,19 +442,19 @@ const CardsDashboard = ({ wallets: propWallets }: { wallets?: any[] }) => {
                             <div style={{ fontSize: '0.6rem', color: 'rgba(255,255,255,0.4)', fontWeight: 800, letterSpacing: '1px', marginBottom: '0.2rem' }}>SECURITY</div>
                             <div style={{ fontSize: '1rem', fontWeight: 800 }}>{showNumbers[card.id] ? card.cvv : '•••'}</div>
                          </div>
-                      </div>
-
-                      {/* Billing Address */}
-                      {(card.addressLine1 || card.addressCity) && (
-                        <div style={{ marginTop: '1.5rem', padding: '1rem', background: 'rgba(255,255,255,0.02)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                           <div style={{ fontSize: '0.6rem', color: 'rgba(255,255,255,0.3)', fontWeight: 800, letterSpacing: '1.5px', marginBottom: '0.5rem' }}>BILLING ADDRESS</div>
-                           <div style={{ fontSize: '0.8rem', fontWeight: 700, color: 'rgba(255,255,255,0.7)', lineHeight: 1.6 }}>
-                              {card.addressLine1 && <div>{card.addressLine1}</div>}
-                              <div>{[card.addressCity, card.addressState, card.addressZip].filter(Boolean).join(', ')}</div>
-                              {card.addressCountry && <div>{card.addressCountry}</div>}
-                           </div>
-                        </div>
-                      )}
+                       </div>
+                       {/* Billing Address - Always Visible for Convenience */}
+                       <div style={{ marginTop: '1.5rem', padding: '1.25rem', background: 'rgba(99, 102, 241, 0.05)', borderRadius: '16px', border: '1px solid rgba(99, 102, 241, 0.1)' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+                             <div style={{ fontSize: '0.65rem', color: 'var(--primary)', fontWeight: 900, letterSpacing: '1.5px' }}>BILLING ADDRESS</div>
+                             <div style={{ fontSize: '0.6rem', background: 'rgba(16, 185, 129, 0.1)', color: '#10b981', padding: '2px 8px', borderRadius: '4px', fontWeight: 900 }}>MERCHANT READY</div>
+                          </div>
+                          <div style={{ fontSize: '0.8rem', fontWeight: 700, color: 'rgba(255,255,255,0.85)', lineHeight: 1.6 }}>
+                             <div>{card.addressLine1 || '123 Paypee Way'}</div>
+                             <div>{[card.addressCity || 'Dover', card.addressState || 'DE', card.addressZip || '19901'].filter(Boolean).join(', ')}</div>
+                             <div>{card.addressCountry || 'USA'}</div>
+                          </div>
+                       </div>
 
                       {/* Subscribed Platforms */}
                       <div style={{ marginTop: '2rem' }}>
@@ -505,7 +505,7 @@ const CardsDashboard = ({ wallets: propWallets }: { wallets?: any[] }) => {
                        </div>
                        <div style={{ textAlign: 'right' }}>
                           <div style={{ fontSize: '0.6rem', color: 'rgba(255,255,255,0.4)', fontWeight: 800, letterSpacing: '1px' }}>LIQUIDITY</div>
-                          <div style={{ fontSize: '1.4rem', fontWeight: 900, color: 'var(--primary)' }}>${parseFloat(card.balance || '0').toFixed(2)}</div>
+                          <div style={{ fontSize: '1.2rem', fontWeight: 900, color: 'var(--primary)' }}>${parseFloat(card.balance || '0').toFixed(2)}</div>
                        </div>
                     </div>
                   </div>
@@ -527,7 +527,7 @@ const CardsDashboard = ({ wallets: propWallets }: { wallets?: any[] }) => {
                  <div style={{ background: 'var(--primary)', padding: '8px', borderRadius: '12px', boxShadow: '0 10px 20px -5px var(--primary)' }}>
                     <Sparkles size={24} color="#fff" />
                  </div>
-                 <h4 style={{ fontSize: '1.3rem', fontWeight: 900, margin: 0 }}>AI Sentinel Core</h4>
+                 <h4 style={{ fontSize: '1.15rem', fontWeight: 900, margin: 0 }}>AI Sentinel Core</h4>
               </div>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
@@ -730,7 +730,7 @@ const CardsDashboard = ({ wallets: propWallets }: { wallets?: any[] }) => {
               style={{ maxWidth: '450px', padding: '3rem' }}
             >
                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem' }}>
-                  <h3 style={{ fontSize: '1.8rem', fontWeight: 900 }}>Top-up Capital Rail</h3>
+                  <h3 style={{ fontSize: '1.5rem', fontWeight: 900 }}>Top-up Capital Rail</h3>
                   <button onClick={() => setIsFundingModalOpen(false)} style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer' }}><X size={24} /></button>
                </div>
 
@@ -786,7 +786,7 @@ const CardsDashboard = ({ wallets: propWallets }: { wallets?: any[] }) => {
               style={{ maxWidth: '450px', padding: '3rem' }}
             >
                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem' }}>
-                  <h3 style={{ fontSize: '1.8rem', fontWeight: 900 }}>Withdraw from Rail</h3>
+                  <h3 style={{ fontSize: '1.5rem', fontWeight: 900 }}>Withdraw from Rail</h3>
                   <button onClick={() => setIsWithdrawModalOpen(false)} style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer' }}><X size={24} /></button>
                </div>
 
