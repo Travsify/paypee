@@ -100,7 +100,7 @@ const AccountCreationModal: React.FC<AccountCreationModalProps> = ({
                     <div>
                       <h2 style={{ fontSize: '2rem', fontWeight: 900, marginBottom: '1rem', color: '#fff' }}>
                         {currentCurrency.name} <br />
-                        <span style={{ color: currentCurrency.color }}>Account</span>
+                        <span style={{ color: currentCurrency.color }}>{['USDC', 'USDT', 'BTC'].includes(currentCurrency.code) ? 'Wallet' : 'Account'}</span>
                       </h2>
                       <p style={{ color: 'var(--text-muted)', fontSize: '1rem', lineHeight: 1.6 }}>{currentCurrency.desc}</p>
                     </div>
@@ -241,7 +241,7 @@ const AccountCreationModal: React.FC<AccountCreationModalProps> = ({
                            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
                               <div style={{ fontSize: '2rem' }}>{currentCurrency.icon}</div>
                               <div>
-                                 <div style={{ fontSize: '1.2rem', fontWeight: 800 }}>Deploying {currentCurrency.code} Account</div>
+                              <div style={{ fontSize: '1.2rem', fontWeight: 800 }}>Deploying {currentCurrency.code} {['USDC', 'USDT', 'BTC'].includes(currentCurrency.code) ? 'Wallet' : 'Account'}</div>
                                  <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{currentCurrency.region}</div>
                               </div>
                            </div>
@@ -319,11 +319,11 @@ const AccountCreationModal: React.FC<AccountCreationModalProps> = ({
                              {isProcessing ? (
                                <>
                                  <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1, ease: 'linear' }}><RefreshCcw size={20} /></motion.div>
-                                 Creating Account...
+                                 Creating {['USDC', 'USDT', 'BTC'].includes(currentCurrency.code) ? 'Wallet' : 'Account'}...
                                </>
                              ) : (
                                <>
-                                 Create {currentCurrency.code} Bank Account <ChevronRight size={20} />
+                                 Create {currentCurrency.code} {['USDC', 'USDT', 'BTC'].includes(currentCurrency.code) ? 'Wallet' : 'Bank Account'} <ChevronRight size={20} />
                                </>
                              )}
                            </button>
