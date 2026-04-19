@@ -205,7 +205,7 @@ const SwapModal: React.FC<SwapModalProps> = ({ isOpen, onClose, onComplete, wall
               {step === 'form' && (
                 <motion.div key="form" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
                   <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginBottom: '1.5rem' }}>
-                    Swap between your wallet currencies at live Maplerad FX rates.
+                    Swap between your wallet currencies at live market FX rates.
                   </p>
 
                   {/* From Currency */}

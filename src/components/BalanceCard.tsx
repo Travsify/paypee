@@ -192,9 +192,9 @@ const BalanceCard: React.FC<BalanceCardProps> = ({
           <div style={{ flex: 1 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.4rem' }}>
               <div style={{ fontSize: '0.65rem', fontWeight: 600, opacity: 0.7, textTransform: 'uppercase', letterSpacing: '1px' }}>
-                {bank || 'Provisioning Account...'}
+                {bank || (['USDC', 'USDT', 'BTC'].includes(currency.toUpperCase()) ? 'Crypto Network' : 'Provisioning Account...')}
               </div>
-              {bank && <CopyButton text={bank} label="Bank Name" />}
+              {bank && <CopyButton text={bank} label={['USDC', 'USDT', 'BTC'].includes(currency.toUpperCase()) ? "Network" : "Bank Name"} />}
             </div>
             
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.6rem' }}>
@@ -204,10 +204,12 @@ const BalanceCard: React.FC<BalanceCardProps> = ({
               {accNo && <CopyButton text={accNo} label="Account/Wallet Address" />}
             </div>
             
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <div style={{ fontSize: '0.75rem', fontWeight: 600, opacity: 0.9 }}>{accName}</div>
-              {accName && <CopyButton text={accName} label="Account Name" />}
-            </div>
+            {!['USDC', 'USDT', 'BTC'].includes(currency.toUpperCase()) && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <div style={{ fontSize: '0.75rem', fontWeight: 600, opacity: 0.9 }}>{accName}</div>
+                {accName && <CopyButton text={accName} label="Account Name" />}
+              </div>
+            )}
           </div>
           
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}>
