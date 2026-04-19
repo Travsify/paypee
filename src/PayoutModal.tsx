@@ -26,7 +26,9 @@ const TARGET_CURRENCIES = [
   { code: 'GBP', label: 'United Kingdom (GBP)' },
   { code: 'EUR', label: 'Europe (EUR)' },
   { code: 'KES', label: 'Kenya (KES)' },
-  { code: 'GHS', label: 'Ghana (GHS)' }
+  { code: 'GHS', label: 'Ghana (GHS)' },
+  { code: 'UGX', label: 'Uganda (UGX)' },
+  { code: 'RWF', label: 'Rwanda (RWF)' }
 ];
 
 const PayoutModal: React.FC<PayoutModalProps> = ({ isOpen, onClose, onComplete, wallets }) => {
@@ -190,7 +192,7 @@ const PayoutModal: React.FC<PayoutModalProps> = ({ isOpen, onClose, onComplete, 
   );
 
   const renderBankingFields = () => {
-    const isMoMo = targetCurrency === 'KES' || targetCurrency === 'GHS';
+    const isMoMo = ['KES', 'GHS', 'UGX', 'RWF'].includes(targetCurrency);
     
     if (targetCurrency === 'NGN' || isMoMo) {
       return (
@@ -317,7 +319,8 @@ const PayoutModal: React.FC<PayoutModalProps> = ({ isOpen, onClose, onComplete, 
 
   const isStep1Valid = () => {
     if (!selectedWalletId || !targetCurrency) return false;
-    if (targetCurrency === 'NGN' || targetCurrency === 'KES' || targetCurrency === 'GHS') {
+    const isMoMo = ['KES', 'GHS', 'UGX', 'RWF'].includes(targetCurrency);
+    if (targetCurrency === 'NGN' || isMoMo) {
       return bankCode && accountNumber.length >= 8;
     }
     if (targetCurrency === 'USD' || targetCurrency === 'GBP') {

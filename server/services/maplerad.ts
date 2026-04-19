@@ -257,6 +257,10 @@ export const getBanks = async (currency: string = 'NGN') => {
       return [{ bank_code: 'MPESA', name: 'M-Pesa' }, { bank_code: 'AIRTEL', name: 'Airtel Money' }];
     } else if (currency === 'GHS') {
       return [{ bank_code: 'MTN', name: 'MTN Mobile Money' }, { bank_code: 'VODAFONE', name: 'Vodafone Cash' }, { bank_code: 'AIRTELTIGO', name: 'AirtelTigo Money' }];
+    } else if (currency === 'UGX') {
+      return [{ bank_code: 'MTN', name: 'MTN Uganda' }, { bank_code: 'AIRTEL', name: 'Airtel Uganda' }];
+    } else if (currency === 'RWF') {
+      return [{ bank_code: 'MTN', name: 'MTN Rwanda' }, { bank_code: 'AIRTEL', name: 'Airtel Rwanda' }];
     }
     
     // Default Nigerian banks
