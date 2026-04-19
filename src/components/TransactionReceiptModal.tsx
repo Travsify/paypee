@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Share2, Printer, CheckCircle2, Zap } from 'lucide-react';
+import { X, Share2, Printer, CheckCircle2, Zap, Lock } from 'lucide-react';
 
 interface TransactionReceiptModalProps {
   transaction: any;

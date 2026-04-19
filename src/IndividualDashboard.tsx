@@ -23,7 +23,8 @@ import {
   X,
   RefreshCw,
   Eye,
-  EyeOff
+  EyeOff,
+  Repeat
 } from 'lucide-react';
 import CardsDashboard from './CardsDashboard';
 import AiAdvisor from './AiAdvisor';
@@ -69,6 +70,7 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
   const [unreadCount, setUnreadCount] = useState(0);
   const [isPinModalOpen, setIsPinModalOpen] = useState(false);
   const [showBalances, setShowBalances] = useState(true);
+  const [chartInterval, setChartInterval] = useState('1W');
 
   const fetchUserData = async () => {
     const token = localStorage.getItem('paypee_token');
@@ -212,13 +214,65 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
 
   const generateSparkline = () => {
     if (!transactions || transactions.length === 0) return "M0,100 L100,100";
-    const data = [...transactions].filter(tx => tx.status === 'SUCCESS' || tx.status === 'COMPLETED').slice(0, 10).reverse();
-    if (data.length < 2) return "M0,50 L100,50";
-    const points = data.map((tx, i) => {
-      const amount = parseFloat(tx.amount);
-      const normalized = Math.min(amount / 10000, 70); 
-      return `${(i / (data.length - 1)) * 100},${90 - normalized}`;
+    
+    const now = new Date();
+    let cutoff: Date;
+    let pointsCount: number;
+    let grouping: 'hour' | 'day' | 'month';
+
+    switch (chartInterval) {
+      case '1D':
+        cutoff = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+        pointsCount = 24;
+        grouping = 'hour';
+        break;
+      case '1W':
+        cutoff = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+        pointsCount = 7;
+        grouping = 'day';
+        break;
+      case '1M':
+        cutoff = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+        pointsCount = 30;
+        grouping = 'day';
+        break;
+      case '1Y':
+        cutoff = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000);
+        pointsCount = 12;
+        grouping = 'month';
+        break;
+      default:
+        cutoff = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+        pointsCount = 7;
+        grouping = 'day';
+    }
+
+    const filtered = transactions.filter(tx => 
+      new Date(tx.createdAt) >= cutoff && 
+      (tx.status === 'SUCCESS' || tx.status === 'COMPLETED')
+    );
+
+    // Grouping logic
+    const aggregatedData = new Array(pointsCount).fill(0);
+    filtered.forEach(tx => {
+      const date = new Date(tx.createdAt);
+      let index: number;
+      if (grouping === 'hour') index = Math.floor((date.getTime() - cutoff.getTime()) / (3600 * 1000));
+      else if (grouping === 'day') index = Math.floor((date.getTime() - cutoff.getTime()) / (24 * 3600 * 1000));
+      else index = (date.getFullYear() - cutoff.getFullYear()) * 12 + (date.getMonth() - cutoff.getMonth());
+      
+      if (index >= 0 && index < pointsCount) {
+        aggregatedData[index] += parseFloat(tx.amount);
+      }
     });
+
+    const maxVolume = Math.max(...aggregatedData, 1000);
+    const points = aggregatedData.map((vol, i) => {
+      const x = (i / (pointsCount - 1)) * 100;
+      const y = 90 - (vol / maxVolume) * 70;
+      return `${x},${y}`;
+    });
+
     return `M${points.join(' L')}`;
   };
 
@@ -436,9 +490,25 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
                          <h3 style={{ fontSize: '1.2rem', fontWeight: 800 }}>Financial Pulse</h3>
                          <div style={{ display: 'flex', background: 'rgba(0,0,0,0.5)', padding: '0.25rem', borderRadius: '8px' }}>
-                            {['1D', '1W', '1M', '1Y'].map(t => (
-                               <button key={t} style={{ background: t === '1W' ? '#6366f1' : 'transparent', color: t === '1W' ? '#fff' : '#94a3b8', border: 'none', padding: '0.4rem 0.8rem', borderRadius: '6px', fontSize: '0.8rem', fontWeight: 700, cursor: 'pointer' }}>{t}</button>
-                            ))}
+                             {['1D', '1W', '1M', '1Y'].map(t => (
+                                <button 
+                                  key={t} 
+                                  onClick={() => setChartInterval(t)}
+                                  style={{ 
+                                    background: t === chartInterval ? '#6366f1' : 'transparent', 
+                                    color: t === chartInterval ? '#fff' : '#94a3b8', 
+                                    border: 'none', 
+                                    padding: '0.4rem 0.8rem', 
+                                    borderRadius: '6px', 
+                                    fontSize: '0.8rem', 
+                                    fontWeight: 700, 
+                                    cursor: 'pointer',
+                                    transition: 'all 0.2s'
+                                  }}
+                                >
+                                  {t}
+                                </button>
+                             ))}
                          </div>
                       </div>
                       <div style={{ flex: 1, position: 'relative', minHeight: '200px', display: 'flex', alignItems: 'flex-end' }}>
