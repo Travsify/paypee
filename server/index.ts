@@ -111,8 +111,14 @@ app.post('/api/users/verify-pin', authenticateToken, async (req: any, res: any):
     const user = await prisma.user.findUnique({ where: { id: req.user.userId } });
     if (!user) return res.status(404).json({ error: 'User not found' });
     
-    if (user.transferPin !== pin) {
-      return res.status(400).json({ error: 'Incorrect PIN' });
+    if (user.transferPin) {
+      const validPin = await bcrypt.compare(pin, user.transferPin);
+      if (!validPin) {
+        return res.status(400).json({ error: 'Incorrect PIN' });
+      }
+    } else {
+      // Fallback if no PIN set yet
+      if (user.transferPin !== pin) return res.status(400).json({ error: 'Incorrect PIN' });
     }
     
     res.json({ success: true });
@@ -644,12 +650,17 @@ app.get('/api/cards', authenticateToken, async (req: any, res: any): Promise<any
           });
         }
 
-        const isUSD = (c.wallet.currency === 'USD');
+        const currency = c.wallet.currency;
+        const isUSD = (currency === 'USD');
+        console.log(`[CARDS] Syncing card ${c.id}: Currency=${currency}, isUSD=${isUSD}`);
+
         const addressLine1 = isUSD ? '16192 Coastal Highway' : (c.addressLine1 || mCard.address?.address || mCard.address_line1 || 'User Address Syncing...');
         const addressCity = isUSD ? 'Lewes' : (c.addressCity || mCard.address?.city || '');
         const addressState = isUSD ? 'DE' : (c.addressState || mCard.address?.state || '');
         const addressCountry = isUSD ? 'USA' : (c.addressCountry || mCard.address?.country || 'NG');
         const addressZip = isUSD ? '19958' : (c.addressZip || mCard.address?.postal_code || '');
+
+        console.log(`[CARDS] Applied Address: ${addressLine1}, ${addressCity}, ${addressCountry}`);
 
         return {
           ...c,
