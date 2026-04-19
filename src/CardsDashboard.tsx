@@ -542,7 +542,7 @@ const CardsDashboard = ({ wallets: propWallets }: { wallets?: any[] }) => {
                            </div>
                            <h4 style={{ fontSize: '1rem', fontWeight: 900, marginBottom: '0.5rem' }}>No Liquid Wallets</h4>
                            <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '1.5rem', lineHeight: 1.5 }}>
-                              You need at least one active wallet with $5.00 to deploy a Capital Rail.
+                              You need at least one active wallet with $1.00 to deploy a Capital Rail.
                            </p>
                            <button 
                              type="button"
@@ -624,7 +624,7 @@ const CardsDashboard = ({ wallets: propWallets }: { wallets?: any[] }) => {
                        <ShieldCheck size={18} /> Instant Tier-1 Deployment
                     </div>
                     <p style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.6)', lineHeight: '1.5', margin: 0 }}>
-                       New card creation requires a mandatory $5.00 **Initial Capital Injection**. This is not a fee; the amount is instantly loaded onto your new card as its starting balance.
+                       New card creation requires a mandatory $1.00 **Initial Capital Injection**. This is not a fee; the amount is instantly loaded onto your new card as its starting balance.
                     </p>
                  </div>
 

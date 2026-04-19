@@ -370,7 +370,7 @@ app.post('/api/cards', authenticateToken, async (req: any, res: any): Promise<an
   try {
     const { walletId, currency, initialAmount } = req.body;
     const userId = req.user.userId;
-    const cardInitialUSD = initialAmount || 5; // Default $5 for Maplerad virtual cards
+    const cardInitialUSD = initialAmount || 1; // Default $1 for Virtual Cards as per new requirement
 
     // 1. Validate Wallet & Check Balance (with cross-currency support)
     const wallet = await prisma.wallet.findFirst({ where: { id: walletId, userId } });
