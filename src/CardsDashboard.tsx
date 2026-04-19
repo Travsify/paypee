@@ -237,46 +237,54 @@ const CardsDashboard = ({ wallets: propWallets }: { wallets?: any[] }) => {
     }
   };
 
-  // Dynamic Analytics Calculations
+  // Dynamic Analytics Calculations — fully data-driven
   const metrics = useMemo(() => {
     const activeVolume = cards.reduce((sum, c) => sum + parseFloat(c.balance || '0'), 0);
-    const totalTransactions = cards.length * 2; // Mocked transaction count for aesthetic
+    const activeCards = cards.filter(c => c.status === 'ACTIVE').length;
+    const frozenCards = cards.filter(c => c.status === 'FROZEN').length;
+    const totalDailyLimit = cards.reduce((sum, c) => sum + parseFloat(c.dailyLimit || '0'), 0);
     const averageSavings = activeVolume > 0 ? (activeVolume * 0.032).toFixed(2) : '0.00';
+    const totalSubscriptions = Object.values(subscriptions).reduce((sum: number, subs: any) => sum + (Array.isArray(subs) ? subs.length : 0), 0);
+    const activeSubscriptions = Object.values(subscriptions).reduce((sum: number, subs: any) => sum + (Array.isArray(subs) ? subs.filter((s: any) => s.status !== 'BLOCKED').length : 0), 0);
     
     return {
       activeVolume,
-      totalTransactions,
-      averageSavings
+      activeCards,
+      frozenCards,
+      totalDailyLimit,
+      averageSavings,
+      totalSubscriptions,
+      activeSubscriptions
     };
-  }, [cards]);
+  }, [cards, subscriptions]);
 
-  // AI Security Insights
+  // AI Security Insights — reactive to real card state
   const aiSecurityInsights = useMemo(() => [
     { 
       title: "AI Spending Shield", 
-      status: "Active", 
-      desc: "Neural patterns monitoring 2,400+ merchant signatures for anomalies.",
+      status: metrics.activeCards > 0 ? "Active" : "Standby", 
+      desc: `Monitoring ${metrics.activeCards} active rail${metrics.activeCards !== 1 ? 's' : ''} across $${metrics.activeVolume.toLocaleString(undefined, {minimumFractionDigits: 2})} in deployed capital.`,
       icon: <Fingerprint size={20} color="#10b981" />
     },
     { 
       title: "FX Optimizer", 
-      status: "Calibrated", 
-      desc: "Automatically suggesting card rails with lowest conversion spread.",
+      status: metrics.activeVolume > 0 ? "Calibrated" : "Idle", 
+      desc: `Estimated $${metrics.averageSavings} saved via optimized card rails vs. traditional FX spreads.`,
       icon: <Globe size={20} color="#3b82f6" />
     },
     { 
       title: "Fraud Sentinel", 
-      status: "Defending", 
-      desc: "Instant freeze protocol armed for 0-day payment exploits.",
+      status: metrics.frozenCards > 0 ? `${metrics.frozenCards} Frozen` : "Defending", 
+      desc: metrics.frozenCards > 0 ? `${metrics.frozenCards} rail${metrics.frozenCards !== 1 ? 's' : ''} currently frozen by security protocol.` : `All ${metrics.activeCards} rail${metrics.activeCards !== 1 ? 's' : ''} operating within safe parameters.`,
       icon: <ShieldCheck size={20} color="#8b5cf6" />
     },
     { 
       title: "Subscription Monitor", 
-      status: "Scanning", 
-      desc: "Detecting recurring trials. Netflix & Spotify expiring in 3 days.",
+      status: metrics.totalSubscriptions > 0 ? `${metrics.activeSubscriptions} Active` : "Scanning", 
+      desc: metrics.totalSubscriptions > 0 ? `Tracking ${metrics.totalSubscriptions} detected subscription${metrics.totalSubscriptions !== 1 ? 's' : ''}, ${metrics.activeSubscriptions} currently active.` : "No recurring charges detected yet. Subscriptions will appear automatically.",
       icon: <RefreshCcw size={20} color="#ec4899" />
     }
-  ], []);
+  ], [metrics]);
 
   return (
     <div style={{ padding: '0', display: 'flex', flexDirection: 'column', gap: '3rem' }}>
@@ -332,17 +340,17 @@ const CardsDashboard = ({ wallets: propWallets }: { wallets?: any[] }) => {
             </div>
          </div>
          <div className="premium-card" style={{ padding: '1.5rem', background: 'rgba(255,255,255,0.02)' }}>
-            <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.75rem', fontWeight: 800, letterSpacing: '1px', marginBottom: '1rem' }}>AI FRAUD PROTECTION</div>
-            <div style={{ fontSize: '1.5rem', fontWeight: 900, color: '#10b981' }}>99.99%</div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'rgba(255,255,255,0.4)', fontSize: '0.8rem', marginTop: '0.5rem', fontWeight: 700 }}>
-               <Activity size={14} /> Live Sentinel Status
+            <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.75rem', fontWeight: 800, letterSpacing: '1px', marginBottom: '1rem' }}>ACTIVE RAILS</div>
+            <div style={{ fontSize: '1.5rem', fontWeight: 900, color: '#10b981' }}>{metrics.activeCards} / {cards.length}</div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: metrics.frozenCards > 0 ? '#ef4444' : 'rgba(255,255,255,0.4)', fontSize: '0.8rem', marginTop: '0.5rem', fontWeight: 700 }}>
+               <Activity size={14} /> {metrics.frozenCards > 0 ? `${metrics.frozenCards} Frozen` : 'All Systems Nominal'}
             </div>
          </div>
          <div className="premium-card" style={{ padding: '1.5rem', background: 'rgba(255,255,255,0.02)' }}>
-            <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.75rem', fontWeight: 800, letterSpacing: '1px', marginBottom: '1rem' }}>GLOBAL REACH</div>
-            <div style={{ fontSize: '1.5rem', fontWeight: 900 }}>180+</div>
+            <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.75rem', fontWeight: 800, letterSpacing: '1px', marginBottom: '1rem' }}>DAILY LIMIT</div>
+            <div style={{ fontSize: '1.5rem', fontWeight: 900 }}>${metrics.totalDailyLimit.toLocaleString(undefined, {minimumFractionDigits: 2})}</div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'rgba(255,255,255,0.4)', fontSize: '0.8rem', marginTop: '0.5rem', fontWeight: 700 }}>
-               Supported Countries
+               Across All Rails
             </div>
          </div>
          <div className="premium-card" style={{ padding: '1.5rem', background: 'rgba(255,255,255,0.02)' }}>
@@ -548,25 +556,31 @@ const CardsDashboard = ({ wallets: propWallets }: { wallets?: any[] }) => {
               <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
                  <div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', marginBottom: '0.5rem' }}>
-                       <span style={{ color: 'var(--text-muted)', fontWeight: 700 }}>Monthly Limit</span>
-                       <span style={{ fontWeight: 900 }}>$2,500 / $5,000</span>
+                       <span style={{ color: 'var(--text-muted)', fontWeight: 700 }}>Capital Deployed</span>
+                       <span style={{ fontWeight: 900 }}>${metrics.activeVolume.toLocaleString(undefined, {minimumFractionDigits: 2})} / ${metrics.totalDailyLimit.toLocaleString(undefined, {minimumFractionDigits: 2})}</span>
                     </div>
                     <div style={{ height: '6px', background: 'rgba(255,255,255,0.05)', borderRadius: '100px', overflow: 'hidden' }}>
-                       <div style={{ height: '100%', width: '50%', background: '#3b82f6' }} />
+                       <div style={{ height: '100%', width: `${metrics.totalDailyLimit > 0 ? Math.min((metrics.activeVolume / metrics.totalDailyLimit) * 100, 100) : 0}%`, background: '#3b82f6', transition: 'width 0.5s ease' }} />
                     </div>
                  </div>
                  <div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', marginBottom: '0.5rem' }}>
-                       <span style={{ color: 'var(--text-muted)', fontWeight: 700 }}>Active Merchants</span>
-                       <span style={{ fontWeight: 900 }}>12</span>
+                       <span style={{ color: 'var(--text-muted)', fontWeight: 700 }}>Tracked Subscriptions</span>
+                       <span style={{ fontWeight: 900 }}>{metrics.totalSubscriptions}</span>
                     </div>
                     <div style={{ display: 'flex', gap: '4px', marginTop: '0.75rem' }}>
-                       {[1,2,3,4,5,6,7].map(i => <div key={i} style={{ height: '24px', flex: 1, background: 'rgba(255,255,255,0.03)', borderRadius: '4px' }} />)}
+                       {cards.length > 0 ? cards.map(c => <div key={c.id} style={{ height: '24px', flex: 1, background: c.status === 'ACTIVE' ? 'rgba(16,185,129,0.15)' : 'rgba(239,68,68,0.15)', borderRadius: '4px', border: `1px solid ${c.status === 'ACTIVE' ? 'rgba(16,185,129,0.3)' : 'rgba(239,68,68,0.3)'}` }} />) : [1,2,3].map(i => <div key={i} style={{ height: '24px', flex: 1, background: 'rgba(255,255,255,0.03)', borderRadius: '4px' }} />)}
+                    </div>
+                 </div>
+                 <div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', marginBottom: '0.5rem' }}>
+                       <span style={{ color: 'var(--text-muted)', fontWeight: 700 }}>FX Savings</span>
+                       <span style={{ fontWeight: 900, color: '#10b981' }}>~${metrics.averageSavings}</span>
                     </div>
                  </div>
               </div>
-              <button className="btn btn-outline" style={{ width: '100%', marginTop: '2.5rem', padding: '1rem', fontSize: '0.9rem', borderRadius: '15px' }}>
-                 View Advanced Analytics
+              <button onClick={fetchCards} className="btn btn-outline" style={{ width: '100%', marginTop: '2.5rem', padding: '1rem', fontSize: '0.9rem', borderRadius: '15px' }}>
+                 Refresh Analytics
               </button>
            </div>
         </div>
