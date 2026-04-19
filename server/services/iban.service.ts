@@ -160,6 +160,18 @@ export class IbanService {
         return;
       }
 
+      // Save customerId to user metadata if not present
+      const userMeta = user.metadata as any || {};
+      if (userMeta.customerId !== customer.id) {
+        await prisma.user.update({
+          where: { id: userId },
+          data: {
+            metadata: { ...userMeta, customerId: customer.id }
+          }
+        });
+        (user as any).metadata = { ...userMeta, customerId: customer.id };
+      }
+
       // 3. Fetch all virtual accounts & crypto wallets for this customer from Maplerad
       console.log(`[RECONCILE] Fetching virtual accounts and crypto wallets for customer ${customer.id}...`);
       const externalAccounts = await Maplerad.getCustomerVirtualAccounts(customer.id);
@@ -244,7 +256,7 @@ export class IbanService {
         const isAccMatch = userIdentifiers.includes(txAcc) && txAcc !== '';
         
         // Match by customer ID (highly reliable)
-        const isCustMatch = txCustId === user.metadata.customerId;
+        const isCustMatch = txCustId === (user.metadata as any)?.customerId;
         
         if (isAccMatch || isCustMatch) return true;
         

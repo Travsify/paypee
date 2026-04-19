@@ -1764,7 +1764,7 @@ app.post('/api/webhooks/maplerad', async (req: Request, res: Response) => {
       // 2. Try finding by customer_id + currency
       if (!resolvedWallet && customer_id && currency) {
         resolvedWallet = wallets.find(w => {
-           const userMeta = w.user?.metadata as any;
+           const userMeta = (w.user as any)?.metadata as any;
            return userMeta?.customerId === customer_id && w.currency === currency;
         });
         if (resolvedWallet) console.log(`[MAPLERAD WEBHOOK] Matched by customer_id and currency: ${currency}`);

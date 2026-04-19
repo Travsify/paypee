@@ -64,6 +64,7 @@ model User {
   businessName String?
   kycStatus    KycStatus    @default(PENDING)
   transferPin  String?      // Hashed 4-digit PIN
+  metadata     Json?        // For storing provider-specific data (e.g. Maplerad customerId)
   createdAt    DateTime     @default(now())
   updatedAt    DateTime     @updatedAt
 
