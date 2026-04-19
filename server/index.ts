@@ -745,6 +745,33 @@ app.post('/api/cards', authenticateToken, async (req: any, res: any): Promise<an
     const user = await prisma.user.findUnique({ where: { id: userId } });
     const customer = await Maplerad.createCustomer(user?.firstName || 'User', user?.lastName || 'Paypee', user?.email || '');
     
+    // 🛡️ Platform Auto-Fund Logic (Ensure Admin has USD for the card)
+    if ((currency || 'USD') === 'USD') {
+      try {
+        const adminWallets = await Maplerad.getWallets();
+        const usdWallet = adminWallets.find((w: any) => w.currency === 'USD');
+        const ngnWallet = adminWallets.find((w: any) => w.currency === 'NGN');
+        
+        const usdBalance = (usdWallet?.balance || 0) / 100;
+        const ngnBalance = (ngnWallet?.balance || 0) / 100;
+        
+        console.log(`[MAPLERAD] Admin Balance Check: USD=$${usdBalance}, NGN=₦${ngnBalance}`);
+
+        if (usdBalance < (cardInitialUSD + 5)) { // Need enough for funding + approx fee
+          console.log(`[MAPLERAD] Admin USD balance low ($${usdBalance}). Attempting auto-swap from NGN...`);
+          if (ngnBalance > 20000) { // If admin has > 20,000 NGN
+             const quote = await Maplerad.generateFxQuote('NGN', 'USD', 15000 * 100); // Swap 15,000 NGN
+             await Maplerad.executeFxSwap(quote.reference);
+             console.log(`[MAPLERAD] Admin Auto-Swap Successful. Proceeding with issuance.`);
+          } else {
+             console.warn(`[MAPLERAD] Admin NGN balance too low for auto-swap (₦${ngnBalance}).`);
+          }
+        }
+      } catch (e: any) {
+        console.warn(`[MAPLERAD] Admin auto-swap pre-check failed (ignoring):`, e.message);
+      }
+    }
+
     // 3. Issue Card via Maplerad
     console.log(`[MAPLERAD] Issuing ${currency || 'USD'} card for customer ${customer.id} with $${cardInitialUSD}...`);
     const mCard = await Maplerad.issueVirtualCard(customer.id, currency || 'USD', cardInitialUSD);
