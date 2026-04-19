@@ -501,7 +501,7 @@ app.post('/api/payouts/transfer', authenticateToken, async (req: any, res: any) 
           status: 'COMPLETED',
           reference,
           category: 'TRANSFER',
-          desc: `Transfer to ${accountNumber}`,
+          desc: `Transfer to ${accountName || 'Recipient'} • ${req.body.bankName || 'Local Bank'}`,
           metadata: {
             provider: 'MAPLERAD',
             providerReference: payoutResult?.id || null,
@@ -1495,6 +1495,7 @@ app.post('/api/fx/swap', authenticateToken, async (req: any, res: any) => {
           currency: src as any,
           status: 'COMPLETED',
           reference: debitRef,
+          desc: `Swap ${srcAmount} ${src} → ${tgtAmount} ${tgt}`,
           category: 'FX_SWAP',
           metadata: {
             type: 'FX_SWAP_DEBIT',
@@ -1514,6 +1515,7 @@ app.post('/api/fx/swap', authenticateToken, async (req: any, res: any) => {
           currency: tgt as any,
           status: 'COMPLETED',
           reference: creditRef,
+          desc: `Swap ${srcAmount} ${src} → ${tgtAmount} ${tgt}`,
           category: 'FX_SWAP',
           metadata: {
             type: 'FX_SWAP_CREDIT',

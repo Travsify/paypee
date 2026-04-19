@@ -167,6 +167,7 @@ const PayoutModal: React.FC<PayoutModalProps> = ({ isOpen, onClose, onComplete, 
           iban,
           walletId: selectedWalletId,
           accountName,
+          bankName: banks.find(b => (b.bank_code || b.code || b.bankCode) === bankCode)?.name || 'Local Bank',
           pin
         })
       });

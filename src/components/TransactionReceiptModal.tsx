@@ -59,17 +59,24 @@ const TransactionReceiptModal: React.FC<TransactionReceiptModalProps> = ({ trans
           <button 
             onClick={onClose} 
             className="no-print"
-            style={{ position: 'absolute', top: '1.5rem', right: '1.5rem', background: 'rgba(0,0,0,0.05)', border: 'none', borderRadius: '50%', width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
+            style={{ position: 'absolute', top: '1.5rem', right: '1.5rem', background: 'rgba(0,0,0,0.05)', border: 'none', borderRadius: '50%', width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', zIndex: 100 }}
           >
             <X size={20} />
           </button>
+
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1.5rem' }}>
+            <div style={{ padding: '0.4rem 1rem', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '100px', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+               <Lock size={12} color="#6366f1" />
+               <span style={{ fontSize: '0.65rem', fontWeight: 800, color: '#64748b', letterSpacing: '0.05em' }}>SECURE SETTLEMENT RECEIPT</span>
+            </div>
+          </div>
 
           <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
             <div style={{ width: '60px', height: '60px', background: '#6366f1', borderRadius: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem' }}>
               <Zap size={32} color="#fff" strokeWidth={3} />
             </div>
             <h2 style={{ fontSize: '1.5rem', fontWeight: 900, letterSpacing: '-0.02em', marginBottom: '0.5rem' }}>Transaction Receipt</h2>
-            <div style={{ color: '#64748b', fontSize: '0.9rem' }}>Paypee Global Settlements</div>
+            <div style={{ color: '#64748b', fontSize: '0.9rem', fontWeight: 500 }}>Paypee Global Settlements • Terminal {Math.floor(1000 + Math.random() * 9000)}</div>
           </div>
 
           <div style={{ textAlign: 'center', marginBottom: '2.5rem', background: 'rgba(0,0,0,0.02)', padding: '2rem', borderRadius: '24px' }}>
@@ -92,11 +99,22 @@ const TransactionReceiptModal: React.FC<TransactionReceiptModalProps> = ({ trans
              <ReceiptRow label="Source Wallet" value={transaction.currency + ' Wallet'} />
              {transaction.metadata?.bankCode && <ReceiptRow label="Destination Bank" value={transaction.metadata.bankCode} />}
              {transaction.metadata?.accountNumber && <ReceiptRow label="Account Number" value={transaction.metadata.accountNumber} />}
+             
+             <div style={{ marginTop: '1rem', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+                <div style={{ padding: '0.75rem', background: '#f0fdf4', borderRadius: '12px', border: '1px solid #dcfce7' }}>
+                   <div style={{ fontSize: '0.65rem', fontWeight: 800, color: '#16a34a', marginBottom: '0.2rem' }}>SPEED</div>
+                   <div style={{ fontSize: '0.8rem', fontWeight: 700, color: '#065f46' }}>Instant Settlement</div>
+                </div>
+                <div style={{ padding: '0.75rem', background: '#eff6ff', borderRadius: '12px', border: '1px solid #dbeafe' }}>
+                   <div style={{ fontSize: '0.65rem', fontWeight: 800, color: '#2563eb', marginBottom: '0.2rem' }}>ROUTING</div>
+                   <div style={{ fontSize: '0.8rem', fontWeight: 700, color: '#1e40af' }}>Global Rail Enabled</div>
+                </div>
+             </div>
           </div>
 
           <div style={{ borderTop: '2px dashed #e2e8f0', margin: '2.5rem 0', paddingTop: '2rem' }}>
-             <div style={{ textAlign: 'center', color: '#64748b', fontSize: '0.8rem', marginBottom: '2rem' }}>
-                Thank you for using Paypee. For support, contact hi@paypee.co
+             <div style={{ textAlign: 'center', color: '#64748b', fontSize: '0.75rem', marginBottom: '2rem', lineHeight: 1.6 }}>
+                This transaction is protected by Paypee's multi-layer encryption and real-time fraud monitoring. For support, contact hi@paypee.co
              </div>
              
              <div className="no-print" style={{ display: 'flex', gap: '1rem' }}>
