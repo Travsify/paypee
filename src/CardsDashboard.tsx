@@ -439,7 +439,7 @@ const CardsDashboard = ({ wallets: propWallets }: { wallets?: any[] }) => {
                       </div>
 
                       {/* Billing Address */}
-                      {(card.addressLine1 || card.addressCity) && showNumbers[card.id] && (
+                      {(card.addressLine1 || card.addressCity) && (
                         <div style={{ marginTop: '1.5rem', padding: '1rem', background: 'rgba(255,255,255,0.02)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
                            <div style={{ fontSize: '0.6rem', color: 'rgba(255,255,255,0.3)', fontWeight: 800, letterSpacing: '1.5px', marginBottom: '0.5rem' }}>BILLING ADDRESS</div>
                            <div style={{ fontSize: '0.8rem', fontWeight: 700, color: 'rgba(255,255,255,0.7)', lineHeight: 1.6 }}>
