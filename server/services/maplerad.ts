@@ -508,7 +508,21 @@ export const withdrawFromCard = async (cardId: string, amount: number) => {
 };
 
 /**
- * Freeze/Unfreeze a card
+ * Freeze a card
+ */
+export const freezeCard = async (cardId: string) => {
+  return toggleCardStatus(cardId, 'FREEZE');
+};
+
+/**
+ * Unfreeze a card
+ */
+export const unfreezeCard = async (cardId: string) => {
+  return toggleCardStatus(cardId, 'UNFREEZE');
+};
+
+/**
+ * Freeze/Unfreeze a card (Base function)
  */
 export const toggleCardStatus = async (cardId: string, status: 'FREEZE' | 'UNFREEZE') => {
   try {

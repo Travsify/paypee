@@ -24,6 +24,20 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ limit: '10mb', extended: true }));
 app.use(morgan('dev'));
 
+// Authentication middleware
+const authenticateToken = (req: any, res: any, next: any) => {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1];
+  
+  if (!token) return res.status(401).json({ error: 'Access token missing' });
+
+  jwt.verify(token, JWT_SECRET, (err: any, user: any) => {
+    if (err) return res.status(403).json({ error: 'Token is invalid or expired' });
+    req.user = user;
+    next();
+  });
+};
+
 // Basic health check
 app.get('/api/health', (req: Request, res: Response) => {
   res.json({ status: 'live', service: 'paypee-core-api', timestamp: new Date() });
@@ -42,19 +56,18 @@ app.get('/api/admin/fix-card-withdraw', async (req: any, res: any) => {
     });
 
     if (!badTx) {
-      // Look even broader
       const txs = await prisma.transaction.findMany({ 
-        where: { userId: badTx?.userId }, 
-        take: 10, 
+        take: 5, 
         orderBy: { createdAt: 'desc' } 
       });
-      return res.json({ message: 'No incorrect withdrawal found to fix.', recent_txs: txs });
+      return res.json({ message: 'No incorrect withdrawal found to fix.', debug_txs: txs });
     }
 
     const rateData = await Maplerad.getExchangeRate('USD', 'NGN');
-    const rate = rateData.rate || 1500; // Fallback to 1500 if API fails
+    const rate = Number(rateData.rate || 1500); 
     const correctAmount = 1000 * rate; 
-    const difference = correctAmount - badTx.amount; 
+    const currentAmount = Number(badTx.amount);
+    const difference = correctAmount - currentAmount; 
 
     if (difference <= 0) return res.json({ message: 'Transaction already looks correct or higher than expected.', tx: badTx });
 
@@ -82,7 +95,7 @@ app.get('/api/admin/fix-card-withdraw', async (req: any, res: any) => {
 
     res.json({ 
       message: 'Balance corrected successfully',
-      original: badTx.amount,
+      original: currentAmount,
       corrected: correctAmount,
       difference: `+${difference.toFixed(2)} NGN`,
       rate: rate
@@ -124,22 +137,9 @@ app.post('/api/cards/:cardId/toggle-freeze', authenticateToken, async (req: any,
   }
 });
 
-// Authentication middleware
-const authenticateToken = (req: any, res: any, next: any) => {
-  const authHeader = req.headers['authorization'];
-  const token = authHeader && authHeader.split(' ')[1];
-  
-  if (!token) return res.status(401).json({ error: 'Access token missing' });
-
-  jwt.verify(token, JWT_SECRET, (err: any, user: any) => {
-    if (err) return res.status(403).json({ error: 'Token is invalid or expired' });
-    req.user = user;
-    next();
-  });
-};
-
 // ==========================================
 // Authentication Routes
+// ==========================================
 // ==========================================
 
 app.post('/api/auth/register', async (req: Request, res: Response): Promise<any> => {

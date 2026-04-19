@@ -94,19 +94,19 @@ const App = () => {
   // Empty useEffect for cleanup (initialization is now synchronous)
   useEffect(() => {}, []);
 
-  // Set up Auto-Logout after 5 minutes of inactivity (only when logged in)
+  // Set up Auto-Logout after 30 minutes of inactivity (only when logged in)
   useEffect(() => {
     let timeoutId: ReturnType<typeof setTimeout>;
 
     const resetTimer = () => {
       clearTimeout(timeoutId);
-      // 5 minutes = 300,000 ms
+      // 30 minutes = 1,800,000 ms
       timeoutId = setTimeout(() => {
         if (view === 'individual' || view === 'business' || view === 'developer') {
           handleLogout();
           alert('You have been logged out due to inactivity.');
         }
-      }, 300000); 
+      }, 1800000); 
     };
 
     if (view === 'individual' || view === 'business' || view === 'developer') {
