@@ -124,39 +124,40 @@ const CardsDashboard = ({ wallets: propWallets }: { wallets?: any[] }) => {
 
   const handleIssueCard = async (e: any) => {
     e.preventDefault();
-    console.log('[DEBUG] handleIssueCard triggered');
-    console.log('[DEBUG] issueWalletId:', issueWalletId);
-    console.log('[DEBUG] issueCurrency:', issueCurrency);
     
     if (!issueWalletId) {
-      alert('Please select a funding wallet first.');
+      alert('CRITICAL: No wallet selected. Please click on a wallet in the list above.');
       return;
     }
 
     setSubmitting(true);
     try {
       const token = localStorage.getItem('paypee_token');
+      const payload = { walletId: issueWalletId, currency: issueCurrency };
+      console.log('[DEBUG] Sending Payload:', payload);
+
       const res = await fetch('/api/cards', {
         method: 'POST',
         headers: { 
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ walletId: issueWalletId, currency: issueCurrency })
+        body: JSON.stringify(payload)
       });
       
       const data = await res.json();
-      console.log('[DEBUG] Card Issuance Response:', data);
+      console.log('[DEBUG] Server Response:', data);
 
       if (res.ok) {
+        alert('SUCCESS: Your Capital Rail has been deployed!');
         setIsIssueModalOpen(false);
         fetchCards();
       } else {
-        alert(data.error || 'Failed to issue card');
+        alert('SERVER ERROR: ' + (data.error || 'Unknown error occurred during card issuance'));
       }
-    } catch (err) {
-      console.error('[DEBUG] Fetch Error:', err);
-      alert('Network error. Please try again.');
+    } catch (err: any) {
+      console.error('[DEBUG] Fetch Exception:', err);
+      alert('NETWORK/JS ERROR: ' + err.message);
     } finally {
       setSubmitting(false);
     }
@@ -572,7 +573,10 @@ const CardsDashboard = ({ wallets: propWallets }: { wallets?: any[] }) => {
                         wallets.map(w => (
                           <div 
                             key={w.id} 
-                            onClick={() => setIssueWalletId(w.id)}
+                            onClick={() => {
+                               console.log('[DEBUG] Wallet selected:', w.id);
+                               setIssueWalletId(w.id);
+                            }}
                             style={{ 
                               padding: '1.25rem', 
                               borderRadius: '12px', 
@@ -582,14 +586,16 @@ const CardsDashboard = ({ wallets: propWallets }: { wallets?: any[] }) => {
                               display: 'flex',
                               justifyContent: 'space-between',
                               alignItems: 'center',
-                              transition: 'all 0.2s'
+                              transition: 'all 0.2s',
+                              position: 'relative',
+                              zIndex: 10
                             }}
                           >
-                             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', pointerEvents: 'none' }}>
                                 <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem', fontWeight: 900 }}>{w.currency}</div>
                                 <div style={{ fontSize: '0.9rem', fontWeight: 700 }}>{w.currency} Wallet</div>
                              </div>
-                             <div style={{ textAlign: 'right' }}>
+                             <div style={{ textAlign: 'right', pointerEvents: 'none' }}>
                                 <div style={{ fontSize: '0.9rem', fontWeight: 900 }}>{parseFloat(w.balance).toLocaleString()}</div>
                                 <div style={{ fontSize: '0.6rem', color: 'var(--text-muted)', fontWeight: 800 }}>AVAILABLE</div>
                              </div>
