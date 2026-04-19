@@ -749,23 +749,24 @@ app.post('/api/cards', authenticateToken, async (req: any, res: any): Promise<an
     const customer = await Maplerad.createCustomer(user?.firstName || 'User', user?.lastName || 'Paypee', user?.email || '');
     
     // 🛡️ Platform Auto-Fund Logic (Ensure Admin has USD for the card)
-    if ((currency || 'USD') === 'USD') {
+    if ((targetCurrency === 'USD')) {
       try {
         const adminWallets = await Maplerad.getWallets();
+        console.log(`[MAPLERAD] Full Admin Wallets Structure:`, JSON.stringify(adminWallets));
+
         const usdWallet = adminWallets.find((w: any) => w.currency === 'USD');
         const ngnWallet = adminWallets.find((w: any) => w.currency === 'NGN');
         
-        // Maplerad balance is usually in minor units
-        const usdBalance = (usdWallet?.balance || 0) / 100;
-        const ngnBalance = (ngnWallet?.balance || 0) / 100;
+        // Maplerad balance can be in 'balance' or 'available_balance'
+        const usdBalance = (usdWallet?.available_balance || usdWallet?.available || usdWallet?.balance || 0) / 100;
+        const ngnBalance = (ngnWallet?.available_balance || ngnWallet?.available || ngnWallet?.balance || 0) / 100;
         
         console.log(`[MAPLERAD] Admin Balance Check: USD=$${usdBalance.toFixed(2)}, NGN=₦${ngnBalance.toFixed(2)}`);
 
         if (usdBalance < (cardInitialUSD + 5)) {
           console.log(`[MAPLERAD] Admin USD balance low ($${usdBalance}). Attempting auto-swap from NGN...`);
-          // Lowered threshold to 5,000 NGN to be more helpful
           if (ngnBalance > 5000) { 
-             const swapAmount = Math.min(10000, ngnBalance - 1000); // Swap 10k or whatever is safe
+             const swapAmount = Math.min(10000, ngnBalance - 1000); 
              console.log(`[MAPLERAD] Swapping ₦${swapAmount} to USD...`);
              const quote = await Maplerad.generateFxQuote('NGN', 'USD', Math.floor(swapAmount * 100));
              await Maplerad.executeFxSwap(quote.reference);
@@ -780,15 +781,18 @@ app.post('/api/cards', authenticateToken, async (req: any, res: any): Promise<an
     }
 
     // 3. Issue Card via Maplerad
-    console.log(`[MAPLERAD] Issuing ${currency || 'USD'} card for customer ${customer.id} with $${cardInitialUSD}...`);
+    console.log(`[MAPLERAD] Issuing ${targetCurrency} card for customer ${customer.id} with $${cardInitialUSD}...`);
     let mCard: any;
     try {
-      mCard = await Maplerad.issueVirtualCard(customer.id, currency || 'USD', cardInitialUSD);
+      mCard = await Maplerad.issueVirtualCard(customer.id, targetCurrency, cardInitialUSD);
     } catch (err: any) {
       // Re-fetch balances for a detailed error message
       const adminWallets = await Maplerad.getWallets();
-      const usdBalance = (adminWallets.find((w: any) => w.currency === 'USD')?.balance || 0) / 100;
-      const ngnBalance = (adminWallets.find((w: any) => w.currency === 'NGN')?.balance || 0) / 100;
+      const usdW = adminWallets.find((w: any) => w.currency === 'USD');
+      const ngnW = adminWallets.find((w: any) => w.currency === 'NGN');
+      
+      const usdBalance = (usdW?.available_balance || usdW?.available || usdW?.balance || 0) / 100;
+      const ngnBalance = (ngnW?.available_balance || ngnW?.available || ngnW?.balance || 0) / 100;
       
       throw new Error(`Insufficient Platform Balance. Your Maplerad account has $${usdBalance.toFixed(2)} USD and ₦${ngnBalance.toFixed(2)} NGN. Please fund your USD or NGN business wallet.`);
     }
