@@ -173,7 +173,7 @@ export const upgradeCustomerTier1 = async (customerId: string, kycData: any) => 
 export const issueVirtualAccount = async (customerId: string, currency: string) => {
   try {
     const isGlobal = ['USD', 'EUR', 'GBP'].includes(currency.toUpperCase());
-    const url = isGlobal ? '/issuing/virtual-accounts' : '/collections/virtual-account';
+    const url = isGlobal ? '/issuing/virtual-account' : '/collections/virtual-account';
     const payload: any = {
       customer_id: customerId,
       currency: currency.toUpperCase()
@@ -191,16 +191,28 @@ export const issueVirtualAccount = async (customerId: string, currency: string) 
     const errorMsg = error.response?.data?.message || '';
     
     // If account already exists, try to fetch it
-    if (errorMsg.toLowerCase().includes('already') || error.response?.status === 400) {
+    if (errorMsg.toLowerCase().includes('already') || error.response?.status === 400 || error.response?.status === 405) {
       try {
         console.log(`[MAPLERAD DEBUG] Checking for existing accounts for customer ${customerId}...`);
-        // Maplerad has different endpoints for listing existing accounts
-        const listUrl = `/customers/${customerId}/virtual-accounts`; 
-        const existing = await makeRequest('get', listUrl);
-        const accounts = existing.data.data || [];
+        // Try multiple possible list endpoints
+        const listEndpoints = [
+          `/customers/${customerId}/virtual-accounts`,
+          `/customers/${customerId}/virtual-account`,
+          `/issuing/virtual-accounts?customer_id=${customerId}`
+        ];
         
-        const match = accounts.find((a: any) => a.currency === currency.toUpperCase());
-        if (match) return match;
+        for (const listUrl of listEndpoints) {
+          try {
+            const existing = await makeRequest('get', listUrl);
+            const accounts = existing.data.data || [];
+            if (Array.isArray(accounts)) {
+              const match = accounts.find((a: any) => a.currency === currency.toUpperCase());
+              if (match) return match;
+            } else if (accounts && accounts.currency === currency.toUpperCase()) {
+              return accounts;
+            }
+          } catch (e) {}
+        }
       } catch (fetchErr: any) {
         console.warn('[MAPLERAD] Fallback account lookup failed:', fetchErr.message);
       }
@@ -654,11 +666,17 @@ export const issueCryptoAddress = async (customerId: string, currency: string) =
  */
 export const getCryptoAddresses = async (customerId: string) => {
   try {
-    const response = await makeRequest('get', `/customers/${customerId}/addresses`);
+    const response = await makeRequest('get', `/crypto?customer_id=${customerId}`);
     return response.data.data;
   } catch (error: any) {
-    console.error('[MAPLERAD] Get Crypto Addresses Error:', error.response?.data || error.message);
-    return [];
+    console.log(`[MAPLERAD DEBUG] /crypto?customer_id= failed, trying fallback /customers/${customerId}/crypto...`);
+    try {
+      const response = await makeRequest('get', `/customers/${customerId}/crypto`);
+      return response.data.data;
+    } catch (e) {
+      console.error('[MAPLERAD] Get Crypto Addresses Error:', error.response?.data || error.message);
+      return [];
+    }
   }
 };
 
