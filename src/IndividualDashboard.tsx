@@ -18,6 +18,7 @@ import {
   Lock,
   ExternalLink,
   Bot,
+  User,
   Bell,
   Menu,
   X,
@@ -76,6 +77,7 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
   const [showBalances, setShowBalances] = useState(true);
   const [chartInterval, setChartInterval] = useState('1W');
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [settingsTab, setSettingsTab] = useState('profile');
   const [selectedWalletId, setSelectedWalletId] = useState<string | null>(null);
 
   const fetchUserData = async () => {
@@ -411,12 +413,11 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
                       </div>
                       
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-                        <UserMenuItem icon={LayoutDashboard} label="My Profile" onClick={() => { navigate('overview'); setShowUserMenu(false); }} />
-                        <UserMenuItem icon={ShieldCheck} label="Security" onClick={() => { navigate('settings'); setShowUserMenu(false); }} />
-                        <UserMenuItem icon={Settings} label="Settings" onClick={() => { navigate('settings'); setShowUserMenu(false); }} />
+                        <UserMenuItem icon={User} label="My Profile" onClick={() => { setActiveSection('settings'); setSettingsTab('profile'); setShowUserMenu(false); }} />
+                        <UserMenuItem icon={ShieldCheck} label="Security" onClick={() => { setActiveSection('settings'); setSettingsTab('security'); setShowUserMenu(false); }} />
+                        <UserMenuItem icon={Settings} label="Settings" onClick={() => { setActiveSection('settings'); setSettingsTab('profile'); setShowUserMenu(false); }} />
                         <div style={{ margin: '0.5rem 0', borderTop: '1px solid rgba(255,255,255,0.05)' }} />
-                        <UserMenuItem icon={Headphones} label="Help & Support" onClick={() => { window.open('mailto:hi@paypee.co'); setShowUserMenu(false); }} />
-                        <UserMenuItem icon={Info} label="About Paypee" onClick={() => setShowUserMenu(false)} />
+                        <UserMenuItem icon={HelpCircle} label="Help & Support" onClick={() => { setActiveSection('help'); setShowUserMenu(false); }} />
                         <div style={{ margin: '0.5rem 0', borderTop: '1px solid rgba(255,255,255,0.05)' }} />
                         <UserMenuItem icon={LogOut} label="Log Out" onClick={onLogout} danger />
                       </div>
@@ -846,7 +847,8 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
             {activeSection === 'collections' && <CollectionsView />}
             {activeSection === 'history' && <HistoryView onTransactionClick={(tx: any) => setSelectedTx(tx)} />}
             {activeSection === 'ai' && <AiAdvisor transactions={transactions} userName={userData?.firstName} />}
-            {activeSection === 'settings' && <SettingsView />}
+            {activeSection === 'settings' && <SettingsView initialTab={settingsTab} />}
+            {activeSection === 'help' && <HelpCenter />}
             {activeSection === 'transfers' && <div className="glass-card" style={{ textAlign: 'center', padding: '5rem 2rem' }}>
                <Send size={50} color="var(--primary)" style={{ marginBottom: '2rem', opacity: 0.5 }} />
                <h3 style={{ fontSize: '1.8rem', marginBottom: '1rem' }}>Global Transfers</h3>
@@ -908,16 +910,64 @@ const UserMenuItem = ({ icon: Icon, label, onClick, danger = false }: any) => (
       gap: '0.75rem', 
       padding: '0.75rem 1rem', 
       borderRadius: '12px', 
-      cursor: 'pointer', 
-      transition: 'all 0.2s',
+      cursor: 'pointer',
       color: danger ? '#f43f5e' : '#fff',
+      transition: 'all 0.2s',
       fontSize: '0.9rem',
       fontWeight: 600
     }}
-    onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.05)'}
-    onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+    onMouseEnter={(e: any) => e.currentTarget.style.background = danger ? 'rgba(244, 63, 94, 0.1)' : 'rgba(255,255,255,0.05)'}
+    onMouseLeave={(e: any) => e.currentTarget.style.background = 'transparent'}
   >
-    <Icon size={16} />
+    <Icon size={18} />
     {label}
   </div>
 );
+
+const HelpCenter = () => {
+  const faqs = [
+    { q: "How do I create a USD account?", a: "Go to your Wallets section, click '+ New Account' and select USD. Your virtual account will be generated instantly." },
+    { q: "What are the transfer fees?", a: "Intra-Paypee transfers are free. External transfers vary by currency and destination, typically starting at $1." },
+    { q: "How long do settlements take?", a: "Most settlements are instant. International wire transfers can take 1-3 business days." }
+  ];
+
+  return (
+    <div style={{ maxWidth: '800px', margin: '0 auto' }}>
+      <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
+        <h2 style={{ fontSize: '2.5rem', fontWeight: 800, marginBottom: '1rem' }}>Help Center</h2>
+        <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem' }}>Get answers to common questions or reach out to our team.</p>
+      </div>
+
+      <div className="glass-card" style={{ padding: '2.5rem', marginBottom: '2rem' }}>
+        <h3 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '1.5rem' }}>Frequently Asked Questions</h3>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+          {faqs.map((faq, idx) => (
+            <div key={idx} style={{ paddingBottom: '1.5rem', borderBottom: idx === faqs.length - 1 ? 'none' : '1px solid var(--border)' }}>
+              <div style={{ fontWeight: 700, marginBottom: '0.5rem', fontSize: '1rem' }}>{faq.q}</div>
+              <div style={{ color: 'var(--text-muted)', fontSize: '0.9rem', lineHeight: 1.6 }}>{faq.a}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+        <div className="glass-card" style={{ padding: '2rem', textAlign: 'center' }}>
+          <div style={{ width: 48, height: 48, background: 'rgba(99, 102, 241, 0.1)', color: 'var(--primary)', borderRadius: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem' }}>
+            <Mail size={24} />
+          </div>
+          <h4 style={{ fontWeight: 700, marginBottom: '0.5rem' }}>Email Support</h4>
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginBottom: '1.5rem' }}>Response within 2 hours</p>
+          <a href="mailto:hi@paypee.co" className="btn btn-primary" style={{ display: 'inline-block', padding: '0.7rem 1.5rem', textDecoration: 'none' }}>Contact Us</a>
+        </div>
+        <div className="glass-card" style={{ padding: '2rem', textAlign: 'center' }}>
+          <div style={{ width: 48, height: 48, background: 'rgba(34, 211, 238, 0.1)', color: '#22d3ee', borderRadius: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem' }}>
+            <Zap size={24} />
+          </div>
+          <h4 style={{ fontWeight: 700, marginBottom: '0.5rem' }}>Live Chat</h4>
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginBottom: '1.5rem' }}>Average wait: 3 mins</p>
+          <button className="btn btn-outline" style={{ padding: '0.7rem 1.5rem' }}>Start Chat</button>
+        </div>
+      </div>
+    </div>
+  );
+};

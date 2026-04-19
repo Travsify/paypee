@@ -16,8 +16,8 @@ import {
   CreditCard
 } from 'lucide-react';
 
-const SettingsView = () => {
-  const [activeTab, setActiveTab] = useState('security');
+const SettingsView = ({ initialTab = 'profile' }: { initialTab?: string }) => {
+  const [activeTab, setActiveTab] = useState(initialTab);
 
   const tabs = [
     { id: 'profile', label: 'Profile details', icon: User },
