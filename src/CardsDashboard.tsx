@@ -118,9 +118,14 @@ const CardsDashboard = ({ wallets: propWallets }: { wallets?: any[] }) => {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}` }
       });
-      if (res.ok) fetchCards();
+      if (res.ok) {
+        fetchCards();
+      } else {
+        const errData = await res.json();
+        alert(`Status Update Failed: ${errData.error || 'Unknown error'}`);
+      }
     } catch (err) {
-      alert('Failed to update card status');
+      alert('Network error: Unable to update card status');
     }
   };
 
