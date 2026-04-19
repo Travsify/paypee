@@ -658,11 +658,32 @@ app.get('/api/cards', authenticateToken, async (req: any, res: any): Promise<any
       const currency = c.wallet.currency;
       const isUSD = (currency === 'USD');
       
-      const addressLine1 = isUSD ? '16192 Coastal Highway' : (c.addressLine1 || mCard?.address?.address || mCard?.address_line1 || 'User Address Syncing...');
-      const addressCity = isUSD ? 'Lewes' : (c.addressCity || mCard?.address?.city || '');
-      const addressState = isUSD ? 'DE' : (c.addressState || mCard?.address?.state || '');
-      const addressCountry = isUSD ? 'USA' : (c.addressCountry || mCard?.address?.country || 'NG');
-      const addressZip = isUSD ? '19958' : (c.addressZip || mCard?.address?.postal_code || '');
+      let addressLine1 = isUSD ? '16192 Coastal Highway' : (c.addressLine1 || mCard?.address?.address || mCard?.address_line1);
+      let addressCity = isUSD ? 'Lewes' : (c.addressCity || mCard?.address?.city);
+      let addressState = isUSD ? 'DE' : (c.addressState || mCard?.address?.state);
+      let addressCountry = isUSD ? 'USA' : (c.addressCountry || mCard?.address?.country || 'NG');
+      let addressZip = isUSD ? '19958' : (c.addressZip || mCard?.address?.postal_code);
+
+      // 🛡️ NGN Fallback: If still missing, try fetching from Customer Profile
+      if (!isUSD && !addressLine1) {
+        try {
+          const user = await prisma.user.findUnique({ where: { id: c.userId } });
+          const customer = await Maplerad.createCustomer(user?.firstName || 'User', user?.lastName || 'Paypee', user?.email || '');
+          const customerDetails = await Maplerad.getCustomer(customer.id);
+          if (customerDetails?.address) {
+            addressLine1 = customerDetails.address.address;
+            addressCity = customerDetails.address.city;
+            addressState = customerDetails.address.state;
+            addressCountry = customerDetails.address.country || 'NG';
+            addressZip = customerDetails.address.postal_code;
+          }
+        } catch (e) {
+          console.error(`[CARDS] Customer address fetch failed for ${c.id}`);
+        }
+      }
+
+      // Final fallbacks for NGN if customer fetch failed or has no address
+      if (!addressLine1) addressLine1 = 'User Address Syncing...';
 
       return {
         ...c,

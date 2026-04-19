@@ -77,6 +77,16 @@ export const getCustomers = async () => {
   }
 };
 
+export const getCustomer = async (customerId: string) => {
+  try {
+    const response = await makeRequest('get', `/customers/${customerId}`);
+    return response.data.data;
+  } catch (error: any) {
+    console.error(`[MAPLERAD] Get Customer Error (${customerId}):`, error.response?.data || error.message);
+    return null;
+  }
+};
+
 
 /**
  * Registers a customer on Maplerad.
