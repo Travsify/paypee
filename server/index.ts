@@ -48,9 +48,8 @@ app.get('/api/admin/fix-card-withdraw', async (req: any, res: any) => {
   try {
     const badTx = await prisma.transaction.findFirst({
       where: {
-        reference: { startsWith: 'CARD_WITHDRAW_' },
-        currency: 'NGN',
-        status: 'COMPLETED'
+        desc: { contains: 'CARD', mode: 'insensitive' },
+        currency: 'NGN'
       },
       orderBy: { createdAt: 'desc' }
     });
