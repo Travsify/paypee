@@ -584,16 +584,75 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
                          );
                          
                          const { symbol, gradient } = getCardProps(activeWallet.currency);
+                         const isCrypto = ['USDC', 'USDT', 'BTC'].includes(activeWallet.currency);
+                         const meta = activeWallet.metadata || {};
+                         const accNo = meta.iban || meta.account_number || meta.accountNumber || meta.virtual_account_number || meta.address || meta.wallet_address || '---';
+                         const bank = meta.bankName || meta.bank_name || meta.bank || meta.provider || meta.network || (isCrypto ? 'Crypto Network' : '---');
+                         const accName = meta.accountInformation?.accountName || meta.accountName || meta.accountHolder || userData?.firstName + ' ' + userData?.lastName;
+
                          return (
-                           <div style={{ width: '100%', maxWidth: '380px' }}>
-                             <BalanceCard 
-                               currency={activeWallet.currency} 
-                               symbol={symbol} 
-                               gradient={gradient} 
-                               details={activeWallet.metadata} 
-                               amount={parseFloat(activeWallet.balance).toFixed(2)} 
-                               userName={userData?.firstName}
-                             />
+                           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '2rem', width: '100%', alignItems: 'stretch' }}>
+                              <div style={{ width: '100%', maxWidth: '380px' }}>
+                                <BalanceCard 
+                                  currency={activeWallet.currency} 
+                                  symbol={symbol} 
+                                  gradient={gradient} 
+                                  details={activeWallet.metadata} 
+                                  amount={parseFloat(activeWallet.balance).toFixed(2)} 
+                                  userName={userData?.firstName}
+                                  onRefresh={fetchUserData}
+                                />
+                              </div>
+
+                              <div style={{ 
+                                flex: 1, 
+                                minWidth: '300px', 
+                                maxWidth: '500px',
+                                background: 'rgba(255,255,255,0.02)', 
+                                border: '1px solid rgba(255,255,255,0.05)', 
+                                borderRadius: '24px', 
+                                padding: '2rem', 
+                                display: 'flex', 
+                                flexDirection: 'column', 
+                                justifyContent: 'center' 
+                              }}>
+                                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem' }}>
+                                   <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#10b981', boxShadow: '0 0 10px #10b981' }} />
+                                   <h4 style={{ margin: 0, fontSize: '0.8rem', fontWeight: 900, color: '#fff', textTransform: 'uppercase', letterSpacing: '2px' }}>Live Account Details</h4>
+                                 </div>
+
+                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+                                    {[
+                                      { label: 'Currency', value: `${activeWallet.currency} (${isCrypto ? 'Digital Asset' : 'Fiat Wallet'})` },
+                                      { label: isCrypto ? 'Blockchain Network' : 'Bank / Provider', value: bank, highlight: true },
+                                      { label: isCrypto ? 'Wallet Address' : 'Account Number', value: accNo, copyable: true },
+                                      { label: 'Beneficiary Name', value: accName, hide: isCrypto }
+                                    ].filter(f => !f.hide).map((item, idx) => (
+                                      <div key={idx} style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                                         <div style={{ fontSize: '0.65rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', letterSpacing: '1px' }}>{item.label}</div>
+                                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                                           <div style={{ 
+                                             fontSize: '1rem', 
+                                             fontWeight: 700, 
+                                             color: item.highlight ? 'var(--primary)' : '#fff',
+                                             fontFamily: item.copyable ? 'monospace' : 'inherit',
+                                             wordBreak: 'break-all'
+                                           }}>
+                                             {item.value}
+                                           </div>
+                                           {item.copyable && (
+                                             <button 
+                                               onClick={() => { navigator.clipboard.writeText(item.value); alert('Copied to clipboard'); }}
+                                               style={{ background: 'rgba(255,255,255,0.05)', border: 'none', padding: '0.3rem', borderRadius: '6px', color: '#94a3b8', cursor: 'pointer' }}
+                                             >
+                                               <Copy size={12} />
+                                             </button>
+                                           )}
+                                         </div>
+                                      </div>
+                                    ))}
+                                 </div>
+                              </div>
                            </div>
                          );
                       })()}

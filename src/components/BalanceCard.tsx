@@ -190,8 +190,18 @@ const BalanceCard: React.FC<BalanceCardProps> = ({
           position: 'relative', zIndex: 10, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '1rem'
         }}>
           <div style={{ flex: 1 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.4rem' }}>
-              <div style={{ fontSize: '0.65rem', fontWeight: 600, opacity: 0.7, textTransform: 'uppercase', letterSpacing: '1px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.6rem' }}>
+              <div style={{ 
+                fontSize: '0.7rem', 
+                fontWeight: 900, 
+                padding: '0.2rem 0.6rem',
+                borderRadius: '6px',
+                background: 'rgba(255,255,255,0.15)',
+                color: '#fff',
+                textTransform: 'uppercase', 
+                letterSpacing: '1px',
+                boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+              }}>
                 {bank ? (['USDC', 'USDT', 'BTC'].includes(currency.toUpperCase()) ? `${bank} Network` : bank) : (['USDC', 'USDT', 'BTC'].includes(currency.toUpperCase()) ? 'Crypto Network' : 'Provisioning Account...')}
               </div>
               {bank && <CopyButton text={bank} label={['USDC', 'USDT', 'BTC'].includes(currency.toUpperCase()) ? "Network" : "Bank Name"} />}
