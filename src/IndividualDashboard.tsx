@@ -24,7 +24,11 @@ import {
   RefreshCw,
   Eye,
   EyeOff,
-  Repeat
+  Repeat,
+  ShieldCheck,
+  Headphones,
+  Info,
+  ChevronRight
 } from 'lucide-react';
 import CardsDashboard from './CardsDashboard';
 import AiAdvisor from './AiAdvisor';
@@ -394,13 +398,23 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
                       }}
                     >
                       <div style={{ marginBottom: '1rem', paddingBottom: '1rem', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                        <div style={{ fontWeight: 800, fontSize: '1rem', color: '#fff' }}>{userData?.firstName} {userData?.lastName}</div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.25rem' }}>
+                          <div style={{ fontWeight: 800, fontSize: '1rem', color: '#fff' }}>{userData?.firstName} {userData?.lastName}</div>
+                          <div style={{ padding: '0.2rem 0.5rem', background: userData?.kycStatus === 'VERIFIED' ? 'rgba(34, 211, 238, 0.1)' : 'rgba(244, 63, 94, 0.1)', borderRadius: '6px', fontSize: '0.6rem', fontWeight: 800, color: userData?.kycStatus === 'VERIFIED' ? '#22d3ee' : '#f43f5e', border: `1px solid ${userData?.kycStatus === 'VERIFIED' ? 'rgba(34, 211, 238, 0.2)' : 'rgba(244, 63, 94, 0.2)'}` }}>
+                            {userData?.kycStatus || 'UNVERIFIED'}
+                          </div>
+                        </div>
                         <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', overflow: 'hidden', textOverflow: 'ellipsis' }}>{userData?.email}</div>
                       </div>
                       
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
                         <UserMenuItem icon={LayoutDashboard} label="My Profile" onClick={() => { navigate('overview'); setShowUserMenu(false); }} />
+                        <UserMenuItem icon={ShieldCheck} label="Security" onClick={() => { navigate('settings'); setShowUserMenu(false); }} />
                         <UserMenuItem icon={Settings} label="Settings" onClick={() => { navigate('settings'); setShowUserMenu(false); }} />
+                        <div style={{ margin: '0.5rem 0', borderTop: '1px solid rgba(255,255,255,0.05)' }} />
+                        <UserMenuItem icon={Headphones} label="Help & Support" onClick={() => { window.open('mailto:hi@paypee.co'); setShowUserMenu(false); }} />
+                        <UserMenuItem icon={Info} label="About Paypee" onClick={() => setShowUserMenu(false)} />
+                        <div style={{ margin: '0.5rem 0', borderTop: '1px solid rgba(255,255,255,0.05)' }} />
                         <UserMenuItem icon={LogOut} label="Log Out" onClick={onLogout} danger />
                       </div>
                     </motion.div>

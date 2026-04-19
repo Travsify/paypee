@@ -295,9 +295,6 @@ const PayoutModal: React.FC<PayoutModalProps> = ({ isOpen, onClose, onComplete, 
               <input type="text" placeholder="Account Number" value={accountNumber} onChange={(e) => setAccountNumber(e.target.value)} style={inputStyle} />
             </div>
           </div>
-              <input type="text" placeholder="John Doe" value={accountName} onChange={(e) => setAccountName(e.target.value)} style={inputStyle} />
-            </div>
-          </div>
           <div style={inputGroupStyle}>
             <label style={labelStyle}>{targetCurrency === 'USD' ? 'ROUTING NUMBER' : 'SORT CODE'}</label>
             <div style={inputWrapperStyle}>
