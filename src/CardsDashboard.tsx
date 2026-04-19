@@ -135,12 +135,16 @@ const CardsDashboard = ({ wallets: propWallets }: { wallets?: any[] }) => {
         },
         body: JSON.stringify({ walletId: issueWalletId, currency: issueCurrency })
       });
+      const data = await res.json();
       if (res.ok) {
         setIsIssueModalOpen(false);
         fetchCards();
+      } else {
+        alert(data.error || 'Failed to issue card');
       }
     } catch (err) {
-      alert('Failed to issue card');
+      console.error('Issue Card Error:', err);
+      alert('Network error. Please try again.');
     } finally {
       setSubmitting(false);
     }

@@ -397,7 +397,9 @@ app.post('/api/cards', authenticateToken, async (req: any, res: any): Promise<an
     const customer = await Maplerad.createCustomer(user?.firstName || 'User', user?.lastName || 'Paypee', user?.email || '');
     
     // 3. Issue Card via Maplerad
+    console.log(`[MAPLERAD] Issuing ${currency || 'USD'} card for customer ${customer.id} with $${cardInitialUSD}...`);
     const mCard = await Maplerad.issueVirtualCard(customer.id, currency || 'USD', cardInitialUSD);
+    console.log(`[MAPLERAD] Card Issued Successfully: ${mCard.card_number || '****'}`);
 
     // 4. Atomic Balance Deduction & Card Creation
     const [card] = await prisma.$transaction([
