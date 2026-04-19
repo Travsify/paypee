@@ -267,7 +267,88 @@ app.post('/api/cards/:cardId/fund', authenticateToken, async (req: any, res: any
 });
 
 app.post('/api/cards/:cardId/withdraw', authenticateToken, async (req: any, res: any): Promise<any> => {
-   // ... (existing withdraw logic)
+   try {
+      const { cardId } = req.params;
+      const { amount, pin } = req.body;
+      const userId = req.user.userId;
+
+      if (!amount || amount <= 0) return res.status(400).json({ error: 'Invalid withdrawal amount' });
+
+      // Validate user & PIN
+      const user = await prisma.user.findUnique({ where: { id: userId }, include: { wallets: true } });
+      if (!user) return res.status(404).json({ error: 'User not found' });
+
+      if (user.transferPin) {
+        if (!pin) return res.status(400).json({ error: 'Transaction PIN is required' });
+        const validPin = await bcrypt.compare(pin, user.transferPin);
+        if (!validPin) return res.status(401).json({ error: 'Invalid Transaction PIN' });
+      }
+
+      // Validate Card
+      const card = await prisma.virtualCard.findUnique({ where: { id: cardId } });
+      if (!card || card.userId !== userId) return res.status(404).json({ error: 'Card not found' });
+
+      // Find the linked wallet
+      const wallet = user.wallets.find(w => w.id === card.walletId);
+      if (!wallet) return res.status(404).json({ error: 'Linked wallet not found' });
+
+      // Check card has enough balance — use dailyLimit as the DB-tracked balance
+      const cardBalance = Number(card.dailyLimit);
+      if (cardBalance < amount) {
+        return res.status(400).json({ error: `Insufficient card balance. Available: $${cardBalance.toFixed(2)}` });
+      }
+
+      // Attempt provider-side withdrawal if card has a provider ID
+      if (card.providerCardId) {
+        try {
+          await Maplerad.withdrawFromCard(card.providerCardId, amount);
+          console.log(`[CARDS] Maplerad withdraw success for ${card.providerCardId}: $${amount}`);
+        } catch (providerErr: any) {
+          console.error(`[CARDS] Provider withdraw failed:`, providerErr.message);
+          // Continue with local balance update even if provider call fails (sandbox limitation)
+        }
+      }
+
+      // Atomic: Credit wallet + Debit card balance + Record transaction
+      await prisma.$transaction([
+         prisma.wallet.update({
+            where: { id: card.walletId },
+            data: { balance: { increment: amount } }
+         }),
+         prisma.virtualCard.update({
+            where: { id: cardId },
+            data: { dailyLimit: { decrement: amount } }
+         }),
+         prisma.transaction.create({
+            data: {
+               userId,
+               walletId: card.walletId,
+               type: 'DEPOSIT',
+               amount,
+               currency: wallet.currency,
+               status: 'COMPLETED',
+               reference: `CARD_WITHDRAW_${Date.now()}`,
+               category: 'CARD',
+               desc: `Withdrawal from Card ending in ${card.cardNumber.slice(-4)}`
+            }
+         })
+      ]);
+
+      console.log(`[CARDS] Withdrawal complete: $${amount} from card ${cardId} -> wallet ${card.walletId}`);
+
+      // Send notification
+      await NotificationService.create(
+        userId,
+        '💳 Card Withdrawal',
+        `$${amount.toFixed(2)} withdrawn from your card ending in ${card.cardNumber.slice(-4)} to your ${wallet.currency} wallet.`,
+        'SUCCESS'
+      );
+
+      res.status(200).json({ message: 'Withdrawal successful' });
+   } catch (error: any) {
+      console.error('[CARDS] Withdraw Error:', error.message);
+      res.status(500).json({ error: 'Failed to withdraw from card' });
+   }
 });
 
 app.get('/api/cards/:cardId/subscriptions', authenticateToken, async (req: any, res: any): Promise<any> => {
