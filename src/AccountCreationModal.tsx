@@ -23,7 +23,6 @@ const allCurrencies = [
   { code: 'USD', name: 'US Dollar', region: 'United States', desc: 'Receive payments via ACH, Fedwire, and SWIFT.', icon: '🇺🇸', color: '#3b82f6', benefits: ['Global acceptance', 'ACH/Fedwire ready', 'Zero incoming fees'] },
   { code: 'EUR', name: 'Euro', region: 'European Union', desc: 'SEPA and SWIFT account for effortless pan-European transfers.', icon: '🇪🇺', color: '#6366f1', benefits: ['SEPA Instant ready', 'Cross-border optimized', 'Standard IBAN'] },
   { code: 'GBP', name: 'British Pound', region: 'United Kingdom', desc: 'FPS account for high-speed UK settlements and direct debits.', icon: '🇬🇧', color: '#8b5cf6', benefits: ['Faster Payments', 'CHAPS & BACS', 'Dedicated Sort Code'] },
-  { code: 'BTC', name: 'Bitcoin', region: 'Global Rail', desc: 'On-chain liquidity for non-custodial global value moving.', icon: '₿', color: '#f59e0b', benefits: ['24/7 Liquidity', 'Permissionless', 'Hedge against inflation'] },
   { code: 'USDT', name: 'Tether (USDT)', region: 'Global Rail', desc: 'Stablecoin pegged to the US Dollar for instant crypto transfers.', icon: '₮', color: '#26a17b', benefits: ['Instant settlement', 'Zero volatility', 'Global reach'] },
   { code: 'USDC', name: 'USD Coin (USDC)', region: 'Global Rail', desc: 'Fully backed digital dollar for borderless payments.', icon: '💲', color: '#2775ca', benefits: ['1:1 USD backed', 'High liquidity', 'Regulated'] }
 ];
