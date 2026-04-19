@@ -156,7 +156,7 @@ const CardsDashboard = ({ wallets: propWallets }: { wallets?: any[] }) => {
 
       console.log('[DEBUG] Server Response:', data);
 
-      if (res.ok) {
+      if (res.ok) { if (data && data.id) setCards(prev => [data, ...prev]);
         alert('SUCCESS: Your Capital Rail has been deployed!');
         setIsIssueModalOpen(false);
         fetchCards();
@@ -188,7 +188,7 @@ const CardsDashboard = ({ wallets: propWallets }: { wallets?: any[] }) => {
           pin: transferPin
         })
       });
-      if (res.ok) {
+      if (res.ok) { if (data && data.id) setCards(prev => [data, ...prev]);
         setIsFundingModalOpen(false);
         setFundAmount('');
         setTransferPin('');
@@ -220,7 +220,7 @@ const CardsDashboard = ({ wallets: propWallets }: { wallets?: any[] }) => {
           pin: transferPin
         })
       });
-      if (res.ok) {
+      if (res.ok) { if (data && data.id) setCards(prev => [data, ...prev]);
         setIsWithdrawModalOpen(false);
         setFundAmount('');
         setTransferPin('');
