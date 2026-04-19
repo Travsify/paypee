@@ -172,18 +172,12 @@ export const upgradeCustomerTier1 = async (customerId: string, kycData: any) => 
  */
 export const issueVirtualAccount = async (customerId: string, currency: string) => {
   try {
-    const isGlobal = ['USD', 'EUR', 'GBP'].includes(currency.toUpperCase());
-    const url = isGlobal ? '/issuing/accounts' : '/collections/virtual-account';
+    // Try using the collections endpoint for all currencies first, as Maplerad often unifies them
+    const url = '/collections/virtual-account';
     const payload: any = {
       customer_id: customerId,
-      currency: currency.toUpperCase(),
-      auto_approve: true // Required by some Maplerad issuing endpoints
+      currency: currency.toUpperCase()
     };
-
-    if (isGlobal) {
-      // USD is often DOMICILIARY, EUR/GBP are GLOBAL
-      payload.type = currency.toUpperCase() === 'USD' ? 'DOMICILIARY' : 'GLOBAL';
-    }
 
     console.log(`[MAPLERAD] Issuing ${currency} account for customer ${customerId} via ${url}...`);
     const response = await makeRequest('post', url, payload);
@@ -668,17 +662,11 @@ export const issueCryptoAddress = async (customerId: string, currency: string) =
  */
 export const getCryptoAddresses = async (customerId: string) => {
   try {
-    const response = await makeRequest('get', `/crypto/wallet?customer_id=${customerId}`);
-    return response.data.data;
+    const response = await makeRequest('get', `/crypto?customer_id=${customerId}`);
+    return response.data.data || [];
   } catch (error: any) {
-    console.log(`[MAPLERAD DEBUG] /crypto/wallet failed, trying fallback /crypto?customer_id=${customerId}...`);
-    try {
-      const response = await makeRequest('get', `/crypto?customer_id=${customerId}`);
-      return response.data.data;
-    } catch (e) {
-      console.error('[MAPLERAD] Get Crypto Addresses Error:', error.response?.data || error.message);
-      return [];
-    }
+    console.warn(`[MAPLERAD] Crypto lookup failed for ${customerId}:`, error.response?.data?.message || error.message);
+    return [];
   }
 };
 
