@@ -11,6 +11,7 @@ import { IbanService } from './services/iban.service';
 import { BillsService } from './services/bills.service';
 import { NotificationService } from './services/notification.service';
 import * as Maplerad from './services/maplerad';
+import * as Bridgecard from './services/bridgecard';
 
 dotenv.config();
 
@@ -200,18 +201,19 @@ app.post('/api/cards/:cardId/toggle-freeze', authenticateToken, async (req: any,
     const card = await prisma.virtualCard.findUnique({ where: { id: cardId } });
     if (!card || card.userId !== req.user.userId) return res.status(404).json({ error: 'Card not found' });
 
-    const newStatus = card.status === 'ACTIVE' ? 'FROZEN' : 'ACTIVE';
+    const isFrozen = card.status === 'FROZEN';
+    const newStatus = isFrozen ? 'ACTIVE' : 'FROZEN';
     
-    // Call Maplerad if possible
     if (card.providerCardId) {
       try {
         if (newStatus === 'FROZEN') {
-          await Maplerad.freezeCard(card.providerCardId);
+          await Bridgecard.freezeCard(card.providerCardId);
         } else {
-          await Maplerad.unfreezeCard(card.providerCardId);
+          await Bridgecard.unfreezeCard(card.providerCardId);
         }
       } catch (e: any) {
-        console.error(`[CARDS] Provider toggle failed:`, e.message);
+        console.error(`[CARDS] Bridgecard toggle failed:`, e.message);
+        return res.status(400).json({ error: e.message || 'Provider failed to toggle card status' });
       }
     }
 
@@ -366,23 +368,7 @@ app.post('/api/users/set-pin', authenticateToken, async (req: any, res: any) => 
 // Virtual Card Management
 // ==========================================
 
-app.post('/api/cards/:cardId/toggle-freeze', authenticateToken, async (req: any, res: any): Promise<any> => {
-   try {
-      const { cardId } = req.params;
-      const card = await prisma.virtualCard.findUnique({ where: { id: cardId } });
-      
-      if (!card || card.userId !== req.user.userId) return res.status(404).json({ error: 'Card not found' });
-
-      const updatedCard = await prisma.virtualCard.update({
-         where: { id: cardId },
-         data: { status: card.status === 'FROZEN' ? 'ACTIVE' : 'FROZEN' }
-      });
-
-      res.status(200).json({ message: `Card ${updatedCard.status === 'FROZEN' ? 'frozen' : 'activated'} successfully`, status: updatedCard.status });
-   } catch (error) {
-      res.status(500).json({ error: 'Failed to toggle card status' });
-   }
-});
+// Duplicate toggle-freeze route removed (already handled above)
 
 app.get('/api/cards/:cardId/pin', authenticateToken, async (req: any, res: any): Promise<any> => {
    try {
@@ -391,7 +377,7 @@ app.get('/api/cards/:cardId/pin', authenticateToken, async (req: any, res: any):
       
       if (!card || card.userId !== req.user.userId) return res.status(404).json({ error: 'Card not found' });
 
-      // In production, you would fetch this from the provider (Marqeta/Lithic)
+      // In production, you would fetch this from the provider
       res.status(200).json({ pin: '4491' }); 
    } catch (error) {
       res.status(500).json({ error: 'Failed to fetch PIN' });
@@ -420,14 +406,29 @@ app.post('/api/cards/:cardId/fund', authenticateToken, async (req: any, res: any
 
       const wallet = user.wallets.find(w => w.id === walletId);
       if (!wallet || Number(wallet.balance) < amount) {
-         return res.status(400).json({ error: 'Insufficient funds or invalid wallet' });
+          return res.status(400).json({ error: 'Insufficient funds or invalid wallet' });
       }
 
-      // 2. Atomic Update
+      // 2. Call Bridgecard Provider
+      if (card.providerCardId) {
+        try {
+          await Bridgecard.fundCard(card.providerCardId, amount);
+          console.log(`[CARDS] Bridgecard funded: ${card.providerCardId} with $${amount}`);
+        } catch (providerErr: any) {
+          console.error(`[CARDS] Provider funding failed:`, providerErr.message);
+          return res.status(400).json({ error: providerErr.message || 'Provider failed to fund card' });
+        }
+      }
+
+      // 3. Atomic Update
       await prisma.$transaction([
          prisma.wallet.update({
             where: { id: walletId },
             data: { balance: { decrement: amount } }
+         }),
+         prisma.virtualCard.update({
+            where: { id: cardId },
+            data: { dailyLimit: { increment: amount } }
          }),
          prisma.transaction.create({
             data: {
@@ -476,14 +477,8 @@ app.post('/api/cards/:cardId/withdraw', authenticateToken, async (req: any, res:
       const wallet = user.wallets.find(w => w.id === card.walletId);
       if (!wallet) return res.status(404).json({ error: 'Linked wallet not found' });
 
-      // Check card has enough balance
-      const cardBalance = Number(card.dailyLimit);
-      if (cardBalance < amount) {
-        return res.status(400).json({ error: `Insufficient card balance. Available: $${cardBalance.toFixed(2)}` });
-      }
-
-      // FX Conversion: Card is always USD, wallet may be NGN/EUR/GBP etc.
-      const cardCurrency = 'USD'; // Virtual cards are issued in USD
+      // FX Conversion
+      const cardCurrency = 'USD';
       let creditAmount = amount;
       let conversionRate = 1;
 
@@ -492,24 +487,23 @@ app.post('/api/cards/:cardId/withdraw', authenticateToken, async (req: any, res:
           const rateData = await Maplerad.getExchangeRate(cardCurrency, wallet.currency);
           conversionRate = rateData.rate;
           creditAmount = amount * conversionRate;
-          console.log(`[CARDS] FX Conversion: $${amount} USD × ${conversionRate} = ${creditAmount.toFixed(2)} ${wallet.currency}`);
         } catch (fxErr: any) {
-          console.error(`[CARDS] FX rate fetch failed:`, fxErr.message);
-          return res.status(500).json({ error: 'Unable to fetch exchange rate for withdrawal. Please try again.' });
+          return res.status(500).json({ error: 'Unable to fetch exchange rate' });
         }
       }
 
-      // Attempt provider-side withdrawal if card has a provider ID
+      // Attempt provider-side withdrawal
       if (card.providerCardId) {
         try {
-          await Maplerad.withdrawFromCard(card.providerCardId, amount);
-          console.log(`[CARDS] Maplerad withdraw success for ${card.providerCardId}: $${amount}`);
+          await Bridgecard.withdrawFromCard(card.providerCardId, amount);
+          console.log(`[CARDS] Bridgecard withdraw success: ${card.providerCardId} $${amount}`);
         } catch (providerErr: any) {
           console.error(`[CARDS] Provider withdraw failed:`, providerErr.message);
+          return res.status(400).json({ error: providerErr.message || 'Provider failed to withdraw funds' });
         }
       }
 
-      // Atomic: Credit wallet (converted amount) + Debit card balance (USD) + Record transaction
+      // Atomic Update
       await prisma.$transaction([
          prisma.wallet.update({
             where: { id: card.walletId },
@@ -529,28 +523,16 @@ app.post('/api/cards/:cardId/withdraw', authenticateToken, async (req: any, res:
                status: 'COMPLETED',
                reference: `CARD_WITHDRAW_${Date.now()}`,
                category: 'CARD',
-               desc: `Withdrawal from Card ending in ${card.cardNumber.slice(-4)}${conversionRate !== 1 ? ` ($${amount} USD @ ${conversionRate.toFixed(2)})` : ''}`
+               desc: `Withdrawal from Card ending in ${card.cardNumber.slice(-4)}`
             }
          })
       ]);
 
-      console.log(`[CARDS] Withdrawal complete: $${amount} USD → ${creditAmount.toFixed(2)} ${wallet.currency} (rate: ${conversionRate})`);
-
-      await NotificationService.create(
-        userId,
-        '💳 Card Withdrawal',
-        `$${amount.toFixed(2)} USD withdrawn → ${creditAmount.toFixed(2)} ${wallet.currency} credited to your wallet.`,
-        'SUCCESS'
-      );
-
-      res.status(200).json({ message: 'Withdrawal successful', credited: creditAmount, currency: wallet.currency, rate: conversionRate });
+      res.status(200).json({ message: 'Withdrawal successful', credited: creditAmount });
    } catch (error: any) {
-      console.error('[CARDS] Withdraw Error:', error.message);
       res.status(500).json({ error: 'Failed to withdraw from card' });
    }
 });
-
-
 
 app.get('/api/cards/:cardId/subscriptions', authenticateToken, async (req: any, res: any): Promise<any> => {
   try {
@@ -558,7 +540,7 @@ app.get('/api/cards/:cardId/subscriptions', authenticateToken, async (req: any, 
     const transactions = await prisma.transaction.findMany({
       where: { 
         userId: req.user.userId,
-        desc: { contains: 'CARD', mode: 'insensitive' } // Simplified lookup
+        desc: { contains: 'CARD', mode: 'insensitive' }
       },
       orderBy: { createdAt: 'desc' }
     });
@@ -569,7 +551,6 @@ app.get('/api/cards/:cardId/subscriptions', authenticateToken, async (req: any, 
     const platformKeywords = ['Netflix', 'Spotify', 'Amazon', 'Apple', 'Google', 'Youtube', 'LinkedIn', 'ChatGPT', 'Microsoft', 'Adobe', 'Figma', 'Heroku', 'DigitalOcean', 'Cloudflare'];
     const detected = new Map();
 
-    // Simulated detection from description strings
     transactions.forEach(tx => {
       const desc = tx.desc || '';
       platformKeywords.forEach(keyword => {
@@ -635,29 +616,24 @@ app.get('/api/cards', authenticateToken, async (req: any, res: any): Promise<any
 
     console.log(`[CARDS] Found ${cards.length} cards in database.`);
     
-    // Fetch live details from Maplerad for each card to get the actual balance
+    // Fetch live details from Bridgecard for each card
     const liveCards = await Promise.all(cards.map(async (c) => {
       let liveBalance = parseFloat(c.dailyLimit.toString());
-      let mCard: any = null;
+      let bCard: any = null;
 
       try {
         if (c.providerCardId) {
-          mCard = await Maplerad.getCard(c.providerCardId);
-          if (mCard) {
-            liveBalance = (mCard.amount || 0) / 100;
+          bCard = await Bridgecard.getCard(c.providerCardId);
+          if (bCard) {
+            // Bridgecard returns balance in standard units (e.g. 5.0)
+            liveBalance = parseFloat(bCard.balance || bCard.amount || 0);
 
-            // Auto-migrate DB if missing address
-            if (!c.addressLine1 && mCard.address) {
-              await prisma.virtualCard.update({
-                where: { id: c.id },
-                data: {
-                  addressLine1: mCard.address.address,
-                  addressCity: mCard.address.city,
-                  addressState: mCard.address.state,
-                  addressCountry: mCard.address.country || 'USA',
-                  addressZip: mCard.address.postal_code
-                }
-              });
+            // Sync status
+            if (bCard.card_status && bCard.card_status !== c.status) {
+               await prisma.virtualCard.update({
+                 where: { id: c.id },
+                 data: { status: bCard.card_status.toUpperCase() }
+               });
             }
           }
         }
@@ -668,32 +644,12 @@ app.get('/api/cards', authenticateToken, async (req: any, res: any): Promise<any
       const currency = c.wallet.currency;
       const isUSD = (currency === 'USD');
       
-      let addressLine1 = isUSD ? '16192 Coastal Highway' : (c.addressLine1 || mCard?.address?.address || mCard?.address_line1);
-      let addressCity = isUSD ? 'Lewes' : (c.addressCity || mCard?.address?.city);
-      let addressState = isUSD ? 'DE' : (c.addressState || mCard?.address?.state);
-      let addressCountry = isUSD ? 'USA' : (c.addressCountry || mCard?.address?.country || 'NG');
-      let addressZip = isUSD ? '19958' : (c.addressZip || mCard?.address?.postal_code);
-
-      // 🛡️ NGN Fallback: If still missing, try fetching from Customer Profile
-      if (!isUSD && !addressLine1) {
-        try {
-          const user = await prisma.user.findUnique({ where: { id: c.userId } });
-          const customer = await Maplerad.createCustomer(user?.firstName || 'User', user?.lastName || 'Paypee', user?.email || '');
-          const customerDetails = await Maplerad.getCustomer(customer.id);
-          if (customerDetails?.address) {
-            addressLine1 = customerDetails.address.address;
-            addressCity = customerDetails.address.city;
-            addressState = customerDetails.address.state;
-            addressCountry = customerDetails.address.country || 'NG';
-            addressZip = customerDetails.address.postal_code;
-          }
-        } catch (e) {
-          console.error(`[CARDS] Customer address fetch failed for ${c.id}`);
-        }
-      }
-
-      // Final fallbacks for NGN if customer fetch failed or has no address
-      if (!addressLine1) addressLine1 = 'User Address Syncing...';
+      // Use fixed address for USD cards (Bridgecard Delaware address often used)
+      let addressLine1 = isUSD ? '16192 Coastal Highway' : (c.addressLine1 || bCard?.address?.address);
+      let addressCity = isUSD ? 'Lewes' : (c.addressCity || bCard?.address?.city);
+      let addressState = isUSD ? 'DE' : (c.addressState || bCard?.address?.state);
+      let addressCountry = isUSD ? 'USA' : (c.addressCountry || bCard?.address?.country || 'NG');
+      let addressZip = isUSD ? '19958' : (c.addressZip || bCard?.address?.postal_code);
 
       return {
         ...c,
@@ -703,7 +659,7 @@ app.get('/api/cards', authenticateToken, async (req: any, res: any): Promise<any
         addressState,
         addressCountry,
         addressZip,
-        status: mCard?.status || c.status
+        status: bCard?.card_status?.toUpperCase() || c.status
       };
     }));
 
@@ -718,119 +674,70 @@ app.post('/api/cards', authenticateToken, async (req: any, res: any): Promise<an
   try {
     const { walletId, currency, initialAmount } = req.body;
     const userId = req.user.userId;
-    console.log(`[CARDS] Received issuance request: User=${userId}, Wallet=${walletId}, Rail=${currency}`);
-    const targetCurrency = currency || 'USD';
-    const cardInitialUSD = initialAmount || 1;
+    console.log(`[CARDS] Bridgecard Issuance Request: User=${userId}, Wallet=${walletId}`);
     
-    // 💳 DEFINED ISSUANCE FEES (Total Cost to User)
-    const USD_TOTAL_COST = 5.00; // $5 USD total
-    const NGN_TOTAL_COST = 3500; // ₦3,500 NGN total
+    const targetCurrency = currency || 'USD';
+    const cardInitialAmount = initialAmount || 3; // Bridgecard min is $3
+    
+    const USD_TOTAL_COST = 5.00; // $5 USD total to user
+    const NGN_TOTAL_COST = 3500; // ₦3,500 NGN total to user
 
     // 1. Validate Wallet & Check Balance
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    if (!user) return res.status(404).json({ error: 'User not found' });
+
     const wallet = await prisma.wallet.findFirst({ where: { id: walletId, userId } });
     if (!wallet) return res.status(404).json({ error: 'Source wallet not found' });
 
     let costInWalletCurrency = (targetCurrency === 'USD') ? USD_TOTAL_COST : NGN_TOTAL_COST;
 
-    // If user is paying with a different currency than the card's fee currency, convert it
     if (wallet.currency !== (targetCurrency === 'USD' ? 'USD' : 'NGN')) {
+       // Using Maplerad for FX rate as Bridgecard is purely for cards
        const rateData = await Maplerad.getExchangeRate(targetCurrency === 'USD' ? 'USD' : 'NGN', wallet.currency);
        costInWalletCurrency = costInWalletCurrency * rateData.rate;
     }
 
     if (parseFloat(wallet.balance.toString()) < costInWalletCurrency) {
       return res.status(400).json({ 
-        error: `Insufficient balance. This card creation costs ${costInWalletCurrency.toLocaleString()} ${wallet.currency} (includes issuance fee + $1 funding).` 
+        error: `Insufficient balance. This card costs ${costInWalletCurrency.toLocaleString()} ${wallet.currency} (includes issuance fee + $${cardInitialAmount} funding).` 
       });
     }
 
-    // 2. Get or Create Maplerad Customer
-    const user = await prisma.user.findUnique({ where: { id: userId } });
-    const customer = await Maplerad.createCustomer(user?.firstName || 'User', user?.lastName || 'Paypee', user?.email || '');
+    // 2. Get or Create Bridgecard Cardholder
+    let bridgecardId = (user.metadata as any)?.bridgecard_id;
+    if (!bridgecardId) {
+      console.log(`[BRIDGECARD] Registering new cardholder for ${user.email}...`);
+      const customer = await Bridgecard.createCustomer({
+        firstName: user.firstName || 'User',
+        lastName: user.lastName || 'Paypee',
+        email: user.email,
+        phone: (user.metadata as any)?.phone || '+2348000000000'
+      });
+      bridgecardId = customer.cardholder_id;
+      
+      // Save ID to user metadata
+      await prisma.user.update({
+        where: { id: userId },
+        data: { metadata: { ...(user.metadata as any || {}), bridgecard_id: bridgecardId } }
+      });
+    }
+
+    // 3. Issue Card via Bridgecard
+    console.log(`[BRIDGECARD] Issuing ${targetCurrency} card for ${bridgecardId} with $${cardInitialAmount}...`);
+    const bCard = await Bridgecard.issueVirtualCard(bridgecardId, targetCurrency, cardInitialAmount);
     
-    // 🛡️ Platform Auto-Fund Logic (Ensure Admin has USD for the card)
-    if ((targetCurrency === 'USD')) {
-      try {
-        const adminWallets = await Maplerad.getWallets();
-        console.log(`[MAPLERAD] Full Admin Wallets Structure:`, JSON.stringify(adminWallets));
+    // Normalize response
+    const cardNumber = bCard.card_number.replace(/\s/g, '');
+    const expiry = bCard.expiry_month ? `${bCard.expiry_month}/${bCard.expiry_year}` : '12/2029';
+    const cvv = bCard.cvv || '000';
+    const providerCardId = bCard.card_id;
 
-        const usdWallet = adminWallets.find((w: any) => w.currency === 'USD');
-        const ngnWallet = adminWallets.find((w: any) => w.currency === 'NGN');
-        
-        // Maplerad balance can be in 'balance' or 'available_balance'
-        const usdBalance = (usdWallet?.available_balance || usdWallet?.available || usdWallet?.balance || 0) / 100;
-        const ngnBalance = (ngnWallet?.available_balance || ngnWallet?.available || ngnWallet?.balance || 0) / 100;
-        
-        console.log(`[MAPLERAD] Admin Balance Check: USD=$${usdBalance.toFixed(2)}, NGN=₦${ngnBalance.toFixed(2)}`);
-
-        if (usdBalance < (cardInitialUSD + 5)) {
-          console.log(`[MAPLERAD] Admin USD balance low ($${usdBalance}). Attempting auto-swap from NGN...`);
-          if (ngnBalance > 5000) { 
-             const swapAmount = Math.min(10000, ngnBalance - 1000); 
-             console.log(`[MAPLERAD] Swapping ₦${swapAmount} to USD...`);
-             const quote = await Maplerad.generateFxQuote('NGN', 'USD', Math.floor(swapAmount * 100));
-             await Maplerad.executeFxSwap(quote.reference);
-             console.log(`[MAPLERAD] Admin Auto-Swap Successful.`);
-          } else {
-             console.warn(`[MAPLERAD] Admin NGN balance too low for auto-swap (₦${ngnBalance}).`);
-          }
-        }
-      } catch (e: any) {
-        console.warn(`[MAPLERAD] Admin auto-swap pre-check failed:`, e.message);
-      }
-    }
-
-    // 3. Issue Card via Maplerad
-    console.log(`[MAPLERAD] Issuing ${targetCurrency} card for customer ${customer.id} with $${cardInitialUSD}...`);
-    let mCard: any;
-    try {
-      mCard = await Maplerad.issueVirtualCard(customer.id, targetCurrency, cardInitialUSD);
-    } catch (err: any) {
-      // Re-fetch balances for context
-      const adminWallets = await Maplerad.getWallets();
-      const usdW = adminWallets.find((w: any) => w.currency === 'USD');
-      const ngnW = adminWallets.find((w: any) => w.currency === 'NGN');
-      
-      const usdBalance = (usdW?.available_balance || usdW?.available || usdW?.balance || 0) / 100;
-      const ngnBalance = (ngnW?.available_balance || ngnW?.available || ngnW?.balance || 0) / 100;
-      
-      const rawError = err.message || 'Unknown Provider Error';
-      console.error(`[MAPLERAD] Issuance Failed: ${rawError}`);
-
-      throw new Error(`Provider Error: "${rawError}". (Current Platform Balance: $${usdBalance.toFixed(2)} USD, ₦${ngnBalance.toFixed(2)} NGN)`);
-    }
-    console.log(`[MAPLERAD] Raw Provider Response:`, JSON.stringify(mCard));
-
-    if (!mCard || (!mCard.card_number && !mCard.card_no)) {
-      throw new Error('Provider failed to return valid card details.');
-    }
-
-    // Maplerad sometimes returns card_no instead of card_number
-    const rawCardNumber = mCard.card_number || mCard.card_no;
-    const cardNumber = String(rawCardNumber).replace(/\s/g, ''); // Normalize: remove spaces
-    const expiry = mCard.expiry || mCard.expiry_date || (mCard.expiry_month ? `${mCard.expiry_month}/${mCard.expiry_year}` : '12/2029');
-    const cvv = mCard.cvv || mCard.cvv2 || '000';
-    const providerCardId = mCard.id || mCard.card_id || cardNumber;
-
-    console.log(`[MAPLERAD] Normalized Details: ${cardNumber} | ID: ${providerCardId}`);
-
-    // Determine Billing Address based on currency
-    let addressLine1, addressCity, addressState, addressCountry, addressZip;
-
-    if ((currency || 'USD') === 'USD') {
-      addressLine1 = '16192 Coastal Highway';
-      addressCity = 'Lewes';
-      addressState = 'DE';
-      addressCountry = 'USA';
-      addressZip = '19958';
-    } else {
-      // For NGN or other cards, use provider-assigned (user's) address
-      addressLine1 = mCard.address?.address || mCard.address_line1 || 'User Address Syncing...';
-      addressCity = mCard.address?.city || mCard.city || '';
-      addressState = mCard.address?.state || mCard.state || '';
-      addressCountry = mCard.address?.country || mCard.country || 'NG';
-      addressZip = mCard.address?.postal_code || mCard.zip_code || mCard.postal_code || '';
-    }
+    // Address (Bridgecard defaults)
+    const addressLine1 = (targetCurrency === 'USD') ? '16192 Coastal Highway' : (bCard.address?.address || 'User Address');
+    const addressCity = (targetCurrency === 'USD') ? 'Lewes' : (bCard.address?.city || 'Lagos');
+    const addressState = (targetCurrency === 'USD') ? 'DE' : (bCard.address?.state || 'Lagos');
+    const addressCountry = (targetCurrency === 'USD') ? 'USA' : (bCard.address?.country || 'NG');
+    const addressZip = (targetCurrency === 'USD') ? '19958' : (bCard.address?.postal_code || '100001');
 
     // 4. Atomic Balance Deduction & Card Creation
     try {
@@ -844,7 +751,7 @@ app.post('/api/cards', authenticateToken, async (req: any, res: any): Promise<an
             cvv,
             providerCardId,
             status: "ACTIVE",
-            dailyLimit: cardInitialUSD,
+            dailyLimit: cardInitialAmount,
             addressLine1,
             addressCity,
             addressState,
@@ -866,21 +773,17 @@ app.post('/api/cards', authenticateToken, async (req: any, res: any): Promise<an
             status: 'COMPLETED',
             reference: `CARD_ISSUE_${Date.now()}`,
             category: 'CARD',
-            desc: `Issued ${currency || 'USD'} Virtual Card (Initial: $${cardInitialUSD})`
+            desc: `Issued ${targetCurrency} Virtual Card (Initial: $${cardInitialAmount})`
           }
         })
       ]);
-      console.log(`[CARDS] Transaction Committed Successfully. CardID: ${card.id}`);
       res.status(201).json(card);
     } catch (prismaError: any) {
       console.error('[PRISMA ERROR] Card Creation Failed:', prismaError);
-      if (prismaError.code === 'P2002') {
-        return res.status(400).json({ error: 'This card number already exists in our system. Provider returned a duplicate sandbox card.' });
-      }
       throw prismaError;
     }
   } catch (error: any) {
-    console.error('Create card error:', error);
+    console.error('[CARDS] Issuance Error:', error.message);
     res.status(500).json({ error: error.message || 'Failed to issue virtual card' });
   }
 });

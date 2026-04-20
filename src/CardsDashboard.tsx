@@ -741,19 +741,18 @@ const CardsDashboard = ({ wallets: propWallets }: { wallets?: any[] }) => {
                       </div>
                    </div>
                  </div>
-
-                 <div style={{ padding: '1.5rem', background: 'rgba(99, 102, 241, 0.05)', borderRadius: '16px', marginBottom: '2.5rem', border: '1px solid rgba(99, 102, 241, 0.1)' }}>
+                          <div style={{ padding: '1.5rem', background: 'rgba(99, 102, 241, 0.05)', borderRadius: '16px', marginBottom: '2.5rem', border: '1px solid rgba(99, 102, 241, 0.1)' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: 'var(--primary)', fontSize: '0.85rem', fontWeight: 800, marginBottom: '1rem' }}>
                        <Zap size={18} /> ISSUANCE COST SUMMARY
                     </div>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem' }}>
                           <span style={{ color: 'rgba(255,255,255,0.5)', fontWeight: 600 }}>Provisioning Fee</span>
-                          <span style={{ fontWeight: 800 }}>{issueCurrency === 'USD' ? '$4.00' : '₦2,500'}</span>
+                          <span style={{ fontWeight: 800 }}>{issueCurrency === 'USD' ? '$2.00' : '₦500'}</span>
                        </div>
                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', paddingBottom: '0.5rem', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
                           <span style={{ color: 'rgba(255,255,255,0.5)', fontWeight: 600 }}>Initial Funding</span>
-                          <span style={{ fontWeight: 800 }}>{issueCurrency === 'USD' ? '$1.00' : '₦1,000'}</span>
+                          <span style={{ fontWeight: 800 }}>{issueCurrency === 'USD' ? '$3.00' : '₦3,000'}</span>
                        </div>
                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem', paddingTop: '0.25rem' }}>
                           <span style={{ fontWeight: 900 }}>TOTAL TO PAY</span>
@@ -767,7 +766,7 @@ const CardsDashboard = ({ wallets: propWallets }: { wallets?: any[] }) => {
                        <ShieldCheck size={18} /> Instant Tier-1 Deployment
                     </div>
                     <p style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.6)', lineHeight: '1.5', margin: 0 }}>
-                       New card creation requires a mandatory $1.00 **Initial Capital Injection**. This is not a fee; the amount is instantly loaded onto your new card as its starting balance.
+                       New card creation requires a mandatory $3.00 **Initial Capital Injection**. This is not a fee; the amount is instantly loaded onto your new card as its starting balance.
                     </p>
                  </div>
 
