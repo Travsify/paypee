@@ -721,6 +721,7 @@ app.post('/api/cards', authenticateToken, async (req: any, res: any): Promise<an
         phone: phone || (user.metadata as any)?.phone || (user.metadata as any)?.phoneNumber || '+2348000000000',
         bvn: bvn || (user.metadata as any)?.bvn,
         selfie_image: (user.metadata as any)?.selfie_base64,
+        date_of_birth: (user.metadata as any)?.date_of_birth,
         address: (user.metadata as any)?.address
       });
       bridgecardId = customer.cardholder_id;
@@ -1608,6 +1609,10 @@ app.post('/api/verify/identity', authenticateToken, async (req: any, res: any): 
       if (idType === 'BVN') kycMetadata.bvn = idNumber;
       if (idType === 'NIN') kycMetadata.nin = idNumber;
       if (faceImage) kycMetadata.selfie_base64 = faceImage;
+      
+      // Capture DOB if available from Prembly
+      if (data.data?.dob) kycMetadata.date_of_birth = data.data.dob;
+      else if (data.data?.date_of_birth) kycMetadata.date_of_birth = data.data.date_of_birth;
 
       await prisma.user.update({ 
         where: { id: userId }, 

@@ -45,9 +45,10 @@ export const createCustomer = async (userData: {
     const sanitizedSelfie = userData.selfie_image?.replace(/^data:image\/[a-z]+;base64,/, '') || '';
 
     const payload = {
-      first_name: userData.firstName,
-      last_name: userData.lastName,
+      first_name: (userData.firstName || '').trim(),
+      last_name: (userData.lastName || '').trim(),
       email_address: userData.email,
+      date_of_birth: userData.date_of_birth, // YYYY-MM-DD
       phone: (() => {
         const digits = (userData.phone || '').replace(/\D/g, '');
         const subscriber = digits.length >= 10 ? digits.slice(-10) : '8000000000';
