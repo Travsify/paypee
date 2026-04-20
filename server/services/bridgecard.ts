@@ -69,7 +69,7 @@ export const createCustomer = async (userData: {
       }
     };
 
-    console.log('[BRIDGECARD] Sending Registration Payload:', JSON.stringify({ ...payload, identity: { ...payload.identity, selfie_image: '[REDACTED]' } }, null, 2));
+    console.log('[BRIDGECARD] [v1.1-phone-fix] Sending Registration Payload:', JSON.stringify({ ...payload, identity: { ...payload.identity, selfie_image: '[REDACTED]' } }, null, 2));
 
     const response = await bridgecardClient.post('/cardholder/register_cardholder_synchronously', payload);
     const data = response.data.data;
