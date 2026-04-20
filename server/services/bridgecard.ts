@@ -48,7 +48,11 @@ export const createCustomer = async (userData: {
       first_name: userData.firstName,
       last_name: userData.lastName,
       email_address: userData.email,
-      phone: `+234${(userData.phone || '08000000000').replace(/\D/g, '').slice(-10)}`, 
+      phone: (() => {
+        const digits = (userData.phone || '').replace(/\D/g, '');
+        const subscriber = digits.length >= 10 ? digits.slice(-10) : '8000000000';
+        return `+234${subscriber}`;
+      })(),
       address: {
         address: userData.address?.street || '9 Jibowu Street',
         city: userData.address?.city || 'Lagos',
