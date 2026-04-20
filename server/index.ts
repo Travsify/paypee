@@ -1501,7 +1501,7 @@ app.post('/api/notifications/read', authenticateToken, async (req: any, res: any
 // Submit KYC Verification (LIVE — No demo mode)
 app.post('/api/verify/identity', authenticateToken, async (req: any, res: any): Promise<any> => {
   try {
-    const { idType, idNumber, faceImage } = req.body;
+    const { idType, idNumber, faceImage, dob } = req.body;
     const userId = req.user.userId;
 
     console.log(`[KYC DEBUG] 🏁 Starting verification for user: ${userId}`);
@@ -1526,10 +1526,8 @@ app.post('/api/verify/identity', authenticateToken, async (req: any, res: any): 
     const user = await prisma.user.findUnique({ where: { id: userId } });
     if (!user) return res.status(404).json({ error: 'User not found.' });
 
-    if (user.kycStatus === 'VERIFIED') {
-      return res.status(400).json({ error: 'Your account is already verified.' });
-    }
-
+    // Removed the "already verified" check to allow users to refresh their KYC data (like DOB and Selfie)
+    // for strict card issuers.
     // Set status to PROCESSING immediately
     console.log('[KYC DEBUG] 💾 Updating user status to PROCESSING...');
     await prisma.user.update({
@@ -1611,8 +1609,10 @@ app.post('/api/verify/identity', authenticateToken, async (req: any, res: any): 
       if (idType === 'NIN') kycMetadata.nin = idNumber;
       if (faceImage) kycMetadata.selfie_base64 = faceImage;
       
-      // Capture DOB if available from Prembly
-      if (data.data?.dob) kycMetadata.date_of_birth = data.data.dob;
+      // Capture DOB if provided directly from frontend (crucial for card issuance)
+      if (dob) kycMetadata.date_of_birth = dob;
+      // Or fallback to Prembly returned DOB
+      else if (data.data?.dob) kycMetadata.date_of_birth = data.data.dob;
       else if (data.data?.date_of_birth) kycMetadata.date_of_birth = data.data.date_of_birth;
 
       await prisma.user.update({ 
