@@ -129,7 +129,7 @@ const VerificationGate: React.FC<VerificationGateProps> = ({ kycStatus: initialS
     }
 
     setLoading(true);
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('paypee_token');
     console.log('[FRONTEND DEBUG] 🔑 Auth Token exists?', !!token);
     
     try {
