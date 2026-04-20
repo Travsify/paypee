@@ -70,7 +70,7 @@ export const createCustomer = async (userData: {
       },
       identity: {
         id_type: identityType,
-        bvn: identityNumber, // Some providers still expect this field even for NIN
+        ...(identityType === 'NIGERIAN_BVN_VERIFICATION' ? { bvn: identityNumber } : {}),
         id_no: identityNumber,
         id_image: sanitizedSelfie, // Also pass as id_image to satisfy strict ID image checks
         selfie_image: sanitizedSelfie
