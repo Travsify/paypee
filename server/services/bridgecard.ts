@@ -40,7 +40,7 @@ export const createCustomer = async (userData: {
   try {
     console.log(`[BRIDGECARD] Registering cardholder: ${userData.email}`);
     
-    const identityType = userData.id_type === 'NIN' ? 'NIGERIAN_NIN_VERIFICATION' : 'NIGERIAN_BVN_VERIFICATION';
+    const identityType = userData.id_type === 'NIN' ? 'NIGERIAN_NIN' : 'NIGERIAN_BVN_VERIFICATION';
     const identityNumber = userData.id_no || userData.bvn;
 
     if (!identityNumber || identityNumber.length !== 11) {
