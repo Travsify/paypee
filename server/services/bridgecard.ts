@@ -36,6 +36,10 @@ export const createCustomer = async (userData: {
   try {
     console.log(`[BRIDGECARD] Registering cardholder: ${userData.email}`);
     
+    if (!userData.bvn || userData.bvn.length !== 11) {
+      throw new Error('A valid 11-digit BVN is required to issue a virtual card.');
+    }
+
     const payload = {
       first_name: userData.firstName,
       last_name: userData.lastName,
@@ -51,7 +55,7 @@ export const createCustomer = async (userData: {
       },
       identity: {
         id_type: 'NIGERIAN_BVN_VERIFICATION',
-        bvn: userData.bvn || '22222222222', // Fallback for testing if needed
+        bvn: userData.bvn,
         selfie_image: 'https://paypee.com/selfie.jpg'
       }
     };

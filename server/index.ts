@@ -618,7 +618,7 @@ app.get('/api/cards', authenticateToken, async (req: any, res: any): Promise<any
 
 app.post('/api/cards', authenticateToken, async (req: any, res: any): Promise<any> => {
   try {
-    const { walletId, currency, initialAmount } = req.body;
+    const { walletId, currency, initialAmount, bvn, phone } = req.body;
     const userId = req.user.userId;
     console.log(`[CARDS] Bridgecard Issuance Request: User=${userId}, Wallet=${walletId}`);
     
@@ -657,7 +657,8 @@ app.post('/api/cards', authenticateToken, async (req: any, res: any): Promise<an
         firstName: user.firstName || 'User',
         lastName: user.lastName || 'Paypee',
         email: user.email,
-        phone: (user.metadata as any)?.phone || '+2348000000000'
+        phone: phone || (user.metadata as any)?.phone || '+2348000000000',
+        bvn: bvn || (user.metadata as any)?.bvn
       });
       bridgecardId = customer.cardholder_id;
       

@@ -48,6 +48,8 @@ const CardsDashboard = ({ wallets: propWallets }: { wallets?: any[] }) => {
   // Issue form state
   const [issueWalletId, setIssueWalletId] = useState('');
   const [issueCurrency, setIssueCurrency] = useState('USD');
+  const [issueBvn, setIssueBvn] = useState('');
+  const [issuePhone, setIssuePhone] = useState('');
 
   const fetchCards = async () => {
     try {
@@ -177,7 +179,7 @@ const CardsDashboard = ({ wallets: propWallets }: { wallets?: any[] }) => {
     setSubmitting(true);
     try {
       const token = localStorage.getItem('paypee_token');
-      const payload = { walletId: issueWalletId, currency: issueCurrency };
+      const payload = { walletId: issueWalletId, currency: issueCurrency, bvn: issueBvn, phone: issuePhone };
       console.log('[DEBUG] Sending Payload:', payload);
 
       const res = await fetch(`${API_BASE}/api/cards`, {
@@ -741,6 +743,39 @@ const CardsDashboard = ({ wallets: propWallets }: { wallets?: any[] }) => {
                       </div>
                    </div>
                  </div>
+
+                 <div style={{ marginBottom: '2rem' }}>
+                    <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: '#475569', marginBottom: '0.75rem', letterSpacing: '1px' }}>IDENTITY VERIFICATION</label>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                      <div>
+                        <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 700, color: 'rgba(255,255,255,0.4)', marginBottom: '0.5rem' }}>BVN (11 digits)</label>
+                        <input 
+                          type="text" 
+                          value={issueBvn} 
+                          onChange={(e) => setIssueBvn(e.target.value.replace(/\D/g, '').slice(0, 11))} 
+                          placeholder="Enter your 11-digit BVN" 
+                          maxLength={11}
+                          className="form-input" 
+                          style={{ fontSize: '1rem', fontWeight: 700, letterSpacing: '2px' }} 
+                        />
+                      </div>
+                      <div>
+                        <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 700, color: 'rgba(255,255,255,0.4)', marginBottom: '0.5rem' }}>Phone Number</label>
+                        <input 
+                          type="text" 
+                          value={issuePhone} 
+                          onChange={(e) => setIssuePhone(e.target.value)} 
+                          placeholder="+234XXXXXXXXXX" 
+                          className="form-input" 
+                          style={{ fontSize: '1rem', fontWeight: 700 }} 
+                        />
+                      </div>
+                    </div>
+                    <p style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.35)', marginTop: '0.75rem', lineHeight: 1.5 }}>
+                      Required by our card issuing partner to verify your identity. Your BVN is encrypted and never stored in plain text.
+                    </p>
+                  </div>
+
                           <div style={{ padding: '1.5rem', background: 'rgba(99, 102, 241, 0.05)', borderRadius: '16px', marginBottom: '2.5rem', border: '1px solid rgba(99, 102, 241, 0.1)' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: 'var(--primary)', fontSize: '0.85rem', fontWeight: 800, marginBottom: '1rem' }}>
                        <Zap size={18} /> ISSUANCE COST SUMMARY
@@ -770,7 +805,7 @@ const CardsDashboard = ({ wallets: propWallets }: { wallets?: any[] }) => {
                     </p>
                  </div>
 
-                 <button type="button" onClick={handleIssueCard} disabled={submitting || !issueWalletId} className="btn btn-primary" style={{ width: '100%', padding: '1.4rem', borderRadius: '24px', fontSize: '1.1rem', fontWeight: 900 }}>
+                 <button type="button" onClick={handleIssueCard} disabled={submitting || !issueWalletId || issueBvn.length !== 11 || !issuePhone} className="btn btn-primary" style={{ width: '100%', padding: '1.4rem', borderRadius: '24px', fontSize: '1.1rem', fontWeight: 900 }}>
                    {submitting ? 'Initializing Rail...' : 'Deploy Instantly'}
                  </button>
                </form>
