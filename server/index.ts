@@ -138,62 +138,7 @@ app.post('/api/users/verify-pin', authenticateToken, async (req: any, res: any):
   }
 });
 
-app.post('/api/cards/:cardId/fund', authenticateToken, async (req: any, res: any): Promise<any> => {
-  try {
-    const { cardId } = req.params;
-    const { walletId, amount } = req.body;
-    const userId = req.user.userId;
 
-    const card = await prisma.virtualCard.findUnique({ where: { id: cardId } });
-    if (!card || card.userId !== userId) return res.status(404).json({ error: 'Card not found' });
-
-    const wallet = await prisma.wallet.findUnique({ where: { id: walletId } });
-    if (!wallet || wallet.userId !== userId) return res.status(400).json({ error: 'Invalid wallet' });
-
-    // Handle currency conversion if wallet is not USD
-    let costInWalletCurrency = amount;
-    if (wallet.currency !== 'USD') {
-      const rateData = await Maplerad.getExchangeRate('USD', wallet.currency);
-      costInWalletCurrency = amount * rateData.rate;
-    }
-
-    if (wallet.balance < costInWalletCurrency) return res.status(400).json({ error: 'Insufficient wallet balance' });
-
-    // Call Maplerad
-    if (card.providerCardId) {
-      await Maplerad.fundCard(card.providerCardId, amount);
-    }
-
-    await prisma.$transaction([
-      prisma.wallet.update({
-        where: { id: walletId },
-        data: { balance: { decrement: costInWalletCurrency } }
-      }),
-      prisma.virtualCard.update({
-        where: { id: cardId },
-        data: { dailyLimit: { increment: amount } }
-      }),
-      prisma.transaction.create({
-        data: {
-          userId,
-          walletId,
-          type: 'WITHDRAWAL',
-          amount: costInWalletCurrency,
-          currency: wallet.currency,
-          status: 'COMPLETED',
-          reference: `CARD_FUND_${Date.now()}`,
-          category: 'CARD',
-          desc: `Funded Card ending in ${card.cardNumber.slice(-4)} ($${amount} USD)`
-        }
-      })
-    ]);
-
-    res.json({ message: 'Card funded successfully', newBalance: card.dailyLimit + amount });
-  } catch (error: any) {
-    console.error('[CARDS] Fund Error:', error.message);
-    res.status(500).json({ error: error.message || 'Failed to fund card' });
-  }
-});
 
 app.post('/api/cards/:cardId/toggle-freeze', authenticateToken, async (req: any, res: any): Promise<any> => {
   try {
@@ -1727,76 +1672,7 @@ app.post('/api/bills/pay', authenticateToken, async (req: any, res: any) => {
 
 
 
-// ==========================================
-// Virtual Cards (Issuing)
-// ==========================================
 
-app.post('/api/cards/issue', authenticateToken, async (req: any, res: any) => {
-  try {
-    const { currency, amount, walletId } = req.body;
-    const userId = req.user.userId;
-
-    // 1. Check wallet balance for initial funding
-    const wallet = await prisma.wallet.findUnique({ where: { id: walletId } });
-    if (!wallet || parseFloat(wallet.balance.toString()) < amount) {
-      return res.status(400).json({ error: 'Insufficient funds for initial card funding.' });
-    }
-
-    // 2. Maplerad customer
-    const mapleradCustomer = await Maplerad.createCustomer(req.user.firstName, req.user.lastName, req.user.email);
-    
-    // 3. Issue via Maplerad
-    const card = await Maplerad.issueVirtualCard(mapleradCustomer.id, currency, amount);
-
-    // 4. Update DB
-    await prisma.$transaction([
-      prisma.wallet.update({ where: { id: walletId }, data: { balance: { decrement: amount } } }),
-      prisma.virtualCard.create({
-        data: {
-          userId,
-          walletId,
-          cardNumber: card.card_number,
-          expiry: card.expiry,
-          cvv: card.cvv,
-          status: 'ACTIVE',
-          dailyLimit: 1000
-        }
-      }),
-      prisma.transaction.create({
-        data: {
-          userId,
-          walletId,
-          type: 'WITHDRAWAL',
-          amount,
-          currency: wallet.currency,
-          status: 'COMPLETED',
-          reference: `CARD_GEN_${Date.now()}`,
-          category: 'CARD_ISSUING'
-        }
-      })
-    ]);
-    
-    await NotificationService.create(
-      userId,
-      '💳 Virtual Card Issued',
-      `Your new ${currency} virtual card has been issued and funded with ${amount} ${currency}.`,
-      'SUCCESS'
-    );
-
-    res.status(201).json(card);
-  } catch (error: any) {
-    res.status(500).json({ error: error.message });
-  }
-});
-
-app.get('/api/cards', authenticateToken, async (req: any, res: any) => {
-  try {
-    const cards = await prisma.virtualCard.findMany({ where: { userId: req.user.userId } });
-    res.json(cards);
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to fetch cards' });
-  }
-});
 
 // ==========================================
 // Payment Links & Collections (Commerce)

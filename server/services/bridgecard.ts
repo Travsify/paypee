@@ -8,11 +8,14 @@ const BRIDGECARD_BASE_URL = process.env.BRIDGECARD_ENV === 'live'
 
 const BRIDGECARD_AUTH_TOKEN = (process.env.BRIDGECARD_AUTH_TOKEN || '').trim();
 const BRIDGECARD_ISSUING_ID = (process.env.BRIDGECARD_ISSUING_ID || '').trim();
+const BRIDGECARD_SECRET_KEY = (process.env.BRIDGECARD_SECRET_KEY || '').trim();
 
 const bridgecardClient = axios.create({
   baseURL: BRIDGECARD_BASE_URL,
   headers: {
     'token': `Bearer ${BRIDGECARD_AUTH_TOKEN}`,
+    'secret-key': BRIDGECARD_SECRET_KEY,
+    'issuing-id': BRIDGECARD_ISSUING_ID,
     'Content-Type': 'application/json'
   },
   timeout: 60000 // Bridgecard requires at least 45s for sync registration
