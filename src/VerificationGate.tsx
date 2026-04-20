@@ -438,6 +438,15 @@ const VerificationGate: React.FC<VerificationGateProps> = ({ kycStatus: initialS
                      )}
                      <canvas ref={canvasRef} width="240" height="320" style={{ display: 'none' }} />
                   </div>
+                  <AnimatePresence>
+                    {error && (
+                      <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
+                        style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', background: 'rgba(244,63,94,0.1)', border: '1px solid rgba(244,63,94,0.3)', borderRadius: '10px', padding: '0.8rem 1rem', marginBottom: '1.25rem', color: '#f43f5e', fontSize: '0.85rem', fontWeight: 600, textAlign: 'left' }}
+                      >
+                        <AlertCircle size={20} style={{ flexShrink: 0 }} /> <span>{error}</span>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                   
                   {!faceImage ? (
                      <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
