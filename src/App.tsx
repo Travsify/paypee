@@ -64,6 +64,18 @@ const getInitialView = () => {
   if (path.startsWith('/pay/')) return 'checkout';
   if (path === '/docs') return 'docs';
   
+  // Handle mobile auth link seamless login
+  const urlParams = new URLSearchParams(window.location.search);
+  const urlAuthToken = urlParams.get('auth');
+  if (urlAuthToken) {
+    localStorage.setItem('paypee_token', urlAuthToken);
+    // Assume user is individual for mobile verify flow
+    localStorage.setItem('paypee_user', JSON.stringify({ role: 'INDIVIDUAL' }));
+    // Remove auth from URL
+    window.history.replaceState({}, document.title, window.location.pathname);
+    return 'individual';
+  }
+
   const token = localStorage.getItem('paypee_token');
   const userStr = localStorage.getItem('paypee_user');
   if (token && userStr) {

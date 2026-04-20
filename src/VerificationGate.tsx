@@ -42,6 +42,7 @@ const VerificationGate: React.FC<VerificationGateProps> = ({ kycStatus: initialS
   const [dob, setDob] = useState('');
   const [faceImage, setFaceImage] = useState<string | null>(null);
   const [error, setError] = useState('');
+  const [showMobileScan, setShowMobileScan] = useState(false);
 
   const videoRef = React.useRef<HTMLVideoElement>(null);
   const canvasRef = React.useRef<HTMLCanvasElement>(null);
@@ -189,7 +190,9 @@ const VerificationGate: React.FC<VerificationGateProps> = ({ kycStatus: initialS
         await fetchStatus();
       } else {
         console.warn('[FRONTEND DEBUG] ❌ Server rejected verification:', data.error);
-        setError(data.error || 'Verification failed. Please check your details.');
+        const backendError = data.error || 'Verification failed. Please check your details.';
+        const hint = data.status === 'REJECTED' ? ' Ensure your face is clearly visible, well-lit, and matches your ID.' : '';
+        setError(backendError + hint);
         if (data.status === 'REJECTED') {
           setKycStatus('REJECTED');
           await fetchStatus();
@@ -394,6 +397,24 @@ const VerificationGate: React.FC<VerificationGateProps> = ({ kycStatus: initialS
                     Continue <ChevronRight size={18} />
                   </motion.button>
                 </>
+              ) : showMobileScan ? (
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: '1.5rem', padding: '1rem 0' }}>
+                   <div style={{ background: '#fff', padding: '1rem', borderRadius: '24px' }}>
+                     <img src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(window.location.origin + window.location.pathname + '?auth=' + token)}`} alt="Mobile Auth QR" style={{ width: '180px', height: '180px' }} />
+                   </div>
+                   <div>
+                     <h3 style={{ fontSize: '1.2rem', fontWeight: 800, marginBottom: '0.5rem' }}>Scan with your Phone</h3>
+                     <p style={{ color: '#94a3b8', fontSize: '0.9rem', lineHeight: 1.5 }}>
+                       Open your phone's camera and scan this code to continue verification seamlessly with a better camera.
+                     </p>
+                   </div>
+                   <button
+                     onClick={() => setShowMobileScan(false)}
+                     style={{ background: 'transparent', border: 'none', color: '#6366f1', fontWeight: 700, cursor: 'pointer', padding: '0.5rem' }}
+                   >
+                     Back to Desktop Camera
+                   </button>
+                </div>
               ) : (
                 <>
                   <div style={{ background: '#1e293b', borderRadius: '24px', height: '280px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', marginBottom: '1.5rem', border: '2px dashed #475569', position: 'relative', overflow: 'hidden' }}>
@@ -416,13 +437,21 @@ const VerificationGate: React.FC<VerificationGateProps> = ({ kycStatus: initialS
                   </div>
                   
                   {!faceImage ? (
-                     <motion.button
-                       whileTap={{ scale: 0.98 }}
-                       onClick={captureFace}
-                       style={{ width: '100%', background: '#f59e0b', color: '#fff', border: 'none', padding: '1.1rem', borderRadius: '14px', fontSize: '1rem', fontWeight: 700, cursor: 'pointer', transition: 'all 0.3s', marginBottom: '0.5rem' }}
-                     >
-                       Take Snapshot
-                     </motion.button>
+                     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                       <motion.button
+                         whileTap={{ scale: 0.98 }}
+                         onClick={captureFace}
+                         style={{ width: '100%', background: '#f59e0b', color: '#fff', border: 'none', padding: '1.1rem', borderRadius: '14px', fontSize: '1rem', fontWeight: 700, cursor: 'pointer', transition: 'all 0.3s' }}
+                       >
+                         Take Snapshot
+                       </motion.button>
+                       <button
+                         onClick={() => setShowMobileScan(true)}
+                         style={{ background: 'transparent', border: '1px solid #475569', color: '#94a3b8', padding: '1rem', borderRadius: '14px', fontSize: '0.9rem', fontWeight: 600, cursor: 'pointer' }}
+                       >
+                         Verify from Phone
+                       </button>
+                     </div>
                   ) : (
                      <div style={{ display: 'flex', gap: '1rem' }}>
                        <motion.button
