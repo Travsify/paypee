@@ -748,8 +748,11 @@ const CardsDashboard = ({ wallets: propWallets }: { wallets?: any[] }) => {
                       >
                          <div style={{ fontSize: '1.2rem', fontWeight: 900, color: '#fff' }}>NGN Card</div>
                          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '4px', fontWeight: 800 }}>LOCAL RAIL</div>
-                      </div>
-                                   {!(userData?.metadata?.bridgecard_id || (issueBvn && issuePhone)) && (
+                       </div>
+                    </div>
+                  </div>
+
+                  {!(userData?.metadata?.bridgecard_id || (issueBvn && issuePhone)) && (
                     <div style={{ marginBottom: '2rem' }}>
                       <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: '#475569', marginBottom: '0.75rem', letterSpacing: '1px' }}>IDENTITY VERIFICATION</label>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
