@@ -32,7 +32,7 @@ interface Notification {
 
 import { API_BASE } from './config';
 
-const VerificationGate: React.FC<VerificationGateProps> = ({ kycStatus: initialStatus, accountType, onStatusChange }) => {
+const VerificationGate: React.FC<VerificationGateProps> = ({ kycStatus: initialStatus, accountType, onStatusChange, forceShow }) => {
   const [kycStatus, setKycStatus] = useState(initialStatus);
   const [showModal, setShowModal] = useState(false);
   const [kycStep, setKycStep] = useState(1);
