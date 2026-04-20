@@ -815,7 +815,16 @@ const CardsDashboard = ({ wallets: propWallets }: { wallets?: any[] }) => {
                        </div>
                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem', paddingTop: '0.25rem' }}>
                           <span style={{ fontWeight: 900 }}>TOTAL TO PAY</span>
-                          <span style={{ fontWeight: 900, color: 'var(--primary)' }}>{issueCurrency === 'USD' ? '$5.00' : '₦3,500'}</span>
+                          <div style={{ textAlign: 'right' }}>
+                             <div style={{ fontWeight: 900, color: 'var(--primary)' }}>
+                                {issueCurrency === 'USD' ? '$5.00' : '₦3,500'}
+                             </div>
+                             {issueWalletId && wallets.find(w => w.id === issueWalletId)?.currency !== issueCurrency && (
+                                <div style={{ fontSize: '0.65rem', color: '#f59e0b', fontWeight: 700, marginTop: '2px' }}>
+                                   ≈ {wallets.find(w => w.id === issueWalletId)?.currency === 'NGN' ? '₦7,750.00' : 'ESTIMATING RATE...'}
+                                </div>
+                             )}
+                          </div>
                        </div>
                     </div>
                   </div>

@@ -281,7 +281,40 @@ app.get('/api/users/me', authenticateToken, async (req: any, res: any) => {
     // AUTO-SYNC: Trigger reconciliation (background)
     IbanService.reconcileUserWallets(user.id).catch(err => console.error('[BG-RECONCILE] Error:', err));
 
-    res.json({ ...safeUser, wallets, isPinSet: !!transferPin });
+    // KYC AUTO-POPULATION: If metadata is missing but user is verified, try to pull from Maplerad
+    let updatedMetadata = user.metadata ? (typeof user.metadata === 'string' ? JSON.parse(user.metadata) : user.metadata) : {};
+    let metadataChanged = false;
+
+    if (user.kycStatus === 'VERIFIED' && (!updatedMetadata.bvn || !updatedMetadata.phone)) {
+       const customerId = updatedMetadata.customerId;
+       if (customerId) {
+          try {
+             const customer = await Maplerad.getCustomer(customerId);
+             if (customer) {
+                if (!updatedMetadata.phone && (customer.phone_number || customer.phone)) {
+                   updatedMetadata.phone = customer.phone_number || customer.phone;
+                   metadataChanged = true;
+                }
+                // BVN is rarely returned in plain text, but we can at least flag that we have it verified
+                if (!updatedMetadata.bvn && customer.identity?.number) {
+                   updatedMetadata.bvn = customer.identity.number;
+                   metadataChanged = true;
+                }
+             }
+          } catch (e) {
+             console.error('[KYC-SYNC] Failed to fetch customer from Maplerad:', e);
+          }
+       }
+    }
+
+    if (metadataChanged) {
+       await prisma.user.update({
+          where: { id: user.id },
+          data: { metadata: updatedMetadata }
+       });
+    }
+
+    res.json({ ...safeUser, wallets, metadata: updatedMetadata, isPinSet: !!transferPin });
   } catch (error: any) {
     res.status(500).json({ error: error.message });
   }
@@ -649,6 +682,34 @@ app.post('/api/cards', authenticateToken, async (req: any, res: any): Promise<an
       });
     }
 
+    // 1.1 Perform LIVE Maplerad Swap if currencies differ
+    if (wallet.currency !== (targetCurrency === 'USD' ? 'USD' : 'NGN')) {
+       try {
+          console.log(`[FX-SWAP] Executing Maplerad conversion: ${costInWalletCurrency} ${wallet.currency} -> ${targetCurrency}`);
+          const quote = await Maplerad.generateFxQuote(wallet.currency, targetCurrency === 'USD' ? 'USD' : 'NGN', costInWalletCurrency);
+          await Maplerad.executeFxSwap(quote.reference);
+          console.log(`[FX-SWAP] Successfully converted funds via Maplerad.`);
+       } catch (fxErr: any) {
+          console.error('[FX-SWAP] Conversion failed:', fxErr.message);
+          return res.status(400).json({ error: `Currency conversion failed: ${fxErr.message}. Please ensure you have sufficient funds for the swap.` });
+       }
+    }
+
+    // Save provided KYC data if missing
+    const existingMetadata = (user.metadata as any) || {};
+    if ((bvn || phone) && (!existingMetadata.bvn || !existingMetadata.phone)) {
+       await prisma.user.update({
+          where: { id: userId },
+          data: {
+             metadata: {
+                ...existingMetadata,
+                bvn: bvn || existingMetadata.bvn,
+                phone: phone || existingMetadata.phone
+             }
+          }
+       });
+    }
+
     // 2. Get or Create Bridgecard Cardholder
     let bridgecardId = (user.metadata as any)?.bridgecard_id;
     if (!bridgecardId) {
@@ -659,7 +720,8 @@ app.post('/api/cards', authenticateToken, async (req: any, res: any): Promise<an
         email: user.email,
         phone: phone || (user.metadata as any)?.phone || (user.metadata as any)?.phoneNumber || '+2348000000000',
         bvn: bvn || (user.metadata as any)?.bvn,
-        selfie_image: (user.metadata as any)?.selfie_base64
+        selfie_image: (user.metadata as any)?.selfie_base64,
+        address: (user.metadata as any)?.address
       });
       bridgecardId = customer.cardholder_id;
       
@@ -1619,6 +1681,26 @@ app.post('/api/accounts/provision', authenticateToken, async (req: any, res: any
     }
 
     const name = user?.businessName || `${user?.firstName} ${user?.lastName}`;
+    
+    // Save KYC data to metadata for future reuse (e.g. Card issuance)
+    const existingMetadata = (user?.metadata as any) || {};
+    const updatedMetadata = {
+      ...existingMetadata,
+      bvn: bvn || kycData?.bvn || existingMetadata.bvn,
+      phone: kycData?.phoneNumber || kycData?.phone || existingMetadata.phone || existingMetadata.phoneNumber,
+      address: kycData ? {
+        street: kycData.street,
+        city: kycData.city,
+        state: kycData.state,
+        postalCode: kycData.postalCode
+      } : existingMetadata.address
+    };
+
+    await prisma.user.update({
+      where: { id: req.user.userId },
+      data: { metadata: updatedMetadata }
+    });
+
     const account = await IbanService.provisionGlobalAccount(req.user.userId, currency, name, bvn, kycData);
     res.status(201).json(account);
   } catch (error: any) {

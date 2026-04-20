@@ -41,31 +41,51 @@ export const createCustomer = async (userData: {
       throw new Error('A valid 11-digit BVN is required to issue a virtual card.');
     }
 
+    // Sanitize selfie image (Bridgecard expects raw base64 without prefix)
+    const sanitizedSelfie = userData.selfie_image?.replace(/^data:image\/[a-z]+;base64,/, '') || '';
+
     const payload = {
       first_name: userData.firstName,
       last_name: userData.lastName,
       email_address: userData.email,
-      phone: userData.phone.startsWith('+') ? userData.phone : `+234${userData.phone.slice(-10)}`, // Ensure E.164
+      phone: userData.phone?.replace(/\D/g, '').startsWith('234') ? `+${userData.phone.replace(/\D/g, '')}` : `+234${userData.phone?.replace(/\D/g, '').slice(-10)}`, // Ensure E.164
       address: {
         address: userData.address?.street || '9 Jibowu Street',
         city: userData.address?.city || 'Lagos',
         state: userData.address?.state || 'Lagos',
-        country: userData.address?.country || 'Nigeria',
+        country: 'NIGERIA',
         postal_code: userData.address?.postalCode || '100001',
         house_no: '1'
       },
       identity: {
         id_type: 'NIGERIAN_BVN_VERIFICATION',
         bvn: userData.bvn,
-        selfie_image: userData.selfie_image || ''
+        id_no: userData.bvn,
+        selfie_image: sanitizedSelfie
       }
     };
 
     const response = await bridgecardClient.post('/cardholder/register_cardholder_synchronously', payload);
-    return response.data.data;
+    const data = response.data.data;
+    
+    if (!data || !data.cardholder_id) {
+       console.error('[BRIDGECARD] Registration response missing cardholder_id:', data);
+       throw new Error('Bridgecard registration succeeded but returned no cardholder ID.');
+    }
+    
+    return data;
   } catch (error: any) {
-    console.error('[BRIDGECARD] Register Cardholder Error:', error.response?.data || error.message);
-    throw new Error(error.response?.data?.message || 'Failed to register cardholder on Bridgecard');
+    const errorData = error.response?.data;
+    const statusCode = error.response?.status;
+    console.error('[BRIDGECARD] Register Cardholder Error:', JSON.stringify(errorData, null, 2) || error.message);
+    
+    // EXTREME DEBUGGING: Include everything in the message if possible
+    let msg = errorData?.message || errorData?.error?.message || (errorData ? JSON.stringify(errorData) : error.message);
+    if (!msg || msg === 'Failed to register cardholder on Bridgecard') {
+       msg = `Bridgecard Error (${statusCode || 'Unknown'}): ${error.message}`;
+    }
+    
+    throw new Error(msg);
   }
 };
 

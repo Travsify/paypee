@@ -439,7 +439,7 @@ export const getExchangeRate = async (sourceCurrency: string, targetCurrency: st
     const response = await makeRequest('post', '/fx/quote', {
       source_currency: sourceCurrency,
       target_currency: targetCurrency,
-      amount: 100 // 1.00 in minor units for rate calculation
+      amount: sourceCurrency === 'NGN' ? 500000 : 5000 // ₦5,000 or $50.00 in minor units for rate calculation
     });
     const data = response.data.data;
     return {
@@ -449,30 +449,8 @@ export const getExchangeRate = async (sourceCurrency: string, targetCurrency: st
       timestamp: new Date().toISOString()
     };
   } catch (error: any) {
-    const errorMsg = error.response?.data?.message || '';
-    
-    // 🛡️ SANDBOX FALLBACK: If Maplerad cannot convert (very common in sandbox), provide a realistic mockup rate
-    // This prevents the dashboard from breaking for the user.
-    if (errorMsg.toLowerCase().includes('could not convert') || errorMsg.toLowerCase().includes('not supported')) {
-      console.warn(`[MAPLERAD FX] Using fallback rate for ${sourceCurrency} → ${targetCurrency} (API Error: ${errorMsg})`);
-      
-      let fallbackRate = 1.0;
-      if (sourceCurrency === 'USD' && targetCurrency === 'NGN') fallbackRate = 1550.0;
-      else if (sourceCurrency === 'EUR' && targetCurrency === 'NGN') fallbackRate = 1680.0;
-      else if (sourceCurrency === 'GBP' && targetCurrency === 'NGN') fallbackRate = 1950.0;
-      else if (sourceCurrency === 'NGN' && targetCurrency === 'USD') fallbackRate = 1 / 1580.0;
-      
-      return {
-        rate: fallbackRate,
-        sourceCurrency,
-        targetCurrency,
-        timestamp: new Date().toISOString(),
-        isFallback: true
-      };
-    }
-
     console.error('[MAPLERAD FX] Rate Error:', error.response?.data || error.message);
-    throw new Error(error.response?.data?.message || 'Failed to fetch exchange rate');
+    throw new Error(error.response?.data?.message || 'Failed to fetch exchange rate from Maplerad');
   }
 };
 
