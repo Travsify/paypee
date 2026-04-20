@@ -749,7 +749,7 @@ const CardsDashboard = ({ wallets: propWallets }: { wallets?: any[] }) => {
                          <div style={{ fontSize: '1.2rem', fontWeight: 900, color: '#fff' }}>NGN Card</div>
                          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '4px', fontWeight: 800 }}>LOCAL RAIL</div>
                       </div>
-                                   {!(userData?.metadata?.bridgecard_id) && (
+                                   {!(userData?.metadata?.bridgecard_id || (issueBvn && issuePhone)) && (
                     <div style={{ marginBottom: '2rem' }}>
                       <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: '#475569', marginBottom: '0.75rem', letterSpacing: '1px' }}>IDENTITY VERIFICATION</label>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
@@ -783,14 +783,16 @@ const CardsDashboard = ({ wallets: propWallets }: { wallets?: any[] }) => {
                     </div>
                   )}
                   
-                  {userData?.metadata?.bridgecard_id && (
+                  {(userData?.metadata?.bridgecard_id || (issueBvn && issuePhone)) && (
                     <div style={{ marginBottom: '2rem', padding: '1.5rem', background: 'rgba(16, 185, 129, 0.05)', borderRadius: '16px', border: '1px solid rgba(16, 185, 129, 0.1)', display: 'flex', alignItems: 'center', gap: '1rem' }}>
                        <div style={{ width: '40px', height: '40px', background: 'rgba(16, 185, 129, 0.1)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#10b981' }}>
                           <ShieldCheck size={20} />
                        </div>
                        <div>
                           <div style={{ fontSize: '0.9rem', fontWeight: 900, color: '#fff' }}>Identity Verified</div>
-                          <div style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.5)', fontWeight: 700 }}>Using your existing Bridgecard Profile</div>
+                          <div style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.5)', fontWeight: 700 }}>
+                            {userData?.metadata?.bridgecard_id ? 'Using your Bridgecard Profile' : 'Reusing your verified KYC identity'}
+                          </div>
                        </div>
                     </div>
                   )}
