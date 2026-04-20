@@ -18,6 +18,7 @@ interface VerificationGateProps {
   kycStatus: string;
   accountType: 'INDIVIDUAL' | 'BUSINESS' | 'DEVELOPER';
   onStatusChange?: (newStatus: string) => void;
+  forceShow?: boolean;
 }
 
 interface Notification {
@@ -38,6 +39,7 @@ const VerificationGate: React.FC<VerificationGateProps> = ({ kycStatus: initialS
   const [loading, setLoading] = useState(false);
   const [idType, setIdType] = useState(accountType === 'BUSINESS' ? 'CAC' : 'NIN');
   const [idNumber, setIdNumber] = useState('');
+  const [dob, setDob] = useState('');
   const [faceImage, setFaceImage] = useState<string | null>(null);
   const [error, setError] = useState('');
 
@@ -110,6 +112,10 @@ const VerificationGate: React.FC<VerificationGateProps> = ({ kycStatus: initialS
     if (idType === 'CAC' && idNumber.trim().length < 5) {
       setError('Please enter a valid CAC/RC number.'); return;
     }
+    if (showDob && !dob) {
+      setError('Please select your Date of Birth.');
+      return;
+    }
     setKycStep(2);
   };
 
@@ -165,7 +171,7 @@ const VerificationGate: React.FC<VerificationGateProps> = ({ kycStatus: initialS
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ idType, idNumber: idNumber.trim(), faceImage: compressedImage })
+        body: JSON.stringify({ idType, idNumber: idNumber.trim(), dob, faceImage: compressedImage })
       });
 
       console.log('[FRONTEND DEBUG] 🛰️ Server Response Received. Status:', res.status);
@@ -214,8 +220,10 @@ const VerificationGate: React.FC<VerificationGateProps> = ({ kycStatus: initialS
   };
 
   const cfg = statusConfig[kycStatus as keyof typeof statusConfig];
+  const isBusiness = accountType === 'BUSINESS';
+  const showDob = !isBusiness && (idType === 'NIN' || idType === 'BVN' || idType === 'PASSPORT');
 
-  if (kycStatus === 'VERIFIED') return null;
+  if (kycStatus === 'VERIFIED' && !forceShow) return null;
 
   return (
     <>
@@ -236,9 +244,11 @@ const VerificationGate: React.FC<VerificationGateProps> = ({ kycStatus: initialS
           zIndex: 1000,
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: cfg?.color }}>
-          {cfg?.icon}
-          <span style={{ fontWeight: 600, fontSize: '0.9rem', color: '#fff' }}>{cfg?.text}</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: forceShow ? '#f59e0b' : cfg?.color }}>
+          {forceShow ? <ShieldAlert size={18} /> : cfg?.icon}
+          <span style={{ fontWeight: 600, fontSize: '0.9rem', color: '#fff' }}>
+            {forceShow ? 'Card Issuer requires additional details (DOB & Selfie).' : cfg?.text}
+          </span>
           {kycStatus === 'PROCESSING' && (
             <motion.div animate={{ rotate: 360 }} transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}>
               <RefreshCcw size={14} color={cfg?.color} />
@@ -250,12 +260,12 @@ const VerificationGate: React.FC<VerificationGateProps> = ({ kycStatus: initialS
 
 
           {/* Action Button */}
-          {(kycStatus === 'PENDING' || kycStatus === 'REJECTED') && (
+          {(kycStatus === 'PENDING' || kycStatus === 'REJECTED' || forceShow) && (
             <button
-              onClick={() => { setShowModal(true); setKycStep(1); setError(''); setIdNumber(''); }}
-              style={{ background: cfg?.color, border: 'none', color: '#fff', padding: '0.4rem 1.2rem', borderRadius: '8px', fontSize: '0.85rem', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.4rem' }}
+              onClick={() => { setShowModal(true); setKycStep(1); setError(''); }}
+              style={{ background: forceShow ? '#f59e0b' : cfg?.color, border: 'none', color: '#fff', padding: '0.4rem 1.2rem', borderRadius: '8px', fontSize: '0.85rem', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.4rem' }}
             >
-              {kycStatus === 'REJECTED' ? 'Retry Verification' : 'Verify Now'} <ChevronRight size={14} />
+              {forceShow ? 'Update Now' : kycStatus === 'REJECTED' ? 'Retry Verification' : 'Verify Now'} <ChevronRight size={14} />
             </button>
           )}
         </div>
@@ -337,6 +347,23 @@ const VerificationGate: React.FC<VerificationGateProps> = ({ kycStatus: initialS
                       onBlur={e => { if (!error) e.target.style.borderColor = '#1e293b'; }}
                     />
                   </div>
+
+                  {showDob && (
+                    <div style={{ marginBottom: '1.5rem' }}>
+                      <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 800, color: '#475569', letterSpacing: '1.5px', marginBottom: '0.6rem' }}>
+                        DATE OF BIRTH
+                      </label>
+                      <input 
+                        type="date" 
+                        value={dob} 
+                        onChange={e => { setDob(e.target.value); setError(''); }}
+                        style={{ width: '100%', background: 'rgba(255,255,255,0.03)', border: `2px solid ${error ? '#f43f5e' : '#1e293b'}`, borderRadius: '12px', padding: '0.9rem 1.1rem', color: '#fff', fontSize: '1rem', fontWeight: 600, outline: 'none', boxSizing: 'border-box', transition: 'border 0.2s', colorScheme: 'dark' }}
+                      />
+                      <p style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.3)', marginTop: '0.5rem' }}>
+                        Must match the date on your {idType} record.
+                      </p>
+                    </div>
+                  )}
 
                   {/* Error */}
                   <AnimatePresence>

@@ -23,6 +23,7 @@ import {
   Sparkles
 } from 'lucide-react';
 import { API_BASE } from './config';
+import VerificationGate from './VerificationGate';
 
 const CardsDashboard = ({ wallets: propWallets }: { wallets?: any[] }) => {
   const [cards, setCards] = useState<any[]>([]);
@@ -35,6 +36,7 @@ const CardsDashboard = ({ wallets: propWallets }: { wallets?: any[] }) => {
   const [isIssueModalOpen, setIsIssueModalOpen] = useState(false);
   const [isFundingModalOpen, setIsFundingModalOpen] = useState(false);
   const [isWithdrawModalOpen, setIsWithdrawModalOpen] = useState(false);
+  const [needsKycRefresh, setNeedsKycRefresh] = useState(false);
   const [selectedCard, setSelectedCard] = useState<any>(null);
   const [subscriptions, setSubscriptions] = useState<Record<string, any[]>>({});
   
@@ -214,7 +216,11 @@ const CardsDashboard = ({ wallets: propWallets }: { wallets?: any[] }) => {
         setIsIssueModalOpen(false);
         fetchCards();
       } else {
-        alert('SERVER ERROR (' + res.status + '): ' + (data.error || text || 'Unknown error occurred during card issuance'));
+        const errorMsg = data.error || text || 'Unknown error occurred during card issuance';
+        if (errorMsg.toLowerCase().includes("couldn't verify this id") || errorMsg.toLowerCase().includes("biometric")) {
+          setNeedsKycRefresh(true);
+        }
+        alert('SERVER ERROR (' + res.status + '): ' + errorMsg);
       }
     } catch (err: any) {
       console.error('[DEBUG] Fetch Exception:', err);
@@ -791,12 +797,38 @@ const CardsDashboard = ({ wallets: propWallets }: { wallets?: any[] }) => {
                        <div style={{ width: '40px', height: '40px', background: 'rgba(16, 185, 129, 0.1)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#10b981' }}>
                           <ShieldCheck size={20} />
                        </div>
-                       <div>
-                          <div style={{ fontSize: '0.9rem', fontWeight: 900, color: '#fff' }}>Identity Verified</div>
-                          <div style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.5)', fontWeight: 700 }}>
-                            {userData?.metadata?.bridgecard_id ? 'Using your Bridgecard Profile' : 'Reusing your verified KYC identity'}
+                       <div style={{ flex: 1 }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <div>
+                               <div style={{ fontSize: '0.9rem', fontWeight: 900, color: '#fff' }}>Identity Verified</div>
+                               <div style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.5)', fontWeight: 700 }}>
+                                 {userData?.metadata?.bridgecard_id ? 'Using your Bridgecard Profile' : 'Reusing your verified KYC identity'}
+                               </div>
+                            </div>
+                            <button 
+                              type="button" 
+                              onClick={() => setNeedsKycRefresh(true)}
+                              className="btn btn-outline"
+                              style={{ padding: '0.5rem 1rem', fontSize: '0.75rem', borderRadius: '10px' }}
+                            >
+                              Update Details
+                            </button>
                           </div>
                        </div>
+                    </div>
+                  )}
+
+                  {needsKycRefresh && (
+                    <div style={{ marginBottom: '2.5rem' }}>
+                      <VerificationGate 
+                        kycStatus={userData?.kycStatus || 'VERIFIED'}
+                        accountType="INDIVIDUAL"
+                        forceShow={true}
+                        onStatusChange={() => {
+                          setNeedsKycRefresh(false);
+                          fetchWallets();
+                        }}
+                      />
                     </div>
                   )}
 
