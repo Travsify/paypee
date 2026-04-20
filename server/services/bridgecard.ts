@@ -30,7 +30,9 @@ export const createCustomer = async (userData: {
   lastName: string;
   email: string;
   phone: string;
-  bvn?: string;
+  bvn?: string; // Legacy fallback
+  id_type?: string;
+  id_no?: string;
   selfie_image?: string;
   date_of_birth?: string;
   address?: any;
@@ -38,8 +40,11 @@ export const createCustomer = async (userData: {
   try {
     console.log(`[BRIDGECARD] Registering cardholder: ${userData.email}`);
     
-    if (!userData.bvn || userData.bvn.length !== 11) {
-      throw new Error('A valid 11-digit BVN is required to issue a virtual card.');
+    const identityType = userData.id_type === 'NIN' ? 'NIGERIAN_NIN_VERIFICATION' : 'NIGERIAN_BVN_VERIFICATION';
+    const identityNumber = userData.id_no || userData.bvn;
+
+    if (!identityNumber || identityNumber.length !== 11) {
+      throw new Error(`A valid 11-digit ${userData.id_type || 'BVN'} is required to issue a virtual card.`);
     }
 
     // Sanitize selfie image (Bridgecard expects raw base64 without prefix)
@@ -64,9 +69,10 @@ export const createCustomer = async (userData: {
         house_no: '1'
       },
       identity: {
-        id_type: 'NIGERIAN_BVN_VERIFICATION',
-        bvn: userData.bvn,
-        id_no: userData.bvn,
+        id_type: identityType,
+        bvn: identityNumber, // Some providers still expect this field even for NIN
+        id_no: identityNumber,
+        id_image: sanitizedSelfie, // Also pass as id_image to satisfy strict ID image checks
         selfie_image: sanitizedSelfie
       }
     };

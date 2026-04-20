@@ -720,6 +720,8 @@ app.post('/api/cards', authenticateToken, async (req: any, res: any): Promise<an
         email: user.email,
         phone: phone || (user.metadata as any)?.phone || (user.metadata as any)?.phoneNumber || '+2348000000000',
         bvn: bvn || (user.metadata as any)?.bvn,
+        id_type: (user.metadata as any)?.kyc_id_type,
+        id_no: (user.metadata as any)?.nin || (user.metadata as any)?.bvn,
         selfie_image: (user.metadata as any)?.selfie_base64,
         date_of_birth: (user.metadata as any)?.date_of_birth,
         address: (user.metadata as any)?.address
