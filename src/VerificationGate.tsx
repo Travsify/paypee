@@ -13,6 +13,7 @@ import {
   Bell,
   X
 } from 'lucide-react';
+import { QRCodeSVG } from 'qrcode.react';
 
 interface VerificationGateProps {
   kycStatus: string;
@@ -399,8 +400,13 @@ const VerificationGate: React.FC<VerificationGateProps> = ({ kycStatus: initialS
                 </>
               ) : showMobileScan ? (
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: '1.5rem', padding: '1rem 0' }}>
-                   <div style={{ background: '#fff', padding: '1rem', borderRadius: '24px' }}>
-                     <img src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(window.location.origin + window.location.pathname + '?auth=' + token)}`} alt="Mobile Auth QR" style={{ width: '180px', height: '180px' }} />
+                   <div style={{ background: '#fff', padding: '1.5rem', borderRadius: '24px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                     <QRCodeSVG 
+                       value={window.location.origin + window.location.pathname + '?auth=' + token} 
+                       size={180}
+                       level="H"
+                       includeMargin={true}
+                     />
                    </div>
                    <div>
                      <h3 style={{ fontSize: '1.2rem', fontWeight: 800, marginBottom: '0.5rem' }}>Scan with your Phone</h3>
