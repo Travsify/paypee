@@ -107,8 +107,10 @@ const VerificationGate: React.FC<VerificationGateProps> = ({ kycStatus: initialS
     if (videoRef.current && canvasRef.current) {
       const ctx = canvasRef.current.getContext('2d');
       if (ctx) {
+        // Apply image enhancements to improve Prembly face match success rate
+        ctx.filter = 'brightness(1.15) contrast(1.1) saturate(1.05)';
         ctx.drawImage(videoRef.current, 0, 0, 240, 320);
-        const dataUrl = canvasRef.current.toDataURL('image/jpeg', 0.8);
+        const dataUrl = canvasRef.current.toDataURL('image/jpeg', 0.9);
         setFaceImage(dataUrl);
         if (stream) stream.getTracks().forEach(t => t.stop());
       }

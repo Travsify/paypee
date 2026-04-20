@@ -1593,8 +1593,9 @@ app.post('/api/verify/identity', authenticateToken, async (req: any, res: any): 
       console.error('[KYC DEBUG] ❌ Prembly call failed after attempt!');
       console.error('Error Details:', premblyError.response?.data || premblyError.message);
       
+      const realError = premblyError.response?.data?.message || premblyError.response?.data?.detail || 'Verification service rejected the photo. Please try again with a better photo.';
       await prisma.user.update({ where: { id: userId }, data: { kycStatus: 'PENDING' } });
-      return res.status(503).json({ error: 'Verification service timeout. Please try again with a better photo.' });
+      return res.status(503).json({ error: realError });
     }
 
     if (premblySuccess) {
