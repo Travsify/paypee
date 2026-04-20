@@ -1568,6 +1568,7 @@ app.post('/api/verify/identity', authenticateToken, async (req: any, res: any): 
 
     let premblySuccess = false;
     let failureReason = 'Biometric match failed. Please ensure your face is well-lit and matches your ID photo.';
+    let data: any = null;
 
     try {
       const startTime = Date.now();
@@ -1581,8 +1582,8 @@ app.post('/api/verify/identity', authenticateToken, async (req: any, res: any): 
 
       console.log(`[KYC DEBUG] ✅ Prembly responded in ${Date.now() - startTime}ms`);
       console.log(`[KYC DEBUG] Data:`, JSON.stringify(response.data).substring(0, 100));
-
-      const data = response.data;
+      
+      data = response.data;
       premblySuccess = data.status === 'success' || data.response_code === '00' || data.data?.status === 'MATCH';
       
       if (!premblySuccess) {

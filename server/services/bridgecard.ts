@@ -32,6 +32,7 @@ export const createCustomer = async (userData: {
   phone: string;
   bvn?: string;
   selfie_image?: string;
+  date_of_birth?: string;
   address?: any;
 }) => {
   try {
