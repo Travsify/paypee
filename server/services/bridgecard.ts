@@ -1,6 +1,7 @@
 import axios from 'axios';
 import dotenv from 'dotenv';
-dotenv.config();
+import path from 'path';
+dotenv.config({ path: path.resolve(__dirname, '../.env') });
 
 const BRIDGECARD_BASE_URL = process.env.BRIDGECARD_ENV === 'live' 
   ? 'https://issuecards.api.bridgecard.co/v1/issuing' 

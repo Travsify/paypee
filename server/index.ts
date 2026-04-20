@@ -12,8 +12,9 @@ import { BillsService } from './services/bills.service';
 import { NotificationService } from './services/notification.service';
 import * as Maplerad from './services/maplerad';
 import * as Bridgecard from './services/bridgecard';
+import path from 'path';
 
-dotenv.config();
+dotenv.config({ path: path.resolve(__dirname, '.env') });
 
 const app = express();
 const prisma = new PrismaClient();
