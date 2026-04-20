@@ -50,6 +50,7 @@ const CardsDashboard = ({ wallets: propWallets }: { wallets?: any[] }) => {
   const [issueCurrency, setIssueCurrency] = useState('USD');
   const [issueBvn, setIssueBvn] = useState('');
   const [issuePhone, setIssuePhone] = useState('');
+  const [userData, setUserData] = useState<any>(null);
 
   const fetchCards = async () => {
     try {
@@ -136,6 +137,7 @@ const CardsDashboard = ({ wallets: propWallets }: { wallets?: any[] }) => {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await res.json();
+      setUserData(data);
       if (data.wallets) setWallets(data.wallets);
       
       // Pre-fill KYC data if available
@@ -747,39 +749,51 @@ const CardsDashboard = ({ wallets: propWallets }: { wallets?: any[] }) => {
                          <div style={{ fontSize: '1.2rem', fontWeight: 900, color: '#fff' }}>NGN Card</div>
                          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '4px', fontWeight: 800 }}>LOCAL RAIL</div>
                       </div>
-                   </div>
-                 </div>
-
-                 <div style={{ marginBottom: '2rem' }}>
-                    <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: '#475569', marginBottom: '0.75rem', letterSpacing: '1px' }}>IDENTITY VERIFICATION</label>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                      <div>
-                        <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 700, color: 'rgba(255,255,255,0.4)', marginBottom: '0.5rem' }}>BVN (11 digits)</label>
-                        <input 
-                          type="text" 
-                          value={issueBvn} 
-                          onChange={(e) => setIssueBvn(e.target.value.replace(/\D/g, '').slice(0, 11))} 
-                          placeholder="Enter your 11-digit BVN" 
-                          maxLength={11}
-                          className="form-input" 
-                          style={{ fontSize: '1rem', fontWeight: 700, letterSpacing: '2px' }} 
-                        />
+                                   {!(userData?.metadata?.bridgecard_id) && (
+                    <div style={{ marginBottom: '2rem' }}>
+                      <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: '#475569', marginBottom: '0.75rem', letterSpacing: '1px' }}>IDENTITY VERIFICATION</label>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                        <div>
+                          <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 700, color: 'rgba(255,255,255,0.4)', marginBottom: '0.5rem' }}>BVN (11 digits)</label>
+                          <input 
+                            type="text" 
+                            value={issueBvn} 
+                            onChange={(e) => setIssueBvn(e.target.value.replace(/\D/g, '').slice(0, 11))} 
+                            placeholder="Enter your 11-digit BVN" 
+                            maxLength={11}
+                            className="form-input" 
+                            style={{ fontSize: '1rem', fontWeight: 700, letterSpacing: '2px' }} 
+                          />
+                        </div>
+                        <div>
+                          <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 700, color: 'rgba(255,255,255,0.4)', marginBottom: '0.5rem' }}>Phone Number</label>
+                          <input 
+                            type="text" 
+                            value={issuePhone} 
+                            onChange={(e) => setIssuePhone(e.target.value)} 
+                            placeholder="+234XXXXXXXXXX" 
+                            className="form-input" 
+                            style={{ fontSize: '1rem', fontWeight: 700 }} 
+                          />
+                        </div>
                       </div>
-                      <div>
-                        <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 700, color: 'rgba(255,255,255,0.4)', marginBottom: '0.5rem' }}>Phone Number</label>
-                        <input 
-                          type="text" 
-                          value={issuePhone} 
-                          onChange={(e) => setIssuePhone(e.target.value)} 
-                          placeholder="+234XXXXXXXXXX" 
-                          className="form-input" 
-                          style={{ fontSize: '1rem', fontWeight: 700 }} 
-                        />
-                      </div>
+                      <p style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.35)', marginTop: '0.75rem', lineHeight: 1.5 }}>
+                        Required by our card issuing partner to verify your identity. Your BVN is encrypted and never stored in plain text.
+                      </p>
                     </div>
-                    <p style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.35)', marginTop: '0.75rem', lineHeight: 1.5 }}>
-                      Required by our card issuing partner to verify your identity. Your BVN is encrypted and never stored in plain text.
-                    </p>
+                  )}
+                  
+                  {userData?.metadata?.bridgecard_id && (
+                    <div style={{ marginBottom: '2rem', padding: '1.5rem', background: 'rgba(16, 185, 129, 0.05)', borderRadius: '16px', border: '1px solid rgba(16, 185, 129, 0.1)', display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                       <div style={{ width: '40px', height: '40px', background: 'rgba(16, 185, 129, 0.1)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#10b981' }}>
+                          <ShieldCheck size={20} />
+                       </div>
+                       <div>
+                          <div style={{ fontSize: '0.9rem', fontWeight: 900, color: '#fff' }}>Identity Verified</div>
+                          <div style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.5)', fontWeight: 700 }}>Using your existing Bridgecard Profile</div>
+                       </div>
+                    </div>
+                  )}
                   </div>
 
                           <div style={{ padding: '1.5rem', background: 'rgba(99, 102, 241, 0.05)', borderRadius: '16px', marginBottom: '2.5rem', border: '1px solid rgba(99, 102, 241, 0.1)' }}>
@@ -811,7 +825,7 @@ const CardsDashboard = ({ wallets: propWallets }: { wallets?: any[] }) => {
                     </p>
                  </div>
 
-                 <button type="button" onClick={handleIssueCard} disabled={submitting || !issueWalletId || issueBvn.length !== 11 || !issuePhone} className="btn btn-primary" style={{ width: '100%', padding: '1.4rem', borderRadius: '24px', fontSize: '1.1rem', fontWeight: 900 }}>
+                 <button type="button" onClick={handleIssueCard} disabled={submitting || !issueWalletId || (!userData?.metadata?.bridgecard_id && (issueBvn.length !== 11 || !issuePhone))} className="btn btn-primary" style={{ width: '100%', padding: '1.4rem', borderRadius: '24px', fontSize: '1.1rem', fontWeight: 900 }}>
                    {submitting ? 'Initializing Rail...' : 'Deploy Instantly'}
                  </button>
                </form>
