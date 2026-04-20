@@ -296,13 +296,7 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
 
   return (
     <div className="dashboard-shell">
-      {userData && (
-        <VerificationGate 
-          kycStatus={userData.kycStatus} 
-          accountType="INDIVIDUAL"
-          onStatusChange={(status) => setUserData((prev: any) => ({ ...prev, kycStatus: status }))}
-        />
-      )}
+
 
       {/* Modern Desktop Sidebar */}
       <aside className="modern-sidebar desktop-only">
@@ -333,6 +327,13 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
 
       {/* Main Content Area */}
       <main className="dashboard-main">
+        {userData && (
+          <VerificationGate 
+            kycStatus={userData.kycStatus} 
+            accountType="INDIVIDUAL"
+            onStatusChange={(status) => setUserData((prev: any) => ({ ...prev, kycStatus: status }))}
+          />
+        )}
         {/* Sticky Modern Header */}
         <div style={{ 
           display: 'flex', 
