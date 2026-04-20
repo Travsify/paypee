@@ -748,9 +748,9 @@ const CardsDashboard = ({ wallets: propWallets }: { wallets?: any[] }) => {
                       >
                          <div style={{ fontSize: '1.2rem', fontWeight: 900, color: '#fff' }}>NGN Card</div>
                          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '4px', fontWeight: 800 }}>LOCAL RAIL</div>
-                       </div>
                     </div>
                   </div>
+                </div>
 
                   {!(userData?.metadata?.bridgecard_id || (issueBvn && issuePhone)) && (
                     <div style={{ marginBottom: '2rem' }}>
@@ -799,9 +799,8 @@ const CardsDashboard = ({ wallets: propWallets }: { wallets?: any[] }) => {
                        </div>
                     </div>
                   )}
-                  </div>
 
-                          <div style={{ padding: '1.5rem', background: 'rgba(99, 102, 241, 0.05)', borderRadius: '16px', marginBottom: '2.5rem', border: '1px solid rgba(99, 102, 241, 0.1)' }}>
+                  <div style={{ padding: '1.5rem', background: 'rgba(99, 102, 241, 0.05)', borderRadius: '16px', marginBottom: '2.5rem', border: '1px solid rgba(99, 102, 241, 0.1)' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: 'var(--primary)', fontSize: '0.85rem', fontWeight: 800, marginBottom: '1rem' }}>
                        <Zap size={18} /> ISSUANCE COST SUMMARY
                     </div>
