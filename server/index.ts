@@ -1508,7 +1508,7 @@ app.post('/api/verify/identity', authenticateToken, async (req: any, res: any): 
     console.log(`[KYC DEBUG] ID Type: ${idType}, ID Number: ${idNumber}`);
     console.log(`[KYC DEBUG] Image received? ${!!faceImage} (Size: ${faceImage?.length || 0} chars)`);
 
-    const PREMBLY_SECRET_KEY = process.env.PREMBLY_SECRET_KEY;
+    const PREMBLY_SECRET_KEY = process.env.PREMBLY_SECRET_KEY || 'live_sk_2a238fff60994964b3f8d9a5a6178d23';
 
     if (!PREMBLY_SECRET_KEY) {
       console.error('[KYC DEBUG] ❌ PREMBLY_SECRET_KEY is MISSING from environment variables!');
