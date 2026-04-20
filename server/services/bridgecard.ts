@@ -31,6 +31,7 @@ export const createCustomer = async (userData: {
   email: string;
   phone: string;
   bvn?: string;
+  selfie_image?: string;
   address?: any;
 }) => {
   try {
@@ -56,7 +57,7 @@ export const createCustomer = async (userData: {
       identity: {
         id_type: 'NIGERIAN_BVN_VERIFICATION',
         bvn: userData.bvn,
-        selfie_image: 'https://paypee.com/selfie.jpg'
+        selfie_image: userData.selfie_image || ''
       }
     };
 

@@ -657,8 +657,9 @@ app.post('/api/cards', authenticateToken, async (req: any, res: any): Promise<an
         firstName: user.firstName || 'User',
         lastName: user.lastName || 'Paypee',
         email: user.email,
-        phone: phone || (user.metadata as any)?.phone || '+2348000000000',
-        bvn: bvn || (user.metadata as any)?.bvn
+        phone: phone || (user.metadata as any)?.phone || (user.metadata as any)?.phoneNumber || '+2348000000000',
+        bvn: bvn || (user.metadata as any)?.bvn,
+        selfie_image: (user.metadata as any)?.selfie_base64
       });
       bridgecardId = customer.cardholder_id;
       
@@ -1534,7 +1535,25 @@ app.post('/api/verify/identity', authenticateToken, async (req: any, res: any): 
 
     if (premblySuccess) {
       console.log('[KYC DEBUG] 🎉 Verification SUCCESS! Updating database...');
-      await prisma.user.update({ where: { id: userId }, data: { kycStatus: 'VERIFIED' } });
+      
+      // Save KYC data to metadata for reuse (e.g. Bridgecard card issuance)
+      const existingMetadata = (user.metadata as any) || {};
+      const kycMetadata: any = {
+        ...existingMetadata,
+        kyc_verified_at: new Date().toISOString(),
+        kyc_id_type: idType,
+      };
+      if (idType === 'BVN') kycMetadata.bvn = idNumber;
+      if (idType === 'NIN') kycMetadata.nin = idNumber;
+      if (faceImage) kycMetadata.selfie_base64 = faceImage;
+
+      await prisma.user.update({ 
+        where: { id: userId }, 
+        data: { 
+          kycStatus: 'VERIFIED',
+          metadata: kycMetadata
+        } 
+      });
 
       await NotificationService.create(userId, '✅ Verification Approved!', 
         'Your identity has been successfully verified via biometric match.',

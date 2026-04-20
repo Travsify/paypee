@@ -137,6 +137,12 @@ const CardsDashboard = ({ wallets: propWallets }: { wallets?: any[] }) => {
       });
       const data = await res.json();
       if (data.wallets) setWallets(data.wallets);
+      
+      // Pre-fill KYC data if available
+      if (data.metadata?.bvn) setIssueBvn(data.metadata.bvn);
+      if (data.metadata?.phone || data.metadata?.phoneNumber) {
+        setIssuePhone(data.metadata.phone || data.metadata.phoneNumber);
+      }
     } catch (err) {}
   };
 
