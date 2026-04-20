@@ -181,13 +181,7 @@ const BusinessDashboard = ({ onLogout }: { onLogout?: () => void }) => {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', background: '#020617', color: '#fff', overflow: 'hidden' }}>
-      {userData && (
-        <VerificationGate 
-          kycStatus={userData.kycStatus} 
-          accountType="BUSINESS"
-          onStatusChange={(status) => setUserData((prev: any) => ({ ...prev, kycStatus: status }))}
-        />
-      )}
+
       
       <div style={{ display: 'flex', flex: 1, overflow: 'hidden', position: 'relative' }}>
         {/* Sidebar - Hidden on Mobile */}
@@ -244,7 +238,15 @@ const BusinessDashboard = ({ onLogout }: { onLogout?: () => void }) => {
            </div>
         </div>
 
-        <main className="dashboard-main" style={{ flex: 1, overflowY: 'auto', padding: '3rem 4rem', paddingBottom: '100px' }}>
+        <main className="dashboard-main" style={{ flex: 1, overflowY: 'auto', padding: '3rem 4rem', paddingBottom: '100px', background: 'radial-gradient(circle at 50% 0%, rgba(99, 102, 241, 0.05) 0%, transparent 50%)' }}>
+          {userData && (
+            <VerificationGate 
+              kycStatus={userData.kycStatus} 
+              accountType="BUSINESS"
+              onStatusChange={(status) => setUserData((prev: any) => ({ ...prev, kycStatus: status }))}
+            />
+          )}
+
           {activeSection === 'verification_required' && (
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', textAlign: 'center', minHeight: '60vh' }}>
               <div style={{ width: 80, height: 80, background: 'rgba(99,102,241,0.1)', borderRadius: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary)', marginBottom: '2rem' }}><Building2 size={40} /></div>
