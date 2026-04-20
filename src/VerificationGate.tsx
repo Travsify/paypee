@@ -63,6 +63,27 @@ const VerificationGate: React.FC<VerificationGateProps> = ({ kycStatus: initialS
     } catch (_) {}
   }, [token, kycStatus, onStatusChange]);
 
+  // Resume mobile verify from sessionStorage
+  useEffect(() => {
+    const step = sessionStorage.getItem('mobile_verify_step');
+    if (step === '2') {
+      setKycStep(2);
+      setShowModal(true);
+      const sIdType = sessionStorage.getItem('mobile_verify_idType');
+      const sIdNumber = sessionStorage.getItem('mobile_verify_idNumber');
+      const sDob = sessionStorage.getItem('mobile_verify_dob');
+      if (sIdType) setIdType(sIdType);
+      if (sIdNumber) setIdNumber(sIdNumber);
+      if (sDob) setDob(sDob);
+      
+      // Cleanup
+      sessionStorage.removeItem('mobile_verify_step');
+      sessionStorage.removeItem('mobile_verify_idType');
+      sessionStorage.removeItem('mobile_verify_idNumber');
+      sessionStorage.removeItem('mobile_verify_dob');
+    }
+  }, []);
+
   useEffect(() => {
     if (kycStep === 2 && !faceImage && !loading) {
       navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } })
@@ -140,32 +161,8 @@ const VerificationGate: React.FC<VerificationGateProps> = ({ kycStatus: initialS
         stream.getTracks().forEach(t => t.stop());
       }
 
-      console.log('[FRONTEND DEBUG] 🖼️ Compressing image...');
-      // 🖼️ COMPRESSION STEP: Resize high-res selfies
-      const compressedImage = await new Promise<string>((resolve) => {
-        const img = new Image();
-        img.onload = () => {
-          const canvas = document.createElement('canvas');
-          let width = img.width;
-          let height = img.height;
-          const MAX_WIDTH = 800;
-          
-          if (width > MAX_WIDTH) {
-            height *= MAX_WIDTH / width;
-            width = MAX_WIDTH;
-          }
-          
-          canvas.width = width;
-          canvas.height = height;
-          const ctx = canvas.getContext('2d');
-          ctx?.drawImage(img, 0, 0, width, height);
-          resolve(canvas.toDataURL('image/jpeg', 0.7));
-        };
-        img.src = faceImage;
-      });
-
       console.log('[FRONTEND DEBUG] 🚀 Sending FETCH request to Render...');
-      console.log('[FRONTEND DEBUG] Payload size:', compressedImage.length);
+      console.log('[FRONTEND DEBUG] Payload size:', faceImage.length);
 
       const res = await fetch(`${API_BASE}/api/verify/identity`, {
         method: 'POST',
@@ -173,7 +170,7 @@ const VerificationGate: React.FC<VerificationGateProps> = ({ kycStatus: initialS
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ idType, idNumber: idNumber.trim(), dob, faceImage: compressedImage })
+        body: JSON.stringify({ idType, idNumber: idNumber.trim(), dob, faceImage })
       });
 
       console.log('[FRONTEND DEBUG] 🛰️ Server Response Received. Status:', res.status);
@@ -402,7 +399,7 @@ const VerificationGate: React.FC<VerificationGateProps> = ({ kycStatus: initialS
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: '1.5rem', padding: '1rem 0' }}>
                    <div style={{ background: '#fff', padding: '1.5rem', borderRadius: '24px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                      <QRCodeSVG 
-                       value={window.location.origin + window.location.pathname + '?auth=' + token} 
+                       value={window.location.origin + window.location.pathname + `?auth=${token}&step=2&idType=${idType}&idNumber=${idNumber}&dob=${dob}`} 
                        size={180}
                        level="H"
                        includeMargin={true}

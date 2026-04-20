@@ -71,6 +71,17 @@ const getInitialView = () => {
     localStorage.setItem('paypee_token', urlAuthToken);
     // Assume user is individual for mobile verify flow
     localStorage.setItem('paypee_user', JSON.stringify({ role: 'INDIVIDUAL' }));
+    
+    // Save KYC step data for mobile scan
+    const step = urlParams.get('step');
+    if (step) sessionStorage.setItem('mobile_verify_step', step);
+    const idType = urlParams.get('idType');
+    if (idType) sessionStorage.setItem('mobile_verify_idType', idType);
+    const idNumber = urlParams.get('idNumber');
+    if (idNumber) sessionStorage.setItem('mobile_verify_idNumber', idNumber);
+    const dob = urlParams.get('dob');
+    if (dob) sessionStorage.setItem('mobile_verify_dob', dob);
+
     // Remove auth from URL
     window.history.replaceState({}, document.title, window.location.pathname);
     return 'individual';
