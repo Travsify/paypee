@@ -874,7 +874,7 @@ const CardsDashboard = ({ wallets: propWallets }: { wallets?: any[] }) => {
                     </p>
                  </div>
 
-                 <button type="button" onClick={handleIssueCard} disabled={submitting || !issueWalletId || (!userData?.metadata?.bridgecard_id && (issueBvn.length !== 11 || !issuePhone))} className="btn btn-primary" style={{ width: '100%', padding: '1.4rem', borderRadius: '24px', fontSize: '1.1rem', fontWeight: 900 }}>
+                 <button type="button" onClick={handleIssueCard} disabled={submitting || !issueWalletId || (!userData?.metadata?.bridgecard_id && (!(userData?.metadata?.bvn || userData?.metadata?.nin || issueBvn.length === 11) || !issuePhone))} className="btn btn-primary" style={{ width: '100%', padding: '1.4rem', borderRadius: '24px', fontSize: '1.1rem', fontWeight: 900 }}>
                    {submitting ? 'Initializing Rail...' : 'Deploy Instantly'}
                  </button>
                </form>
