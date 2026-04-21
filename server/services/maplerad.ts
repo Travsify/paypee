@@ -202,7 +202,7 @@ export const issueVirtualAccount = async (customerId: string, currency: string) 
   // Try multiple endpoints as Sandbox rails frequently change
   const endpoints = [
     { url: '/accounts', payload: { customer_id: customerId, currency: currency.toUpperCase() } },
-    { url: '/wallets', payload: { customer_id: customerId, Currency: currency.toUpperCase() } }, // Note: Uppercase 'Currency' for some older Go-based endpoints
+    { url: '/wallets', payload: { customer_id: customerId, currency: currency.toUpperCase() } }, // Lowercase currency for JSON serialization
     { url: '/issuing/accounts', payload: { customer_id: customerId, currency: currency.toUpperCase() } }
   ];
 
