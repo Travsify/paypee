@@ -25,6 +25,7 @@ const allCurrencies = [
   { code: 'GBP', name: 'British Pound', region: 'United Kingdom', desc: 'FPS account for high-speed UK settlements and direct debits.', icon: '🇬🇧', color: '#8b5cf6', benefits: ['Faster Payments', 'CHAPS & BACS', 'Dedicated Sort Code'] },
   { code: 'USDT', name: 'Tether (USDT)', region: 'Solana/Global', desc: 'Stablecoin pegged to the US Dollar for instant crypto transfers.', icon: '💵', color: '#26a17b', benefits: ['Instant settlement', 'Zero volatility', 'Global reach'] },
   { code: 'USDC', name: 'USD Coin (USDC)', region: 'Solana/Global', desc: 'Fully backed digital dollar for borderless payments.', icon: '🔵', color: '#2775ca', benefits: ['1:1 USD backed', 'High liquidity', 'Regulated'] },
+  { code: 'PYUSD', name: 'PayPal USD (PYUSD)', region: 'PayPal/Global', desc: 'Stablecoin from PayPal for secure web3 payments.', icon: '🅿️', color: '#003087', benefits: ['PayPal ecosystem', 'Regulated', 'Solana rail'] },
   { code: 'BTC', name: 'Bitcoin (BTC)', region: 'Global Rail', desc: 'The gold standard of digital assets for long-term value preservation.', icon: '₿', color: '#f59e0b', benefits: ['Absolute scarcity', 'Peer-to-peer', 'Store of value'] }
 ];
 
@@ -286,7 +287,7 @@ const AccountCreationModal: React.FC<AccountCreationModalProps> = ({
                             <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem', marginBottom: '1.25rem' }}>
                                <div style={{ fontSize: '2.5rem' }}>{currentCurrency.icon}</div>
                                <div>
-                                  <div style={{ fontSize: '1.3rem', fontWeight: 900 }}>Configure {currentCurrency.code} {['USDC', 'USDT', 'BTC'].includes(currentCurrency.code) ? 'Wallet' : 'Account'}</div>
+                                  <div style={{ fontSize: '1.3rem', fontWeight: 900 }}>Configure {currentCurrency.code} {['USDC', 'USDT', 'BTC', 'PYUSD'].includes(currentCurrency.code) ? 'Wallet' : 'Account'}</div>
                                   <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 600 }}>{currentCurrency.region} Compliance Region</div>
                                </div>
                             </div>

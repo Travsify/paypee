@@ -916,7 +916,58 @@ app.get('/api/payouts/banks', authenticateToken, async (req: any, res: any) => {
     res.status(500).json({ error: 'Failed to fetch banks' });
   }
 });
-app.get('/api/payouts/verify', authenticateToken, async (req: any, res: any) => {
+app.post('/api/payouts/bulk-transfer', authenticateToken, async (req: any, res: any) => {
+  try {
+    const { payouts, walletId, pin } = req.body;
+    const userId = req.user.userId;
+
+    // Verify PIN
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    if (!user) return res.status(404).json({ error: 'User not found' });
+    if (user.transferPin) {
+       const validPin = await bcrypt.compare(pin, user.transferPin);
+       if (!validPin) return res.status(401).json({ error: 'Invalid Transaction PIN' });
+    }
+
+    const wallet = await prisma.wallet.findUnique({ where: { id: walletId } });
+    if (!wallet || wallet.userId !== userId) return res.status(404).json({ error: 'Wallet not found' });
+
+    const totalAmount = payouts.reduce((acc: number, p: any) => acc + p.amount, 0);
+    if (parseFloat(wallet.balance.toString()) < totalAmount) {
+       return res.status(400).json({ error: 'Insufficient balance for bulk payout' });
+    }
+
+    // Call Maplerad Bulk Transfer
+    const result = await Maplerad.processBulkPayout(payouts);
+
+    // Update Local State (Simplified: Deduct total)
+    await prisma.wallet.update({
+       where: { id: walletId },
+       data: { balance: { decrement: totalAmount } }
+    });
+
+    // Create a single bulk transaction record
+    await prisma.transaction.create({
+       data: {
+          userId,
+          walletId,
+          type: 'WITHDRAWAL',
+          amount: totalAmount,
+          currency: wallet.currency,
+          status: 'COMPLETED',
+          reference: `BULK_${Date.now()}`,
+          category: 'TRANSFER',
+          desc: `Bulk Payout to ${payouts.length} recipients`
+       }
+    });
+
+    res.json(result);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.post('/api/payouts/verify', authenticateToken, async (req: any, res: any) => {
   try {
     const { accountNumber, bankCode } = req.query;
     if (!accountNumber || !bankCode) {
@@ -984,8 +1035,8 @@ app.post('/api/payouts/transfer', authenticateToken, async (req: any, res: any) 
     }
 
     // 3. Execute Maplerad Payout (Handles both Fiat and Crypto)
-    const isMoMo = ['KES', 'GHS', 'UGX', 'RWF', 'XAF', 'XOF', 'TZS'].includes(payoutCurrency);
-    const isCrypto = ['BTC', 'USDT', 'USDC'].includes(payoutCurrency);
+    const isAfricanFiat = ['NGN', 'EUR', 'GBP', 'USD', 'KES', 'GHS', 'UGX', 'RWF', 'XAF', 'XOF', 'TZS'].includes(payoutCurrency);
+    const isCrypto = ['BTC', 'USDT', 'USDC', 'PYUSD'].includes(payoutCurrency);
 
     const accountDetails = {
       bankCode,
@@ -994,7 +1045,7 @@ app.post('/api/payouts/transfer', authenticateToken, async (req: any, res: any) 
       swift_code: swiftCode,
       iban: iban,
       accountName: accountName,
-      beneficiary_type: isMoMo ? 'mobile_money' : (isCrypto ? 'crypto_address' : 'bank_account')
+      beneficiary_type: !isAfricanFiat ? 'mobile_money' : (isCrypto ? 'crypto_address' : 'bank_account')
     };
 
     const reference = `PAYOUT_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
@@ -1738,7 +1789,7 @@ app.get('/api/ai/insights', authenticateToken, async (req: any, res: any) => {
 app.post('/api/accounts/provision', authenticateToken, async (req: any, res: any) => {
   try {
     const { currency, bvn, kycData } = req.body;
-    if (!['USD', 'EUR', 'GBP', 'NGN', 'BTC', 'USDT', 'USDC', 'KES', 'GHS', 'UGX', 'RWF', 'XAF', 'XOF', 'TZS'].includes(currency)) {
+    if (!['USD', 'EUR', 'GBP', 'NGN', 'BTC', 'USDT', 'USDC', 'PYUSD', 'KES', 'GHS', 'UGX', 'RWF', 'XAF', 'XOF', 'TZS'].includes(currency)) {
       return res.status(400).json({ error: 'Unsupported currency for account generation.' });
     }
     const user = await prisma.user.findUnique({ where: { id: req.user.userId } });
@@ -2291,7 +2342,7 @@ app.post('/api/webhooks/maplerad', async (req: Request, res: Response) => {
       
       const customer_id = txData.customer_id || txData.customer?.id || txData.meta?.customer_id;
       
-      const isCrypto = ['BTC', 'USDT', 'USDC'].includes(currency);
+      const isCrypto = ['BTC', 'USDT', 'USDC', 'PYUSD'].includes(currency);
       let parsedAmount = amount;
       if (!isCrypto) {
           parsedAmount = amount / 100;

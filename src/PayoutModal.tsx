@@ -22,6 +22,7 @@ interface PayoutModalProps {
   onClose: () => void;
   onComplete: () => void;
   wallets: any[];
+  userType?: 'BUSINESS' | 'INDIVIDUAL';
 }
 
 const TARGET_CURRENCIES = [
@@ -38,13 +39,17 @@ const TARGET_CURRENCIES = [
   { code: 'TZS', label: 'Tanzania (TZS)', flag: '🇹🇿' },
   { code: 'BTC', label: 'Bitcoin (BTC)', flag: '₿' },
   { code: 'USDT', label: 'Tether (USDT)', flag: '💵' },
-  { code: 'USDC', label: 'USD Coin (USDC)', flag: '🔵' }
+  { code: 'USDC', label: 'USD Coin (USDC)', flag: '🔵' },
+  { code: 'PYUSD', label: 'PayPal USD (PYUSD)', flag: '🪙' }
 ];
 
 const PayoutModal: React.FC<PayoutModalProps> = ({ isOpen, onClose, onComplete, wallets }) => {
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [payoutMode, setPayoutMode] = useState<'single' | 'bulk'>('single');
+  const [bulkFile, setBulkFile] = useState<File | null>(null);
+  const [bulkData, setBulkData] = useState<any[]>([]);
   
   const [amount, setAmount] = useState('');
   const [targetCurrency, setTargetCurrency] = useState('NGN');
@@ -203,9 +208,70 @@ const PayoutModal: React.FC<PayoutModalProps> = ({ isOpen, onClose, onComplete, 
       onComplete();
     } catch (err: any) {
       setError(err.message);
+    }
+  };
+
+  const handleBulkPayout = async () => {
+    if (bulkData.length === 0) return;
+    setLoading(true);
+    setError('');
+    try {
+      const response = await fetch(`${API_BASE}/api/payouts/bulk-transfer`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('paypee_token')}`
+        },
+        body: JSON.stringify({
+          payouts: bulkData,
+          walletId: selectedWalletId,
+          pin
+        })
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || 'Bulk transfer failed');
+      }
+
+      setStep(3);
+      onComplete();
+    } catch (err: any) {
+      setError(err.message);
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setBulkFile(file);
+    
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const text = event.target?.result as string;
+      const lines = text.split('\n').filter(l => l.trim());
+      const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
+      
+      const parsed = lines.slice(1).map(line => {
+        const cols = line.split(',').map(c => c.trim());
+        const row: any = {};
+        headers.forEach((header, i) => {
+          row[header] = cols[i];
+        });
+        return {
+          amount: parseFloat(row.amount),
+          currency: row.currency || targetCurrency,
+          accountNumber: row.account_number || row.accountnumber,
+          bankCode: row.bank_code || row.bankcode,
+          accountName: row.name || row.account_name || row.accountname
+        };
+      }).filter(r => !isNaN(r.amount) && r.accountNumber);
+      
+      setBulkData(parsed);
+    };
+    reader.readAsText(file);
   };
 
   const [bankSearch, setBankSearch] = useState('');
@@ -396,18 +462,27 @@ const PayoutModal: React.FC<PayoutModalProps> = ({ isOpen, onClose, onComplete, 
              <button onClick={onClose} className="btn btn-outline" style={{ width: 40, height: 40, borderRadius: '50%', padding: 0 }}><X size={20} /></button>
           </div>
 
-          {error && (
-            <motion.div 
-              initial={{ opacity: 0, y: -10 }} 
-              animate={{ opacity: 1, y: 0 }}
-              style={{ background: 'rgba(244, 63, 94, 0.1)', color: '#f43f5e', padding: '1.25rem', borderRadius: '20px', marginBottom: '2rem', display: 'flex', alignItems: 'center', gap: '1rem', fontSize: '0.9rem', fontWeight: 700, border: '1px solid rgba(244, 63, 94, 0.2)' }}
-            >
-              <AlertCircle size={20} /> {error}
-            </motion.div>
+          )}
+          
+          {userType === 'BUSINESS' && step === 1 && (
+            <div style={{ display: 'flex', gap: '1rem', marginBottom: '2rem', padding: '0.5rem', background: 'rgba(255,255,255,0.03)', borderRadius: '16px' }}>
+              <button 
+                onClick={() => setPayoutMode('single')}
+                style={{ flex: 1, padding: '0.75rem', borderRadius: '12px', border: 'none', background: payoutMode === 'single' ? 'var(--primary)' : 'transparent', color: '#fff', fontWeight: 700, transition: 'all 0.2s' }}
+              >
+                Single Transfer
+              </button>
+              <button 
+                onClick={() => setPayoutMode('bulk')}
+                style={{ flex: 1, padding: '0.75rem', borderRadius: '12px', border: 'none', background: payoutMode === 'bulk' ? 'var(--primary)' : 'transparent', color: '#fff', fontWeight: 700, transition: 'all 0.2s' }}
+              >
+                Bulk Payout (CSV)
+              </button>
+            </div>
           )}
 
           <AnimatePresence mode="wait">
-            {step === 1 && (
+            {step === 1 && payoutMode === 'single' && (
               <motion.div
                 key="step1"
                 initial={{ opacity: 0, x: -20 }}
@@ -471,6 +546,51 @@ const PayoutModal: React.FC<PayoutModalProps> = ({ isOpen, onClose, onComplete, 
                   style={{ width: '100%', padding: '1.4rem', fontSize: '1.1rem', fontWeight: 900, borderRadius: '24px', opacity: !isStep1Valid() ? 0.5 : 1 }}
                 >
                   Confirm Details <ArrowRight size={20} />
+                </button>
+              </motion.div>
+            )}
+
+            {step === 1 && payoutMode === 'bulk' && (
+              <motion.div
+                key="step1-bulk"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}
+              >
+                <div style={{ padding: '3rem 2rem', border: '2px dashed rgba(255,255,255,0.1)', borderRadius: '24px', textAlign: 'center', background: 'rgba(255,255,255,0.02)' }}>
+                   <input type="file" accept=".csv" onChange={handleFileUpload} style={{ display: 'none' }} id="bulk-payout-upload" />
+                   <label htmlFor="bulk-payout-upload" style={{ cursor: 'pointer' }}>
+                      <div style={{ width: 64, height: 64, background: 'rgba(99, 102, 241, 0.1)', borderRadius: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem', color: 'var(--primary)' }}>
+                         <Globe size={32} />
+                      </div>
+                      <div style={{ fontSize: '1.2rem', fontWeight: 900, marginBottom: '0.5rem' }}>{bulkFile ? bulkFile.name : 'Upload Payout List (CSV)'}</div>
+                      <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Format: amount, account_number, bank_code, name</p>
+                   </label>
+                </div>
+
+                {bulkData.length > 0 && (
+                   <div style={{ background: 'rgba(255,255,255,0.03)', borderRadius: '20px', padding: '1.5rem' }}>
+                      <div style={{ fontSize: '0.8rem', fontWeight: 800, color: 'var(--text-muted)', marginBottom: '1rem' }}>PREVIEW ({bulkData.length} RECIPIENTS)</div>
+                      <div style={{ maxHeight: '150px', overflowY: 'auto' }} className="no-scrollbar">
+                         {bulkData.slice(0, 5).map((r, i) => (
+                            <div key={i} style={{ display: 'flex', justifyContent: 'space-between', padding: '0.5rem 0', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                               <span style={{ fontWeight: 700 }}>{r.accountName || r.accountNumber}</span>
+                               <span style={{ color: 'var(--primary)', fontWeight: 900 }}>{r.amount.toLocaleString()} {r.currency}</span>
+                            </div>
+                         ))}
+                         {bulkData.length > 5 && <div style={{ textAlign: 'center', fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '1rem' }}>+ {bulkData.length - 5} more</div>}
+                      </div>
+                   </div>
+                )}
+
+                <button 
+                  onClick={() => setStep(2)}
+                  disabled={bulkData.length === 0}
+                  className="btn btn-primary"
+                  style={{ width: '100%', padding: '1.4rem', fontSize: '1.1rem', fontWeight: 900, borderRadius: '24px', opacity: bulkData.length === 0 ? 0.5 : 1 }}
+                >
+                  Continue to Authorization <ArrowRight size={20} />
                 </button>
               </motion.div>
             )}
@@ -550,8 +670,8 @@ const PayoutModal: React.FC<PayoutModalProps> = ({ isOpen, onClose, onComplete, 
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '1rem' }}>
                    <button onClick={() => setStep(1)} className="btn btn-outline" style={{ padding: '1.25rem', borderRadius: '20px' }}>Back</button>
                    <button 
-                     onClick={handlePayout}
-                     disabled={loading || pin.length < 4 || !amount}
+                     onClick={payoutMode === 'single' ? handlePayout : handleBulkPayout}
+                     disabled={loading || pin.length < 4 || (payoutMode === 'single' ? !amount : bulkData.length === 0)}
                      className="btn btn-primary"
                      style={{ padding: '1.25rem', borderRadius: '20px', fontSize: '1.1rem', fontWeight: 900 }}
                    >

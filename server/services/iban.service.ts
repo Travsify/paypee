@@ -32,7 +32,7 @@ export class IbanService {
     let details: any = null;
 
     const isAfricanFiat = ['NGN', 'EUR', 'GBP', 'USD', 'KES', 'GHS', 'UGX', 'RWF', 'XAF', 'XOF', 'TZS'].includes(currency);
-    const isCrypto = ['BTC', 'USDT', 'USDC'].includes(currency);
+    const isCrypto = ['BTC', 'USDT', 'USDC', 'PYUSD'].includes(currency);
 
     if (isAfricanFiat) {
        try {
@@ -200,7 +200,7 @@ export class IbanService {
         if (wallet) {
           const currentMeta = typeof wallet.metadata === 'string' ? JSON.parse(wallet.metadata) : wallet.metadata;
           
-          const isCrypto = ['BTC', 'USDT', 'USDC'].includes(accountCurrency);
+          const isCrypto = ['BTC', 'USDT', 'USDC', 'PYUSD'].includes(accountCurrency);
           const needsFiatUpdate = !isCrypto && (!currentMeta || (!currentMeta.iban && !currentMeta.account_number));
           const needsCryptoUpdate = isCrypto && (!currentMeta || (!currentMeta.address && !currentMeta.wallet_address));
 

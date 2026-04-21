@@ -32,6 +32,8 @@ import VerificationGate from './VerificationGate';
 import AiAdvisor from './AiAdvisor';
 import VaultsDashboard from './VaultsDashboard';
 import AccountCreationModal from './AccountCreationModal';
+import BillsDashboard from './BillsDashboard';
+import PayoutModal from './PayoutModal';
 import BalanceCard from './components/BalanceCard';
 import HistoryView from './components/HistoryView';
 import TransactionReceiptModal from './components/TransactionReceiptModal';
@@ -435,14 +437,13 @@ const BusinessDashboard = ({ onLogout }: { onLogout?: () => void }) => {
         </main>
       </div>
 
-      <PayoutModal isOpen={activeSection === 'payouts'} onClose={() => setActiveSection('dashboard')} onComplete={fetchUserData} wallets={userData?.wallets || []} />
+      <PayoutModal isOpen={activeSection === 'payouts'} onClose={() => setActiveSection('dashboard')} onComplete={fetchUserData} wallets={userData?.wallets || []} userType="BUSINESS" />
       <AccountCreationModal 
         isOpen={isAccountModalOpen} 
         onClose={() => setIsAccountModalOpen(false)} 
         onSelect={generateAccount} 
         isProcessing={isGenerating} 
         existingCurrencies={userData?.wallets?.map((w: any) => w.currency) || []} 
-        isStaging={false}
       />
       <TransactionReceiptModal transaction={selectedTx} onClose={() => setSelectedTx(null)} />
     </div>

@@ -333,6 +333,29 @@ export const processPayout = async (amount: number, currency: string, accountDet
 };
 
 /**
+ * Process Bulk Payouts
+ */
+export const processBulkPayout = async (payouts: any[]) => {
+  try {
+    const payload = {
+      payouts: payouts.map(p => ({
+        amount: Math.round(p.amount * 100),
+        currency: p.currency,
+        account_number: p.accountNumber,
+        bank_code: p.bankCode,
+        reason: p.reason || 'Paypee Bulk Payout',
+        name: p.accountName
+      }))
+    };
+    const response = await makeRequest('post', '/transfers/bulk', payload);
+    return response.data.data;
+  } catch (error: any) {
+    console.error('[MAPLERAD] Bulk Payout Error:', error.response?.data || error.message);
+    throw new Error(error.response?.data?.message || 'Bulk Payout failed via Maplerad');
+  }
+};
+
+/**
  * Get Banks / Institutions / Mobile Money Providers
  */
 export const getBanks = async (currency: string = 'NGN') => {
@@ -726,7 +749,8 @@ export const issueCryptoAddress = async (customerId: string, currency: string) =
   // Map Paypee currency codes to Maplerad's coin/chain format
   const coinMap: Record<string, { coin: string; chain: string }> = {
     'USDC': { coin: 'USDC', chain: 'solana' },
-    'USDT': { coin: 'USDT', chain: 'solana' } // Changed to solana as tron/eth are down and polygon is not allowed
+    'USDT': { coin: 'USDT', chain: 'solana' },
+    'PYUSD': { coin: 'PYUSD', chain: 'solana' }
   };
 
   const mapping = coinMap[currency];
