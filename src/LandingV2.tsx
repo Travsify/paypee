@@ -59,7 +59,7 @@ const Nav = ({ onAuth, onNavigate }: { onAuth: () => void, onNavigate: (page: st
 
 const InnerHero = ({ title, subtitle }: { title: string, subtitle: string }) => (
    <section style={{ padding: '12rem 0 4rem', textAlign: 'center', background: `radial-gradient(circle at top center, rgba(99, 102, 241, 0.1) 0%, transparent 70%)` }}>
-      <h1 className="text-glow" style={{ fontSize: 'clamp(3rem, 6vw, 4.5rem)', fontWeight: 900, color: theme.text1, letterSpacing: '-0.04em', marginBottom: '1.5rem' }}>{title}</h1>
+      <h1 className="text-glow" style={{ fontSize: 'clamp(2rem, 6vw, 4rem)', fontWeight: 900, color: theme.text1, letterSpacing: '-0.04em', marginBottom: '1.5rem' }}>{title}</h1>
       <p style={{ fontSize: '1.2rem', color: theme.text2, maxWidth: '700px', margin: '0 auto', fontWeight: 500, lineHeight: 1.6 }}>{subtitle}</p>
    </section>
 );
@@ -76,7 +76,7 @@ const HeroSection = ({ onAuth }: { onAuth: () => void }) => {
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.75rem', padding: '0.6rem 1.5rem', ...glassPanel, borderRadius: '99px', color: theme.cyan, fontSize: '0.8rem', fontWeight: 900, letterSpacing: '3px', marginBottom: '3rem', border: '1px solid rgba(34, 211, 238, 0.2)' }}>
              <Activity size={16} /> EASY MONEY APP
           </div>
-          <h1 style={{ fontSize: 'clamp(3.5rem, 8vw, 6rem)', fontWeight: 900, letterSpacing: '-0.05em', lineHeight: 1, marginBottom: '1.5rem', color: theme.text1 }}>
+          <h1 style={{ fontSize: 'clamp(2.5rem, 8vw, 5rem)', fontWeight: 900, letterSpacing: '-0.05em', lineHeight: 1, marginBottom: '1.5rem', color: theme.text1 }}>
              Your Money.<br />
              <span className="text-glow">Simple & Fast.</span>
           </h1>
@@ -124,7 +124,7 @@ const LivePreview = () => (
   <section style={{ padding: '6rem 0', position: 'relative', zIndex: 20 }}>
     <div className="container" style={{ textAlign: 'center', marginBottom: '4.5rem' }}>
        <div style={{ color: theme.text2, fontWeight: 900, letterSpacing: '3px', textTransform: 'uppercase', marginBottom: '1rem', fontSize: '0.75rem' }}>TERMINAL PREVIEW</div>
-       <h2 className="text-glow" style={{ fontSize: 'clamp(2.5rem, 5vw, 3.5rem)', fontWeight: 900, color: theme.text1, letterSpacing: '-0.03em', marginBottom: '1.5rem' }}>High-Velocity Dashboard</h2>
+       <h2 className="text-glow" style={{ fontSize: 'clamp(1.8rem, 5vw, 3rem)', fontWeight: 900, color: theme.text1, letterSpacing: '-0.03em', marginBottom: '1.5rem' }}>High-Velocity Dashboard</h2>
        <p style={{ color: theme.text2, fontSize: '1.1rem', maxWidth: '650px', margin: '0 auto', fontWeight: 500, lineHeight: 1.6 }}>See your money move in real-time, keep it safe with smart protection — all in one easy app.</p>
     </div>
     <div className="container" style={{ display: 'flex', justifyContent: 'center' }}>
@@ -140,7 +140,7 @@ const LivePreview = () => (
           <div style={{ padding: '4rem', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '4rem', position: 'relative', zIndex: 10 }}>
              <div>
                 <div style={{ color: 'var(--primary)', fontWeight: 900, fontSize: '0.8rem', letterSpacing: '2px', marginBottom: '1rem' }}>AGGREGATE PORTFOLIO</div>
-                <div style={{ fontSize: '4rem', fontWeight: 900, color: theme.text1, letterSpacing: '-0.04em', marginBottom: '0.5rem' }}>$128,450<span style={{ opacity: 0.4 }}>.20</span></div>
+                <div style={{ fontSize: 'clamp(2.5rem, 6vw, 4rem)', fontWeight: 900, color: theme.text1, letterSpacing: '-0.04em', marginBottom: '0.5rem' }}>$128,450<span style={{ opacity: 0.4 }}>.20</span></div>
                 <div style={{ color: '#10b981', fontWeight: 800, fontSize: '1.1rem', marginBottom: '3rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                    <TrendingUp size={20} /> + $2,340.42 <span style={{ opacity: 0.6, fontSize: '0.9rem', fontWeight: 600 }}>this cycle</span>
                 </div>
@@ -190,7 +190,7 @@ const Capabilities = () => (
     <div className="container">
        <div style={{ textAlign: 'center', marginBottom: '5rem' }}>
           <div style={{ color: theme.text2, fontWeight: 900, letterSpacing: '3px', textTransform: 'uppercase', marginBottom: '1rem', fontSize: '0.75rem' }}>CAPABILITIES</div>
-          <h2 className="text-glow" style={{ fontSize: 'clamp(2.5rem, 5vw, 3.5rem)', fontWeight: 900, color: theme.text1, letterSpacing: '-0.03em' }}>Institutional Infrastructure</h2>
+          <h2 className="text-glow" style={{ fontSize: 'clamp(1.8rem, 5vw, 3rem)', fontWeight: 900, color: theme.text1, letterSpacing: '-0.03em' }}>Institutional Infrastructure</h2>
        </div>
        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: '2.5rem' }}>
           {[
@@ -221,7 +221,7 @@ const MultiCurrency = () => (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '6rem', alignItems: 'center' }}>
            <div>
               <div style={{ color: theme.cyan, fontWeight: 900, letterSpacing: '3px', textTransform: 'uppercase', marginBottom: '1.5rem', fontSize: '0.75rem' }}>CURRENCY RAILS</div>
-              <h2 className="text-glow" style={{ fontSize: 'clamp(2.5rem, 5vw, 3.5rem)', fontWeight: 900, color: theme.text1, marginBottom: '1.5rem', lineHeight: 1, letterSpacing: '-0.04em' }}>Global Capital.<br/>Single Registry.</h2>
+              <h2 className="text-glow" style={{ fontSize: 'clamp(1.8rem, 5vw, 3rem)', fontWeight: 900, color: theme.text1, marginBottom: '1.5rem', lineHeight: 1, letterSpacing: '-0.04em' }}>Global Capital.<br/>Single Registry.</h2>
               <p style={{ color: theme.text2, fontSize: '1.2rem', lineHeight: 1.7, fontWeight: 500 }}>Switch between fiat and digital assets in one tap. High-fidelity settlement engine ensures real-time parity across all global regions.</p>
            </div>
            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
@@ -298,7 +298,7 @@ const VirtualCards = () => (
            {/* Right side: Text Content */}
            <div>
               <div style={{ color: theme.purple, fontWeight: 900, letterSpacing: '3px', textTransform: 'uppercase', marginBottom: '1.5rem', fontSize: '0.75rem' }}>CAPITAL RAILS</div>
-              <h2 className="text-glow" style={{ fontSize: 'clamp(2.5rem, 5vw, 3.5rem)', fontWeight: 900, color: theme.text1, marginBottom: '1.5rem', lineHeight: 1, letterSpacing: '-0.04em' }}>Platinum Rails.<br/>Absolute Agency.</h2>
+              <h2 className="text-glow" style={{ fontSize: 'clamp(1.8rem, 5vw, 3rem)', fontWeight: 900, color: theme.text1, marginBottom: '1.5rem', lineHeight: 1, letterSpacing: '-0.04em' }}>Platinum Rails.<br/>Absolute Agency.</h2>
               <p style={{ color: theme.text2, fontSize: '1.2rem', marginBottom: '3rem', lineHeight: 1.7, fontWeight: 500 }}>Issue unlimited virtual Mastercard rails for subscriptions, corporate travel, or global spending. Set precise thresholds and freeze rails instantly.</p>
               
               <div style={{ display: 'flex', gap: '2rem', flexWrap: 'wrap' }}>
@@ -342,7 +342,7 @@ const GlobalTransfers = () => (
               </div>
               <div style={{ ...glassPanel, padding: '1.5rem', marginBottom: '2rem', border: '1px solid rgba(34, 211, 238, 0.2)', background: 'rgba(34, 211, 238, 0.02)' }}>
                  <div style={{ color: theme.text2, fontSize: '0.8rem', fontWeight: 800, letterSpacing: '1px', marginBottom: '0.5rem' }}>VOLUME</div>
-                 <div style={{ fontWeight: 900, fontSize: '2.2rem', color: theme.text1, letterSpacing: '-0.02em' }}>$1,200.00</div>
+                 <div style={{ fontWeight: 900, fontSize: 'clamp(1.6rem, 4vw, 2.2rem)', color: theme.text1, letterSpacing: '-0.02em' }}>$1,200.00</div>
                  <div style={{ color: theme.cyan, fontSize: '1rem', fontWeight: 800 }}>≈ ₦1,800,000.00</div>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.25rem', padding: '0 0.5rem' }}>
@@ -357,7 +357,7 @@ const GlobalTransfers = () => (
            </div>
            <div>
               <div style={{ color: theme.primary, fontWeight: 900, letterSpacing: '3px', textTransform: 'uppercase', marginBottom: '1.5rem', fontSize: '0.75rem' }}>GLOBAL SETTLEMENTS</div>
-              <h2 className="text-glow" style={{ fontSize: 'clamp(2.5rem, 5vw, 3.5rem)', fontWeight: 900, color: theme.text1, marginBottom: '1.5rem', lineHeight: 1, letterSpacing: '-0.04em' }}>Capital Movement.<br/>Accelerated.</h2>
+              <h2 className="text-glow" style={{ fontSize: 'clamp(1.8rem, 5vw, 3rem)', fontWeight: 900, color: theme.text1, marginBottom: '1.5rem', lineHeight: 1, letterSpacing: '-0.04em' }}>Capital Movement.<br/>Accelerated.</h2>
               <p style={{ color: theme.text2, fontSize: '1.2rem', lineHeight: 1.7, fontWeight: 500 }}>80+ countries. 40+ currencies. Eliminate banking latency with our high-velocity settlement network. Send capital worldwide like sending a text.</p>
            </div>
         </div>
@@ -370,13 +370,13 @@ const CryptoSwap = () => (
    <section id="crypto" style={{ padding: '8rem 0' }}>
       <div className="container" style={{ textAlign: 'center' }}>
          <div style={{ color: theme.cyan, fontWeight: 900, letterSpacing: '3px', textTransform: 'uppercase', marginBottom: '1.5rem', fontSize: '0.75rem' }}>ASSET SWAP ENGINE</div>
-         <h2 className="text-glow" style={{ fontSize: 'clamp(2.5rem, 5vw, 3.5rem)', fontWeight: 900, color: theme.text1, marginBottom: '1.5rem', letterSpacing: '-0.04em' }}>Liquidity on Demand.</h2>
+         <h2 className="text-glow" style={{ fontSize: 'clamp(1.8rem, 5vw, 3rem)', fontWeight: 900, color: theme.text1, marginBottom: '1.5rem', letterSpacing: '-0.04em' }}>Liquidity on Demand.</h2>
          <p style={{ color: theme.text2, fontSize: '1.2rem', maxWidth: '750px', margin: '0 auto 5rem', fontWeight: 500, lineHeight: 1.7 }}>Trade fiat and digital assets with near-zero spreads. Aggregated liquidity from global registries gives you the best execution price, every time.</p>
          
          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '3rem', flexWrap: 'wrap' }}>
             <div className="premium-card" style={{ padding: '3rem', width: '340px', textAlign: 'left', background: 'rgba(255,255,255,0.01)' }}>
                <div style={{ color: theme.text2, fontSize: '0.9rem', fontWeight: 800, letterSpacing: '1px', marginBottom: '0.75rem' }}>YOU PAY</div>
-               <div style={{ fontSize: '2.5rem', fontWeight: 900, color: theme.text1, letterSpacing: '-0.02em' }}>1.24 BTC</div>
+               <div style={{ fontSize: 'clamp(1.8rem, 4vw, 2.5rem)', fontWeight: 900, color: theme.text1, letterSpacing: '-0.02em' }}>1.24 BTC</div>
                <div style={{ color: theme.text2, fontSize: '0.85rem', fontWeight: 600 }}>LIQUIDITY: 1.24 BTC</div>
             </div>
             <div style={{ width: 64, height: 64, background: 'var(--primary)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', boxShadow: '0 0 30px var(--primary-glow)' }}>
@@ -384,13 +384,13 @@ const CryptoSwap = () => (
             </div>
             <div className="premium-card" style={{ padding: '3rem', width: '340px', textAlign: 'left', borderColor: theme.cyan, background: 'rgba(34, 211, 238, 0.02)' }}>
                <div style={{ color: theme.text2, fontSize: '0.9rem', fontWeight: 800, letterSpacing: '1px', marginBottom: '0.75rem' }}>YOU RECEIVE <span style={{ background: theme.cyan, color: '#000', padding: '3px 8px', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 900, marginLeft: '0.5rem' }}>OPTIMIZED</span></div>
-               <div style={{ fontSize: '2.5rem', fontWeight: 900, color: theme.cyan, letterSpacing: '-0.02em' }}>$32,540<span style={{ opacity: 0.4 }}>.00</span></div>
+               <div style={{ fontSize: 'clamp(1.8rem, 4vw, 2.5rem)', fontWeight: 900, color: theme.cyan, letterSpacing: '-0.02em' }}>$32,540<span style={{ opacity: 0.4 }}>.00</span></div>
             </div>
          </div>
          <div style={{ display: 'flex', justifyContent: 'center', gap: '6rem', marginTop: '6rem' }}>
-            <div><div style={{ fontSize: '3rem', fontWeight: 900 }}>120+</div><div style={{ color: theme.text2, fontWeight: 800, letterSpacing: '1px' }}>ASSET PAIRS</div></div>
-            <div><div style={{ fontSize: '3rem', fontWeight: 900 }}>1.4s</div><div style={{ color: theme.text2, fontWeight: 800, letterSpacing: '1px' }}>AVG SETTLEMENT</div></div>
-            <div><div style={{ fontSize: '3rem', fontWeight: 900 }}>0.1%</div><div style={{ color: theme.text2, fontWeight: 800, letterSpacing: '1px' }}>PROTOCOL FEE</div></div>
+            <div><div style={{ fontSize: 'clamp(2rem, 5vw, 3rem)', fontWeight: 900 }}>120+</div><div style={{ color: theme.text2, fontWeight: 800, letterSpacing: '1px' }}>ASSET PAIRS</div></div>
+            <div><div style={{ fontSize: 'clamp(2rem, 5vw, 3rem)', fontWeight: 900 }}>1.4s</div><div style={{ color: theme.text2, fontWeight: 800, letterSpacing: '1px' }}>AVG SETTLEMENT</div></div>
+            <div><div style={{ fontSize: 'clamp(2rem, 5vw, 3rem)', fontWeight: 900 }}>0.1%</div><div style={{ color: theme.text2, fontWeight: 800, letterSpacing: '1px' }}>PROTOCOL FEE</div></div>
          </div>
       </div>
    </section>
@@ -405,7 +405,7 @@ const PaypeeAI = () => (
             <div style={{ width: 80, height: 80, background: 'var(--primary)', borderRadius: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 2rem', color: '#fff', boxShadow: '0 20px 40px -10px var(--primary-glow)' }}>
                <Bot size={48} />
             </div>
-            <h2 className="text-glow" style={{ fontSize: 'clamp(2.5rem, 5vw, 3.5rem)', fontWeight: 900, color: theme.text1, marginBottom: '1.5rem', letterSpacing: '-0.04em' }}>Capital Intelligence.</h2>
+            <h2 className="text-glow" style={{ fontSize: 'clamp(1.8rem, 5vw, 3rem)', fontWeight: 900, color: theme.text1, marginBottom: '1.5rem', letterSpacing: '-0.04em' }}>Capital Intelligence.</h2>
             <p style={{ color: theme.text2, fontSize: '1.2rem', maxWidth: '700px', margin: '0 auto', fontWeight: 500, lineHeight: 1.7 }}>Your smart helper watches your money 24/7 to make sure it's safe and growing.</p>
          </div>
          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: '2.5rem' }}>
@@ -433,7 +433,7 @@ const Security = () => (
       <div className="container" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '6rem', alignItems: 'center' }}>
          <div>
             <div style={{ color: theme.primary, fontWeight: 900, letterSpacing: '3px', textTransform: 'uppercase', marginBottom: '1.5rem', fontSize: '0.75rem' }}>HARDENED SECURITY</div>
-            <h2 className="text-glow" style={{ fontSize: 'clamp(2.5rem, 5vw, 3.5rem)', fontWeight: 900, color: theme.text1, marginBottom: '1.5rem', lineHeight: 1, letterSpacing: '-0.04em' }}>Fortified Assets.<br/>Seamless Access.</h2>
+            <h2 className="text-glow" style={{ fontSize: 'clamp(1.8rem, 5vw, 3rem)', fontWeight: 900, color: theme.text1, marginBottom: '1.5rem', lineHeight: 1, letterSpacing: '-0.04em' }}>Fortified Assets.<br/>Seamless Access.</h2>
             <p style={{ color: theme.text2, fontSize: '1.2rem', lineHeight: 1.7, fontWeight: 500 }}>Your capital and identity are protected by institutional-grade encryption protocols trusted by the world's leading financial entities.</p>
          </div>
          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '3rem' }}>
@@ -461,7 +461,7 @@ const ForWho = ({ onAuth }: { onAuth: () => void }) => (
       <div className="container">
          <div style={{ textAlign: 'center', marginBottom: '5rem' }}>
             <div style={{ color: theme.cyan, fontWeight: 900, letterSpacing: '3px', textTransform: 'uppercase', marginBottom: '1.5rem', fontSize: '0.75rem' }}>CLIENT PROFILES</div>
-            <h2 className="text-glow" style={{ fontSize: 'clamp(2.5rem, 5vw, 3.5rem)', fontWeight: 900, color: theme.text1, letterSpacing: '-0.04em' }}>Provisioned for All.</h2>
+            <h2 className="text-glow" style={{ fontSize: 'clamp(1.8rem, 5vw, 3rem)', fontWeight: 900, color: theme.text1, letterSpacing: '-0.04em' }}>Provisioned for All.</h2>
          </div>
          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '2.5rem' }}>
             {[
@@ -470,7 +470,7 @@ const ForWho = ({ onAuth }: { onAuth: () => void }) => (
               { t: 'Developers', p: 'Engineer custom money flows with our advanced API and SDK registry.', items: ['REST + Real-time Webhooks', 'High-fidelity sandbox', 'Open source SDK registry'], btn: 'btn-outline', color: theme.purple }
             ].map((card, i) => (
               <div key={i} className="premium-card" style={{ padding: '4rem 3rem', display: 'flex', flexDirection: 'column', background: card.active ? `linear-gradient(180deg, rgba(99, 102, 241, 0.1) 0%, rgba(2, 6, 23, 0.5) 100%)` : 'rgba(255,255,255,0.01)', border: card.active ? '1px solid rgba(99, 102, 241, 0.2)' : '1px solid rgba(255,255,255,0.05)' }}>
-                 <h3 style={{ fontSize: '2.2rem', fontWeight: 900, color: theme.text1, marginBottom: '1.25rem', letterSpacing: '-0.03em' }}>{card.t}</h3>
+                 <h3 style={{ fontSize: 'clamp(1.6rem, 4vw, 2.2rem)', fontWeight: 900, color: theme.text1, marginBottom: '1.25rem', letterSpacing: '-0.03em' }}>{card.t}</h3>
                  <p style={{ color: theme.text2, lineHeight: 1.7, marginBottom: '2.5rem', fontSize: '1.05rem', fontWeight: 500 }}>{card.p}</p>
                  <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 3rem 0', color: theme.text1, display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                     {card.items.map((item, idx) => (
@@ -499,7 +499,7 @@ const SocialProof = () => (
               { l: 'APP STORE RATING', v: '4.9★', c: theme.text1 }
             ].map((s, idx) => (
               <div key={idx}>
-                <div style={{ fontSize: '3.5rem', fontWeight: 900, color: s.c, letterSpacing: '-0.04em' }}>{s.v}</div>
+                <div style={{ fontSize: 'clamp(2.5rem, 6vw, 3.5rem)', fontWeight: 900, color: s.c, letterSpacing: '-0.04em' }}>{s.v}</div>
                 <div style={{ color: theme.text2, fontWeight: 900, fontSize: '0.8rem', letterSpacing: '2px', marginTop: '0.5rem' }}>{s.l}</div>
               </div>
             ))}
@@ -530,7 +530,7 @@ const CTA = ({ onAuth }: { onAuth: () => void }) => (
       <div style={{ position: 'absolute', inset: 0, background: `radial-gradient(circle at center, ${theme.primary}20 0%, transparent 60%)` }} />
       <div className="container" style={{ textAlign: 'center', position: 'relative', zIndex: 10 }}>
          <div className="premium-card" style={{ padding: '6rem 4rem', background: 'rgba(10,15,44,0.4)', border: '1px solid rgba(255,255,255,0.08)' }}>
-            <h2 className="text-glow" style={{ fontSize: 'clamp(2.5rem, 5vw, 4rem)', fontWeight: 900, color: theme.text1, marginBottom: '1.5rem', letterSpacing: '-0.04em' }}>Execute Your Global Vision.</h2>
+            <h2 className="text-glow" style={{ fontSize: 'clamp(1.8rem, 5vw, 3.5rem)', fontWeight: 900, color: theme.text1, marginBottom: '1.5rem', letterSpacing: '-0.04em' }}>Execute Your Global Vision.</h2>
             <p style={{ color: theme.text2, fontSize: '1.25rem', marginBottom: '3.5rem', fontWeight: 500 }}>Setup takes under 60 seconds. Deploy your financial terminal today.</p>
             <motion.button 
               onClick={onAuth} 
