@@ -33,7 +33,7 @@ const CollectionsDashboard = () => {
   const fetchLinks = async () => {
     try {
       const token = localStorage.getItem('paypee_token');
-      const res = await fetch('https://paypee-api-kmhv.onrender.com/api/collections/links', {
+      const res = await fetch(`${window.location.origin.includes('localhost') ? 'http://localhost:5000' : 'https://paypee-api-kmhv.onrender.com'}/api/collections/links`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await res.json();
@@ -53,7 +53,7 @@ const CollectionsDashboard = () => {
     e.preventDefault();
     try {
       const token = localStorage.getItem('paypee_token');
-      const res = await fetch('https://paypee-api-kmhv.onrender.com/api/collections/links', {
+      const res = await fetch(`${window.location.origin.includes('localhost') ? 'http://localhost:5000' : 'https://paypee-api-kmhv.onrender.com'}/api/collections/links`, {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
@@ -141,7 +141,7 @@ const CollectionsDashboard = () => {
                     </td>
                     <td style={{ padding: '1.2rem 2rem' }}>
                       <div style={{ display: 'flex', gap: '0.75rem' }}>
-                        <button onClick={() => copyToClipboard(`https://paypee.me/checkout/${link.slug}`, link.id)} style={{ background: 'rgba(255,255,255,0.05)', border: 'none', borderRadius: '8px', padding: '0.5rem', color: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                        <button onClick={() => copyToClipboard(`${window.location.origin}/pay/${link.slug}`, link.id)} style={{ background: 'rgba(255,255,255,0.05)', border: 'none', borderRadius: '8px', padding: '0.5rem', color: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                           {copiedId === link.id ? <Check size={14} color="#10b981" /> : <Copy size={14} />} {copiedId === link.id ? 'Copied' : 'Copy'}
                         </button>
                         <button style={{ background: 'rgba(255,255,255,0.05)', border: 'none', borderRadius: '8px', padding: '0.5rem', color: '#fff', cursor: 'pointer' }}>
@@ -172,8 +172,8 @@ const CollectionsDashboard = () => {
                   <select value={currency} onChange={e => setCurrency(e.target.value)} style={inputStyle}>
                     <option value="USD">USD</option>
                     <option value="NGN">NGN</option>
-                    <option value="EUR">EUR</option>
-                    <option value="GBP">GBP</option>
+                    <option value="USDT">USDT</option>
+                    <option value="USDC">USDC</option>
                   </select>
                 </div>
                 <div>

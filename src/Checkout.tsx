@@ -9,6 +9,7 @@ import {
   ChevronRight,
   Globe
 } from 'lucide-react';
+import { API_BASE } from './config';
 
 const Checkout = ({ slug, onBack }: { slug: string, onBack: () => void }) => {
   const [link, setLink] = useState<any>(null);
@@ -16,14 +17,31 @@ const Checkout = ({ slug, onBack }: { slug: string, onBack: () => void }) => {
   const [method, setMethod] = useState<'CARD' | 'BITCOIN' | 'BANK' | null>(null);
   const [paid, setPaid] = useState(false);
 
+  // Sanitize slug
+  const cleanSlug = slug?.replace(/\/$/, '');
+
+  const getCurrencySymbol = (ccy: string) => {
+    switch (ccy?.toUpperCase()) {
+      case 'NGN': return '₦';
+      case 'USDT':
+      case 'USDC': return '₮';
+      default: return '$';
+    }
+  };
+
   useEffect(() => {
-    fetch(`https://paypee-api-kmhv.onrender.com/api/pub/payment-links/${slug}`)
+    if (!cleanSlug) return;
+    fetch(`${API_BASE}/api/pub/payment-links/${cleanSlug}`)
       .then(res => res.json())
       .then(data => {
         setLink(data);
         setLoading(false);
+      })
+      .catch(err => {
+        console.error('Fetch error:', err);
+        setLoading(false);
       });
-  }, [slug]);
+  }, [cleanSlug]);
 
   const handlePay = () => {
     setLoading(true);
@@ -55,8 +73,8 @@ const Checkout = ({ slug, onBack }: { slug: string, onBack: () => void }) => {
             </div>
 
             <div style={amountDisplaystyle}>
-              <span style={{ fontSize: '1.5rem', opacity: 0.5 }}>$</span>
-              <span style={{ fontSize: '3.5rem', fontWeight: 900 }}>{parseFloat(link.amount).toFixed(2)}</span>
+              <span style={{ fontSize: '1.5rem', opacity: 0.5 }}>{getCurrencySymbol(link.currency)}</span>
+              <span style={{ fontSize: '3.5rem', fontWeight: 900 }}>{parseFloat(link.amount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
             </div>
 
             <div style={{ display: 'grid', gap: '0.75rem', marginBottom: '2.5rem' }}>
@@ -89,7 +107,7 @@ const Checkout = ({ slug, onBack }: { slug: string, onBack: () => void }) => {
               disabled={!method || loading}
               style={{ ...payButtonStyle, opacity: (!method || loading) ? 0.5 : 1 }}
             >
-              {loading ? 'Processing...' : `Pay $${parseFloat(link.amount).toFixed(2)} Now`}
+              {loading ? 'Processing...' : `Pay ${getCurrencySymbol(link.currency)}${parseFloat(link.amount).toLocaleString()} Now`}
             </button>
 
             <div style={footerStyle}>
@@ -103,7 +121,7 @@ const Checkout = ({ slug, onBack }: { slug: string, onBack: () => void }) => {
               <CheckCircle2 size={60} />
             </motion.div>
             <h2 style={{ fontSize: '2rem', fontWeight: 800, marginBottom: '1rem' }}>Payment Received</h2>
-            <p style={{ color: '#64748b', marginBottom: '2.5rem' }}>Your payment of ${parseFloat(link.amount).toFixed(2)} for "{link.title}" was successful.</p>
+            <p style={{ color: '#64748b', marginBottom: '2.5rem' }}>Your payment of {getCurrencySymbol(link.currency)}{parseFloat(link.amount).toLocaleString()} for "{link.title}" was successful.</p>
             <div style={{ fontSize: '0.8rem', color: '#475569', marginBottom: '2rem' }}>Receipt: #PAY-{(Math.random()*100000).toFixed(0)}</div>
             <button onClick={() => window.location.reload()} style={receiptButtonStyle}>Download Receipt</button>
           </div>

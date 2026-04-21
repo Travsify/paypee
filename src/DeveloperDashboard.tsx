@@ -129,9 +129,9 @@ const DeveloperDashboard = ({ onLogout }: { onLogout?: () => void }) => {
 
     try {
       const [uData, keysData, txData] = await Promise.all([
-        fetch('https://paypee-api-kmhv.onrender.com/api/users/me', { headers }).then(res => res.json()),
-        fetch('https://paypee-api-kmhv.onrender.com/api/apikeys', { headers }).then(res => res.json()),
-        fetch('https://paypee-api-kmhv.onrender.com/api/transactions', { headers }).then(res => res.json())
+        fetch(`${API_BASE}/api/users/me`, { headers }).then(res => res.json()),
+        fetch(`${API_BASE}/api/apikeys`, { headers }).then(res => res.json()),
+        fetch(`${API_BASE}/api/transactions`, { headers }).then(res => res.json())
       ]);
       if(!uData.error) setUserData(uData);
       if(Array.isArray(keysData)) setApiKeys(keysData);
@@ -147,8 +147,9 @@ const DeveloperDashboard = ({ onLogout }: { onLogout?: () => void }) => {
 
   const generateAccount = async (currency: string) => {
     setIsGenerating(true);
+    setIsGenerating(true);
     try {
-      const response = await fetch('https://paypee-api-kmhv.onrender.com/api/accounts/provision', {
+      const response = await fetch(`${API_BASE}/api/accounts/provision`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -172,11 +173,11 @@ const DeveloperDashboard = ({ onLogout }: { onLogout?: () => void }) => {
 
   const deleteAccount = async (id: string) => {
      try {
-        const response = await fetch(`https://paypee-api-kmhv.onrender.com/api/accounts/${id}`, {
-           method: 'DELETE',
-           headers: {
-              'Authorization': `Bearer ${localStorage.getItem('paypee_token')}`
-           }
+        const response = await fetch(`${API_BASE}/api/accounts/${id}`, {
+            method: 'DELETE',
+            headers: {
+               'Authorization': `Bearer ${localStorage.getItem('paypee_token')}`
+            }
         });
         if (response.ok) {
            fetchUserData();
@@ -206,7 +207,7 @@ const DeveloperDashboard = ({ onLogout }: { onLogout?: () => void }) => {
       
       <div style={{ display: 'flex', flex: 1, overflow: 'hidden', position: 'relative' }}>
         {/* Sidebar - Hidden on Mobile */}
-        <aside className="dashboard-aside" style={{ width: '280px', borderRight: '1px solid var(--border)', background: '#0a0f1e', padding: '2rem 1.5rem', display: 'flex', flexDirection: 'column' }}>
+        <aside className="dashboard-aside desktop-only" style={{ width: '280px', borderRight: '1px solid var(--border)', background: '#0a0f1e', padding: '2rem 1.5rem', display: 'flex', flexDirection: 'column' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0 0.5rem', marginBottom: '3rem' }}>
             <div style={{ width: 32, height: 32, background: 'var(--primary)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                <Code2 size={20} color="#fff" strokeWidth={3} />

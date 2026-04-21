@@ -41,6 +41,7 @@ const CollectionsView = () => {
   // Form state
   const [title, setTitle] = useState('');
   const [amount, setAmount] = useState('');
+  const [currency, setCurrency] = useState('USD');
   const [description, setDescription] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
@@ -73,13 +74,19 @@ const CollectionsView = () => {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ title, amount: parseFloat(amount), description })
+        body: JSON.stringify({ 
+          title, 
+          amount: parseFloat(amount), 
+          currency,
+          description 
+        })
       });
       
       if (res.ok) {
         setIsModalOpen(false);
         setTitle('');
         setAmount('');
+        setCurrency('USD');
         setDescription('');
         fetchLinks();
       }
@@ -234,17 +241,33 @@ const CollectionsView = () => {
                   />
                 </div>
 
-                <div>
-                  <label className="form-label">SETTLEMENT AMOUNT (USD)</label>
-                  <input 
-                    type="number" 
-                    placeholder="0.00"
-                    className="form-input"
-                    value={amount}
-                    onChange={(e) => setAmount(e.target.value)}
-                    required
-                    style={{ fontSize: '1.75rem', fontWeight: 900, padding: '1.25rem 1.5rem' }}
-                  />
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+                  <div>
+                    <label className="form-label">SETTLEMENT AMOUNT</label>
+                    <input 
+                      type="number" 
+                      placeholder="0.00"
+                      className="form-input"
+                      value={amount}
+                      onChange={(e) => setAmount(e.target.value)}
+                      required
+                      style={{ fontSize: '1.5rem', fontWeight: 900, padding: '1rem 1.5rem' }}
+                    />
+                  </div>
+                  <div>
+                    <label className="form-label">CURRENCY</label>
+                    <select 
+                      className="form-input"
+                      value={currency}
+                      onChange={(e) => setCurrency(e.target.value)}
+                      style={{ height: '64px', fontSize: '1.1rem', fontWeight: 800, cursor: 'pointer' }}
+                    >
+                      <option value="USD">USD - US Dollar</option>
+                      <option value="NGN">NGN - Nigerian Naira</option>
+                      <option value="USDT">USDT - Tether</option>
+                      <option value="USDC">USDC - USD Coin</option>
+                    </select>
+                  </div>
                 </div>
 
                 <div>

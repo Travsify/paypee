@@ -40,7 +40,6 @@ const TransactionReceiptModal: React.FC<TransactionReceiptModalProps> = ({ trans
           initial={{ scale: 0.95, opacity: 0, y: 20 }}
           animate={{ scale: 1, opacity: 1, y: 0 }}
           exit={{ scale: 0.95, opacity: 0, y: 20 }}
-          className="no-print"
           style={{
             background: '#fff',
             color: '#000',
@@ -55,6 +54,7 @@ const TransactionReceiptModal: React.FC<TransactionReceiptModalProps> = ({ trans
         >
           <button 
             onClick={onClose} 
+            className="no-print"
             style={{ position: 'absolute', top: '2rem', right: '2rem', background: 'rgba(0,0,0,0.05)', border: 'none', borderRadius: '12px', width: '44px', height: '44px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', zIndex: 100 }}
           >
             <X size={22} color="#000" />
@@ -110,7 +110,7 @@ const TransactionReceiptModal: React.FC<TransactionReceiptModalProps> = ({ trans
                 This settlement record is cryptographically signed and stored on the immutable Paypee ledger. For auditing, visit paypee.co/verify
              </div>
              
-             <div style={{ display: 'flex', gap: '1.25rem' }}>
+             <div className="no-print" style={{ display: 'flex', gap: '1.25rem' }}>
                 <button onClick={handlePrint} className="btn btn-primary" style={{ flex: 1, padding: '1.25rem', borderRadius: '20px', background: '#000', border: 'none', fontSize: '1.1rem', fontWeight: 900 }}>
                    <Printer size={20} /> Print Receipt
                 </button>
@@ -118,6 +118,12 @@ const TransactionReceiptModal: React.FC<TransactionReceiptModalProps> = ({ trans
                    <Share2 size={20} /> Share Proof
                 </button>
              </div>
+             <style>{`
+               @media print {
+                 .no-print { display: none !important; }
+                 body { background: #fff !important; }
+               }
+             `}</style>
           </div>
         </motion.div>
       </div>

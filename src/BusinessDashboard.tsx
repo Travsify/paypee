@@ -31,9 +31,11 @@ import SettingsView from './SettingsView';
 import VerificationGate from './VerificationGate';
 import AiAdvisor from './AiAdvisor';
 import VaultsDashboard from './VaultsDashboard';
-import BillsDashboard from './BillsDashboard';
 import AccountCreationModal from './AccountCreationModal';
 import BalanceCard from './components/BalanceCard';
+import HistoryView from './components/HistoryView';
+import TransactionReceiptModal from './components/TransactionReceiptModal';
+import { API_BASE } from './config';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart as ReBarChart, Bar, Cell } from 'recharts';
 
 const SidebarItem = ({ icon: Icon, label, active = false, onClick }: { icon: any, label: string, active?: boolean, onClick?: () => void }) => (
@@ -96,6 +98,7 @@ const BusinessDashboard = ({ onLogout }: { onLogout?: () => void }) => {
   const [isAccountModalOpen, setIsAccountModalOpen] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
+  const [selectedTx, setSelectedTx] = useState<any>(null);
 
   const fetchUserData = async () => {
     const token = localStorage.getItem('paypee_token');
@@ -103,8 +106,8 @@ const BusinessDashboard = ({ onLogout }: { onLogout?: () => void }) => {
 
     try {
       const [uData, txData] = await Promise.all([
-        fetch('https://paypee-api-kmhv.onrender.com/api/users/me', { headers }).then(res => res.json()),
-        fetch('https://paypee-api-kmhv.onrender.com/api/transactions', { headers }).then(res => res.json())
+        fetch(`${API_BASE}/api/users/me`, { headers }).then(res => res.json()),
+        fetch(`${API_BASE}/api/transactions`, { headers }).then(res => res.json())
       ]);
       if(!uData.error) setUserData(uData);
       if(Array.isArray(txData)) setTransactions(txData);
@@ -120,7 +123,7 @@ const BusinessDashboard = ({ onLogout }: { onLogout?: () => void }) => {
   const generateAccount = async (currency: string, bvn?: string, kycData?: any) => {
     setIsGenerating(true);
     try {
-      const response = await fetch('https://paypee-api-kmhv.onrender.com/api/accounts/provision', {
+      const response = await fetch(`${API_BASE}/api/accounts/provision`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -148,7 +151,7 @@ const BusinessDashboard = ({ onLogout }: { onLogout?: () => void }) => {
 
   const deleteAccount = async (id: string) => {
      try {
-        const response = await fetch(`https://paypee-api-kmhv.onrender.com/api/accounts/${id}`, {
+        const response = await fetch(`${API_BASE}/api/accounts/${id}`, {
            method: 'DELETE',
            headers: {
               'Authorization': `Bearer ${localStorage.getItem('paypee_token')}`
@@ -196,8 +199,9 @@ const BusinessDashboard = ({ onLogout }: { onLogout?: () => void }) => {
           
           <div style={{ flex: 1, overflowY: 'auto' }}>
              <SidebarItem icon={LayoutDashboard} label="Overview" active={activeSection === 'dashboard'} onClick={() => navigate('dashboard')} />
-             <SidebarItem icon={Wallet} label="Wallets" active={activeSection === 'wallets'} onClick={() => navigate('wallets')} />
-             <SidebarItem icon={Send} label="Send Money" active={activeSection === 'payouts'} onClick={() => navigate('payouts')} />
+             <SidebarItem icon={Wallet} label="Treasury" active={activeSection === 'wallets'} onClick={() => navigate('wallets')} />
+             <SidebarItem icon={History} label="Transactions" active={activeSection === 'history'} onClick={() => navigate('history')} />
+             <SidebarItem icon={Send} label="Disbursements" active={activeSection === 'payouts'} onClick={() => navigate('payouts')} />
              <SidebarItem icon={Layers} label="Team Accounts" active={activeSection === 'subs'} onClick={() => navigate('subs')} />
              <SidebarItem icon={Zap} label="Pay Bills" active={activeSection === 'bills'} onClick={() => navigate('bills')} />
              <SidebarItem icon={Lock} label="Savings" active={activeSection === 'vaults'} onClick={() => navigate('vaults')} />
@@ -213,7 +217,6 @@ const BusinessDashboard = ({ onLogout }: { onLogout?: () => void }) => {
           </div>
         </aside>
 
-        {/* Mobile Bottom Navigation */}
         <div className="mobile-only" style={{ 
           position: 'fixed', 
           bottom: 0, 
@@ -229,7 +232,7 @@ const BusinessDashboard = ({ onLogout }: { onLogout?: () => void }) => {
         }}>
           <MobileNavButton icon={LayoutDashboard} label="Home" active={activeSection === 'dashboard'} onClick={() => navigate('dashboard')} />
           <MobileNavButton icon={Wallet} label="Wallets" active={activeSection === 'wallets'} onClick={() => navigate('wallets')} />
-          <MobileNavButton icon={BarChart3} label="Stats" active={activeSection === 'analytics'} onClick={() => navigate('analytics')} />
+          <MobileNavButton icon={History} label="History" active={activeSection === 'history'} onClick={() => navigate('history')} />
           <MobileNavButton icon={MenuIcon} label="More" onClick={() => setShowMobileMenu(true)} />
         </div>
 
@@ -260,6 +263,7 @@ const BusinessDashboard = ({ onLogout }: { onLogout?: () => void }) => {
                   <SidebarItem icon={Layers} label="Team Accounts" active={activeSection === 'subs'} onClick={() => { navigate('subs'); setShowMobileMenu(false); }} />
                   <SidebarItem icon={Zap} label="Pay Bills" active={activeSection === 'bills'} onClick={() => { navigate('bills'); setShowMobileMenu(false); }} />
                   <SidebarItem icon={Lock} label="Savings" active={activeSection === 'vaults'} onClick={() => { navigate('vaults'); setShowMobileMenu(false); }} />
+                  <SidebarItem icon={BarChart3} label="Insights" active={activeSection === 'analytics'} onClick={() => { navigate('analytics'); setShowMobileMenu(false); }} />
                   <SidebarItem icon={Users} label="Team" active={activeSection === 'team'} onClick={() => { navigate('team'); setShowMobileMenu(false); }} />
                   <SidebarItem icon={Bot} label="AI Helper" active={activeSection === 'ai'} onClick={() => { navigate('ai'); setShowMobileMenu(false); }} />
                   <div style={{ borderTop: '1px solid rgba(255,255,255,0.08)', margin: '1rem 0' }} />
@@ -293,6 +297,7 @@ const BusinessDashboard = ({ onLogout }: { onLogout?: () => void }) => {
           {activeSection === 'ai' && <AiAdvisor transactions={transactions} userName={userData?.businessName} />}
           {activeSection === 'vaults' && <VaultsDashboard />}
           {activeSection === 'bills' && <BillsDashboard />}
+          {activeSection === 'history' && <HistoryView onTransactionClick={(tx) => setSelectedTx(tx)} />}
 
           {activeSection === 'wallets' && (
              <div style={{ animation: 'fadeIn 0.5s ease-out' }}>
@@ -430,13 +435,16 @@ const BusinessDashboard = ({ onLogout }: { onLogout?: () => void }) => {
         </main>
       </div>
 
+      <PayoutModal isOpen={activeSection === 'payouts'} onClose={() => setActiveSection('dashboard')} onComplete={fetchUserData} wallets={userData?.wallets || []} />
       <AccountCreationModal 
         isOpen={isAccountModalOpen} 
         onClose={() => setIsAccountModalOpen(false)} 
         onSelect={generateAccount} 
         isProcessing={isGenerating} 
-        existingCurrencies={userData?.wallets?.map((w: any) => w.currency) || []}
+        existingCurrencies={userData?.wallets?.map((w: any) => w.currency) || []} 
+        isStaging={false}
       />
+      <TransactionReceiptModal transaction={selectedTx} onClose={() => setSelectedTx(null)} />
     </div>
   );
 };
