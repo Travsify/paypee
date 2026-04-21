@@ -276,21 +276,21 @@ const CardsDashboard = ({ wallets: propWallets }: { wallets?: any[] }) => {
 
   const aiSecurityInsights = useMemo(() => [
     { 
-      title: "AI Spending Shield", 
+      title: "Fraud Shield", 
       status: metrics.activeCards > 0 ? "Active" : "Standby", 
-      desc: `Monitoring ${metrics.activeCards} active rail${metrics.activeCards !== 1 ? 's' : ''} across $${metrics.activeVolume.toLocaleString(undefined, {minimumFractionDigits: 2})} in deployed capital.`,
+      desc: `Monitoring ${metrics.activeCards} active card${metrics.activeCards !== 1 ? 's' : ''} with $${metrics.activeVolume.toLocaleString(undefined, {minimumFractionDigits: 2})} total balance.`,
       icon: <Fingerprint size={20} color="var(--primary)" />
     },
     { 
       title: "FX Optimizer", 
-      status: metrics.activeVolume > 0 ? "Calibrated" : "Idle", 
-      desc: `Estimated $${metrics.averageSavings} saved via optimized card rails vs. traditional FX spreads.`,
+      status: metrics.activeVolume > 0 ? "Active" : "Idle", 
+      desc: `Estimated $${metrics.averageSavings} saved via our optimized exchange rates.`,
       icon: <Globe size={20} color="var(--accent)" />
     },
     { 
-      title: "Smart Protection", 
-      status: metrics.frozenCards > 0 ? `${metrics.frozenCards} Frozen` : "Defending", 
-      desc: metrics.frozenCards > 0 ? `${metrics.frozenCards} rail${metrics.frozenCards !== 1 ? 's' : ''} currently frozen by security protocol.` : `All ${metrics.activeCards} rail${metrics.activeCards !== 1 ? 's' : ''} operating within safe parameters.`,
+      title: "Card Protection", 
+      status: metrics.frozenCards > 0 ? `${metrics.frozenCards} Frozen` : "Active", 
+      desc: metrics.frozenCards > 0 ? `${metrics.frozenCards} card${metrics.frozenCards !== 1 ? 's' : ''} currently frozen.` : `All ${metrics.activeCards} card${metrics.activeCards !== 1 ? 's' : ''} are working perfectly.`,
       icon: <Shield size={20} color="#ec4899" />
     }
   ], [metrics]);
@@ -302,13 +302,13 @@ const CardsDashboard = ({ wallets: propWallets }: { wallets?: any[] }) => {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '3rem' }}>
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: 'var(--primary)', fontWeight: 900, fontSize: '0.75rem', letterSpacing: '3px', textTransform: 'uppercase', marginBottom: '1.25rem' }}>
-            <Database size={16} fill="var(--primary)" /> Card Issuance Protocol
+            <CreditCard size={16} fill="var(--primary)" /> Virtual Cards
           </div>
           <h1 style={{ fontSize: '3.5rem', fontWeight: 900, marginBottom: '0.5rem', letterSpacing: '-0.05em' }}>
-            Global <span className="text-glow">Capital Rails</span>
+            Virtual <span className="text-glow">Cards</span>
           </h1>
           <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem', maxWidth: '600px', fontWeight: 500, lineHeight: 1.6 }}>
-            Provision secure, AI-monitored virtual Mastercard rails globally. Integrated with institutional FX settlements.
+            Issue secure virtual Mastercard cards instantly for your global payments.
           </p>
         </div>
         <div style={{ display: 'flex', gap: '1.25rem' }}>
@@ -328,7 +328,7 @@ const CardsDashboard = ({ wallets: propWallets }: { wallets?: any[] }) => {
             className="btn btn-primary"
             style={{ padding: '1.1rem 2.5rem', borderRadius: '20px', fontSize: '1.1rem', fontWeight: 900 }}
           >
-            <PlusCircle size={22} /> Deploy New Rail
+            <PlusCircle size={22} /> Get New Card
           </motion.button>
         </div>
       </div>
@@ -336,10 +336,10 @@ const CardsDashboard = ({ wallets: propWallets }: { wallets?: any[] }) => {
       {/* Analytics Registry */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '2rem' }}>
          {[
-           { label: 'ACTIVE VOLUME', value: `$${metrics.activeVolume.toLocaleString(undefined, { minimumFractionDigits: 2 })}`, trend: `+${(metrics.activeVolume > 0 ? 12.4 : 0)}%`, icon: TrendingUp, color: 'var(--text)' },
-           { label: 'PROVISIONED RAILS', value: `${metrics.activeCards} / ${cards.length}`, trend: metrics.frozenCards > 0 ? `${metrics.frozenCards} FROZEN` : 'OPERATIONAL', icon: Activity, color: 'var(--accent)' },
-           { label: 'DAILY AGGREGATE CAP', value: `$${metrics.totalDailyLimit.toLocaleString()}`, trend: 'LIMIT ACTIVE', icon: Shield, color: 'var(--text)' },
-           { label: 'FX ARBITRAGE SAVINGS', value: `$${metrics.averageSavings}`, trend: 'OPTIMIZED', icon: Cpu, color: 'var(--primary)' }
+           { label: 'TOTAL BALANCE', value: `$${metrics.activeVolume.toLocaleString(undefined, { minimumFractionDigits: 2 })}`, trend: `+${(metrics.activeVolume > 0 ? 12.4 : 0)}%`, icon: TrendingUp, color: 'var(--text)' },
+           { label: 'ACTIVE CARDS', value: `${metrics.activeCards} / ${cards.length}`, trend: metrics.frozenCards > 0 ? `${metrics.frozenCards} FROZEN` : 'ACTIVE', icon: Activity, color: 'var(--accent)' },
+           { label: 'DAILY SPENDING LIMIT', value: `$${metrics.totalDailyLimit.toLocaleString()}`, trend: 'ACTIVE', icon: Shield, color: 'var(--text)' },
+           { label: 'MONEY SAVED', value: `$${metrics.averageSavings}`, trend: 'SAVED', icon: Cpu, color: 'var(--primary)' }
          ].map((m, idx) => (
            <div key={idx} className="premium-card" style={{ padding: '2.5rem', background: 'rgba(255,255,255,0.01)' }}>
               <div style={{ color: 'var(--text-muted)', fontSize: '0.75rem', fontWeight: 900, letterSpacing: '2px', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
@@ -356,13 +356,13 @@ const CardsDashboard = ({ wallets: propWallets }: { wallets?: any[] }) => {
 
       <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 2fr) minmax(340px, 1fr)', gap: '4rem', alignItems: 'start' }}>
         
-        {/* Rail Inventory */}
+        {/* Card Inventory */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
             <div style={{ width: 32, height: 32, borderRadius: '8px', background: 'rgba(99,102,241,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary)' }}>
                <CreditCard size={18} />
             </div>
-            <h3 style={{ fontSize: '1.6rem', fontWeight: 900, letterSpacing: '-0.02em' }}>Active Rail Inventory</h3>
+            <h3 style={{ fontSize: '1.6rem', fontWeight: 900, letterSpacing: '-0.02em' }}>My Cards</h3>
           </div>
 
           {loading ? (
@@ -379,16 +379,16 @@ const CardsDashboard = ({ wallets: propWallets }: { wallets?: any[] }) => {
               <div style={{ width: 100, height: 100, background: 'rgba(99,102,241,0.05)', borderRadius: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 2.5rem', color: 'var(--primary)', border: '1px solid rgba(99, 102, 241, 0.1)' }}>
                 <CreditCard size={50} />
               </div>
-              <h3 style={{ fontSize: '2rem', fontWeight: 900, marginBottom: '1rem', letterSpacing: '-0.02em' }}>Zero Capital Rails Detected</h3>
+              <h3 style={{ fontSize: '2rem', fontWeight: 900, marginBottom: '1rem', letterSpacing: '-0.02em' }}>No Cards Yet</h3>
               <p style={{ color: 'var(--text-muted)', maxWidth: '450px', margin: '0 auto 3rem', fontSize: '1.1rem', lineHeight: 1.6, fontWeight: 500 }}>
-                Deploy your first high-velocity Mastercard rail to begin global settlements.
+                Get your first virtual Mastercard to start making global payments.
               </p>
               <button className="btn btn-primary" style={{ padding: '1.25rem 3.5rem', borderRadius: '24px', fontSize: '1.1rem', fontWeight: 900 }}>
-                Deploy First Rail
+                Get Your First Card
               </button>
             </motion.div>
           ) : (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(400px, 1fr))', gap: '2.5rem' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(360px, 1fr))', gap: '2.5rem' }}>
               {cards.map(card => (
                 <motion.div 
                   key={card.id}
@@ -409,7 +409,7 @@ const CardsDashboard = ({ wallets: propWallets }: { wallets?: any[] }) => {
                   <div style={{ position: 'relative', zIndex: 10 }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '3.5rem' }}>
                        <div>
-                          <div style={{ fontSize: '0.75rem', fontWeight: 900, letterSpacing: '3px', color: 'rgba(255,255,255,0.3)', marginBottom: '0.5rem' }}>INSTITUTIONAL RAIL</div>
+                          <div style={{ fontSize: '0.75rem', fontWeight: 900, letterSpacing: '3px', color: 'rgba(255,255,255,0.3)', marginBottom: '0.5rem' }}>VIRTUAL CARD</div>
                           <div style={{ fontSize: '1.8rem', fontWeight: 900, color: '#fff', letterSpacing: '-0.02em' }}>{card.brand?.toUpperCase() || 'MASTERCARD'}</div>
                        </div>
                        <div style={{ 
@@ -418,7 +418,7 @@ const CardsDashboard = ({ wallets: propWallets }: { wallets?: any[] }) => {
                          padding: '0.6rem 1.5rem', borderRadius: '100px', fontSize: '0.8rem', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '0.5rem', border: `1px solid ${card.status === 'ACTIVE' ? 'rgba(16,185,129,0.2)' : 'rgba(239,68,68,0.2)'}`
                        }}>
                          <div style={{ width: 8, height: 8, borderRadius: '50%', background: card.status === 'ACTIVE' ? 'var(--accent)' : '#ef4444', boxShadow: `0 0 10px ${card.status === 'ACTIVE' ? 'var(--accent)' : '#ef4444'}` }} />
-                         {card.status === 'ACTIVE' ? 'OPERATIONAL' : 'FROZEN'}
+                         {card.status === 'ACTIVE' ? 'ACTIVE' : 'FROZEN'}
                        </div>
                     </div>
 
@@ -448,7 +448,7 @@ const CardsDashboard = ({ wallets: propWallets }: { wallets?: any[] }) => {
                     
                     <div style={{ padding: '1.5rem', background: 'rgba(255,255,255,0.02)', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.05)' }}>
                        <div style={{ fontSize: '0.75rem', color: 'var(--primary)', fontWeight: 900, letterSpacing: '2px', marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                          <Globe size={14} /> BILLING PROTOCOL
+                          <Globe size={14} /> BILLING ADDRESS
                        </div>
                        <div style={{ fontSize: '1rem', fontWeight: 700, color: 'rgba(255,255,255,0.7)', lineHeight: 1.6 }}>
                           {card.addressLine1 || 'San Francisco, CA'} <br />
@@ -481,11 +481,11 @@ const CardsDashboard = ({ wallets: propWallets }: { wallets?: any[] }) => {
                           className="btn btn-primary"
                           style={{ padding: '0 2.25rem', fontSize: '1rem', borderRadius: '18px', fontWeight: 900 }}
                         >
-                          Inject
+                          Add Money
                         </motion.button>
                      </div>
                      <div style={{ textAlign: 'right' }}>
-                        <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 900, letterSpacing: '2px', marginBottom: '0.5rem' }}>NET CAPITAL</div>
+                        <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 900, letterSpacing: '2px', marginBottom: '0.5rem' }}>CARD BALANCE</div>
                         <div style={{ fontSize: '2rem', fontWeight: 900, color: 'var(--accent)' }}>${parseFloat(card.balance || '0').toLocaleString(undefined, {minimumFractionDigits: 2})}</div>
                      </div>
                   </div>
@@ -525,13 +525,13 @@ const CardsDashboard = ({ wallets: propWallets }: { wallets?: any[] }) => {
               </div>
               
               <div style={{ marginTop: '3rem', padding: '2rem', background: 'rgba(255,255,255,0.01)', borderRadius: '24px', textAlign: 'center', border: '1px dashed rgba(255,255,255,0.1)' }}>
-                 <p style={{ fontSize: '1rem', color: 'var(--text-muted)', marginBottom: '1.5rem', lineHeight: 1.6, fontWeight: 500 }}>Provision institutional-grade Mastercard rails globally with near-zero latency.</p>
+                 <p style={{ fontSize: '1rem', color: 'var(--text-muted)', marginBottom: '1.5rem', lineHeight: 1.6, fontWeight: 500 }}>Get your virtual Mastercard and pay for any service worldwide instantly.</p>
                  <motion.button 
                    whileHover={{ scale: 1.05 }}
                    className="btn btn-outline" 
                    style={{ width: '100%', borderRadius: '18px', padding: '1.1rem', fontWeight: 800 }}
                  >
-                    Technical Specifications
+                    How it works
                  </motion.button>
               </div>
            </div>
@@ -555,8 +555,8 @@ const CardsDashboard = ({ wallets: propWallets }: { wallets?: any[] }) => {
                         <PlusCircle size={32} />
                      </div>
                      <div>
-                        <h3 style={{ fontSize: '2rem', fontWeight: 900, letterSpacing: '-0.03em' }}>Deploy Platinum Rail</h3>
-                        <div style={{ fontSize: '0.9rem', color: 'var(--text-muted)', fontWeight: 700, letterSpacing: '1px' }}>MASTERCARD WORLD ELITE PROTOCOL</div>
+                        <h3 style={{ fontSize: '2rem', fontWeight: 900, letterSpacing: '-0.03em' }}>Get Virtual Card</h3>
+                        <div style={{ fontSize: '0.9rem', color: 'var(--text-muted)', fontWeight: 700, letterSpacing: '1px' }}>MASTERCARD WORLD ELITE</div>
                      </div>
                   </div>
                   <button onClick={() => setIsIssueModalOpen(false)} className="btn btn-outline" style={{ width: 48, height: 48, borderRadius: '50%', padding: 0 }}><X size={24} /></button>
@@ -568,8 +568,8 @@ const CardsDashboard = ({ wallets: propWallets }: { wallets?: any[] }) => {
                       <label className="form-label">CURRENCY REGION</label>
                       <div style={{ position: 'relative' }}>
                         <select value={issueCurrency} onChange={(e) => setIssueCurrency(e.target.value)} className="form-input" style={{ appearance: 'none', paddingRight: '3rem' }}>
-                          <option value="USD" style={{ background: '#0a0f1e' }}>🇺🇸 USD (Global Rail)</option>
-                          <option value="NGN" style={{ background: '#0a0f1e' }}>🇳🇬 NGN (Local Rail)</option>
+                          <option value="USD" style={{ background: '#0a0f1e' }}>🇺🇸 USD Card (Global)</option>
+                          <option value="NGN" style={{ background: '#0a0f1e' }}>🇳🇬 NGN Card (Local)</option>
                         </select>
                         <ChevronDown size={20} style={{ position: 'absolute', right: '1.5rem', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', opacity: 0.5 }} />
                       </div>
@@ -580,7 +580,7 @@ const CardsDashboard = ({ wallets: propWallets }: { wallets?: any[] }) => {
                         <select value={issueWalletId} onChange={(e) => setIssueWalletId(e.target.value)} required className="form-input" style={{ appearance: 'none', paddingRight: '3rem' }}>
                           <option value="" disabled style={{ background: '#0a0f1e' }}>Select Source Wallet</option>
                           {wallets.map(w => (
-                            <option key={w.id} value={w.id} style={{ background: '#0a0f1e' }}>{w.currency} Rail — {parseFloat(w.balance).toLocaleString()}</option>
+                            <option key={w.id} value={w.id} style={{ background: '#0a0f1e' }}>{w.currency} Wallet — {parseFloat(w.balance).toLocaleString()}</option>
                           ))}
                         </select>
                         <ChevronDown size={20} style={{ position: 'absolute', right: '1.5rem', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', opacity: 0.5 }} />
@@ -590,33 +590,33 @@ const CardsDashboard = ({ wallets: propWallets }: { wallets?: any[] }) => {
 
                   {!userData?.metadata?.bridgecard_id && !userData?.metadata?.bvn && (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                       <label className="form-label">KYC PROTOCOL (BVN)</label>
+                       <label className="form-label">IDENTITY NUMBER (BVN)</label>
                        <input type="text" className="form-input" maxLength={11} placeholder="Enter 11-digit NIN/BVN" value={issueBvn} onChange={e => setIssueBvn(e.target.value)} style={{ fontSize: '1.2rem', fontWeight: 800, letterSpacing: '2px' }} />
                     </div>
                   )}
 
                   <div style={{ padding: '2.5rem', background: 'rgba(99, 102, 241, 0.05)', borderRadius: '32px', border: '1px solid rgba(99, 102, 241, 0.1)' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', color: 'var(--primary)', fontSize: '0.85rem', fontWeight: 900, marginBottom: '2rem', letterSpacing: '2px', textTransform: 'uppercase' }}>
-                       <Activity size={20} /> DEPLOYMENT COST MATRIX
+                       <Activity size={20} /> COST SUMMARY
                     </div>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '1.1rem', fontWeight: 600 }}>
-                          <span style={{ color: 'var(--text-muted)' }}>Provisioning Protocol</span>
+                          <span style={{ color: 'var(--text-muted)' }}>Card Creation Fee</span>
                           <span style={{ color: '#fff' }}>{issueCurrency === 'USD' ? '$4.00' : '₦5,500'}</span>
                        </div>
                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '1.1rem', fontWeight: 600 }}>
-                          <span style={{ color: 'var(--text-muted)' }}>Initial Liquidity Injection</span>
+                          <span style={{ color: 'var(--text-muted)' }}>Initial Balance</span>
                           <span style={{ color: '#fff' }}>{issueCurrency === 'USD' ? '$1.00' : '₦1,500'}</span>
                        </div>
                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '1.5rem', fontWeight: 900, borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: '1.5rem', marginTop: '0.5rem' }}>
-                          <span>TOTAL SETTLEMENT</span>
+                          <span>TOTAL COST</span>
                           <span style={{ color: 'var(--primary)' }}>{issueCurrency === 'USD' ? '$5.00' : '₦7,000'}</span>
                        </div>
                     </div>
                   </div>
 
                   <button type="submit" disabled={submitting || !issueWalletId} className="btn btn-primary" style={{ width: '100%', padding: '1.5rem', borderRadius: '24px', fontSize: '1.25rem', fontWeight: 900 }}>
-                    {submitting ? <div className="spinner" style={{ width: 24, height: 24 }} /> : 'Authorize & Deploy Rail'}
+                    {submitting ? <div className="spinner" style={{ width: 24, height: 24 }} /> : 'Get My Card'}
                   </button>
                </form>
             </motion.div>
@@ -640,8 +640,8 @@ const CardsDashboard = ({ wallets: propWallets }: { wallets?: any[] }) => {
                         {isFundingModalOpen ? <ArrowUpRight size={32} /> : <ArrowDownLeft size={32} />}
                      </div>
                      <div>
-                        <h3 style={{ fontSize: '2rem', fontWeight: 900, letterSpacing: '-0.03em' }}>{isFundingModalOpen ? 'Inject Liquidity' : 'Reclaim Capital'}</h3>
-                        <div style={{ fontSize: '0.9rem', color: 'var(--text-muted)', fontWeight: 700, letterSpacing: '1px' }}>RAIL SETTLEMENT ENGINE</div>
+                        <h3 style={{ fontSize: '2rem', fontWeight: 900, letterSpacing: '-0.03em' }}>{isFundingModalOpen ? 'Add Money' : 'Withdraw Money'}</h3>
+                        <div style={{ fontSize: '0.9rem', color: 'var(--text-muted)', fontWeight: 700, letterSpacing: '1px' }}>CARD WALLET</div>
                      </div>
                   </div>
                   <button onClick={() => { setIsFundingModalOpen(false); setIsWithdrawModalOpen(false); }} className="btn btn-outline" style={{ width: 48, height: 48, borderRadius: '50%', padding: 0 }}><X size={24} /></button>
@@ -655,7 +655,7 @@ const CardsDashboard = ({ wallets: propWallets }: { wallets?: any[] }) => {
                        <select value={fundWalletId} onChange={(e) => setFundWalletId(e.target.value)} required className="form-input" style={{ appearance: 'none', paddingRight: '3rem' }}>
                          <option value="" disabled style={{ background: '#0a0f1e' }}>Select Capital Source</option>
                          {wallets.map(w => (
-                           <option key={w.id} value={w.id} style={{ background: '#0a0f1e' }}>{w.currency} Rail — {parseFloat(w.balance).toLocaleString()}</option>
+                           <option key={w.id} value={w.id} style={{ background: '#0a0f1e' }}>{w.currency} Wallet — {parseFloat(w.balance).toLocaleString()}</option>
                          ))}
                        </select>
                        <ChevronDown size={20} style={{ position: 'absolute', right: '1.5rem', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', opacity: 0.5 }} />
@@ -664,7 +664,7 @@ const CardsDashboard = ({ wallets: propWallets }: { wallets?: any[] }) => {
                  )}
 
                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                   <label className="form-label">VOLUME TO {isFundingModalOpen ? 'INJECT' : 'RECLAIM'}</label>
+                   <label className="form-label">AMOUNT TO {isFundingModalOpen ? 'ADD' : 'WITHDRAW'}</label>
                    <div style={{ position: 'relative' }}>
                      <span style={{ position: 'absolute', left: '1.75rem', top: '50%', transform: 'translateY(-50%)', fontSize: '2.5rem', fontWeight: 900, color: 'var(--primary)', opacity: 0.5 }}>$</span>
                      <input type="number" value={fundAmount} onChange={(e) => setFundAmount(e.target.value)} placeholder="0.00" required className="form-input" style={{ paddingLeft: '4rem', fontSize: '3rem', fontWeight: 900, letterSpacing: '-0.04em' }} />
@@ -674,7 +674,7 @@ const CardsDashboard = ({ wallets: propWallets }: { wallets?: any[] }) => {
                  <div style={{ padding: '2rem', background: 'rgba(99, 102, 241, 0.05)', borderRadius: '32px', border: '1px solid rgba(99, 102, 241, 0.1)' }}>
                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem' }}>
                       <Lock size={20} color="var(--primary)" />
-                      <span style={{ fontWeight: 900, fontSize: '0.85rem', letterSpacing: '2px', color: 'var(--primary)', textTransform: 'uppercase' }}>AUTHORIZE PROTOCOL</span>
+                      <span style={{ fontWeight: 900, fontSize: '0.85rem', letterSpacing: '2px', color: 'var(--primary)', textTransform: 'uppercase' }}>ENTER PIN TO AUTHORIZE</span>
                    </div>
                    <input 
                     type="password" 
@@ -688,7 +688,7 @@ const CardsDashboard = ({ wallets: propWallets }: { wallets?: any[] }) => {
                 </div>
 
                  <button type="submit" disabled={submitting || transferPin.length < 4} className="btn btn-primary" style={{ width: '100%', padding: '1.5rem', borderRadius: '24px', fontSize: '1.25rem', fontWeight: 900 }}>
-                   {submitting ? <div className="spinner" style={{ width: 24, height: 24 }} /> : <><ShieldCheck size={22} /> Execute Settlement</>}
+                   {submitting ? <div className="spinner" style={{ width: 24, height: 24 }} /> : <><ShieldCheck size={22} /> Confirm Transaction</>}
                  </button>
                </form>
             </motion.div>
@@ -718,7 +718,7 @@ const CardsDashboard = ({ wallets: propWallets }: { wallets?: any[] }) => {
                </div>
 
                <p style={{ color: 'var(--text-muted)', marginBottom: '3rem', fontSize: '1.1rem', fontWeight: 500, lineHeight: 1.6 }}>
-                  Decrypt sensitive rail identifiers by providing your 4-digit security PIN.
+                  View your card details by entering your 4-digit security PIN.
                </p>
 
                <form onSubmit={handleVerifyPinAndShow} style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
@@ -736,7 +736,7 @@ const CardsDashboard = ({ wallets: propWallets }: { wallets?: any[] }) => {
                   </div>
 
                   <button type="submit" className="btn btn-primary" style={{ width: '100%', padding: '1.5rem', fontSize: '1.25rem', fontWeight: 900, borderRadius: '24px' }} disabled={submitting || pinToVerify.length < 4}>
-                     {submitting ? <div className="spinner" style={{ width: 24, height: 24 }} /> : <><Eye size={22} /> Decrypt Protocol</>}
+                     {submitting ? <div className="spinner" style={{ width: 24, height: 24 }} /> : <><Eye size={22} /> View Details</>}
                   </button>
                </form>
             </motion.div>

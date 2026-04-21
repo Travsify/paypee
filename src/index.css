@@ -460,7 +460,24 @@ h1, h2, h3, h4, h5, h6 {
   border-color: var(--text-muted);
 }
 
-/* Responsive Utilities */
+.dashboard-grid-2 {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 0.6fr);
+  gap: 3rem;
+}
+
+.balance-card-slider {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 2rem;
+}
+
+.responsive-grid-auto {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 2rem;
+}
+
 @media (max-width: 768px) {
   .desktop-only {
     display: none !important;
@@ -470,6 +487,48 @@ h1, h2, h3, h4, h5, h6 {
     width: 100% !important;
     padding: 1.5rem !important;
   }
+
+  .dashboard-grid-2 {
+    grid-template-columns: 1fr !important;
+  }
+
+  .balance-card-slider {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  .responsive-grid-auto {
+    grid-template-columns: 1fr !important;
+  }
+
+  .balance-header-responsive {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 1.5rem !important;
+  }
+
+  .topbar-responsive {
+    margin-bottom: 2rem !important;
+  }
+
+  .topbar-responsive h1 {
+    font-size: 1.8rem !important;
+  }
+
+  .active-wallet-card-responsive {
+    padding: 1.5rem !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .balance-card-slider {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+.responsive-grid-auto {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  gap: 2.5rem;
 }
 
 @media (min-width: 769px) {

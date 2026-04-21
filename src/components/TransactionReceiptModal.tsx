@@ -66,7 +66,7 @@ const TransactionReceiptModal: React.FC<TransactionReceiptModalProps> = ({ trans
           <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '2.5rem' }}>
             <div style={{ padding: '0.6rem 1.5rem', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '100px', display: 'flex', alignItems: 'center', gap: '0.6rem', boxShadow: '0 5px 15px rgba(0,0,0,0.05)' }}>
                <ShieldCheck size={16} color="var(--primary)" />
-               <span style={{ fontSize: '0.75rem', fontWeight: 900, color: '#64748b', letterSpacing: '1px', textTransform: 'uppercase' }}>SECURE SETTLEMENT RECEIPT</span>
+               <span style={{ fontSize: '0.75rem', fontWeight: 900, color: '#64748b', letterSpacing: '1px', textTransform: 'uppercase' }}>TRANSACTION RECEIPT</span>
             </div>
           </div>
 
@@ -75,12 +75,12 @@ const TransactionReceiptModal: React.FC<TransactionReceiptModalProps> = ({ trans
               <Zap size={40} color="#fff" fill="#fff" />
             </div>
             <h2 style={{ fontSize: '2rem', fontWeight: 900, letterSpacing: '-0.03em', marginBottom: '0.75rem', color: '#000' }}>Proof of Payment</h2>
-            <div style={{ color: '#64748b', fontSize: '1rem', fontWeight: 600 }}>Paypee Global Settlements • Node {Math.floor(1000 + Math.random() * 9000)}</div>
+            <div style={{ color: '#64748b', fontSize: '1rem', fontWeight: 600 }}>Paypee • Receipt #{Math.floor(1000 + Math.random() * 9000)}</div>
           </div>
 
           <div style={{ textAlign: 'center', marginBottom: '3.5rem', background: '#f8fafc', padding: '2.5rem', borderRadius: '28px', border: '1px solid #f1f5f9' }}>
             <div style={{ fontSize: '0.85rem', fontWeight: 900, color: '#64748b', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '0.75rem' }}>
-              {isDeposit ? 'Net Credits' : 'Net Debits'}
+              {isDeposit ? 'Amount Received' : 'Amount Sent'}
             </div>
             <div style={{ fontSize: '3rem', fontWeight: 900, color: '#000', letterSpacing: '-0.04em' }}>
               {transaction.currency} {parseFloat(transaction.amount).toLocaleString(undefined, { minimumFractionDigits: 2 })}
@@ -91,26 +91,26 @@ const TransactionReceiptModal: React.FC<TransactionReceiptModalProps> = ({ trans
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-             <ReceiptRow label="Transaction Rail" value={transaction.type} />
+             <ReceiptRow label="Transaction Type" value={transaction.type} />
              <ReceiptRow label="Details" value={transaction.desc || (isDeposit ? 'Money Received' : 'Money Sent')} />
-             <ReceiptRow label="Timestamp" value={new Date(transaction.createdAt).toLocaleString(undefined, { dateStyle: 'long', timeStyle: 'short' })} />
-             <ReceiptRow label="Immutable Ref" value={transaction.reference} />
+             <ReceiptRow label="Date & Time" value={new Date(transaction.createdAt).toLocaleString(undefined, { dateStyle: 'long', timeStyle: 'short' })} />
+             <ReceiptRow label="Reference Number" value={transaction.reference} />
              
              <div style={{ marginTop: '1.5rem', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem' }}>
                 <div style={{ padding: '1rem', background: '#f0fdf4', borderRadius: '18px', border: '1px solid #dcfce7' }}>
-                   <div style={{ fontSize: '0.7rem', fontWeight: 900, color: '#16a34a', marginBottom: '0.4rem', letterSpacing: '1px' }}>VELOCITY</div>
+                   <div style={{ fontSize: '0.7rem', fontWeight: 900, color: '#16a34a', marginBottom: '0.4rem', letterSpacing: '1px' }}>SPEED</div>
                    <div style={{ fontSize: '0.95rem', fontWeight: 900, color: '#065f46' }}>Instant</div>
                 </div>
                 <div style={{ padding: '1rem', background: '#eff6ff', borderRadius: '18px', border: '1px solid #dbeafe' }}>
-                   <div style={{ fontSize: '0.7rem', fontWeight: 900, color: '#2563eb', marginBottom: '0.4rem', letterSpacing: '1px' }}>NETWORKS</div>
-                   <div style={{ fontSize: '0.95rem', fontWeight: 900, color: '#1e40af' }}>Global Rail</div>
+                   <div style={{ fontSize: '0.7rem', fontWeight: 900, color: '#2563eb', marginBottom: '0.4rem', letterSpacing: '1px' }}>NETWORK</div>
+                   <div style={{ fontSize: '0.95rem', fontWeight: 900, color: '#1e40af' }}>Secure</div>
                 </div>
              </div>
           </div>
 
           <div style={{ borderTop: '2px dashed #e2e8f0', margin: '3rem 0', paddingTop: '2.5rem' }}>
              <div style={{ textAlign: 'center', color: '#64748b', fontSize: '0.85rem', marginBottom: '3rem', lineHeight: 1.7, fontWeight: 500 }}>
-                This settlement record is cryptographically signed and stored on the immutable Paypee ledger. For auditing, visit paypee.co/verify
+                This receipt is your official proof of payment.
              </div>
              
              <div className="no-print" style={{ display: 'flex', gap: '1.25rem' }}>

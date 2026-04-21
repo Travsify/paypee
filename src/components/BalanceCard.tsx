@@ -153,7 +153,7 @@ const BalanceCard: React.FC<BalanceCardProps> = ({
             </div>
             <div>
               <div style={{ fontWeight: 900, fontSize: '1rem', letterSpacing: '1.5px', textTransform: 'uppercase' }}>{currency}</div>
-              <div style={{ fontSize: '0.7rem', fontWeight: 800, opacity: 0.7, letterSpacing: '0.5px' }}>{type} ASSET</div>
+              <div style={{ fontSize: '0.7rem', fontWeight: 800, opacity: 0.7, letterSpacing: '0.5px' }}>{type} WALLET</div>
             </div>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
@@ -177,7 +177,7 @@ const BalanceCard: React.FC<BalanceCardProps> = ({
 
         {/* Balance Section */}
         <div style={{ position: 'relative', zIndex: 10, marginTop: '2rem' }}>
-          <div style={{ fontSize: '0.85rem', fontWeight: 800, opacity: 0.8, marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '2px' }}>Net Liquidity</div>
+          <div style={{ fontSize: '0.85rem', fontWeight: 800, opacity: 0.8, marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '2px' }}>Total Balance</div>
           <div style={{ fontSize: '3.5rem', fontWeight: 900, display: 'flex', alignItems: 'baseline', gap: '0.5rem', letterSpacing: '-0.04em' }}>
             <span style={{ fontSize: '1.8rem', opacity: 0.6, fontWeight: 800 }}>{symbol}</span>
             <span className="text-glow" style={{ textShadow: '0 0 30px rgba(255,255,255,0.3)' }}>
@@ -232,7 +232,7 @@ const BalanceCard: React.FC<BalanceCardProps> = ({
                 letterSpacing: '1.5px',
                 border: '1px solid rgba(255,255,255,0.08)'
               }}>
-                {bank ? (['USDC', 'USDT', 'BTC'].includes(currency.toUpperCase()) ? `${bank.toUpperCase()} RAIL` : bank.toUpperCase()) : 'PROVISIONING...'}
+                 {bank ? (['USDC', 'USDT', 'BTC', 'PYUSD'].includes(currency.toUpperCase()) ? `${bank.toUpperCase()} NETWORK` : bank.toUpperCase()) : 'PROVISIONING...'}
               </div>
               {bank && <CopyButton text={bank} label="Bank/Network" />}
             </div>
@@ -244,7 +244,7 @@ const BalanceCard: React.FC<BalanceCardProps> = ({
               {accNo && <CopyButton text={accNo} label="Account/Address" />}
             </div>
             
-            {!['USDC', 'USDT', 'BTC'].includes(currency.toUpperCase()) && (
+            {!['USDC', 'USDT', 'BTC', 'PYUSD'].includes(currency.toUpperCase()) && (
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                 <div style={{ fontSize: '0.9rem', fontWeight: 800, color: 'rgba(255,255,255,0.8)', letterSpacing: '0.5px' }}>{accName}</div>
                 {accName && <CopyButton text={accName} label="Account Name" />}
@@ -269,7 +269,7 @@ const BalanceCard: React.FC<BalanceCardProps> = ({
                 onClick={(e) => {
                    e.stopPropagation();
                    const targetId = details?.walletId || details?.id;
-                   if (targetId && confirm('Terminate this asset rail? This action is irreversible.')) {
+                    if (targetId && confirm('Delete this wallet? This action is irreversible.')) {
                       onDelete(targetId);
                    }
                 }}

@@ -137,7 +137,7 @@ const SmartWalletView: React.FC<SmartWalletViewProps> = ({
             Smart Wallet
           </h2>
           <p style={{ color: 'var(--text-muted)', fontSize: '1.15rem', maxWidth: '600px', fontWeight: 500 }}>
-            Manage all your global wallets and crypto in one place.
+            Manage all your global money and crypto in one place.
           </p>
         </div>
         <div style={{ display: 'flex', gap: '1.25rem' }}>
@@ -183,9 +183,9 @@ const SmartWalletView: React.FC<SmartWalletViewProps> = ({
               </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1.5rem', width: '340px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1.5rem', width: '100%', maxWidth: '340px' }}>
                <div className="holographic-card" style={{ padding: '1.75rem', textAlign: 'center', background: 'rgba(255,255,255,0.02)' }}>
-                   <div style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.4)', fontWeight: 900, marginBottom: '0.75rem', letterSpacing: '2px' }}>CASH SCORE</div>
+                   <div style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.4)', fontWeight: 900, marginBottom: '0.75rem', letterSpacing: '2px' }}>CASH STRENGTH</div>
                   <div style={{ fontSize: '1.75rem', fontWeight: 900 }}>{calculations.liquidityScore}<span style={{ fontSize: '0.9rem', opacity: 0.4 }}>/100</span></div>
                </div>
                <div className="holographic-card" style={{ padding: '1.75rem', textAlign: 'center', background: 'rgba(255,255,255,0.02)' }}>
@@ -245,7 +245,7 @@ const SmartWalletView: React.FC<SmartWalletViewProps> = ({
         </div>
 
         <AnimatePresence mode="popLayout">
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(380px, 1fr))', gap: '2.5rem' }}>
+          <div className="responsive-grid-auto" style={{ display: 'grid', gap: '2.5rem' }}>
             {filteredWallets.map((w, idx) => (
               <motion.div 
                 key={w.id}
@@ -298,7 +298,7 @@ const SmartWalletView: React.FC<SmartWalletViewProps> = ({
                       You have a lot of Naira in your account. We suggest moving about ₦{((calculations.assetsByCurrency['NGN'] || 0) * 0.2 * (fxRates['USD_NGN'] || 1620)).toLocaleString()} to Dollars (USD) to keep your money safe from value changes.
                     </p>
                     <button onClick={onSwap} style={{ background: 'transparent', border: 'none', color: 'var(--primary)', fontWeight: 900, fontSize: '1rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.75rem', padding: 0 }}>
-                      Secure Rail Assets <ArrowRight size={20} />
+                      Swap to USD Now <ArrowRight size={20} />
                     </button>
                  </div>
                )}
@@ -311,7 +311,7 @@ const SmartWalletView: React.FC<SmartWalletViewProps> = ({
                       Aggregate liquid capital of ${calculations.totalUSD.toFixed(0)} is currently yielding 0%. Moving 50% to a Secure Vault protocol would generate an estimated ${((calculations.totalUSD * 0.5 * 0.12) / 12).toFixed(2)} in monthly institutional rewards.
                     </p>
                     <button style={{ background: 'transparent', border: 'none', color: 'var(--primary)', fontWeight: 900, fontSize: '1rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.75rem', padding: 0 }}>
-                      Provision Secure Vault <ArrowRight size={20} />
+                      Move to Vault <ArrowRight size={20} />
                     </button>
                  </div>
                )}
@@ -342,7 +342,7 @@ const SmartWalletView: React.FC<SmartWalletViewProps> = ({
                       <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '1rem', marginBottom: '1rem' }}>
                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                             <div style={{ width: 12, height: 12, borderRadius: '4px', background: color, boxShadow: `0 0 10px ${color}` }} />
-                            <span style={{ color: 'var(--text-muted)', fontWeight: 800 }}>{currency} Rails</span>
+                            <span style={{ color: 'var(--text-muted)', fontWeight: 800 }}>{currency} Wallet</span>
                          </div>
                          <span style={{ fontWeight: 900 }}>{percentage}%</span>
                       </div>
@@ -359,7 +359,7 @@ const SmartWalletView: React.FC<SmartWalletViewProps> = ({
                })}
             </div>
             <button className="btn btn-outline" style={{ width: '100%', marginTop: '4rem', padding: '1.25rem', borderRadius: '18px', fontSize: '1rem', fontWeight: 900, background: 'rgba(255,255,255,0.02)' }}>
-              Export Protocol Audit
+              Export Statement
             </button>
          </div>
       </div>

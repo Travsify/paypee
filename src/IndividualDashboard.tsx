@@ -230,6 +230,7 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
     if (currency === 'GBP') return { symbol: '£', gradient: 'linear-gradient(135deg, #4c1d95 0%, #8b5cf6 100%)' };
     if (currency === 'BTC') return { symbol: '₿', gradient: 'linear-gradient(135deg, #b45309 0%, #f59e0b 100%)' };
     if (['USDT', 'USDC'].includes(currency)) return { symbol: '₮', gradient: 'linear-gradient(135deg, #26a17b 0%, #00d395 100%)' };
+    if (currency === 'PYUSD') return { symbol: '₱', gradient: 'linear-gradient(135deg, #0ea5e9 0%, #2563eb 100%)' };
     if (['KES', 'GHS', 'UGX', 'RWF', 'XAF', 'XOF', 'TZS'].includes(currency)) return { symbol: currency, gradient: 'linear-gradient(135deg, #374151 0%, #111827 100%)' };
     return { symbol: '₦', gradient: 'linear-gradient(135deg, #064e3b 0%, #10b981 100%)' };
   };
@@ -354,7 +355,7 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
         )}
         
         {/* Sticky Modern Topbar */}
-        <div style={{ 
+        <div className="topbar-responsive" style={{ 
           display: 'flex', 
           justifyContent: 'space-between', 
           alignItems: 'center', 
@@ -501,8 +502,8 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
                         <Lock size={28} color="var(--primary)" />
                       </div>
                       <div>
-                        <h4 style={{ fontSize: '1.25rem', fontWeight: 900, marginBottom: '0.4rem', color: '#fff', letterSpacing: '-0.01em' }}>Secure Your Capital Access</h4>
-                        <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', fontWeight: 500 }}>Initialization of a 4-digit security PIN is required for outbound settlements.</p>
+                        <h4 style={{ fontSize: '1.25rem', fontWeight: 900, marginBottom: '0.4rem', color: '#fff', letterSpacing: '-0.01em' }}>Secure Your Account</h4>
+                        <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', fontWeight: 500 }}>Set up a 4-digit PIN to securely send money.</p>
                       </div>
                       <button 
                         className="btn btn-primary" 
@@ -515,8 +516,8 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
                   </motion.div>
                 )}
                 
-                {/* 1. Master Capital Summary */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '3rem' }}>
+                {/* 1. Total Balance Summary */}
+                <div className="balance-header-responsive" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '3rem', flexWrap: 'wrap', gap: '2rem' }}>
                       <div>
                         <div style={{ color: 'var(--text-muted)', textTransform: 'uppercase', fontSize: '0.85rem', fontWeight: 900, letterSpacing: '2.5px', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
                         TOTAL BALANCE
@@ -527,19 +528,19 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
                           {showBalances ? <EyeOff size={16} /> : <Eye size={16} />}
                         </button>
                       </div>
-                      <div style={{ fontSize: 'clamp(3.5rem, 6vw, 5.5rem)', fontWeight: 900, lineHeight: 0.9, marginBottom: '1rem', letterSpacing: '-0.05em' }}>
+                      <div style={{ fontSize: 'clamp(2.5rem, 5vw, 4rem)', fontWeight: 900, lineHeight: 0.9, marginBottom: '1rem', letterSpacing: '-0.05em' }}>
                         {showBalances ? <span className="text-glow">₦{calculateTotalNGN().toLocaleString(undefined, {minimumFractionDigits: 2})}</span> : '₦•••••••••'}
                       </div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                         <div style={{ color: 'var(--accent)', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.95rem', background: 'rgba(16, 185, 129, 0.1)', padding: '0.4rem 1rem', borderRadius: '100px', border: '1px solid rgba(16, 185, 129, 0.2)' }}>
                            <div style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--accent)', boxShadow: '0 0 10px var(--accent)' }}></div>
-                           LIVE UPDATES
+                           LIVE
                         </div>
                         <div style={{ color: 'var(--text-muted)', fontSize: '0.9rem', fontWeight: 600 }}>Sync: {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
                       </div>
                    </div>
                    
-                   {/* 2. Rapid Command Actions */}
+                   {/* 2. Quick Actions */}
                    <div style={{ display: 'flex', gap: '1.25rem', flexWrap: 'wrap', justifyContent: 'flex-end' }} className="desktop-only">
                       <motion.button whileHover={{ y: -5 }} onClick={() => setIsPayoutOpen(true)} className="btn btn-primary" style={{ padding: '1.1rem 2.2rem', borderRadius: '18px', fontSize: '1.05rem', fontWeight: 900 }}>
                          <Send size={18} /> Send
@@ -563,9 +564,9 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
                          <div style={{ width: 32, height: 32, borderRadius: '8px', background: 'rgba(99,102,241,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary)' }}>
                             <Globe size={18} />
                          </div>
-                         <h3 style={{ fontSize: '1.4rem', fontWeight: 900, letterSpacing: '-0.02em' }}>Your Wallets</h3>
+                         <h3 style={{ fontSize: '1.2rem', fontWeight: 900, letterSpacing: '-0.02em' }}>Your Wallets</h3>
                       </div>
-                      <button onClick={() => setActiveSection('wallets')} className="btn btn-outline" style={{ padding: '0.5rem 1.25rem', borderRadius: '12px', fontSize: '0.85rem', fontWeight: 800 }}>See All <ChevronRight size={16} /></button>
+                      <button onClick={() => setActiveSection('wallets')} className="btn btn-outline" style={{ padding: '0.5rem 1.25rem', borderRadius: '12px', fontSize: '0.85rem', fontWeight: 800 }}>View All <ChevronRight size={16} /></button>
                    </div>
                    
                    <div style={{ display: 'flex', gap: '1rem', overflowX: 'auto', paddingBottom: '1.25rem', marginBottom: '1.5rem' }} className="custom-scrollbar">
@@ -614,7 +615,7 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
                             transition: 'all 0.3s'
                          }}
                       >
-                         <Plus size={16} /> Deploy Asset Rail
+                         <Plus size={16} /> Add Wallet
                       </button>
                    </div>
 
@@ -628,85 +629,61 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
                            <motion.div 
                             whileHover={{ scale: 1.01 }}
                             className="premium-card"
-                            style={{ width: '100%', borderStyle: 'dashed', padding: '4rem', textAlign: 'center', cursor: 'pointer' }} 
+                            style={{ width: '100%', borderStyle: 'dashed', padding: '3rem', textAlign: 'center', cursor: 'pointer' }} 
                             onClick={() => setIsAccountModalOpen(true)}
                            >
-                              <div style={{ width: 80, height: 80, background: 'rgba(255,255,255,0.02)', borderRadius: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 2rem' }}>
-                                 <Plus size={40} color="var(--text-muted)" />
+                              <div style={{ width: 64, height: 64, background: 'rgba(255,255,255,0.02)', borderRadius: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem' }}>
+                                 <Plus size={32} color="var(--text-muted)" />
                               </div>
-                              <h3 style={{ fontSize: '1.6rem', fontWeight: 900, color: '#fff', marginBottom: '0.75rem' }}>No Active Rails Detected</h3>
-                              <p style={{ color: 'var(--text-muted)', fontSize: '1rem', fontWeight: 500 }}>Deploy an NGN, USD or GBP asset rail to begin processing capital.</p>
+                              <h3 style={{ fontSize: '1.4rem', fontWeight: 900, color: '#fff', marginBottom: '0.5rem' }}>No Active Wallets</h3>
+                              <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', fontWeight: 500 }}>Create an NGN, USD, or GBP wallet to start receiving money.</p>
                            </motion.div>
                          );
                          
                          const { symbol, gradient } = getCardProps(activeWallet.currency);
-                         const isCrypto = ['USDC', 'USDT', 'BTC'].includes(activeWallet.currency);
+                         const isCrypto = ['USDC', 'USDT', 'BTC', 'PYUSD'].includes(activeWallet.currency);
                          const meta = activeWallet.metadata || {};
                          const accNo = meta.address || meta.wallet_address || meta.iban || meta.account_number || meta.accountNumber || meta.virtual_account_number || '---';
                          const bank = meta.network || meta.bankName || meta.bank_name || meta.bank || meta.provider || (isCrypto ? 'Decentralized Network' : 'Global Settlement Core');
                          const accName = meta.accountInformation?.accountName || meta.accountName || meta.accountHolder || userData?.firstName + ' ' + userData?.lastName;
 
                          return (
-                           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))', gap: '2.5rem', width: '100%' }}>
-                              <div style={{ width: '100%' }}>
-                                <BalanceCard 
-                                  currency={activeWallet.currency} 
-                                  symbol={symbol} 
-                                  gradient={gradient} 
-                                  details={activeWallet.metadata} 
-                                  amount={parseFloat(activeWallet.balance).toFixed(2)} 
-                                  userName={userData?.firstName}
-                                  onRefresh={fetchUserData}
-                                />
+                           <div className="premium-card active-wallet-card-responsive" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', width: '100%', padding: '2rem', background: 'rgba(255,255,255,0.01)', borderLeft: `4px solid ${isCrypto ? '#f59e0b' : 'var(--primary)'}` }}>
+                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
+                                <div>
+                                  <div style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '0.2rem' }}>{isCrypto ? 'Crypto Wallet' : 'Fiat Account'}</div>
+                                  <div style={{ fontSize: '2.5rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.5rem', letterSpacing: '-0.02em' }}>
+                                    <span style={{ fontSize: '1.5rem', opacity: 0.5 }}>{symbol}</span>
+                                    {showBalances ? parseFloat(activeWallet.balance).toLocaleString(undefined, { minimumFractionDigits: 2 }) : '••••••'}
+                                  </div>
+                                </div>
+                                <div style={{ display: 'flex', gap: '0.75rem' }}>
+                                   <button className="btn btn-primary" onClick={() => setIsPayoutOpen(true)} style={{ padding: '0.75rem 1.5rem', borderRadius: '14px', fontSize: '0.95rem', fontWeight: 800, display: 'flex', alignItems: 'center' }}><Send size={16} style={{ marginRight: 6 }}/> Send</button>
+                                   <button className="btn btn-outline" onClick={() => setIsSwapOpen(true)} style={{ padding: '0.75rem 1.5rem', borderRadius: '14px', fontSize: '0.95rem', fontWeight: 800, display: 'flex', alignItems: 'center' }}><Repeat size={16} style={{ marginRight: 6 }}/> Swap</button>
+                                </div>
                               </div>
 
-                              <div className="premium-card" style={{ 
-                                padding: '3rem', 
-                                display: 'flex', 
-                                flexDirection: 'column', 
-                                justifyContent: 'center',
-                                background: 'rgba(255,255,255,0.01)'
-                              }}>
-                                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '2.5rem' }}>
-                                   <div style={{ width: 12, height: 12, borderRadius: '50%', background: 'var(--accent)', boxShadow: '0 0 15px var(--accent)' }} />
-                                   <h4 style={{ margin: 0, fontSize: '0.9rem', fontWeight: 900, color: '#fff', textTransform: 'uppercase', letterSpacing: '3px' }}>Rail Diagnostics</h4>
-                                 </div>
-
-                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-                                    {[
-                                      { label: 'Settlement Currency', value: `${activeWallet.currency} Protocol` },
-                                      { label: 'Network Provider', value: bank, highlight: true, icon: Globe },
-                                      { label: isCrypto ? 'On-Chain Address' : 'Account Routing ID', value: accNo, copyable: true, icon: Shield },
-                                      { label: 'Auth Beneficiary', value: accName, hide: isCrypto, icon: User }
-                                    ].filter(f => !f.hide).map((item, idx) => (
-                                      <div key={idx} style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                                         <div style={{ fontSize: '0.7rem', fontWeight: 900, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1.5px', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                            {item.icon && <item.icon size={12} />} {item.label}
-                                         </div>
-                                         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                                           <div style={{ 
-                                             fontSize: '1.2rem', 
-                                             fontWeight: 800, 
-                                             color: item.highlight ? 'var(--primary)' : '#fff',
-                                             fontFamily: item.copyable ? 'monospace' : 'inherit',
-                                             wordBreak: 'break-all',
-                                             letterSpacing: item.copyable ? '0.5px' : '-0.01em'
-                                           }}>
-                                             {item.value}
-                                           </div>
-                                           {item.copyable && (
-                                             <motion.button 
-                                               whileHover={{ scale: 1.1, background: 'rgba(255,255,255,0.1)' }}
-                                               onClick={() => { navigator.clipboard.writeText(item.value); }}
-                                               style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)', padding: '0.5rem', borderRadius: '10px', color: '#fff', cursor: 'pointer', display: 'flex' }}
-                                             >
-                                               <Copy size={14} />
-                                             </motion.button>
-                                           )}
-                                         </div>
-                                      </div>
-                                    ))}
-                                 </div>
+                              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', background: 'rgba(255,255,255,0.02)', padding: '1.25rem', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase' }}>Bank / Network</span>
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.95rem', fontWeight: 700 }}>
+                                    {bank} <Copy size={14} color="var(--primary)" style={{ cursor: 'pointer', opacity: 0.8 }} onClick={() => navigator.clipboard.writeText(bank)} />
+                                  </div>
+                                </div>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase' }}>Account / Address</span>
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.95rem', fontWeight: 700, wordBreak: 'break-all' }}>
+                                    {accNo} <Copy size={14} color="var(--primary)" style={{ cursor: 'pointer', opacity: 0.8 }} onClick={() => navigator.clipboard.writeText(accNo)} />
+                                  </div>
+                                </div>
+                                {!isCrypto && (
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase' }}>Account Name</span>
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.95rem', fontWeight: 700 }}>
+                                    {accName} <Copy size={14} color="var(--primary)" style={{ cursor: 'pointer', opacity: 0.8 }} onClick={() => navigator.clipboard.writeText(accName)} />
+                                  </div>
+                                </div>
+                                )}
                               </div>
                            </div>
                          );
@@ -714,13 +691,13 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
                    </div>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: '2.5rem' }}>
-                   {/* 4. Institutional Analytics (Pulse) */}
+                <div className="responsive-grid-auto">
+                   {/* 4. Analytics */}
                    <div className="premium-card" style={{ padding: '2.5rem', flex: 2, display: 'flex', flexDirection: 'column', background: 'rgba(255,255,255,0.01)' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3rem' }}>
                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                             <Cpu size={20} color="var(--primary)" />
-                            <h3 style={{ fontSize: '1.3rem', fontWeight: 900, letterSpacing: '-0.02em' }}>Financial Velocity</h3>
+                            <h3 style={{ fontSize: '1.3rem', fontWeight: 900, letterSpacing: '-0.02em' }}>Balance Over Time</h3>
                          </div>
                          <div style={{ display: 'flex', background: 'rgba(255,255,255,0.03)', padding: '0.4rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
                              {['1D', '1W', '1M', '1Y'].map(t => (
@@ -773,8 +750,8 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
                       </div>
                    </div>
 
-                   {/* 5. Smart Helper Core */}
-                   <div className="premium-card" style={{ padding: '2.5rem', flex: 1, background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.03) 0%, rgba(168, 85, 247, 0.03) 100%)', border: '1px solid rgba(99, 102, 241, 0.1)' }}>
+                   {/* 5. Smart Helper */}
+                   <div className="premium-card" style={{ padding: '2.5rem', flex: 1, background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.03) 100%)', border: '1px solid rgba(99, 102, 241, 0.1)' }}>
                       <div className="mesh-bg" style={{ opacity: 0.1 }} />
                       <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '2.5rem' }}>
                          <div style={{ width: 44, height: 44, borderRadius: '14px', background: 'rgba(99, 102, 241, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(99, 102, 241, 0.2)' }}>
@@ -782,39 +759,39 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
                          </div>
                          <div>
                             <h3 style={{ fontSize: '1.3rem', fontWeight: 900, letterSpacing: '-0.02em', color: '#fff' }}>Smart Helper</h3>
-                            <div style={{ fontSize: '0.65rem', color: 'var(--primary)', fontWeight: 900, letterSpacing: '2px', textTransform: 'uppercase' }}>Active Monitoring</div>
+                            <div style={{ fontSize: '0.65rem', color: 'var(--primary)', fontWeight: 900, letterSpacing: '2px', textTransform: 'uppercase' }}>Always On</div>
                          </div>
                       </div>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', position: 'relative', zIndex: 1 }}>
                          {userData?.wallets?.find((w: any) => w.currency === 'NGN')?.balance > 500000 && (
                            <div style={{ background: 'rgba(255,255,255,0.02)', padding: '1.5rem', borderRadius: '20px', border: '1px solid rgba(255,255,255,0.05)' }}>
                               <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: 'var(--accent)', fontWeight: 900, fontSize: '0.75rem', letterSpacing: '1px', textTransform: 'uppercase', marginBottom: '0.75rem' }}>
-                                 <Zap size={14} fill="var(--accent)" /> Asset Optimization
+                                 <Zap size={14} fill="var(--accent)" /> Balance Alert
                               </div>
-                              <p style={{ color: 'rgba(255,255,255,0.8)', fontSize: '1rem', lineHeight: 1.6, marginBottom: '1.25rem', fontWeight: 500 }}>High NGN exposure detected. Market volatility is increasing. Hedging 40% into USD is recommended.</p>
-                              <button onClick={() => setIsSwapOpen(true)} className="btn btn-primary" style={{ width: '100%', padding: '0.8rem', borderRadius: '12px', fontSize: '0.9rem', fontWeight: 900 }}>Execute FX Swap</button>
+                              <p style={{ color: 'rgba(255,255,255,0.8)', fontSize: '1rem', lineHeight: 1.6, marginBottom: '1.25rem', fontWeight: 500 }}>Your Naira balance is high. Consider swapping some to USD to protect your money.</p>
+                              <button onClick={() => setIsSwapOpen(true)} className="btn btn-primary" style={{ width: '100%', padding: '0.8rem', borderRadius: '12px', fontSize: '0.9rem', fontWeight: 900 }}>Swap to USD</button>
                            </div>
                          )}
                          <div style={{ background: 'rgba(255,255,255,0.02)', padding: '1.5rem', borderRadius: '20px', border: '1px solid rgba(255,255,255,0.05)' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: 'var(--primary)', fontWeight: 900, fontSize: '0.75rem', letterSpacing: '1px', textTransform: 'uppercase', marginBottom: '0.75rem' }}>
-                               <ShieldCheck size={14} fill="var(--primary)" /> Protocol Audit
+                               <ShieldCheck size={14} fill="var(--primary)" /> Account Status
                             </div>
                             <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.95rem', lineHeight: 1.6, fontWeight: 500 }}>
-                              {transactions.length > 5 ? 'System throughput has scaled by 12% this session. No anomalies detected in settlement rails.' : 'Welcome to the core. Initialize your first asset rail to begin institutional operations.'}
+                              {transactions.length > 5 ? 'Your account is secure and running smoothly.' : 'Welcome to Paypee! Add your first wallet to start transacting.'}
                             </p>
                          </div>
                       </div>
                    </div>
                 </div>
 
-                {/* 6. Recent Immutable Activity */}
+                {/* 6. Recent Transactions */}
                 <div className="premium-card" style={{ padding: '3rem', background: 'rgba(255,255,255,0.01)' }}>
                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3rem' }}>
                        <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
                           <div style={{ width: 40, height: 40, borderRadius: '12px', background: 'rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', border: '1px solid rgba(255,255,255,0.08)' }}>
                              <History size={20} />
                           </div>
-                          <h3 style={{ fontSize: '1.5rem', fontWeight: 900, letterSpacing: '-0.02em' }}>Transaction Ledger</h3>
+                          <h3 style={{ fontSize: '1.5rem', fontWeight: 900, letterSpacing: '-0.02em' }}>Recent Transactions</h3>
                           <motion.button 
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
@@ -837,20 +814,20 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
                             }}
                           >
                              <RefreshCw size={14} className={isGenerating ? 'animate-spin' : ''} /> 
-                             {isGenerating ? 'Syncing...' : 'Force Sync'}
+                             {isGenerating ? 'Syncing...' : 'Refresh'}
                           </motion.button>
                        </div>
-                      <button onClick={() => navigate('history')} className="btn btn-outline" style={{ padding: '0.6rem 1.5rem', borderRadius: '14px', fontSize: '0.9rem', fontWeight: 900 }}>Full Audit Logs <ChevronRight size={16} /></button>
+                      <button onClick={() => navigate('history')} className="btn btn-outline" style={{ padding: '0.6rem 1.5rem', borderRadius: '14px', fontSize: '0.9rem', fontWeight: 900 }}>View All <ChevronRight size={16} /></button>
                    </div>
                    
                    <div style={{ width: '100%', overflowX: 'auto' }}>
                       <table style={{ width: '100%', minWidth: '800px', borderCollapse: 'separate', borderSpacing: '0 12px' }}>
                          <thead>
                             <tr style={{ color: 'var(--text-muted)', fontSize: '0.75rem', textAlign: 'left', textTransform: 'uppercase', letterSpacing: '2px', fontWeight: 900 }}>
-                               <th style={{ padding: '0 1.5rem 1rem' }}>Settle Event</th>
-                               <th style={{ padding: '0 1.5rem 1rem' }}>Timestamp</th>
-                               <th style={{ padding: '0 1.5rem 1rem' }}>Status Code</th>
-                               <th style={{ padding: '0 1.5rem 1rem', textAlign: 'right' }}>Net Volume</th>
+                               <th style={{ padding: '0 1.5rem 1rem' }}>Transaction</th>
+                               <th style={{ padding: '0 1.5rem 1rem' }}>Date & Time</th>
+                               <th style={{ padding: '0 1.5rem 1rem' }}>Status</th>
+                               <th style={{ padding: '0 1.5rem 1rem', textAlign: 'right' }}>Amount</th>
                             </tr>
                          </thead>
                          <tbody>
@@ -878,7 +855,7 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
                                            {tx.type === 'DEPOSIT' ? <ArrowDownLeft size={20} color="var(--accent)" /> : <ArrowUpRight size={20} color="#fff" />}
                                         </div>
                                         <div>
-                                          <div style={{ fontWeight: 900, fontSize: '1rem', color: '#fff', letterSpacing: '-0.01em' }}>{tx.desc || (tx.type === 'DEPOSIT' ? 'Incoming Settlement' : 'Transfer Payout')}</div>
+                                          <div style={{ fontWeight: 900, fontSize: '1rem', color: '#fff', letterSpacing: '-0.01em' }}>{tx.desc || (tx.type === 'DEPOSIT' ? 'Money Received' : 'Money Sent')}</div>
                                           <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px', marginTop: '4px' }}>REF: {tx.reference?.slice(0, 12)}...</div>
                                         </div>
                                      </div>
@@ -915,10 +892,10 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
                                             <History size={40} color="var(--text-muted)" style={{ opacity: 0.3 }} />
                                          </div>
                                          <div>
-                                            <div style={{ fontWeight: 900, fontSize: '1.4rem', color: '#fff', marginBottom: '0.5rem' }}>Immutable Ledger Empty</div>
-                                            <div style={{ color: 'var(--text-muted)', fontSize: '1rem', fontWeight: 500 }}>Make a transfer to see your history here.</div>
+                                            <div style={{ fontWeight: 900, fontSize: '1.4rem', color: '#fff', marginBottom: '0.5rem' }}>No Transactions Yet</div>
+                                            <div style={{ color: 'var(--text-muted)', fontSize: '1rem', fontWeight: 500 }}>Send or receive money to see your history here.</div>
                                          </div>
-                                         <button onClick={() => setIsPayoutOpen(true)} className="btn btn-primary" style={{ padding: '1rem 2.5rem', borderRadius: '16px', fontWeight: 900 }}>Initiate First Settlement</button>
+                                         <button onClick={() => setIsPayoutOpen(true)} className="btn btn-primary" style={{ padding: '1rem 2.5rem', borderRadius: '16px', fontWeight: 900 }}>Send Money Now</button>
                                       </div>
                                    </td>
                                 </tr>
@@ -1100,13 +1077,13 @@ const HelpCenter = () => {
   return (
     <div style={{ maxWidth: '900px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '4rem' }}>
       <div style={{ textAlign: 'center' }}>
-        <div style={{ color: 'var(--primary)', fontWeight: 900, fontSize: '0.85rem', letterSpacing: '3px', textTransform: 'uppercase', marginBottom: '1rem' }}>Support Protocol</div>
+        <div style={{ color: 'var(--primary)', fontWeight: 900, fontSize: '0.85rem', letterSpacing: '3px', textTransform: 'uppercase', marginBottom: '1rem' }}>Support Center</div>
         <h2 style={{ fontSize: '3.5rem', fontWeight: 900, marginBottom: '1rem', letterSpacing: '-0.04em' }}>Help Center</h2>
-        <p style={{ color: 'var(--text-muted)', fontSize: '1.25rem', fontWeight: 500, maxWidth: '600px', margin: '0 auto' }}>Access technical documentation or initiate a support session with our engineering team.</p>
+        <p style={{ color: 'var(--text-muted)', fontSize: '1.25rem', fontWeight: 500, maxWidth: '600px', margin: '0 auto' }}>Need help with your account? We're here for you.</p>
       </div>
 
       <div className="premium-card" style={{ padding: '3.5rem', background: 'rgba(255,255,255,0.01)' }}>
-        <h3 style={{ fontSize: '1.6rem', fontWeight: 900, marginBottom: '2.5rem', color: '#fff' }}>Technical Knowledge Base</h3>
+        <h3 style={{ fontSize: '1.6rem', fontWeight: 900, marginBottom: '2.5rem', color: '#fff' }}>Frequently Asked Questions</h3>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
           {faqs.map((faq, idx) => (
             <div key={idx} style={{ paddingBottom: '2rem', borderBottom: idx === faqs.length - 1 ? 'none' : '1px solid rgba(255,255,255,0.06)' }}>

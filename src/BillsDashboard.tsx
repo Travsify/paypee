@@ -204,12 +204,12 @@ const BillsDashboard = () => {
                          </div>
 
                          <div style={{ background: 'rgba(255,255,255,0.02)', padding: '1.5rem', borderRadius: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <div style={{ color: 'var(--text-muted)', fontSize: '0.9rem', fontWeight: 700 }}>Protocol Fee</div>
+                            <div style={{ color: 'var(--text-muted)', fontSize: '0.9rem', fontWeight: 700 }}>Service Fee</div>
                             <div style={{ fontWeight: 900, fontSize: '1.1rem' }}>₦0.00</div>
                          </div>
 
                          <button className="btn btn-primary" style={{ width: '100%', padding: '1.5rem', borderRadius: '20px', fontWeight: 900, fontSize: '1.1rem', marginTop: '1.5rem' }}>
-                            Authorize Bill Payment
+                            Pay Bill Now
                          </button>
                       </div>
                    </motion.div>
@@ -219,7 +219,7 @@ const BillsDashboard = () => {
                         <Zap size={48} />
                       </div>
                       <div style={{ fontSize: '1.25rem', fontWeight: 900, color: 'var(--text-muted)', marginBottom: '0.5rem' }}>Awaiting Selection</div>
-                      <p style={{ maxWidth: '250px', lineHeight: 1.6, fontSize: '0.95rem', fontWeight: 500 }}>Choose a billing registry from the terminal to begin settlement.</p>
+                      <p style={{ maxWidth: '250px', lineHeight: 1.6, fontSize: '0.95rem', fontWeight: 500 }}>Choose a service provider from the list to pay your bill.</p>
                    </div>
                 )}
              </AnimatePresence>
@@ -232,13 +232,13 @@ const BillsDashboard = () => {
              <ShieldCheck size={36} />
           </div>
           <div>
-             <div style={{ fontWeight: 900, fontSize: '1.1rem', color: '#fff', marginBottom: '0.4rem', letterSpacing: '0.01em' }}>Verified Settlement Pipeline</div>
+             <div style={{ fontWeight: 900, fontSize: '1.1rem', color: '#fff', marginBottom: '0.4rem', letterSpacing: '0.01em' }}>Secure Bill Payments</div>
              <p style={{ color: 'var(--text-muted)', fontSize: '1rem', margin: 0, fontWeight: 500 }}>
-                All utility settlements are finalized in real-time via the Paypee primary financial grid. Transaction hashes are generated instantly for institutional audit trails.
+                All bill payments are processed instantly and securely. You will receive a receipt for every payment made.
              </p>
           </div>
           <div style={{ marginLeft: 'auto' }}>
-             <button className="btn btn-outline" style={{ padding: '1rem 2rem', borderRadius: '14px', fontSize: '0.85rem', fontWeight: 900, background: 'rgba(255,255,255,0.02)' }}>Protocol Specs</button>
+             <button className="btn btn-outline" style={{ padding: '1rem 2rem', borderRadius: '14px', fontSize: '0.85rem', fontWeight: 900, background: 'rgba(255,255,255,0.02)' }}>View FAQ</button>
           </div>
        </div>
 

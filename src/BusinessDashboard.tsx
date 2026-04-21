@@ -303,15 +303,16 @@ const BusinessDashboard = ({ onLogout }: { onLogout?: () => void }) => {
 
           {activeSection === 'wallets' && (
              <div style={{ animation: 'fadeIn 0.5s ease-out' }}>
-               <h2 style={{ fontSize: '1.8rem', fontWeight: 800, marginBottom: '2rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}><Wallet size={28} color="var(--primary)" /> Corporate Treasury Nodes</h2>
+               <h2 style={{ fontSize: '1.8rem', fontWeight: 800, marginBottom: '2rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}><Wallet size={28} color="var(--primary)" /> Corporate Treasury Wallets</h2>
                <div className="balance-card-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '2rem' }}>
                   {userData?.wallets?.map((w: any) => {
-                    const symbols: any = { USD: '$', EUR: '€', NGN: '₦', GBP: '£', BTC: '₿' };
+                    const symbols: any = { USD: '$', EUR: '€', NGN: '₦', GBP: '£', BTC: '₿', PYUSD: '₱' };
                     const gradients: any = {
                       USD: "linear-gradient(135deg, #6366f1 0%, #a855f7 100%)",
                       NGN: "linear-gradient(135deg, #10b981 0%, #059669 100%)",
                       EUR: "linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)",
-                      BTC: "linear-gradient(135deg, #f59e0b 0%, #d97706 100%)"
+                      BTC: "linear-gradient(135deg, #f59e0b 0%, #d97706 100%)",
+                      PYUSD: "linear-gradient(135deg, #0ea5e9 0%, #2563eb 100%)"
                     };
                     return (
                       <BalanceCard 
@@ -365,17 +366,17 @@ const BusinessDashboard = ({ onLogout }: { onLogout?: () => void }) => {
                 </div>
               </div>
 
-              <div className="balance-card-slider no-scrollbar" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '2rem', marginBottom: '3.5rem' }}>
+              <div className="balance-card-slider no-scrollbar" style={{ display: 'grid', gap: '2rem', marginBottom: '3.5rem' }}>
                  <MetricCard label="Total Balance" value={`$${(userData?.wallets?.reduce((acc: any, w: any) => acc + (w.currency === 'USD' ? parseFloat(w.balance) : 0), 0) || 0).toLocaleString()}`} trend="+12.4%" icon={TrendingUp} color="#10b981" />
                  <MetricCard label="Total Payments" value="1.2k" trend="+85%" icon={Send} color="var(--primary)" />
                  <MetricCard label="Team Accounts" value="12" trend="Active" icon={Layers} color="var(--secondary)" />
                  <MetricCard label="Safety Score" value="100%" trend="Safe" icon={ShieldCheck} color="#10b981" />
               </div>
 
-              <div className="dashboard-grid-2" style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1.4fr) minmax(0, 0.6fr)', gap: '3rem' }}>
+              <div className="dashboard-grid-2" style={{ display: 'grid', gap: '3rem' }}>
                  <div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-                      <h2 style={{ fontSize: '1.4rem', fontWeight: 800 }}>Cash-Flow Velocity</h2>
+                      <h2 style={{ fontSize: '1.4rem', fontWeight: 800 }}>Balance Over Time</h2>
                       <div className="desktop-only" style={{ display: 'flex', gap: '0.5rem' }}>
                          {['1D', '1W', '1M', '1Y'].map(p => (<button key={p} style={{ background: p === '1M' ? 'var(--primary)' : 'rgba(255,255,255,0.03)', border: 'none', padding: '0.4rem 0.8rem', borderRadius: '8px', fontSize: '0.7rem', fontWeight: 800, cursor: 'pointer' }}>{p}</button>))}
                       </div>
@@ -405,7 +406,7 @@ const BusinessDashboard = ({ onLogout }: { onLogout?: () => void }) => {
                  </div>
 
                  <div>
-                    <h2 style={{ fontSize: '1.4rem', fontWeight: 800, marginBottom: '2rem' }}>Active Node Status</h2>
+                    <h2 style={{ fontSize: '1.4rem', fontWeight: 800, marginBottom: '2rem' }}>Active Wallet Status</h2>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
                       {userData?.wallets?.map((w: any) => (
                         <div key={w.id} style={{ padding: '1.25rem', background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border)', borderRadius: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -414,8 +415,8 @@ const BusinessDashboard = ({ onLogout }: { onLogout?: () => void }) => {
                                  {w.currency === 'USD' ? '🇺🇸' : w.currency === 'NGN' ? '🇳🇬' : w.currency === 'EUR' ? '🇪🇺' : '🌐'}
                               </div>
                               <div style={{ flex: 1 }}>
-                                 <div style={{ fontWeight: 800, fontSize: '0.9rem' }}>{w.currency} Rail</div>
-                                 <div style={{ fontSize: '0.65rem', color: '#10b981', fontWeight: 700 }}>SYNCHRONIZED</div>
+                                 <div style={{ fontWeight: 800, fontSize: '0.9rem' }}>{w.currency} Wallet</div>
+                                 <div style={{ fontSize: '0.65rem', color: '#10b981', fontWeight: 700 }}>ACTIVE</div>
                               </div>
                            </div>
                            <ChevronRight size={18} opacity={0.3} />
@@ -428,7 +429,7 @@ const BusinessDashboard = ({ onLogout }: { onLogout?: () => void }) => {
                            else { setIsAccountModalOpen(true); }
                          }}
                          style={{ width: '100%', padding: '1rem', border: '2px dashed var(--border)', background: 'transparent', borderRadius: '20px', color: isVerified ? 'var(--text-muted)' : '#64748b', fontWeight: 700, cursor: isVerified ? 'pointer' : 'not-allowed', opacity: isVerified ? 1 : 0.5 }}
-                       >{isVerified ? '+ Add Rail' : '🔒 Verification Required'}</motion.button>
+                       >{isVerified ? '+ Add Wallet' : '🔒 Verification Required'}</motion.button>
                     </div>
                  </div>
               </div>

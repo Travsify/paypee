@@ -8,7 +8,8 @@ export class IbanService {
    * Provisions a new virtual global account for a user.
    */
   static async provisionGlobalAccount(userId: string, currency: string, userName?: string, bvn?: string, kycData?: any) {
-    console.log(`🌍 [MAPLERAD] Provisioning ${currency} account for User ${userId}...`);
+    const normalizedCurrency = currency.toUpperCase();
+    console.log(`🌍 [MAPLERAD] Provisioning ${normalizedCurrency} account for User ${userId}...`);
 
     // 1. Fetch user to ensure we have email and names
     const user = await prisma.user.findUnique({ where: { id: userId } });
@@ -16,13 +17,13 @@ export class IbanService {
 
     // 2. Check if the user already has a wallet in this currency
     const existingWallet = await prisma.wallet.findFirst({
-        where: { userId, currency: currency as Currency }
+        where: { userId, currency: normalizedCurrency as Currency }
     });
 
     if (existingWallet && existingWallet.metadata && (existingWallet.metadata as any).account_number) {
         return {
             walletId: existingWallet.id,
-            currency,
+            currency: normalizedCurrency,
             isExisting: true,
             accountDetails: existingWallet.metadata
         };
@@ -31,13 +32,12 @@ export class IbanService {
     // 3. Provision external details from Maplerad API
     let details: any = null;
 
-    const normalizedCurrency = currency.toUpperCase();
     const isAfricanFiat = ['NGN', 'EUR', 'GBP', 'USD', 'KES', 'GHS', 'UGX', 'RWF', 'XAF', 'XOF', 'TZS'].includes(normalizedCurrency);
     const isCrypto = ['BTC', 'USDT', 'USDC', 'PYUSD'].includes(normalizedCurrency);
 
     if (isAfricanFiat) {
        try {
-          console.log(`🏦 Calling Maplerad for ${currency} rails...`);
+          console.log(`🏦 Calling Maplerad for ${normalizedCurrency} rails...`);
           
           // A. Create/Get Maplerad Customer
           const customer = await Maplerad.createCustomer(
@@ -53,24 +53,24 @@ export class IbanService {
           }
 
           // C. Issue Account
-          const apiData = await Maplerad.issueVirtualAccount(customer.id, currency);
+          const apiData = await Maplerad.issueVirtualAccount(customer.id, normalizedCurrency);
           
           details = {
              accountHolder: `${user.firstName} ${user.lastName}`,
              iban: apiData.account_number,
              accountNumber: apiData.account_number,
              bic: apiData.bank_code || apiData.routing_number || 'MAPL',
-             bankName: apiData.bank_name || `${currency} Settlement Bank`,
+             bankName: apiData.bank_name || `${normalizedCurrency} Settlement Bank`,
              provider: 'Maplerad',
              extRef: apiData.id || apiData.reference || apiData.account_number
           };
        } catch (err: any) {
-          console.error(`❌ Maplerad ${currency} Provisioning failed:`, err.message);
+          console.error(`❌ Maplerad ${normalizedCurrency} Provisioning failed:`, err.message);
           throw err; 
        }
     } else if (isCrypto) {
        try {
-          console.log(`🏦 Calling Maplerad for ${currency} crypto address...`);
+          console.log(`🏦 Calling Maplerad for ${normalizedCurrency} crypto address...`);
           
           // A. Create/Get Maplerad Customer
           const customer = await Maplerad.createCustomer(
@@ -80,20 +80,20 @@ export class IbanService {
           );
 
           // B. Issue Crypto Address
-          const apiData = await Maplerad.issueCryptoAddress(customer.id, currency);
+          const apiData = await Maplerad.issueCryptoAddress(customer.id, normalizedCurrency);
           
           details = {
              address: apiData.address,
-             network: apiData.network || (currency === 'BTC' ? 'Bitcoin' : 'ERC20'),
+             network: apiData.network || (normalizedCurrency === 'BTC' ? 'Bitcoin' : 'ERC20'),
              provider: 'Maplerad Crypto',
              note: 'Deposit only to this address'
           };
        } catch (err: any) {
-          console.error(`❌ Maplerad ${currency} Crypto Provisioning failed:`, err.message);
+          console.error(`❌ Maplerad ${normalizedCurrency} Crypto Provisioning failed:`, err.message);
           throw err;
        }
     } else {
-       throw new Error(`Maplerad provisioning is not yet supported for ${currency}.`);
+       throw new Error(`Maplerad provisioning is not yet supported for ${normalizedCurrency}.`);
     }
 
     // 3. Create or update the wallet
@@ -102,13 +102,13 @@ export class IbanService {
           where: { id: existingWallet.id },
           data: { metadata: details }
        });
-       return { walletId: existingWallet.id, currency, accountDetails: details };
+       return { walletId: existingWallet.id, currency: normalizedCurrency, accountDetails: details };
     }
 
     const wallet = await prisma.wallet.create({
       data: {
         userId,
-        currency: currency as Currency,
+        currency: normalizedCurrency as Currency,
         balance: 0.00,
         metadata: details
       }
