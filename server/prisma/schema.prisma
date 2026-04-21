@@ -52,6 +52,7 @@ enum Currency {
   XAF
   XOF
   TZS
+  PYUSD
 }
 
 model User {
