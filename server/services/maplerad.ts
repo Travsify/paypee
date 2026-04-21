@@ -264,28 +264,6 @@ export const issueVirtualAccount = async (customerId: string, currency: string) 
 };
 
 /**
- * Provisions a Crypto address (USDC, USDT, PYUSD) for a customer.
- */
-export const issueCryptoAddress = async (customerId: string, currency: string) => {
-  try {
-    console.log(`[MAPLERAD] Issuing ${currency} crypto address...`);
-    const response = await makeRequest('post', '/crypto', {
-      customer_id: customerId,
-      coin: currency.toUpperCase(),
-      chain: 'solana'
-    });
-    return response.data.data;
-  } catch (error: any) {
-    console.error(`[MAPLERAD DEBUG] /crypto failed:`, error.response?.data || error.message);
-    const finalErrorMsg = error?.response?.data?.message?.toLowerCase() || '';
-    if (finalErrorMsg.includes('not available') || finalErrorMsg.includes('method not allowed')) {
-      throw new Error(`Currently Unavailable: ${currency} crypto addresses are not supported at this time.`);
-    }
-    throw new Error(error.response?.data?.message || `Failed to provision ${currency} crypto address.`);
-  }
-};
-
-/**
  * Issues a virtual card.
  */
 export const issueVirtualCard = async (customerId: string, currency: string, amount: number) => {
