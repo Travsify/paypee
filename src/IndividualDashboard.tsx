@@ -466,6 +466,7 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
                     </motion.div>
                   )}
                 </AnimatePresence>
+            </div>
         </div>
 
         {/* Section Rendering */}
