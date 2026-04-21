@@ -750,18 +750,34 @@ app.post('/api/cards', authenticateToken, async (req: any, res: any): Promise<an
     console.log(`[BRIDGECARD] Issuing ${targetCurrency} card for ${bridgecardId} with $${cardInitialAmount}...`);
     const bCard = await Bridgecard.issueVirtualCard(bridgecardId, targetCurrency, cardInitialAmount);
     
-    // Normalize response
-    const cardNumber = bCard.card_number.replace(/\s/g, '');
-    const expiry = bCard.expiry_month ? `${bCard.expiry_month}/${bCard.expiry_year}` : '12/2029';
-    const cvv = bCard.cvv || '000';
     const providerCardId = bCard.card_id;
+    console.log(`[BRIDGECARD] Card created: ${providerCardId}. Fetching details...`);
+    
+    // Bridgecard create_card only returns {card_id, currency}.
+    // We must fetch full details (number, expiry, cvv) via get_card_details.
+    let cardNumber = '';
+    let expiry = '12/2029';
+    let cvv = '000';
+    
+    try {
+      // Small delay to allow Bridgecard to provision the card details
+      await new Promise(resolve => setTimeout(resolve, 3000));
+      const details = await Bridgecard.getCardDetails(providerCardId);
+      cardNumber = (details.card_number || '').replace(/\s/g, '');
+      expiry = details.expiry_month ? `${details.expiry_month}/${details.expiry_year}` : '12/2029';
+      cvv = details.cvv || '000';
+    } catch (detailsError: any) {
+      console.warn(`[BRIDGECARD] Could not fetch card details immediately: ${detailsError.message}. Using placeholder values.`);
+      // Card was created successfully — details can be fetched later
+      cardNumber = `BC${providerCardId.substring(0, 12).toUpperCase()}`;
+    }
 
-    // Address (Bridgecard defaults)
-    const addressLine1 = (targetCurrency === 'USD') ? '16192 Coastal Highway' : (bCard.address?.address || 'User Address');
-    const addressCity = (targetCurrency === 'USD') ? 'Lewes' : (bCard.address?.city || 'Lagos');
-    const addressState = (targetCurrency === 'USD') ? 'DE' : (bCard.address?.state || 'Lagos');
-    const addressCountry = (targetCurrency === 'USD') ? 'USA' : (bCard.address?.country || 'NG');
-    const addressZip = (targetCurrency === 'USD') ? '19958' : (bCard.address?.postal_code || '100001');
+    // Address (Bridgecard defaults for USD cards)
+    const addressLine1 = '16192 Coastal Highway';
+    const addressCity = 'Lewes';
+    const addressState = 'DE';
+    const addressCountry = 'USA';
+    const addressZip = '19958';
 
     // 4. Atomic Balance Deduction & Card Creation
     try {

@@ -174,6 +174,43 @@ export const issueVirtualCard = async (cardholderId: string, currency: string, a
 };
 
 /**
+ * Get card details (card_number, expiry, cvv, etc.)
+ * Uses the Evervault relay endpoint so data arrives decrypted.
+ * Docs: https://docs.bridgecard.co/reference/api-reference/usd-cards#get-card-details
+ */
+export const getCardDetails = async (cardId: string) => {
+  try {
+    console.log(`[BRIDGECARD] Fetching card details for ${cardId}...`);
+    
+    // Use the Evervault relay for decrypted card details
+    const isLive = process.env.BRIDGECARD_ENV === 'live';
+    const baseUrl = isLive
+      ? 'https://issuecards-api-bridgecard-co.relay.evervault.com/v1/issuing'
+      : 'https://issuecards-api-bridgecard-co.relay.evervault.com/v1/issuing/sandbox';
+    
+    const response = await axios.get(`${baseUrl}/cards/get_card_details`, {
+      params: { card_id: cardId },
+      headers: {
+        'token': `Bearer ${BRIDGECARD_AUTH_TOKEN}`,
+        'Content-Type': 'application/json'
+      },
+      timeout: 30000
+    });
+    
+    const data = response.data.data;
+    console.log('[BRIDGECARD] Card details fetched:', { 
+      last4: data?.card_number?.slice(-4), 
+      expiry: `${data?.expiry_month}/${data?.expiry_year}`,
+      has_cvv: !!data?.cvv 
+    });
+    return data;
+  } catch (error: any) {
+    console.error('[BRIDGECARD] Get Card Details Error:', error.response?.data || error.message);
+    throw new Error(error.response?.data?.message || 'Failed to fetch card details from Bridgecard');
+  }
+};
+
+/**
  * Fund a virtual card
  */
 export const fundCard = async (cardId: string, amount: number) => {
