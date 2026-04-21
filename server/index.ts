@@ -1825,7 +1825,8 @@ app.post('/api/accounts/provision', authenticateToken, async (req: any, res: any
     const account = await IbanService.provisionGlobalAccount(req.user.userId, currency, name, bvn, kycData);
     res.status(201).json(account);
   } catch (error: any) {
-    res.status(500).json({ error: error.message || 'Failed to provision global IBAN' });
+    const isUnavailable = error.message && error.message.includes('Currently Unavailable');
+    res.status(isUnavailable ? 400 : 500).json({ error: error.message || 'Failed to provision global IBAN' });
   }
 });
 

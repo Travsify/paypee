@@ -250,6 +250,16 @@ export const issueVirtualAccount = async (customerId: string, currency: string) 
     }
   } catch (e) {}
 
+  const finalErrorMsg = lastError?.response?.data?.message?.toLowerCase() || '';
+  if (
+    lastError?.response?.status === 405 || 
+    finalErrorMsg.includes('not available') || 
+    finalErrorMsg.includes('validation') ||
+    finalErrorMsg.includes('method not allowed')
+  ) {
+    throw new Error(`Currently Unavailable: Virtual accounts for ${currency} are not supported by the banking provider at this time.`);
+  }
+
   throw new Error(lastError?.response?.data?.message || `Failed to provision ${currency} account after multiple attempts.`);
 };
 

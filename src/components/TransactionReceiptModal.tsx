@@ -35,8 +35,9 @@ const TransactionReceiptModal: React.FC<TransactionReceiptModalProps> = ({ trans
 
   return (
     <AnimatePresence>
-      <div style={{ position: 'fixed', inset: 0, background: 'rgba(2,6,23,0.95)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1500, padding: '2rem 2rem 100px 2rem', backdropFilter: 'blur(15px)' }}>
+      <div className="receipt-print-wrapper" style={{ position: 'fixed', inset: 0, background: 'rgba(2,6,23,0.95)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1500, padding: '2rem 2rem 100px 2rem', backdropFilter: 'blur(15px)' }}>
         <motion.div 
+          className="receipt-print-content"
           initial={{ scale: 0.95, opacity: 0, y: 20 }}
           animate={{ scale: 1, opacity: 1, y: 0 }}
           exit={{ scale: 0.95, opacity: 0, y: 20 }}
@@ -122,8 +123,25 @@ const TransactionReceiptModal: React.FC<TransactionReceiptModalProps> = ({ trans
              </div>
              <style>{`
                @media print {
+                 @page { margin: 0; size: auto; }
+                 body { background: white !important; -webkit-print-color-adjust: exact; }
                  .no-print { display: none !important; }
-                 body { background: #fff !important; }
+                 .receipt-print-wrapper {
+                   position: static !important;
+                   background: white !important;
+                   display: block !important;
+                   padding: 0 !important;
+                   inset: auto !important;
+                 }
+                 .receipt-print-content {
+                   box-shadow: none !important;
+                   max-width: 100% !important;
+                   padding: 2rem !important;
+                   overflow: visible !important;
+                   max-height: none !important;
+                   transform: none !important;
+                   margin: 0 !important;
+                 }
                }
              `}</style>
           </div>
