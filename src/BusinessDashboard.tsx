@@ -230,7 +230,7 @@ const BusinessDashboard = ({ onLogout }: { onLogout?: () => void }) => {
           <MobileNavButton icon={LayoutDashboard} label="Home" active={activeSection === 'dashboard'} onClick={() => navigate('dashboard')} />
           <MobileNavButton icon={Wallet} label="Wallets" active={activeSection === 'wallets'} onClick={() => navigate('wallets')} />
           <MobileNavButton icon={BarChart3} label="Stats" active={activeSection === 'analytics'} onClick={() => navigate('analytics')} />
-          <MobileNavButton icon={Menu} label="More" onClick={() => setShowMobileMenu(true)} />
+          <MobileNavButton icon={MenuIcon} label="More" onClick={() => setShowMobileMenu(true)} />
         </div>
 
         {/* Mobile Hamburger Menu Drawer */}
@@ -253,7 +253,7 @@ const BusinessDashboard = ({ onLogout }: { onLogout?: () => void }) => {
               >
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3rem' }}>
                   <span style={{ fontSize: '1.5rem', fontWeight: 900 }}>Menu</span>
-                  <X onClick={() => setShowMobileMenu(false)} style={{ cursor: 'pointer' }} />
+                  <CloseIcon onClick={() => setShowMobileMenu(false)} style={{ cursor: 'pointer' }} />
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                   <SidebarItem icon={Send} label="Send Money" active={activeSection === 'payouts'} onClick={() => { navigate('payouts'); setShowMobileMenu(false); }} />
@@ -462,11 +462,11 @@ const MobileNavButton = ({ icon: Icon, label, active, onClick }: any) => (
   </motion.button>
 );
 
-const Menu = ({ size }: { size: number }) => (
+const MenuIcon = ({ size }: { size: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
 );
 
-const X = ({ size = 20, onClick, style }: any) => (
+const CloseIcon = ({ size = 20, onClick, style }: any) => (
   <svg onClick={onClick} style={style} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
 );
 
