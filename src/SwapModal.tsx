@@ -16,7 +16,9 @@ import {
   Zap,
   Globe,
   Activity,
-  Cpu
+  Cpu,
+  ArrowRight,
+  Wallet
 } from 'lucide-react';
 import { API_BASE } from './config';
 

@@ -15,7 +15,8 @@ import {
   Droplets,
   Cpu,
   CheckCircle2,
-  AlertCircle
+  AlertCircle,
+  Wallet
 } from 'lucide-react';
 
 const BillCategory = ({ icon: Icon, name, active, onClick }: any) => (
@@ -174,7 +175,7 @@ const BillsDashboard = () => {
                    >
                       <div style={{ textAlign: 'center', marginBottom: '3.5rem' }}>
                          <div style={{ width: 80, height: 80, background: 'rgba(255,255,255,0.03)', borderRadius: '24px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1.5rem', border: '1px solid rgba(255,255,255,0.05)' }}>
-                            {React.cloneElement(selectedProvider.icon as React.ReactElement, { size: 36 })}
+                             {React.cloneElement(selectedProvider.icon as any, { size: 36 })}
                          </div>
                          <h4 style={{ fontSize: '1.5rem', fontWeight: 900, letterSpacing: '-0.02em' }}>{selectedProvider.name}</h4>
                          <div style={{ color: 'var(--accent)', fontWeight: 900, fontSize: '0.75rem', letterSpacing: '2px', marginTop: '0.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>

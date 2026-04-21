@@ -18,7 +18,8 @@ import {
   ArrowRight,
   Shield,
   Zap,
-  Globe
+  Globe,
+  X
 } from 'lucide-react';
 
 interface PaymentLink {
