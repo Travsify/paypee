@@ -43,7 +43,7 @@ const TARGET_CURRENCIES = [
   { code: 'PYUSD', label: 'PayPal USD (PYUSD)', flag: '🪙' }
 ];
 
-const PayoutModal: React.FC<PayoutModalProps> = ({ isOpen, onClose, onComplete, wallets }) => {
+const PayoutModal: React.FC<PayoutModalProps> = ({ isOpen, onClose, onComplete, wallets, userType }) => {
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -462,6 +462,14 @@ const PayoutModal: React.FC<PayoutModalProps> = ({ isOpen, onClose, onComplete, 
              <button onClick={onClose} className="btn btn-outline" style={{ width: 40, height: 40, borderRadius: '50%', padding: 0 }}><X size={20} /></button>
           </div>
 
+          {error && (
+            <motion.div 
+              initial={{ opacity: 0, y: -10 }} 
+              animate={{ opacity: 1, y: 0 }}
+              style={{ background: 'rgba(244, 63, 94, 0.1)', color: '#f43f5e', padding: '1.25rem', borderRadius: '20px', marginBottom: '2rem', display: 'flex', alignItems: 'center', gap: '1rem', fontSize: '0.9rem', fontWeight: 700, border: '1px solid rgba(244, 63, 94, 0.2)' }}
+            >
+              <AlertCircle size={20} /> {error}
+            </motion.div>
           )}
           
           {userType === 'BUSINESS' && step === 1 && (
