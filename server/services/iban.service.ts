@@ -31,8 +31,9 @@ export class IbanService {
     // 3. Provision external details from Maplerad API
     let details: any = null;
 
-    const isAfricanFiat = ['NGN', 'EUR', 'GBP', 'USD', 'KES', 'GHS', 'UGX', 'RWF', 'XAF', 'XOF', 'TZS'].includes(currency);
-    const isCrypto = ['BTC', 'USDT', 'USDC', 'PYUSD'].includes(currency);
+    const normalizedCurrency = currency.toUpperCase();
+    const isAfricanFiat = ['NGN', 'EUR', 'GBP', 'USD', 'KES', 'GHS', 'UGX', 'RWF', 'XAF', 'XOF', 'TZS'].includes(normalizedCurrency);
+    const isCrypto = ['BTC', 'USDT', 'USDC', 'PYUSD'].includes(normalizedCurrency);
 
     if (isAfricanFiat) {
        try {
