@@ -43,31 +43,39 @@ export const createCustomer = async (userData: {
   try {
     console.log(`[BRIDGECARD] Registering cardholder: ${userData.email}`);
     
-    const identityType = userData.id_type === 'NIN' ? 'NIGERIAN_NIN' : 'NIGERIAN_BVN_VERIFICATION';
+    // ALWAYS prefer BVN verification when BVN is available.
+    // BVN flow only needs a selfie (no document photo), which avoids the
+    // "four edges showing" rejection from Bridgecard's document OCR.
+    // NIN flow requires a clear id_image which webcams/phone cameras struggle with.
+    const hasBvn = userData.bvn && userData.bvn.length >= 11;
+    const identityType = hasBvn ? 'NIGERIAN_BVN_VERIFICATION' : 'NIGERIAN_NIN';
     const identityNumber = userData.id_no || userData.bvn;
 
-    if (!identityNumber || identityNumber.length !== 11) {
-      throw new Error(`A valid 11-digit ${userData.id_type || 'BVN'} is required to issue a virtual card.`);
+    if (!hasBvn && (!identityNumber || identityNumber.length !== 11)) {
+      throw new Error(`A valid 11-digit BVN or NIN is required to issue a virtual card.`);
     }
 
-    // Build identity object based on id_type
-    // For BVN: needs bvn + selfie_image (URL)
-    // For NIN/Passport/PVC/Drivers License: needs id_no + id_image (URL) + bvn
+    // Build identity object based on flow
+    // BVN flow: bvn + selfie_image (URL) — PREFERRED, no document photo needed
+    // NIN flow: id_no + id_image (URL) + bvn — fallback only
     const identity: any = {
       id_type: identityType,
-      bvn: userData.bvn,
     };
 
     if (identityType === 'NIGERIAN_BVN_VERIFICATION') {
-      // BVN flow: just needs selfie URL
+      // BVN flow: just needs BVN + selfie URL
+      identity.bvn = userData.bvn;
       identity.selfie_image = userData.selfie_image_url || '';
-      console.log(`[BRIDGECARD] Using BVN flow with selfie URL: ${identity.selfie_image ? identity.selfie_image.substring(0, 80) + '...' : 'MISSING'}`);
+      console.log(`[BRIDGECARD] ✅ Using BVN flow (selfie only, no document photo needed)`);
+      console.log(`[BRIDGECARD]    BVN: ${userData.bvn?.substring(0, 4)}****`);
+      console.log(`[BRIDGECARD]    Selfie URL: ${identity.selfie_image ? identity.selfie_image.substring(0, 80) + '...' : 'MISSING'}`);
     } else {
       // NIN / other ID flow: needs id_no + id_image URL + bvn
       identity.id_no = identityNumber;
       identity.id_image = userData.id_image_url || '';
-      identity.bvn = userData.bvn;
-      console.log(`[BRIDGECARD] Using ${identityType} flow with id_image URL: ${identity.id_image ? identity.id_image.substring(0, 80) + '...' : 'MISSING'}`);
+      if (userData.bvn) identity.bvn = userData.bvn;
+      console.log(`[BRIDGECARD] ⚠️ Using NIN flow (requires document photo)`);
+      console.log(`[BRIDGECARD]    id_image URL: ${identity.id_image ? identity.id_image.substring(0, 80) + '...' : 'MISSING'}`);
     }
 
     const payload = {
