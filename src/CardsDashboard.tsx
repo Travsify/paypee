@@ -437,7 +437,7 @@ const CardsDashboard = ({ wallets: propWallets }: { wallets?: any[] }) => {
                 Deploy your first high-security virtual card to unlock global spending power on Amazon, Google, and more.
               </p>
               <button onClick={() => setIsIssueModalOpen(true)} className="btn btn-primary" style={{ padding: '1rem 3rem', borderRadius: '15px' }}>
-                Generate Master Card
+                Generate Mastercard
               </button>
             </div>
           ) : (
@@ -464,7 +464,7 @@ const CardsDashboard = ({ wallets: propWallets }: { wallets?: any[] }) => {
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '2rem' }}>
                          <div style={{ display: 'flex', flexDirection: 'column' }}>
                             <span style={{ fontSize: '0.65rem', fontWeight: 900, letterSpacing: '3px', color: 'rgba(255,255,255,0.4)' }}>PLATINUM RAIL</span>
-                            <span style={{ fontSize: '1.2rem', fontWeight: 900, color: '#fff' }}>{card.brand || 'VISA'}</span>
+                            <span style={{ fontSize: '1.2rem', fontWeight: 900, color: '#fff' }}>{card.brand || 'MASTERCARD'}</span>
                          </div>
                          {card.status === 'FROZEN' ? (
                            <div style={{ background: 'rgba(239, 68, 68, 0.2)', color: '#ef4444', padding: '0.4rem 1rem', borderRadius: '100px', fontSize: '0.7rem', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
@@ -843,17 +843,17 @@ const CardsDashboard = ({ wallets: propWallets }: { wallets?: any[] }) => {
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem' }}>
                           <span style={{ color: 'rgba(255,255,255,0.5)', fontWeight: 600 }}>Provisioning Fee</span>
-                          <span style={{ fontWeight: 800 }}>{issueCurrency === 'USD' ? '$2.00' : '₦500'}</span>
+                          <span style={{ fontWeight: 800 }}>{issueCurrency === 'USD' ? '$4.00' : '₦400'}</span>
                        </div>
                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', paddingBottom: '0.5rem', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
                           <span style={{ color: 'rgba(255,255,255,0.5)', fontWeight: 600 }}>Initial Funding</span>
-                          <span style={{ fontWeight: 800 }}>{issueCurrency === 'USD' ? '$3.00' : '₦3,000'}</span>
+                          <span style={{ fontWeight: 800 }}>{issueCurrency === 'USD' ? '$1.00' : '₦100'}</span>
                        </div>
                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem', paddingTop: '0.25rem' }}>
                           <span style={{ fontWeight: 900 }}>TOTAL TO PAY</span>
                           <div style={{ textAlign: 'right' }}>
                              <div style={{ fontWeight: 900, color: 'var(--primary)' }}>
-                                {issueCurrency === 'USD' ? '$5.00' : '₦3,500'}
+                                {issueCurrency === 'USD' ? '$5.00' : '₦500'}
                              </div>
                              {issueWalletId && wallets.find(w => w.id === issueWalletId)?.currency !== issueCurrency && (
                                 <div style={{ fontSize: '0.65rem', color: '#f59e0b', fontWeight: 700, marginTop: '2px' }}>
@@ -870,7 +870,7 @@ const CardsDashboard = ({ wallets: propWallets }: { wallets?: any[] }) => {
                        <ShieldCheck size={18} /> Instant Tier-1 Deployment
                     </div>
                     <p style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.6)', lineHeight: '1.5', margin: 0 }}>
-                       New card creation requires a mandatory $3.00 **Initial Capital Injection**. This is not a fee; the amount is instantly loaded onto your new card as its starting balance.
+                       New card creation requires a mandatory {issueCurrency === 'USD' ? '$1.00' : '₦100'} **Initial Capital Injection**. This is not a fee; the amount is instantly loaded onto your new card as its starting balance.
                     </p>
                  </div>
 

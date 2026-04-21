@@ -132,31 +132,34 @@ export const createCustomer = async (userData: {
  */
 export const issueVirtualCard = async (cardholderId: string, currency: string, amount: number) => {
   try {
-    console.log(`[BRIDGECARD] Issuing ${currency} card for cardholder ${cardholderId}`);
+    const targetCurrency = (currency || 'USD').toUpperCase();
+    console.log(`[BRIDGECARD] Issuing ${targetCurrency} card for cardholder ${cardholderId}`);
     
     // Encrypt a default PIN using AES-256 (Bridgecard requirement)
-    // Using the Bridgecard secret key as the encryption key per their docs
     const AES256 = require('aes-everywhere');
     const defaultPin = '1234';
     const encryptedPin = AES256.encrypt(defaultPin, BRIDGECARD_SECRET_KEY);
     
-    // funding_amount is in CENTS: $3 = "300", $4 = "400"
-    // Card limit $5,000 requires min $3 funding, $10,000 requires min $4
-    const fundingAmountCents = Math.max(300, Math.round(amount * 100));
-    
-    const payload = {
+    const payload: any = {
       cardholder_id: cardholderId,
       card_type: 'virtual',
       card_brand: 'Mastercard',
-      card_currency: 'USD', // Bridgecard uses "card_currency", not "currency"
-      card_limit: '500000', // $5,000 limit (in cents)
-      funding_amount: String(fundingAmountCents),
+      card_currency: targetCurrency,
       pin: encryptedPin,
       meta_data: {
         issuing_id: BRIDGECARD_ISSUING_ID,
         platform: 'paypee'
       }
     };
+
+    // USD cards have specific minimum funding and limit requirements
+    if (targetCurrency === 'USD') {
+      // funding_amount is in CENTS: $1 = "100"
+      const fundingAmountCents = Math.max(100, Math.round(amount * 100));
+      payload.card_limit = '500000'; // $5,000 limit
+      payload.funding_amount = String(fundingAmountCents);
+    }
+    // NGN cards do not require funding_amount during creation and should be funded via the naira_cards/fund_naira_card endpoint instead.
 
     console.log('[BRIDGECARD] Create Card Payload:', JSON.stringify({ ...payload, pin: '[ENCRYPTED]' }, null, 2));
 
@@ -213,16 +216,27 @@ export const getCardDetails = async (cardId: string) => {
 /**
  * Fund a virtual card
  */
-export const fundCard = async (cardId: string, amount: number) => {
+export const fundCard = async (cardId: string, amount: number, currency: string = 'USD') => {
   try {
-    const response = await bridgecardClient.post('/cards/fund_card', {
+    const isNGN = currency.toUpperCase() === 'NGN';
+    const endpoint = isNGN ? '/naira_cards/fund_naira_card' : '/cards/fund_card';
+    
+    const payload: any = {
       card_id: cardId,
-      amount: amount // Bridgecard usually takes amount in standard units (e.g. 5.00)
-    });
+      amount: String(amount)
+    };
+
+    if (isNGN) {
+      payload.transaction_reference = `FUND_NGN_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+    }
+
+    console.log(`[BRIDGECARD] Funding ${currency} card ${cardId} with ${amount}. Endpoint: ${endpoint}`);
+    const response = await bridgecardClient.post(endpoint, payload);
     return response.data.data;
   } catch (error: any) {
-    console.error('[BRIDGECARD] Fund Card Error:', error.response?.data || error.message);
-    throw new Error(error.response?.data?.message || 'Failed to fund Bridgecard');
+    const errorData = error.response?.data;
+    console.error('[BRIDGECARD] Fund Card Error:', JSON.stringify(errorData, null, 2) || error.message);
+    throw new Error(errorData?.message || 'Failed to fund Bridgecard');
   }
 };
 
