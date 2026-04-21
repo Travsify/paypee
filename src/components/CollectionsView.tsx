@@ -109,7 +109,7 @@ const CollectionsView = () => {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '2rem' }}>
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--primary)', fontWeight: 800, fontSize: '0.85rem', letterSpacing: '2px', textTransform: 'uppercase', marginBottom: '1rem' }}>
-            <Globe size={18} fill="var(--primary)" /> Global Capital Ingress
+            <Globe size={18} fill="var(--primary)" /> Receive Money Globally
           </div>
           <h2 style={{ fontSize: '3rem', fontWeight: 900, marginBottom: '0.75rem', letterSpacing: '-0.04em' }}>Collections</h2>
           <p style={{ color: 'var(--text-muted)', fontSize: '1.15rem', maxWidth: '600px', fontWeight: 500 }}>
@@ -142,7 +142,7 @@ const CollectionsView = () => {
           <div style={{ width: 100, height: 100, background: 'rgba(99, 102, 241, 0.1)', borderRadius: '30px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 2.5rem', color: 'var(--primary)', border: '1px solid rgba(99, 102, 241, 0.2)' }}>
             <LinkIcon size={50} />
           </div>
-          <h3 style={{ fontSize: '2rem', fontWeight: 900, marginBottom: '1rem', letterSpacing: '-0.02em' }}>No active ingress channels</h3>
+          <h3 style={{ fontSize: '2rem', fontWeight: 900, marginBottom: '1rem', letterSpacing: '-0.02em' }}>No active ways to receive money</h3>
           <p style={{ color: 'var(--text-muted)', maxWidth: '500px', margin: '0 auto 3rem', lineHeight: 1.7, fontSize: '1.1rem' }}>
             Create your first reusable payment link and start receiving professional-grade settlements in minutes.
           </p>

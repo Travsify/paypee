@@ -773,7 +773,7 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
                       </div>
                    </div>
 
-                   {/* 5. AI Sentinel Core */}
+                   {/* 5. Smart Helper Core */}
                    <div className="premium-card" style={{ padding: '2.5rem', flex: 1, background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.03) 0%, rgba(168, 85, 247, 0.03) 100%)', border: '1px solid rgba(99, 102, 241, 0.1)' }}>
                       <div className="mesh-bg" style={{ opacity: 0.1 }} />
                       <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '2.5rem' }}>
@@ -781,7 +781,7 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
                             <Bot size={24} color="var(--primary)" />
                          </div>
                          <div>
-                            <h3 style={{ fontSize: '1.3rem', fontWeight: 900, letterSpacing: '-0.02em', color: '#fff' }}>Sentinel Core</h3>
+                            <h3 style={{ fontSize: '1.3rem', fontWeight: 900, letterSpacing: '-0.02em', color: '#fff' }}>Smart Helper</h3>
                             <div style={{ fontSize: '0.65rem', color: 'var(--primary)', fontWeight: 900, letterSpacing: '2px', textTransform: 'uppercase' }}>Active Monitoring</div>
                          </div>
                       </div>
@@ -916,7 +916,7 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
                                          </div>
                                          <div>
                                             <div style={{ fontWeight: 900, fontSize: '1.4rem', color: '#fff', marginBottom: '0.5rem' }}>Immutable Ledger Empty</div>
-                                            <div style={{ color: 'var(--text-muted)', fontSize: '1rem', fontWeight: 500 }}>Deploy an egress or ingress rail to begin generating audit logs.</div>
+                                            <div style={{ color: 'var(--text-muted)', fontSize: '1rem', fontWeight: 500 }}>Make a transfer to see your history here.</div>
                                          </div>
                                          <button onClick={() => setIsPayoutOpen(true)} className="btn btn-primary" style={{ padding: '1rem 2.5rem', borderRadius: '16px', fontWeight: 900 }}>Initiate First Settlement</button>
                                       </div>

@@ -125,7 +125,7 @@ const LivePreview = () => (
     <div className="container" style={{ textAlign: 'center', marginBottom: '4.5rem' }}>
        <div style={{ color: theme.text2, fontWeight: 900, letterSpacing: '3px', textTransform: 'uppercase', marginBottom: '1rem', fontSize: '0.75rem' }}>TERMINAL PREVIEW</div>
        <h2 className="text-glow" style={{ fontSize: 'clamp(2.5rem, 5vw, 3.5rem)', fontWeight: 900, color: theme.text1, letterSpacing: '-0.03em', marginBottom: '1.5rem' }}>High-Velocity Dashboard</h2>
-       <p style={{ color: theme.text2, fontSize: '1.1rem', maxWidth: '650px', margin: '0 auto', fontWeight: 500, lineHeight: 1.6 }}>Real-time telemetry, institutional asset rails, and AI security sentinel — all in one calm interface.</p>
+       <p style={{ color: theme.text2, fontSize: '1.1rem', maxWidth: '650px', margin: '0 auto', fontWeight: 500, lineHeight: 1.6 }}>See your money move in real-time, keep it safe with smart protection — all in one easy app.</p>
     </div>
     <div className="container" style={{ display: 'flex', justifyContent: 'center' }}>
        <motion.div 
@@ -159,12 +159,12 @@ const LivePreview = () => (
              </div>
              <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                 <h3 style={{ color: theme.text1, fontWeight: 900, fontSize: '1.3rem', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                   <Activity size={20} color="var(--primary)" /> Protocol Telemetry
+                   <Activity size={20} color="var(--primary)" /> App History
                 </h3>
                 {[
                   { label: 'Stripe Settlement', time: 'Today · 10:24', val: '+$2,400.00', color: 'var(--accent)' },
                   { label: 'Cloud Infrastructure', time: 'Yesterday · 18:42', val: '-$80.00', color: '#fff' },
-                  { label: 'Capital Ingress', time: 'Yesterday · 09:12', val: '+₦450,000', color: 'var(--accent)' },
+                  { label: 'Money In', time: 'Yesterday · 09:12', val: '+₦450,000', color: 'var(--accent)' },
                   { label: 'Crypto Swap → USDT', time: '2 days ago', val: '-0.012 BTC', color: theme.purple }
                 ].map((item, idx) => (
                   <div key={idx} style={{ ...glassPanel, padding: '1.5rem 2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)' }}>
@@ -198,8 +198,8 @@ const Capabilities = () => (
             { t: 'Platinum Virtual Cards', d: 'Issue unlimited Mastercard rails. High limits, zero FX spreads, instant provisioning.', i: <CreditCard color={theme.purple} size={36}/>, color: theme.purple },
             { t: 'Global Settlements', d: 'Send capital to 80+ countries via high-velocity rails with real-time tracking.', i: <Repeat color={theme.primary} size={36}/>, color: theme.primary },
             { t: 'Asset Swap Engine', d: 'Aggregated liquidity for instant fiat & crypto conversion at industrial-grade rates.', i: <Cpu color={theme.cyan} size={36}/>, color: theme.cyan },
-            { t: 'Sentinel AI Manager', d: 'Authorized assistant that monitors volatility, secures value, and automates growth.', i: <Bot color={theme.purple} size={36}/>, color: theme.purple },
-            { t: 'Encrypted Security', d: 'Bank-grade hardening, biometric protocol, and 24/7 fraud sentinel monitoring.', i: <ShieldCheck color={theme.primary} size={36}/>, color: theme.primary }
+            { t: 'Smart Helper', d: 'A smart assistant that helps you save, spend, and manage your money easily.', i: <Bot color={theme.purple} size={36}/>, color: theme.purple },
+            { t: 'Top Security', d: 'Bank-level safety, fingerprint login, and 24/7 protection against bad guys.', i: <ShieldCheck color={theme.primary} size={36}/>, color: theme.primary }
           ].map((item, i) => (
              <motion.div key={i} whileHover={{ y: -12, boxShadow: `0 30px 60px rgba(0,0,0,0.5)` }} className="premium-card" style={{ padding: '4rem 2.5rem', position: 'relative', overflow: 'hidden', background: 'rgba(255,255,255,0.01)' }}>
                 <div style={{ position: 'absolute', top: '-10%', right: '-10%', width: '180px', height: '180px', background: `radial-gradient(circle, ${item.color}30 0%, transparent 70%)`, filter: 'blur(40px)', zIndex: 0 }} />
@@ -406,7 +406,7 @@ const PaypeeAI = () => (
                <Bot size={48} />
             </div>
             <h2 className="text-glow" style={{ fontSize: 'clamp(2.5rem, 5vw, 3.5rem)', fontWeight: 900, color: theme.text1, marginBottom: '1.5rem', letterSpacing: '-0.04em' }}>Capital Intelligence.</h2>
-            <p style={{ color: theme.text2, fontSize: '1.2rem', maxWidth: '700px', margin: '0 auto', fontWeight: 500, lineHeight: 1.7 }}>Sentinel AI monitors global markets, currency volatility, and your capital flows — acting autonomously to preserve and grow your value.</p>
+            <p style={{ color: theme.text2, fontSize: '1.2rem', maxWidth: '700px', margin: '0 auto', fontWeight: 500, lineHeight: 1.7 }}>Your smart helper watches your money 24/7 to make sure it's safe and growing.</p>
          </div>
          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: '2.5rem' }}>
             {[
@@ -441,7 +441,7 @@ const Security = () => (
               { i: Lock, t: 'AES-256 Encryption', d: 'End-to-end hardening for all transaction payloads.', c: theme.cyan },
               { i: ShieldCheck, t: 'PCI-DSS v4.0', d: 'Industrial compliance for payment rail integrity.', c: theme.purple },
               { i: Smartphone, t: 'Biometric Auth', d: 'FaceID, TouchID & Passkey authorization.', c: theme.primary },
-              { i: Activity, t: 'Sentinel Monitoring', d: '24/7 autonomous anomaly & fraud detection.', c: theme.cyan }
+              { i: Activity, t: 'Smart Protection', d: 'Always watching out for bad guys and keeping your money safe.', c: theme.cyan }
             ].map((item, idx) => (
               <div key={idx}>
                 <div style={{ color: item.c, marginBottom: '1.25rem' }}><item.i size={32} /></div>
@@ -620,7 +620,7 @@ const LandingV2 = ({ onAuth }: { onAuth: () => void }) => {
 
           {page === 'ai' && (
             <>
-              <InnerHero title="Sentinel AI" subtitle="An authoritative assistant that grows your capital quietly." />
+              <InnerHero title="Smart Helper" subtitle="A helpful assistant that watches your money 24/7." />
               <LandingAI />
             </>
           )}
@@ -639,23 +639,23 @@ const LandingV2 = ({ onAuth }: { onAuth: () => void }) => {
       <footer style={{ padding: '8rem 0 4rem', borderTop: `1px solid ${theme.glassBorder}`, background: theme.bg, position: 'relative' }}>
         <div className="mesh-bg" style={{ opacity: 0.05 }} />
         <div className="container">
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '4rem', marginBottom: '6rem' }}>
-            <div style={{ gridColumn: '1 / -1', maxWidth: '400px', marginBottom: '3rem' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '2rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '2fr repeat(5, 1fr)', gap: '3rem', marginBottom: '6rem' }}>
+            <div style={{ maxWidth: '350px', marginBottom: '2rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem' }}>
                  <div style={{ width: 40, height: 40, background: `linear-gradient(135deg, ${theme.primary}, ${theme.purple})`, borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 10px 20px -5px var(--primary-glow)' }}>
                     <Zap size={22} color="#fff" fill="#fff" />
                  </div>
                  <span style={{ fontSize: '1.7rem', fontWeight: 900, letterSpacing: '-0.04em', color: theme.text1, cursor: 'pointer' }} onClick={() => setPage('home')}>Paypee</span>
               </div>
-              <p style={{ color: theme.text2, lineHeight: 1.8, fontSize: '1.05rem', fontWeight: 500 }}>The advanced financial OS made simple for everyone. Hold, send, spend, and grow capital — globally and instantly.</p>
+              <p style={{ color: theme.text2, lineHeight: 1.8, fontSize: '1.05rem', fontWeight: 500 }}>The easy money app. Keep, send, spend, and save your money anywhere, anytime.</p>
             </div>
             
             {[
-              { h: 'Individuals', links: ['Wallets', 'Virtual Cards', 'Send Money', 'Crypto', 'AI Manager'] },
-              { h: 'Businesses', links: ['Payouts', 'Team Cards', 'Invoicing', 'Treasury', 'Pricing'] },
-              { h: 'Developers', links: ['API Registry', 'SDK Docs', 'Webhooks', 'Sandbox', 'System Status'] },
-              { h: 'Company', links: ['About', 'Careers', 'Press', 'Security', 'Contact'] },
-              { h: 'Legal', links: ['Privacy', 'Terms', 'Compliance', 'Cookies', 'AML Policy'] }
+              { h: 'For You', links: ['Wallets', 'Virtual Cards', 'Send Money', 'Crypto', 'Smart Helper'] },
+              { h: 'For Work', links: ['Payouts', 'Team Cards', 'Invoices', 'Money Management', 'Prices'] },
+              { h: 'Build', links: ['API', 'Docs', 'Webhooks', 'Test Mode', 'System Status'] },
+              { h: 'Us', links: ['About', 'Jobs', 'News', 'Safety', 'Contact'] },
+              { h: 'Rules', links: ['Privacy', 'Terms', 'Safety Rules', 'Cookies', 'Our Promise'] }
             ].map((col, idx) => (
               <div key={idx}>
                 <h5 style={{ marginBottom: '2rem', color: theme.text1, fontWeight: 900, fontSize: '1rem', letterSpacing: '1px' }}>{col.h.toUpperCase()}</h5>
@@ -670,9 +670,9 @@ const LandingV2 = ({ onAuth }: { onAuth: () => void }) => {
           
           <div style={{ fontSize: '0.9rem', color: theme.text2, display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', borderTop: `1px solid ${theme.glassBorder}`, paddingTop: '3rem', gap: '2rem', fontWeight: 600 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-               <Database size={16} /> <span>Paypee Protocol v4.0.2 Stable</span>
+               <Database size={16} /> <span>Paypee System v4.0</span>
             </div>
-            <span>© 2026 Paypee Financial Inc. Engineered with precision.</span>
+            <span>© 2026 Paypee Financial Inc. Built with care.</span>
           </div>
         </div>
       </footer>

@@ -30,7 +30,7 @@ const SettingsView = ({ initialTab = 'profile' }: { initialTab?: string }) => {
   const tabs = [
     { id: 'profile', label: 'Identity Profile', desc: 'Personal credentials', icon: User },
     { id: 'security', label: 'Security & Access', desc: 'Protocol management', icon: ShieldCheck },
-    { id: 'notifications', label: 'Sentinel Alerts', desc: 'Operation updates', icon: Bell },
+    { id: 'notifications', label: 'Smart Alerts', desc: 'Account updates', icon: Bell },
     { id: 'cards', label: 'Capital Sources', desc: 'Settlement methods', icon: CreditCard }
   ];
 
@@ -269,8 +269,8 @@ const SettingsView = ({ initialTab = 'profile' }: { initialTab?: string }) => {
           {activeTab === 'notifications' && (
             <motion.div key="notifications" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
                <div style={{ marginBottom: '3.5rem' }}>
-                  <h3 style={{ fontSize: '1.8rem', fontWeight: 900, marginBottom: '0.75rem', letterSpacing: '-0.02em' }}>Sentinel Alerts</h3>
-                  <p style={{ color: 'var(--text-muted)', fontSize: '1.05rem', fontWeight: 500 }}>Configure the sensitivity of the Paypee Sentinel monitoring system.</p>
+                  <h3 style={{ fontSize: '1.8rem', fontWeight: 900, marginBottom: '0.75rem', letterSpacing: '-0.02em' }}>Smart Alerts</h3>
+                  <p style={{ color: 'var(--text-muted)', fontSize: '1.05rem', fontWeight: 500 }}>Set up notifications for your account.</p>
                </div>
 
                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>

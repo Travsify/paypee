@@ -61,7 +61,7 @@ const NotificationPanel: React.FC<NotificationPanelProps> = ({ notifications, sh
            </div>
            <div>
               <span style={{ fontWeight: 900, fontSize: '1.1rem', color: '#fff', letterSpacing: '-0.02em' }}>Security Intel</span>
-              <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px' }}>AI SENTINEL CORE</div>
+              <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px' }}>SMART HELPER</div>
            </div>
         </div>
         <motion.button 

@@ -288,7 +288,7 @@ const CardsDashboard = ({ wallets: propWallets }: { wallets?: any[] }) => {
       icon: <Globe size={20} color="var(--accent)" />
     },
     { 
-      title: "Fraud Sentinel", 
+      title: "Smart Protection", 
       status: metrics.frozenCards > 0 ? `${metrics.frozenCards} Frozen` : "Defending", 
       desc: metrics.frozenCards > 0 ? `${metrics.frozenCards} rail${metrics.frozenCards !== 1 ? 's' : ''} currently frozen by security protocol.` : `All ${metrics.activeCards} rail${metrics.activeCards !== 1 ? 's' : ''} operating within safe parameters.`,
       icon: <Shield size={20} color="#ec4899" />
@@ -473,7 +473,7 @@ const CardsDashboard = ({ wallets: propWallets }: { wallets?: any[] }) => {
                           className="btn btn-outline"
                           style={{ padding: '0 1.75rem', borderRadius: '18px', fontSize: '1rem', fontWeight: 800 }}
                         >
-                          Egress
+                          Send Money
                         </motion.button>
                         <motion.button 
                           whileHover={{ y: -5 }}
@@ -495,7 +495,7 @@ const CardsDashboard = ({ wallets: propWallets }: { wallets?: any[] }) => {
           )}
         </div>
 
-        {/* AI Sentinel Sidebar */}
+        {/* Smart Helper Sidebar */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
            <div className="premium-card" style={{ padding: '3rem', background: 'linear-gradient(180deg, rgba(99, 102, 241, 0.05) 0%, transparent 100%)', position: 'sticky', top: '2rem' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem', marginBottom: '3rem' }}>
@@ -503,7 +503,7 @@ const CardsDashboard = ({ wallets: propWallets }: { wallets?: any[] }) => {
                     <Sparkles size={28} color="#fff" />
                  </div>
                  <div>
-                    <h4 style={{ fontSize: '1.4rem', fontWeight: 900, margin: 0, letterSpacing: '-0.02em' }}>Sentinel AI</h4>
+                    <h4 style={{ fontSize: '1.4rem', fontWeight: 900, margin: 0, letterSpacing: '-0.02em' }}>Smart Helper</h4>
                     <div style={{ fontSize: '0.7rem', color: 'var(--primary)', fontWeight: 900, letterSpacing: '2px', textTransform: 'uppercase' }}>Active Monitoring</div>
                  </div>
               </div>
@@ -575,7 +575,7 @@ const CardsDashboard = ({ wallets: propWallets }: { wallets?: any[] }) => {
                       </div>
                     </div>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                      <label className="form-label">FUNDING INGRESS</label>
+                      <label className="form-label">ADD MONEY</label>
                       <div style={{ position: 'relative' }}>
                         <select value={issueWalletId} onChange={(e) => setIssueWalletId(e.target.value)} required className="form-input" style={{ appearance: 'none', paddingRight: '3rem' }}>
                           <option value="" disabled style={{ background: '#0a0f1e' }}>Select Source Wallet</option>

@@ -23,7 +23,7 @@ interface Message {
 
 const AiAdvisor = ({ transactions = [], userName = 'User' }: { transactions?: any[], userName?: string }) => {
   const [messages, setMessages] = useState<Message[]>([
-    { id: '1', role: 'assistant', text: `Authorized. Initializing Paypee Sentinel for ${userName}. I am synchronized with your transaction ledger and ready for capital analysis. How can I assist you today?`, type: 'normal' }
+    { id: '1', role: 'assistant', text: `Hi ${userName}! I am your smart helper. I've checked your money and I'm ready to help. What can I do for you today?`, type: 'normal' }
   ]);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
@@ -56,10 +56,10 @@ const AiAdvisor = ({ transactions = [], userName = 'User' }: { transactions?: an
       if (query.includes('spend') || query.includes('spent') || query.includes('burn')) {
          aiText = transactions.length === 0 
            ? "Transaction ledger is currently empty. No spending data available for indexing." 
-           : `Protocol Analysis Complete: Total egress volume is $${totalSpend.toFixed(2)} with an ingress total of $${totalIncome.toFixed(2)}. Spending velocity remains stable.`;
+           : `Money Check Complete: You have spent $${totalSpend.toFixed(2)} and received $${totalIncome.toFixed(2)}. Everything looks good!`;
          aiType = 'insight';
       } else if (query.includes('transfer') || query.includes('send') || query.includes('pay')) {
-         aiText = transactions.length === 0 ? "Egress protocols are locked until first ingress event is detected." : "Capital movement requested. I have prepared the Egress Rail module. Please authenticate the transfer manually to proceed.";
+         aiText = transactions.length === 0 ? "You can't send money until you add some money first." : "Okay, I've got the send money page ready. Please check the details and confirm the send.";
          aiType = 'action';
       } else {
          aiText = `Indexing complete. I currently maintain a record of ${transactions.length} immutable events in your ledger. Would you like a deep-dive into your recent liquidity trends?`;
@@ -78,9 +78,9 @@ const AiAdvisor = ({ transactions = [], userName = 'User' }: { transactions?: an
           </div>
           <div>
              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--primary)', fontWeight: 800, fontSize: '0.75rem', letterSpacing: '2px', textTransform: 'uppercase', marginBottom: '0.25rem' }}>
-               <Database size={14} fill="var(--primary)" /> Sentinel Core Active
-             </div>
-             <h2 style={{ fontSize: '1.75rem', fontWeight: 900, letterSpacing: '-0.03em' }}>AI Financial Sentinel</h2>
+               <Database size={14} fill="var(--primary)" /> Smart Helper Active
+            </div>
+            <h2 style={{ fontSize: '1.75rem', fontWeight: 900, letterSpacing: '-0.03em' }}>Your AI Helper</h2>
           </div>
         </div>
         <div style={{ display: 'flex', gap: '1rem' }}>
@@ -127,7 +127,7 @@ const AiAdvisor = ({ transactions = [], userName = 'User' }: { transactions?: an
                     <div style={{ width: 24, height: 24, borderRadius: '6px', background: 'rgba(99, 102, 241, 0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary)' }}>
                       <Bot size={14} />
                     </div>
-                    <div style={{ fontSize: '0.7rem', fontWeight: 900, color: 'var(--primary)', letterSpacing: '1.5px', textTransform: 'uppercase' }}>Sentinel Response</div>
+                    <div style={{ fontSize: '0.7rem', fontWeight: 900, color: 'var(--primary)', letterSpacing: '1.5px', textTransform: 'uppercase' }}>Helper Response</div>
                   </div>
                 )}
                 {m.type === 'insight' && (
@@ -150,7 +150,7 @@ const AiAdvisor = ({ transactions = [], userName = 'User' }: { transactions?: an
                 animate={{ opacity: 1 }}
                 style={{ alignSelf: 'flex-start', padding: '1rem', display: 'flex', alignItems: 'center', gap: '0.75rem', color: 'var(--text-muted)', fontWeight: 600, fontSize: '0.9rem' }}
               >
-                <div className="spinner" style={{ width: 16, height: 16, borderTopColor: 'var(--primary)' }} /> Sentinel is processing ledger...
+                <div className="spinner" style={{ width: 16, height: 16, borderTopColor: 'var(--primary)' }} /> Helper is thinking...
               </motion.div>
             )}
           </AnimatePresence>
@@ -160,7 +160,7 @@ const AiAdvisor = ({ transactions = [], userName = 'User' }: { transactions?: an
           <div style={{ display: 'flex', gap: '1rem' }}>
               <input 
                 type="text" 
-                placeholder="Submit inquiry to Sentinel Core (e.g. 'Analyze my capital velocity' or 'Isolate high-risk events')" 
+                placeholder="Ask me anything (like 'How much did I spend?' or 'Help me save money')" 
                 className="form-input"
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
@@ -179,7 +179,7 @@ const AiAdvisor = ({ transactions = [], userName = 'User' }: { transactions?: an
           <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem', flexWrap: 'wrap' }}>
              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 900, letterSpacing: '2px', textTransform: 'uppercase' }}>Command Suggestions:</div>
              <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
-                {['Monthly MRR Analysis', 'Rail Egress Check', 'Lock Protocol Cards', 'Liquidity Report'].map((s) => (
+                {['Check Monthly Spend', 'Send Money', 'Lock Cards', 'Money Summary'].map((s) => (
                   <motion.button 
                     key={s} 
                     whileHover={{ scale: 1.05, background: 'rgba(255,255,255,0.06)' }}

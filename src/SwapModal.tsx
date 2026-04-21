@@ -214,7 +214,7 @@ const SwapModal: React.FC<SwapModalProps> = ({ isOpen, onClose, onComplete, wall
                   {historyLoading ? (
                     <div style={{ textAlign: 'center', padding: '5rem 2rem' }}><RefreshCcw className="animate-spin" size={40} color="var(--primary)" /></div>
                   ) : swapHistory.length === 0 ? (
-                    <div style={{ textAlign: 'center', padding: '5rem 2rem', color: 'var(--text-muted)', fontWeight: 600 }}>No historical swap telemetry found.</div>
+                    <div style={{ textAlign: 'center', padding: '5rem 2rem', color: 'var(--text-muted)', fontWeight: 600 }}>No swap history found.</div>
                   ) : (
                     swapHistory.map((swap: any) => (
                       <div key={swap.id} className="premium-card" style={{ padding: '1.5rem', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)' }}>
@@ -346,7 +346,7 @@ const SwapModal: React.FC<SwapModalProps> = ({ isOpen, onClose, onComplete, wall
                          <span style={{ fontWeight: 900, color: '#fff' }}>{parseFloat(amount).toLocaleString()} {fromCurrency}</span>
                       </div>
                       <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '1.05rem' }}>
-                         <span style={{ color: 'var(--text-muted)', fontWeight: 700 }}>Telemetry Rate</span>
+                         <span style={{ color: 'var(--text-muted)', fontWeight: 700 }}>Exchange Rate</span>
                          <span style={{ fontWeight: 900, color: 'var(--accent)' }}>1 {fromCurrency} = {quote.rate} {toCurrency}</span>
                       </div>
                       <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '1.05rem', borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: '1.5rem' }}>

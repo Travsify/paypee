@@ -91,7 +91,7 @@ const TransactionReceiptModal: React.FC<TransactionReceiptModalProps> = ({ trans
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
              <ReceiptRow label="Transaction Rail" value={transaction.type} />
-             <ReceiptRow label="Protocol Desc" value={transaction.desc || (isDeposit ? 'Incoming Ingress' : 'Egress Payout')} />
+             <ReceiptRow label="Details" value={transaction.desc || (isDeposit ? 'Money Received' : 'Money Sent')} />
              <ReceiptRow label="Timestamp" value={new Date(transaction.createdAt).toLocaleString(undefined, { dateStyle: 'long', timeStyle: 'short' })} />
              <ReceiptRow label="Immutable Ref" value={transaction.reference} />
              

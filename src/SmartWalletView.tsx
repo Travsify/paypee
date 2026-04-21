@@ -321,7 +321,7 @@ const SmartWalletView: React.FC<SmartWalletViewProps> = ({
                      <Info size={22} color="rgba(255,255,255,0.4)" />
                   </div>
                   <p style={{ fontSize: '0.9rem', color: 'rgba(255,255,255,0.5)', margin: 0, fontWeight: 500, lineHeight: 1.5 }}>
-                    Sentinel analysis is computed via multi-node market verification and real-time transaction telemetry.
+                    Smart analysis is done using real-time market data.
                   </p>
                </div>
             </div>
