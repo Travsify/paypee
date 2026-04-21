@@ -207,9 +207,7 @@ export const issueVirtualAccount = async (customerId: string, currency: string) 
     { url: '/issuing/accounts', payload: { customer_id: customerId, currency: currency.toUpperCase() } }
   ];
 
-  if (currency.toUpperCase() === 'GBP' || currency.toUpperCase() === 'EUR') {
-    endpoints.forEach(e => (e.payload as any).preferred_bank = 'STERLING');
-  }
+
 
   let lastError: any = null;
 
