@@ -70,7 +70,7 @@ export const createCustomer = async (userData: {
       },
       identity: {
         id_type: identityType,
-        ...(identityType === 'NIGERIAN_BVN_VERIFICATION' ? { bvn: identityNumber } : {}),
+        bvn: userData.bvn, // Bridgecard strictly requires a valid BVN for all Nigerian cards
         id_no: identityNumber,
         id_image: sanitizedSelfie, // Also pass as id_image to satisfy strict ID image checks
         selfie_image: sanitizedSelfie

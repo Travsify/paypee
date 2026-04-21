@@ -758,18 +758,18 @@ const CardsDashboard = ({ wallets: propWallets }: { wallets?: any[] }) => {
                   </div>
                 </div>
 
-                  {!(userData?.metadata?.bridgecard_id || ((userData?.metadata?.bvn || userData?.metadata?.nin || issueBvn) && issuePhone)) && (
+                  {!(userData?.metadata?.bridgecard_id || ((userData?.metadata?.bvn || issueBvn) && issuePhone)) && (
                     <div style={{ marginBottom: '2rem' }}>
                       <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: '#475569', marginBottom: '0.75rem', letterSpacing: '1px' }}>FINISHING TOUCHES</label>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                        {!(userData?.metadata?.bvn || userData?.metadata?.nin) && (
+                        {!userData?.metadata?.bvn && (
                           <div>
-                            <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 700, color: 'rgba(255,255,255,0.4)', marginBottom: '0.5rem' }}>National ID / BVN (11 digits)</label>
+                            <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 700, color: 'rgba(255,255,255,0.4)', marginBottom: '0.5rem' }}>Bank Verification Number (11 digits)</label>
                             <input 
                               type="text" 
                               value={issueBvn} 
                               onChange={(e) => setIssueBvn(e.target.value.replace(/\D/g, '').slice(0, 11))} 
-                              placeholder="Enter your 11-digit ID number" 
+                              placeholder="Enter your 11-digit BVN" 
                               maxLength={11}
                               className="form-input" 
                               style={{ fontSize: '1rem', fontWeight: 700, letterSpacing: '2px' }} 
@@ -791,12 +791,12 @@ const CardsDashboard = ({ wallets: propWallets }: { wallets?: any[] }) => {
                         )}
                       </div>
                       <p style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.35)', marginTop: '0.75rem', lineHeight: 1.5 }}>
-                        {!(userData?.metadata?.bvn || userData?.metadata?.nin) ? "Required by our card issuing partner to verify your identity." : "Our card issuer requires a valid phone number to link your new virtual card."}
+                        {(!userData?.metadata?.bvn) ? "Our card issuing partner strictly requires your BVN to issue virtual cards." : "Our card issuer requires a valid phone number to link your new virtual card."}
                       </p>
                     </div>
                   )}
                   
-                  {(userData?.metadata?.bridgecard_id || ((userData?.metadata?.bvn || userData?.metadata?.nin || issueBvn) && issuePhone)) && (
+                  {(userData?.metadata?.bridgecard_id || ((userData?.metadata?.bvn || issueBvn) && issuePhone)) && (
                     <div style={{ marginBottom: '2rem', padding: '1.5rem', background: 'rgba(16, 185, 129, 0.05)', borderRadius: '16px', border: '1px solid rgba(16, 185, 129, 0.1)', display: 'flex', alignItems: 'center', gap: '1rem' }}>
                        <div style={{ width: '40px', height: '40px', background: 'rgba(16, 185, 129, 0.1)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#10b981' }}>
                           <ShieldCheck size={20} />
@@ -874,7 +874,7 @@ const CardsDashboard = ({ wallets: propWallets }: { wallets?: any[] }) => {
                     </p>
                  </div>
 
-                 <button type="button" onClick={handleIssueCard} disabled={submitting || !issueWalletId || (!userData?.metadata?.bridgecard_id && (!(userData?.metadata?.bvn || userData?.metadata?.nin || issueBvn.length === 11) || !issuePhone))} className="btn btn-primary" style={{ width: '100%', padding: '1.4rem', borderRadius: '24px', fontSize: '1.1rem', fontWeight: 900 }}>
+                 <button type="button" onClick={handleIssueCard} disabled={submitting || !issueWalletId || (!userData?.metadata?.bridgecard_id && (!(userData?.metadata?.bvn || issueBvn.length === 11) || !issuePhone))} className="btn btn-primary" style={{ width: '100%', padding: '1.4rem', borderRadius: '24px', fontSize: '1.1rem', fontWeight: 900 }}>
                    {submitting ? 'Initializing Rail...' : 'Deploy Instantly'}
                  </button>
                </form>
