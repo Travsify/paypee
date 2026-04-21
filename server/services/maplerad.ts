@@ -201,8 +201,9 @@ export const issueVirtualAccount = async (customerId: string, currency: string) 
   // Global Accounts (USD, EUR, GBP)
   // Try multiple endpoints as Sandbox rails frequently change
   const endpoints = [
+    { url: '/collections/virtual-account', payload: { customer_id: customerId, currency: currency.toUpperCase() } },
     { url: '/accounts', payload: { customer_id: customerId, currency: currency.toUpperCase() } },
-    { url: '/wallets', payload: { customer_id: customerId, currency: currency.toUpperCase() } }, // Lowercase currency for JSON serialization
+    { url: '/wallets', payload: { customer_id: customerId, customerId: customerId, currency: currency.toUpperCase(), Currency: currency.toUpperCase() } },
     { url: '/issuing/accounts', payload: { customer_id: customerId, currency: currency.toUpperCase() } }
   ];
 
