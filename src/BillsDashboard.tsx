@@ -68,25 +68,25 @@ const BillsDashboard = () => {
 
   const providers: Record<string, any[]> = {
      AIRTIME: [
-        { id: '1', name: 'MTN Nigeria', icon: <Smartphone color="#facc15" />, desc: 'Airtime & Data Protocol' },
-        { id: '2', name: 'Airtel Nigeria', icon: <Smartphone color="#ef4444" />, desc: 'Airtime & Data Protocol' },
-        { id: '3', name: 'Glo Nigeria', icon: <Smartphone color="#10b981" />, desc: 'Airtime & Data Protocol' },
-        { id: '4', name: '9mobile', icon: <Smartphone color="#10b981" />, desc: 'Airtime & Data Protocol' }
+        { id: '1', name: 'MTN Nigeria', icon: <Smartphone color="#facc15" />, desc: 'Airtime & Data' },
+        { id: '2', name: 'Airtel Nigeria', icon: <Smartphone color="#ef4444" />, desc: 'Airtime & Data' },
+        { id: '3', name: 'Glo Nigeria', icon: <Smartphone color="#10b981" />, desc: 'Airtime & Data' },
+        { id: '4', name: '9mobile', icon: <Smartphone color="#10b981" />, desc: 'Airtime & Data' }
      ],
      UTILITY: [
-        { id: '10', name: 'EKEDC (Lagos)', icon: <Zap color="#6366f1" />, desc: 'Electricity Settlement' },
-        { id: '11', name: 'IKEDC (Lagos)', icon: <Zap color="#6366f1" />, desc: 'Electricity Settlement' },
-        { id: '12', name: 'PHEDC (Rivers)', icon: <Zap color="#6366f1" />, desc: 'Electricity Settlement' }
+        { id: '10', name: 'EKEDC (Lagos)', icon: <Zap color="#6366f1" />, desc: 'Electricity Bill' },
+        { id: '11', name: 'IKEDC (Lagos)', icon: <Zap color="#6366f1" />, desc: 'Electricity Bill' },
+        { id: '12', name: 'PHEDC (Rivers)', icon: <Zap color="#6366f1" />, desc: 'Electricity Bill' }
      ],
      CABLE: [
-        { id: '20', name: 'DSTV Nigeria', icon: <Tv color="#3b82f6" />, desc: 'Digital Satellite Protocol' },
-        { id: '21', name: 'GOTV Nigeria', icon: <Tv color="#3b82f6" />, desc: 'Digital Satellite Protocol' },
-        { id: '22', name: 'StarTimes', icon: <Tv color="#3b82f6" />, desc: 'Digital Satellite Protocol' }
+        { id: '20', name: 'DSTV Nigeria', icon: <Tv color="#3b82f6" />, desc: 'Cable TV' },
+        { id: '21', name: 'GOTV Nigeria', icon: <Tv color="#3b82f6" />, desc: 'Cable TV' },
+        { id: '22', name: 'StarTimes', icon: <Tv color="#3b82f6" />, desc: 'Cable TV' }
      ],
      BETTING: [
-        { id: '30', name: 'Bet9ja', icon: <Trophy color="#22c55e" />, desc: 'Capital Deployment' },
-        { id: '31', name: 'SportyBet', icon: <Trophy color="#ef4444" />, desc: 'Capital Deployment' },
-        { id: '32', name: '1xBet', icon: <Trophy color="#3b82f6" />, desc: 'Capital Deployment' }
+        { id: '30', name: 'Bet9ja', icon: <Trophy color="#22c55e" />, desc: 'Add to Wallet' },
+        { id: '31', name: 'SportyBet', icon: <Trophy color="#ef4444" />, desc: 'Add to Wallet' },
+        { id: '32', name: '1xBet', icon: <Trophy color="#3b82f6" />, desc: 'Add to Wallet' }
      ]
   };
 
@@ -97,15 +97,15 @@ const BillsDashboard = () => {
        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
           <div>
              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: 'var(--primary)', fontWeight: 900, fontSize: '0.75rem', letterSpacing: '3px', textTransform: 'uppercase', marginBottom: '1.25rem' }}>
-                <Cpu size={16} fill="var(--primary)" /> Recurring Settlement Rails
+                <div style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--primary)', boxShadow: '0 0 10px var(--primary)' }} /> Bills & Payments
              </div>
              <h2 style={{ fontSize: '3rem', fontWeight: 900, marginBottom: '0.75rem', letterSpacing: '-0.04em' }}>Bills & Utilities</h2>
              <p style={{ color: 'var(--text-muted)', fontSize: '1.15rem', fontWeight: 500, maxWidth: '600px' }}>
-                Settle global airtime, infrastructure utilities, and corporate services instantly via the Paypee rail.
+                Pay for airtime, electricity, and other utility bills instantly with Paypee.
              </p>
           </div>
           <div style={{ position: 'relative' }}>
-             <input type="text" placeholder="Search billing protocol..." className="form-input" style={{ width: '320px', paddingLeft: '3.5rem', borderRadius: '18px' }} />
+             <input type="text" placeholder="Search for bills..." className="form-input" style={{ width: '320px', paddingLeft: '3.5rem', borderRadius: '18px' }} />
              <Search size={20} style={{ position: 'absolute', left: '1.25rem', top: '50%', transform: 'translateY(-50%)', opacity: 0.4 }} />
           </div>
        </div>
@@ -115,7 +115,7 @@ const BillsDashboard = () => {
           <BillCategory icon={Smartphone} name="Airtime & Data" active={category === 'AIRTIME'} onClick={() => setCategory('AIRTIME')} />
           <BillCategory icon={Zap} name="Electricity" active={category === 'UTILITY'} onClick={() => setCategory('UTILITY')} />
           <BillCategory icon={Tv} name="Cable TV" active={category === 'CABLE'} onClick={() => setCategory('CABLE')} />
-          <BillCategory icon={Trophy} name="Service Ingress" active={category === 'BETTING'} onClick={() => setCategory('BETTING')} />
+          <BillCategory icon={Trophy} name="Betting" active={category === 'BETTING'} onClick={() => setCategory('BETTING')} />
        </div>
 
        <div style={{ display: 'grid', gridTemplateColumns: '1.6fr 1fr', gap: '3.5rem', alignItems: 'flex-start' }}>
@@ -123,8 +123,8 @@ const BillsDashboard = () => {
           {/* Provider Selection */}
           <div>
              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '2.5rem' }}>
-                <h3 style={{ fontSize: '1.5rem', fontWeight: 900, letterSpacing: '-0.02em' }}>Available Registries</h3>
-                <div style={{ background: 'rgba(255,255,255,0.05)', color: 'var(--text-muted)', padding: '4px 12px', borderRadius: '8px', fontSize: '0.8rem', fontWeight: 800 }}>{providers[category].length} VETTED</div>
+                <h3 style={{ fontSize: '1.5rem', fontWeight: 900, letterSpacing: '-0.02em' }}>Service Providers</h3>
+                <div style={{ background: 'rgba(255,255,255,0.05)', color: 'var(--text-muted)', padding: '4px 12px', borderRadius: '8px', fontSize: '0.8rem', fontWeight: 800 }}>{providers[category].length} READY</div>
              </div>
              
              <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
@@ -179,13 +179,13 @@ const BillsDashboard = () => {
                          </div>
                          <h4 style={{ fontSize: '1.5rem', fontWeight: 900, letterSpacing: '-0.02em' }}>{selectedProvider.name}</h4>
                          <div style={{ color: 'var(--accent)', fontWeight: 900, fontSize: '0.75rem', letterSpacing: '2px', marginTop: '0.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
-                            <CheckCircle2 size={14} /> AUTHORIZED SETTLEMENT
+                            <CheckCircle2 size={14} /> VERIFIED BILLER
                          </div>
                       </div>
 
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
                          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                            <label className="form-label">CUSTOMER IDENTIFIER</label>
+                            <label className="form-label">ACCOUNT NUMBER</label>
                             <div style={{ position: 'relative' }}>
                                <input placeholder="Phone / Account No." className="form-input" style={{ fontSize: '1.1rem', fontWeight: 800, paddingLeft: '3.5rem' }} />
                                <div style={{ position: 'absolute', left: '1.25rem', top: '50%', transform: 'translateY(-50%)', opacity: 0.4 }}>
@@ -194,7 +194,7 @@ const BillsDashboard = () => {
                             </div>
                          </div>
                          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                            <label className="form-label">SETTLEMENT AMOUNT (NGN)</label>
+                            <label className="form-label">AMOUNT (NGN)</label>
                             <div style={{ position: 'relative' }}>
                                <input placeholder="0.00" type="number" className="form-input" style={{ fontSize: '1.1rem', fontWeight: 800, paddingLeft: '3.5rem' }} />
                                <div style={{ position: 'absolute', left: '1.25rem', top: '50%', transform: 'translateY(-50%)', opacity: 0.4, fontWeight: 900 }}>

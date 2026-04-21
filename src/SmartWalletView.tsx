@@ -131,18 +131,18 @@ const SmartWalletView: React.FC<SmartWalletViewProps> = ({
       >
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: 'var(--primary)', fontWeight: 900, fontSize: '0.75rem', letterSpacing: '3px', textTransform: 'uppercase', marginBottom: '1.25rem' }}>
-            <Sparkles size={16} fill="var(--primary)" /> Intelligent Treasury Rails
+            <Sparkles size={16} fill="var(--primary)" /> Wallet Overview
           </div>
           <h2 style={{ fontSize: '3rem', fontWeight: 900, marginBottom: '0.75rem', letterSpacing: '-0.04em' }}>
             Smart Wallet
           </h2>
           <p style={{ color: 'var(--text-muted)', fontSize: '1.15rem', maxWidth: '600px', fontWeight: 500 }}>
-            Unified management of your global liquidity rails across fiat and digital asset protocols.
+            Manage all your global wallets and crypto in one place.
           </p>
         </div>
         <div style={{ display: 'flex', gap: '1.25rem' }}>
           <button onClick={onCreateAccount} className="btn btn-primary" style={{ padding: '1.25rem 2.5rem', borderRadius: '18px', fontWeight: 900 }}>
-            <Plus size={20} /> Provision Asset
+            <Plus size={20} /> Add Wallet
           </button>
           <button onClick={onRefresh} className="btn btn-outline" style={{ width: 60, height: 60, borderRadius: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <RefreshCw size={22} />
@@ -164,8 +164,8 @@ const SmartWalletView: React.FC<SmartWalletViewProps> = ({
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '4rem' }}>
             <div style={{ flex: 1 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem' }}>
-                <span style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.5)', fontWeight: 900, letterSpacing: '4px' }}>AGGREGATE CAPITAL VOLUME</span>
-                <div className="pulse-live" title="Live Telemetry Active" />
+                <span style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.5)', fontWeight: 900, letterSpacing: '4px' }}>TOTAL BALANCE</span>
+                <div className="pulse-live" title="Live Updates Active" />
               </div>
               
               <div style={{ fontSize: '6rem', fontWeight: 900, letterSpacing: '-0.06em', marginBottom: '1.5rem', fontFamily: 'var(--font-inter)', display: 'flex', alignItems: 'baseline', gap: '0.75rem' }}>
@@ -177,38 +177,37 @@ const SmartWalletView: React.FC<SmartWalletViewProps> = ({
               
               <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', background: calculations.growth >= 0 ? 'rgba(16, 185, 129, 0.1)' : 'rgba(244, 63, 94, 0.1)', padding: '0.6rem 1.25rem', borderRadius: '14px', color: calculations.growth >= 0 ? 'var(--accent)' : '#f43f5e', fontWeight: 900, fontSize: '1rem', border: '1px solid rgba(255,255,255,0.05)' }}>
-                  {calculations.growth >= 0 ? <TrendingUp size={20} /> : <TrendingDown size={20} />} 
-                  {calculations.growth >= 0 ? '+' : ''}{calculations.growth}% <span style={{ opacity: 0.6, fontSize: '0.8rem', fontWeight: 700 }}>MONTHLY FLUX</span>
+                  {calculations.growth >= 0 ? <TrendingUp size={20} /> : <TrendingDown size={20} />}                   {calculations.growth >= 0 ? '+' : ''}{calculations.growth}% <span style={{ opacity: 0.6, fontSize: '0.8rem', fontWeight: 700 }}>MONTHLY CHANGE</span>
                 </div>
-                <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.9rem', fontWeight: 600 }}>Validated via high-velocity market indices</span>
+                 <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.9rem', fontWeight: 600 }}>Based on latest market prices</span>
               </div>
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1.5rem', width: '340px' }}>
                <div className="holographic-card" style={{ padding: '1.75rem', textAlign: 'center', background: 'rgba(255,255,255,0.02)' }}>
-                  <div style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.4)', fontWeight: 900, marginBottom: '0.75rem', letterSpacing: '2px' }}>LIQUIDITY INDEX</div>
+                   <div style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.4)', fontWeight: 900, marginBottom: '0.75rem', letterSpacing: '2px' }}>CASH SCORE</div>
                   <div style={{ fontSize: '1.75rem', fontWeight: 900 }}>{calculations.liquidityScore}<span style={{ fontSize: '0.9rem', opacity: 0.4 }}>/100</span></div>
                </div>
                <div className="holographic-card" style={{ padding: '1.75rem', textAlign: 'center', background: 'rgba(255,255,255,0.02)' }}>
-                  <div style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.4)', fontWeight: 900, marginBottom: '0.75rem', letterSpacing: '2px' }}>HEDGING STATUS</div>
-                  <div style={{ fontSize: '1.1rem', fontWeight: 900, color: calculations.hedgingRatio > 0.5 ? 'var(--accent)' : '#f59e0b', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem' }}>
-                    <Shield size={18} fill={calculations.hedgingRatio > 0.5 ? 'var(--accent)' : 'transparent'} /> {calculations.hedgingRatio > 0.5 ? 'PROTECTED' : 'EXPOSED'}
-                  </div>
+                   <div style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.4)', fontWeight: 900, marginBottom: '0.75rem', letterSpacing: '2px' }}>SAFETY</div>
+                   <div style={{ fontSize: '1.1rem', fontWeight: 900, color: calculations.hedgingRatio > 0.5 ? 'var(--accent)' : '#f59e0b', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem' }}>
+                     <Shield size={18} fill={calculations.hedgingRatio > 0.5 ? 'var(--accent)' : 'transparent'} /> {calculations.hedgingRatio > 0.5 ? 'VERY SAFE' : 'AT RISK'}
+                   </div>
                </div>
                <div className="holographic-card" style={{ padding: '1.75rem', textAlign: 'center', gridColumn: 'span 2', background: 'rgba(16, 185, 129, 0.05)', border: '1px solid rgba(16, 185, 129, 0.1)' }}>
-                  <div style={{ fontSize: '0.7rem', color: 'var(--accent)', fontWeight: 900, marginBottom: '0.75rem', letterSpacing: '2px' }}>ACCRUED PROTOCOL YIELD</div>
-                  <div style={{ fontSize: '1.8rem', fontWeight: 900, color: 'var(--accent)' }}>+${calculations.accruedInterest.toLocaleString(undefined, { maximumFractionDigits: 2 })} <span style={{ fontSize: '0.9rem', opacity: 0.6 }}>/ MO</span></div>
+                   <div style={{ fontSize: '0.7rem', color: 'var(--accent)', fontWeight: 900, marginBottom: '0.75rem', letterSpacing: '2px' }}>INTEREST EARNED</div>
+                   <div style={{ fontSize: '1.8rem', fontWeight: 900, color: 'var(--accent)' }}>+${calculations.accruedInterest.toLocaleString(undefined, { maximumFractionDigits: 2 })} <span style={{ fontSize: '0.9rem', opacity: 0.6 }}>/ MONTH</span></div>
                </div>
             </div>
           </div>
 
           <div style={{ marginTop: '5rem', display: 'flex', gap: '2rem' }}>
-            <button onClick={onSwap} className="btn btn-primary" style={{ padding: '1.5rem 3.5rem', background: '#fff', color: '#000', borderRadius: '22px', fontSize: '1.1rem', fontWeight: 900 }}>
-              <RefreshCw size={20} /> Execute Asset Swap
-            </button>
-            <button onClick={onPayout} className="btn btn-outline" style={{ padding: '1.5rem 3.5rem', borderRadius: '22px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)', fontSize: '1.1rem', fontWeight: 900 }}>
-              <ArrowUpRight size={20} /> Liquidate Capital
-            </button>
+             <button onClick={onSwap} className="btn btn-primary" style={{ padding: '1.5rem 3.5rem', background: '#fff', color: '#000', borderRadius: '22px', fontSize: '1.1rem', fontWeight: 900 }}>
+               <RefreshCw size={20} /> Convert Money
+             </button>
+             <button onClick={onPayout} className="btn btn-outline" style={{ padding: '1.5rem 3.5rem', borderRadius: '22px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)', fontSize: '1.1rem', fontWeight: 900 }}>
+               <ArrowUpRight size={20} /> Send or Withdraw
+             </button>
           </div>
         </div>
 
@@ -219,7 +218,7 @@ const SmartWalletView: React.FC<SmartWalletViewProps> = ({
       <div>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-            <h3 style={{ fontSize: '1.8rem', fontWeight: 900, letterSpacing: '-0.03em' }}>Institutional Rails</h3>
+            <h3 style={{ fontSize: '1.8rem', fontWeight: 900, letterSpacing: '-0.03em' }}>My Wallets</h3>
             <div style={{ background: 'rgba(255,255,255,0.05)', color: 'var(--text-muted)', padding: '4px 12px', borderRadius: '8px', fontSize: '0.8rem', fontWeight: 800 }}>{filteredWallets.length} ACTIVE</div>
           </div>
           <div style={{ display: 'flex', gap: '0.5rem', background: 'rgba(255,255,255,0.02)', padding: '6px', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.06)' }}>
@@ -283,7 +282,7 @@ const SmartWalletView: React.FC<SmartWalletViewProps> = ({
          >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3rem' }}>
               <h4 style={{ fontSize: '1.4rem', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                 <Zap size={28} color="#f59e0b" fill="#f59e0b" /> Sentinel Market Insights
+                 <Zap size={28} color="#f59e0b" fill="#f59e0b" /> Market Updates
               </h4>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
                 <span style={{ fontSize: '0.75rem', color: '#f59e0b', fontWeight: 900, background: 'rgba(245, 158, 11, 0.1)', padding: '6px 14px', borderRadius: '100px', border: '1px solid rgba(245, 158, 11, 0.2)', letterSpacing: '1px' }}>AUTONOMOUS ANALYSIS ACTIVE</span>
@@ -294,9 +293,9 @@ const SmartWalletView: React.FC<SmartWalletViewProps> = ({
                {/* Dynamic FX Insight */}
                {(calculations.assetsByCurrency['NGN'] || 0) > (calculations.totalUSD * 0.3) && (
                  <div className="holographic-card" style={{ padding: '2.5rem', borderLeft: '5px solid #f59e0b', background: 'rgba(245, 158, 11, 0.02)' }}>
-                    <div style={{ color: '#f59e0b', fontWeight: 900, fontSize: '0.85rem', letterSpacing: '2px', marginBottom: '1rem' }}>PROTOCOL HEDGING RECOMMENDED</div>
+                    <div style={{ color: '#f59e0b', fontWeight: 900, fontSize: '0.85rem', letterSpacing: '2px', marginBottom: '1rem' }}>ACTION SUGGESTED</div>
                     <p style={{ fontSize: '1.1rem', color: 'rgba(255,255,255,0.85)', lineHeight: '1.7', marginBottom: '2rem', fontWeight: 500 }}>
-                      Current NGN exposure exceeds 30% of aggregate volume. Sentinel suggests migrating ₦{((calculations.assetsByCurrency['NGN'] || 0) * 0.2 * (fxRates['USD_NGN'] || 1620)).toLocaleString()} to USD/USDT to neutralize regional volatility risks.
+                      You have a lot of Naira in your account. We suggest moving about ₦{((calculations.assetsByCurrency['NGN'] || 0) * 0.2 * (fxRates['USD_NGN'] || 1620)).toLocaleString()} to Dollars (USD) to keep your money safe from value changes.
                     </p>
                     <button onClick={onSwap} style={{ background: 'transparent', border: 'none', color: 'var(--primary)', fontWeight: 900, fontSize: '1rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.75rem', padding: 0 }}>
                       Secure Rail Assets <ArrowRight size={20} />

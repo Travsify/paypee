@@ -95,6 +95,7 @@ const BusinessDashboard = ({ onLogout }: { onLogout?: () => void }) => {
   const [transactions, setTransactions] = useState<any[]>([]);
   const [isAccountModalOpen, setIsAccountModalOpen] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [showMobileMenu, setShowMobileMenu] = useState(false);
 
   const fetchUserData = async () => {
     const token = localStorage.getItem('paypee_token');
@@ -185,7 +186,7 @@ const BusinessDashboard = ({ onLogout }: { onLogout?: () => void }) => {
       
       <div style={{ display: 'flex', flex: 1, overflow: 'hidden', position: 'relative' }}>
         {/* Sidebar - Hidden on Mobile */}
-        <aside className="dashboard-aside" style={{ width: '280px', borderRight: '1px solid var(--border)', background: '#0a0f1e', padding: '2rem 1.5rem', display: 'flex', flexDirection: 'column' }}>
+        <aside className="dashboard-aside desktop-only" style={{ width: '280px', borderRight: '1px solid var(--border)', background: '#0a0f1e', padding: '2rem 1.5rem', display: 'flex', flexDirection: 'column' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0 0.5rem', marginBottom: '3rem' }}>
             <div style={{ width: 32, height: 32, background: 'var(--primary)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                <Zap size={20} color="#fff" strokeWidth={3} />
@@ -194,49 +195,81 @@ const BusinessDashboard = ({ onLogout }: { onLogout?: () => void }) => {
           </div>
           
           <div style={{ flex: 1, overflowY: 'auto' }}>
-             <SidebarItem icon={LayoutDashboard} label="Treasury Hub" active={activeSection === 'dashboard'} onClick={() => navigate('dashboard')} />
-             <SidebarItem icon={Wallet} label="Corporate Wallets" active={activeSection === 'wallets'} onClick={() => navigate('wallets')} />
-             <SidebarItem icon={Send} label="Bulk Payouts" active={activeSection === 'payouts'} onClick={() => navigate('payouts')} />
-             <SidebarItem icon={Layers} label="Sub-Accounts" active={activeSection === 'subs'} onClick={() => navigate('subs')} />
-             <SidebarItem icon={Zap} label="Business Bills" active={activeSection === 'bills'} onClick={() => navigate('bills')} />
-             <SidebarItem icon={Lock} label="Corporate Vaults" active={activeSection === 'vaults'} onClick={() => navigate('vaults')} />
-             <SidebarItem icon={BarChart3} label="Global Analytics" active={activeSection === 'analytics'} onClick={() => navigate('analytics')} />
-             <SidebarItem icon={Users} label="Team Access" active={activeSection === 'team'} onClick={() => navigate('team')} />
-             <SidebarItem icon={Bot} label="Business AI" active={activeSection === 'ai'} onClick={() => navigate('ai')} />
+             <SidebarItem icon={LayoutDashboard} label="Overview" active={activeSection === 'dashboard'} onClick={() => navigate('dashboard')} />
+             <SidebarItem icon={Wallet} label="Wallets" active={activeSection === 'wallets'} onClick={() => navigate('wallets')} />
+             <SidebarItem icon={Send} label="Send Money" active={activeSection === 'payouts'} onClick={() => navigate('payouts')} />
+             <SidebarItem icon={Layers} label="Team Accounts" active={activeSection === 'subs'} onClick={() => navigate('subs')} />
+             <SidebarItem icon={Zap} label="Pay Bills" active={activeSection === 'bills'} onClick={() => navigate('bills')} />
+             <SidebarItem icon={Lock} label="Savings" active={activeSection === 'vaults'} onClick={() => navigate('vaults')} />
+             <SidebarItem icon={BarChart3} label="Insights" active={activeSection === 'analytics'} onClick={() => navigate('analytics')} />
+             <SidebarItem icon={Users} label="Team" active={activeSection === 'team'} onClick={() => navigate('team')} />
+             <SidebarItem icon={Bot} label="AI Helper" active={activeSection === 'ai'} onClick={() => navigate('ai')} />
           </div>
 
-          <div style={{ borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '1.5rem', marginTop: '1.5rem' }}>
+          <div style={{ borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '1.5rem', marginTop: '1.5rem' }} className="desktop-only">
             <SidebarItem icon={Settings} label="Settings" active={activeSection === 'settings'} onClick={() => navigate('settings')} />
             <SidebarItem icon={HelpCircle} label="Help & Support" onClick={() => navigate('help')} />
             <SidebarItem icon={LogOut} label="Log Out" onClick={onLogout} />
           </div>
         </aside>
 
-        {/* Mobile Navigation Bar */}
-        <div className="mobile-nav">
-           <div onClick={() => navigate('dashboard')} style={{ textAlign: 'center', color: activeSection === 'dashboard' ? 'var(--primary)' : 'var(--text-muted)' }}>
-              <LayoutDashboard size={20} />
-              <div style={{ fontSize: '10px', marginTop: '4px', fontWeight: 600 }}>Hub</div>
-           </div>
-           <div onClick={() => navigate('wallets')} style={{ textAlign: 'center', color: activeSection === 'wallets' ? 'var(--primary)' : 'var(--text-muted)' }}>
-              <Wallet size={20} />
-              <div style={{ fontSize: '10px', marginTop: '4px', fontWeight: 600 }}>Assets</div>
-           </div>
-           <div onClick={() => {
-              if (!isVerified) { alert('You must complete Identity Verification before provisioning a treasury account.'); }
-              else { setIsAccountModalOpen(true); }
-            }} style={{ textAlign: 'center', background: isVerified ? 'var(--primary)' : 'rgba(255,255,255,0.1)', padding: '10px', borderRadius: '50%', marginTop: '-30px', boxShadow: isVerified ? '0 4px 15px rgba(99, 102, 241, 0.4)' : 'none' }}>
-               {isVerified ? <Plus size={24} color="#fff" /> : <Lock size={24} color="var(--text-muted)" />}
-            </div>
-           <div onClick={() => navigate('analytics')} style={{ textAlign: 'center', color: activeSection === 'analytics' ? 'var(--primary)' : 'var(--text-muted)' }}>
-              <BarChart3 size={20} />
-              <div style={{ fontSize: '10px', marginTop: '4px', fontWeight: 600 }}>Stats</div>
-           </div>
-           <div onClick={() => navigate('ai')} style={{ textAlign: 'center', color: activeSection === 'ai' ? 'var(--primary)' : 'var(--text-muted)' }}>
-              <Bot size={20} />
-              <div style={{ fontSize: '10px', marginTop: '4px', fontWeight: 600 }}>BizAI</div>
-           </div>
+        {/* Mobile Bottom Navigation */}
+        <div className="mobile-only" style={{ 
+          position: 'fixed', 
+          bottom: 0, 
+          left: 0, 
+          right: 0, 
+          background: 'rgba(5, 8, 15, 0.9)', 
+          backdropFilter: 'blur(20px)', 
+          borderTop: '1px solid rgba(255,255,255,0.08)',
+          display: 'flex',
+          justifyContent: 'space-around',
+          padding: '0.75rem 0.5rem 2rem',
+          zIndex: 2000
+        }}>
+          <MobileNavButton icon={LayoutDashboard} label="Home" active={activeSection === 'dashboard'} onClick={() => navigate('dashboard')} />
+          <MobileNavButton icon={Wallet} label="Wallets" active={activeSection === 'wallets'} onClick={() => navigate('wallets')} />
+          <MobileNavButton icon={BarChart3} label="Stats" active={activeSection === 'analytics'} onClick={() => navigate('analytics')} />
+          <MobileNavButton icon={Menu} label="More" onClick={() => setShowMobileMenu(true)} />
         </div>
+
+        {/* Mobile Hamburger Menu Drawer */}
+        <AnimatePresence>
+          {showMobileMenu && (
+            <>
+              <motion.div 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={() => setShowMobileMenu(false)}
+                style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', zIndex: 3000, backdropFilter: 'blur(5px)' }}
+              />
+              <motion.div 
+                initial={{ x: '-100%' }}
+                animate={{ x: 0 }}
+                exit={{ x: '-100%' }}
+                transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+                style={{ position: 'fixed', left: 0, top: 0, bottom: 0, width: '280px', background: '#020617', zIndex: 3001, padding: '2rem', borderRight: '1px solid rgba(255,255,255,0.1)' }}
+              >
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3rem' }}>
+                  <span style={{ fontSize: '1.5rem', fontWeight: 900 }}>Menu</span>
+                  <X onClick={() => setShowMobileMenu(false)} style={{ cursor: 'pointer' }} />
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                  <SidebarItem icon={Send} label="Send Money" active={activeSection === 'payouts'} onClick={() => { navigate('payouts'); setShowMobileMenu(false); }} />
+                  <SidebarItem icon={Layers} label="Team Accounts" active={activeSection === 'subs'} onClick={() => { navigate('subs'); setShowMobileMenu(false); }} />
+                  <SidebarItem icon={Zap} label="Pay Bills" active={activeSection === 'bills'} onClick={() => { navigate('bills'); setShowMobileMenu(false); }} />
+                  <SidebarItem icon={Lock} label="Savings" active={activeSection === 'vaults'} onClick={() => { navigate('vaults'); setShowMobileMenu(false); }} />
+                  <SidebarItem icon={Users} label="Team" active={activeSection === 'team'} onClick={() => { navigate('team'); setShowMobileMenu(false); }} />
+                  <SidebarItem icon={Bot} label="AI Helper" active={activeSection === 'ai'} onClick={() => { navigate('ai'); setShowMobileMenu(false); }} />
+                  <div style={{ borderTop: '1px solid rgba(255,255,255,0.08)', margin: '1rem 0' }} />
+                  <SidebarItem icon={Settings} label="Settings" active={activeSection === 'settings'} onClick={() => { navigate('settings'); setShowMobileMenu(false); }} />
+                  <SidebarItem icon={LogOut} label="Logout" onClick={onLogout} />
+                </div>
+              </motion.div>
+            </>
+          )}
+        </AnimatePresence>
 
         <main className="dashboard-main" style={{ flex: 1, overflowY: 'auto', padding: '3rem 4rem', paddingBottom: '100px', background: 'radial-gradient(circle at 50% 0%, rgba(99, 102, 241, 0.05) 0%, transparent 50%)' }}>
           {userData && (
@@ -296,7 +329,7 @@ const BusinessDashboard = ({ onLogout }: { onLogout?: () => void }) => {
                       style={{ border: '2px dashed var(--border)', borderRadius: '24px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '2rem', cursor: isVerified ? 'pointer' : 'not-allowed', minHeight: '200px', opacity: isVerified ? 1 : 0.5 }}
                   >
                      <Plus size={40} color="var(--primary)" style={{ opacity: 0.3, marginBottom: '1rem' }} />
-                     <span style={{ fontWeight: 800, color: 'var(--text-muted)' }}>Deploy Treasury Rail</span>
+                     <span style={{ fontWeight: 800, color: 'var(--text-muted)' }}>Add Wallet</span>
                   </motion.div>
                </div>
              </div>
@@ -306,11 +339,11 @@ const BusinessDashboard = ({ onLogout }: { onLogout?: () => void }) => {
             <>
               <div className="dashboard-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3rem' }}>
                 <div>
-                  <div className="mobile-only" style={{ display: 'none', color: 'var(--primary)', fontWeight: 900, fontSize: '0.7rem', letterSpacing: '2px', marginBottom: '0.5rem' }}>BUSINESS OPERATIONS</div>
-                  <h1 style={{ fontSize: '2.5rem', fontWeight: 900, marginBottom: '0.5rem', letterSpacing: '-0.02em' }}>Treasury Control</h1>
+                  <div className="mobile-only" style={{ color: 'var(--primary)', fontWeight: 900, fontSize: '0.7rem', letterSpacing: '2px', marginBottom: '0.5rem' }}>BUSINESS DASHBOARD</div>
+                  <h1 style={{ fontSize: '2.5rem', fontWeight: 900, marginBottom: '0.5rem', letterSpacing: '-0.02em' }}>Dashboard</h1>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: '2rem' }}>
-                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.8rem', color: '#10b981', fontWeight: 800 }}><div style={{ width: 6, height: 6, background: '#10b981', borderRadius: '50%' }} /> LIQUIDITY_RAILS_ACTIVE</div>
-                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 800 }}><Building2 size={16} /> {userData?.businessName || 'Enterprise Node'}</div>
+                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.8rem', color: '#10b981', fontWeight: 800 }}><div style={{ width: 6, height: 6, background: '#10b981', borderRadius: '50%' }} /> ACTIVE</div>
+                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 800 }}><Building2 size={16} /> {userData?.businessName || 'Business'}</div>
                   </div>
                 </div>
                 <div className="dashboard-header-right" style={{ display: 'flex', gap: '1rem' }}>
@@ -321,15 +354,15 @@ const BusinessDashboard = ({ onLogout }: { onLogout?: () => void }) => {
                     } else {
                       setIsAccountModalOpen(true);
                     }
-                  }}>Generate Rail</button>
+                  }}>Add Wallet</button>
                 </div>
               </div>
 
               <div className="balance-card-slider no-scrollbar" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '2rem', marginBottom: '3.5rem' }}>
-                 <MetricCard label="Total Treasury" value={`$${(userData?.wallets?.reduce((acc: any, w: any) => acc + (w.currency === 'USD' ? parseFloat(w.balance) : 0), 0) || 0).toLocaleString()}`} trend="+12.4%" icon={TrendingUp} color="#10b981" />
-                 <MetricCard label="Global Transfers" value="1.2k" trend="+85%" icon={Send} color="var(--primary)" />
-                 <MetricCard label="Sub-Accounts" value="12" trend="Active" icon={Layers} color="var(--secondary)" />
-                 <MetricCard label="Settlement Health" value="100%" trend="Optimized" icon={ShieldCheck} color="#10b981" />
+                 <MetricCard label="Total Balance" value={`$${(userData?.wallets?.reduce((acc: any, w: any) => acc + (w.currency === 'USD' ? parseFloat(w.balance) : 0), 0) || 0).toLocaleString()}`} trend="+12.4%" icon={TrendingUp} color="#10b981" />
+                 <MetricCard label="Total Payments" value="1.2k" trend="+85%" icon={Send} color="var(--primary)" />
+                 <MetricCard label="Team Accounts" value="12" trend="Active" icon={Layers} color="var(--secondary)" />
+                 <MetricCard label="Safety Score" value="100%" trend="Safe" icon={ShieldCheck} color="#10b981" />
               </div>
 
               <div className="dashboard-grid-2" style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1.4fr) minmax(0, 0.6fr)', gap: '3rem' }}>
@@ -407,5 +440,34 @@ const BusinessDashboard = ({ onLogout }: { onLogout?: () => void }) => {
     </div>
   );
 };
+
+
+const MobileNavButton = ({ icon: Icon, label, active, onClick }: any) => (
+  <motion.button 
+    whileTap={{ scale: 0.9 }}
+    onClick={onClick}
+    style={{ 
+      background: 'transparent', 
+      border: 'none', 
+      display: 'flex', 
+      flexDirection: 'column', 
+      alignItems: 'center', 
+      gap: '0.4rem', 
+      color: active ? 'var(--primary)' : 'var(--text-muted)',
+      cursor: 'pointer'
+    }}
+  >
+    <Icon size={20} />
+    <span style={{ fontSize: '0.65rem', fontWeight: 800 }}>{label}</span>
+  </motion.button>
+);
+
+const Menu = ({ size }: { size: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+);
+
+const X = ({ size = 20, onClick, style }: any) => (
+  <svg onClick={onClick} style={style} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+);
 
 export default BusinessDashboard;

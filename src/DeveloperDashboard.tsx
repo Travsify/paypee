@@ -121,6 +121,7 @@ const DeveloperDashboard = ({ onLogout }: { onLogout?: () => void }) => {
   const [transactions, setTransactions] = useState<any[]>([]);
   const [isAccountModalOpen, setIsAccountModalOpen] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [showMobileMenu, setShowMobileMenu] = useState(false);
 
   const fetchUserData = async () => {
     const token = localStorage.getItem('paypee_token');
@@ -214,47 +215,77 @@ const DeveloperDashboard = ({ onLogout }: { onLogout?: () => void }) => {
           </div>
           
           <div style={{ flex: 1, overflowY: 'auto' }}>
-             <SidebarItem icon={LayoutDashboard} label="Network Matrix" active={activeSection === 'overview'} onClick={() => navigate('overview')} />
+             <SidebarItem icon={LayoutDashboard} label="Overview" active={activeSection === 'overview'} onClick={() => navigate('overview')} />
              <SidebarItem icon={Wallet} label="Test Wallets" active={activeSection === 'wallets'} onClick={() => navigate('wallets')} />
              <SidebarItem icon={Key} label="API Keys" active={activeSection === 'keys'} onClick={() => navigate('keys')} />
              <SidebarItem icon={Webhook} label="Webhooks" active={activeSection === 'webhooks'} onClick={() => navigate('webhooks')} />
-             <SidebarItem icon={Activity} label="System Traffic" active={activeSection === 'traffic'} onClick={() => navigate('traffic')} />
-             <SidebarItem icon={Database} label="Treasury Logs" active={activeSection === 'logs'} onClick={() => navigate('logs')} />
-             <SidebarItem icon={BookOpen} label="Documentation" active={activeSection === 'docs'} onClick={() => navigate('docs')} />
+             <SidebarItem icon={Activity} label="Traffic" active={activeSection === 'traffic'} onClick={() => navigate('traffic')} />
+             <SidebarItem icon={Database} label="Logs" active={activeSection === 'logs'} onClick={() => navigate('logs')} />
+             <SidebarItem icon={BookOpen} label="Docs" active={activeSection === 'docs'} onClick={() => navigate('docs')} />
           </div>
 
-          <div style={{ borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '1.5rem', marginTop: '1.5rem' }}>
+          <div style={{ borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '1.5rem', marginTop: '1.5rem' }} className="desktop-only">
             <SidebarItem icon={Settings} label="Settings" active={activeSection === 'settings'} onClick={() => navigate('settings')} />
             <SidebarItem icon={HelpCircle} label="API Support" onClick={() => navigate('help')} />
             <SidebarItem icon={LogOut} label="Log Out" onClick={onLogout} />
           </div>
         </aside>
 
-        {/* Mobile Navigation Bar */}
-        <div className="mobile-nav">
-           <div onClick={() => navigate('overview')} style={{ textAlign: 'center', color: activeSection === 'overview' ? 'var(--primary)' : 'var(--text-muted)' }}>
-              <Terminal size={20} />
-              <div style={{ fontSize: '10px', marginTop: '4px', fontWeight: 600 }}>Matrix</div>
-           </div>
-           <div onClick={() => navigate('wallets')} style={{ textAlign: 'center', color: activeSection === 'wallets' ? 'var(--primary)' : 'var(--text-muted)' }}>
-              <Wallet size={20} />
-              <div style={{ fontSize: '10px', marginTop: '4px', fontWeight: 600 }}>Assets</div>
-           </div>
-           <div onClick={() => {
-              if (!isVerified) { alert('You must complete Identity Verification before provisioning a staging account.'); }
-              else { setIsAccountModalOpen(true); }
-            }} style={{ textAlign: 'center', background: 'var(--primary)', padding: '10px', borderRadius: '50%', marginTop: '-30px', boxShadow: '0 4px 15px rgba(99, 102, 241, 0.4)' }}>
-              {isVerified ? <Plus size={24} color="#fff" /> : <Lock size={24} color="var(--text-muted)" />}
-           </div>
-           <div onClick={() => navigate('traffic')} style={{ textAlign: 'center', color: activeSection === 'traffic' ? 'var(--primary)' : 'var(--text-muted)' }}>
-              <Activity size={20} />
-              <div style={{ fontSize: '10px', marginTop: '4px', fontWeight: 600 }}>Traffic</div>
-           </div>
-           <div onClick={() => navigate('docs')} style={{ textAlign: 'center', color: activeSection === 'docs' ? 'var(--primary)' : 'var(--text-muted)' }}>
-              <BookOpen size={20} />
-              <div style={{ fontSize: '10px', marginTop: '4px', fontWeight: 600 }}>Docs</div>
-           </div>
+        {/* Mobile Bottom Navigation */}
+        <div className="mobile-only" style={{ 
+          position: 'fixed', 
+          bottom: 0, 
+          left: 0, 
+          right: 0, 
+          background: 'rgba(5, 8, 15, 0.9)', 
+          backdropFilter: 'blur(20px)', 
+          borderTop: '1px solid rgba(255,255,255,0.08)',
+          display: 'flex',
+          justifyContent: 'space-around',
+          padding: '0.75rem 0.5rem 2rem',
+          zIndex: 2000
+        }}>
+          <MobileNavButton icon={LayoutDashboard} label="Home" active={activeSection === 'overview'} onClick={() => navigate('overview')} />
+          <MobileNavButton icon={Wallet} label="Wallets" active={activeSection === 'wallets'} onClick={() => navigate('wallets')} />
+          <MobileNavButton icon={BookOpen} label="Docs" active={activeSection === 'docs'} onClick={() => navigate('docs')} />
+          <MobileNavButton icon={Menu} label="More" onClick={() => setShowMobileMenu(true)} />
         </div>
+
+        {/* Mobile Hamburger Menu Drawer */}
+        <AnimatePresence>
+          {showMobileMenu && (
+            <>
+              <motion.div 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={() => setShowMobileMenu(false)}
+                style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', zIndex: 3000, backdropFilter: 'blur(5px)' }}
+              />
+              <motion.div 
+                initial={{ x: '-100%' }}
+                animate={{ x: 0 }}
+                exit={{ x: '-100%' }}
+                transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+                style={{ position: 'fixed', left: 0, top: 0, bottom: 0, width: '280px', background: '#020617', zIndex: 3001, padding: '2rem', borderRight: '1px solid rgba(255,255,255,0.1)' }}
+              >
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3rem' }}>
+                  <span style={{ fontSize: '1.5rem', fontWeight: 900 }}>Menu</span>
+                  <X onClick={() => setShowMobileMenu(false)} style={{ cursor: 'pointer' }} />
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                  <SidebarItem icon={Key} label="API Keys" active={activeSection === 'keys'} onClick={() => { navigate('keys'); setShowMobileMenu(false); }} />
+                  <SidebarItem icon={Webhook} label="Webhooks" active={activeSection === 'webhooks'} onClick={() => { navigate('webhooks'); setShowMobileMenu(false); }} />
+                  <SidebarItem icon={Activity} label="Traffic" active={activeSection === 'traffic'} onClick={() => { navigate('traffic'); setShowMobileMenu(false); }} />
+                  <SidebarItem icon={Database} label="Logs" active={activeSection === 'logs'} onClick={() => { navigate('logs'); setShowMobileMenu(false); }} />
+                  <div style={{ borderTop: '1px solid rgba(255,255,255,0.08)', margin: '1rem 0' }} />
+                  <SidebarItem icon={Settings} label="Settings" active={activeSection === 'settings'} onClick={() => { navigate('settings'); setShowMobileMenu(false); }} />
+                  <SidebarItem icon={LogOut} label="Logout" onClick={onLogout} />
+                </div>
+              </motion.div>
+            </>
+          )}
+        </AnimatePresence>
 
         <main className="dashboard-main" style={{ flex: 1, overflowY: 'auto', padding: '3rem 4rem', paddingBottom: '100px', background: 'radial-gradient(circle at 50% 0%, rgba(99, 102, 241, 0.05) 0%, transparent 50%)' }}>
           {userData && (
@@ -268,14 +299,14 @@ const DeveloperDashboard = ({ onLogout }: { onLogout?: () => void }) => {
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', textAlign: 'center', minHeight: '60vh' }}>
               <div style={{ width: 80, height: 80, background: 'rgba(99,102,241,0.1)', borderRadius: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary)', marginBottom: '2rem' }}><Cpu size={40} /></div>
               <h2 style={{ fontSize: '1.8rem', fontWeight: 800, marginBottom: '1rem' }}>Developer Verification Required</h2>
-              <p style={{ color: 'var(--text-muted)', maxWidth: '450px', lineHeight: 1.6, marginBottom: '2.5rem' }}>To access live API keys and high-volume treasury rails, your developer profile must undergo identity synchronization.</p>
-              <button onClick={() => navigate('overview')} style={{ background: 'var(--primary)', color: '#fff', border: 'none', padding: '1.2rem 3rem', borderRadius: '16px', fontWeight: 700, cursor: 'pointer' }}>Return to Matrix</button>
+              <p style={{ color: 'var(--text-muted)', maxWidth: '450px', lineHeight: 1.6, marginBottom: '2.5rem' }}>To access live API keys and production wallets, you need to complete identity verification.</p>
+        <button onClick={() => navigate('overview')} style={{ background: 'var(--primary)', color: '#fff', border: 'none', padding: '1.2rem 3rem', borderRadius: '16px', fontWeight: 700, cursor: 'pointer' }}>Return Home</button>
             </div>
           )}
 
           {activeSection === 'wallets' && (
              <div style={{ animation: 'fadeIn 0.5s ease-out' }}>
-                <h2 style={{ fontSize: '1.8rem', fontWeight: 800, marginBottom: '2rem' }}>Provisioned Sandbox Rails</h2>
+                <h2 style={{ fontSize: '1.8rem', fontWeight: 800, marginBottom: '2rem' }}>Test Wallets</h2>
                 <div className="balance-card-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '2rem' }}>
                    {userData?.wallets?.map((w: any) => {
                       const symbols: any = { USD: '$', EUR: '€', NGN: '₦', GBP: '£', BTC: '₿' };
@@ -307,7 +338,7 @@ const DeveloperDashboard = ({ onLogout }: { onLogout?: () => void }) => {
                       style={{ border: '2px dashed var(--border)', borderRadius: '24px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '2rem', cursor: isVerified ? 'pointer' : 'not-allowed', minHeight: '200px', opacity: isVerified ? 1 : 0.5 }}
                   >
                      <Plus size={40} color="var(--primary)" style={{ opacity: 0.3, marginBottom: '1rem' }} />
-                     <span style={{ fontWeight: 800, color: 'var(--text-muted)' }}>Get New Staging Account</span>
+                     <span style={{ fontWeight: 800, color: 'var(--text-muted)' }}>Add Test Wallet</span>
                   </motion.div>
                 </div>
              </div>
@@ -319,11 +350,11 @@ const DeveloperDashboard = ({ onLogout }: { onLogout?: () => void }) => {
                 <div>
                   <div className="mobile-only" style={{ display: 'none', color: 'var(--primary)', fontWeight: 900, fontSize: '0.7rem', letterSpacing: '2px', marginBottom: '0.5rem' }}>DEVELOPER CONSOLE</div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '0.5rem', flexWrap: 'wrap' }}>
-                     <h1 style={{ fontSize: '2.5rem', fontWeight: 900, letterSpacing: '-0.02em' }}>Developer Matrix</h1>
-                     <div style={{ padding: '0.3rem 0.8rem', background: 'rgba(99, 102, 241, 0.1)', color: 'var(--primary)', borderRadius: '8px', fontSize: '0.7rem', fontWeight: 800, letterSpacing: '1px' }}>V2.1.0_LATEST</div>
+                     <h1 style={{ fontSize: '2.5rem', fontWeight: 900, letterSpacing: '-0.02em' }}>Dashboard</h1>
+                     <div style={{ padding: '0.3rem 0.8rem', background: 'rgba(99, 102, 241, 0.1)', color: 'var(--primary)', borderRadius: '8px', fontSize: '0.7rem', fontWeight: 800, letterSpacing: '1px' }}>V2.1.0</div>
                   </div>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: '2rem' }}>
-                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.8rem', color: '#10b981', fontWeight: 800 }}><div style={{ width: 6, height: 6, background: '#10b981', borderRadius: '50%', boxShadow: '0 0 10px #10b981' }} /> LIVE_TRAFFIC_ACTIVE</div>
+                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.8rem', color: '#10b981', fontWeight: 800 }}><div style={{ width: 6, height: 6, background: '#10b981', borderRadius: '50%', boxShadow: '0 0 10px #10b981' }} /> LIVE</div>
                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 800 }}><Terminal size={14} /> Latency: 42ms</div>
                   </div>
                 </div>
@@ -374,10 +405,10 @@ const DeveloperDashboard = ({ onLogout }: { onLogout?: () => void }) => {
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '3rem' }}>
                    <section>
-                      <h2 style={{ fontSize: '1.25rem', fontWeight: 800, marginBottom: '1.5rem' }}>Integration Hub</h2>
+                      <h2 style={{ fontSize: '1.25rem', fontWeight: 800, marginBottom: '1.5rem' }}>Resources</h2>
                       <div className="balance-card-slider no-scrollbar" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: '1rem' }}>
                          {[
-                           { icon: <BookOpen />, label: "Read Docs", color: "var(--primary)" },
+                           { icon: <BookOpen />, label: "Documentation", color: "var(--primary)" },
                            { icon: <Webhook />, label: "Webhooks", color: "var(--secondary)" },
                            { icon: <Cpu />, label: "SDKs", color: "var(--accent)" },
                            { icon: <FileJson />, label: "API Ref", color: "#64748b" }
@@ -405,7 +436,7 @@ const DeveloperDashboard = ({ onLogout }: { onLogout?: () => void }) => {
                                 {w.currency === 'USD' ? '🇺🇸' : w.currency === 'NGN' ? '🇳🇬' : '🇪🇺'}
                               </div>
                               <div style={{ flex: 1, minWidth: 0 }}>
-                                 <div style={{ fontSize: '0.9rem', fontWeight: 800, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{w.currency} Rail</div>
+                                 <div style={{ fontSize: '0.9rem', fontWeight: 800, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{w.currency} Wallet</div>
                                  <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', fontFamily: 'monospace', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{JSON.parse(w.metadata || '{}').iban}</div>
                               </div>
                               <div style={{ fontWeight: 800, color: 'var(--primary)', whiteSpace: 'nowrap' }}>{parseFloat(w.balance).toFixed(2)}</div>
@@ -433,5 +464,34 @@ const DeveloperDashboard = ({ onLogout }: { onLogout?: () => void }) => {
     </div>
   );
 };
+
+
+const MobileNavButton = ({ icon: Icon, label, active, onClick }: any) => (
+  <motion.button 
+    whileTap={{ scale: 0.9 }}
+    onClick={onClick}
+    style={{ 
+      background: 'transparent', 
+      border: 'none', 
+      display: 'flex', 
+      flexDirection: 'column', 
+      alignItems: 'center', 
+      gap: '0.4rem', 
+      color: active ? 'var(--primary)' : 'var(--text-muted)',
+      cursor: 'pointer'
+    }}
+  >
+    <Icon size={20} />
+    <span style={{ fontSize: '0.65rem', fontWeight: 800 }}>{label}</span>
+  </motion.button>
+);
+
+const Menu = ({ size }: { size: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+);
+
+const X = ({ size = 20, onClick, style }: any) => (
+  <svg onClick={onClick} style={style} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+);
 
 export default DeveloperDashboard;

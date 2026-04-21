@@ -73,7 +73,7 @@ const SidebarItem = ({ icon: Icon, label, active = false, onClick }: { icon: any
       />
     )}
     <Icon size={20} style={{ opacity: active ? 1 : 0.6 }} />
-    <span style={{ fontSize: '1rem', fontWeight: active ? 900 : 600 }}>{label}</span>
+    <span style={{ fontSize: '1rem', fontWeight: active ? 800 : 500 }}>{label}</span>
   </motion.div>
 );
 
@@ -98,6 +98,7 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
   const [settingsTab, setSettingsTab] = useState('profile');
   const [selectedWalletId, setSelectedWalletId] = useState<string | null>(null);
   const [vaults, setVaults] = useState<any[]>([]);
+  const [showMobileMenu, setShowMobileMenu] = useState(false);
 
   const fetchUserData = async () => {
     const token = localStorage.getItem('paypee_token');
@@ -320,28 +321,25 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
           </div>
           <div>
             <span style={{ fontSize: '1.75rem', fontWeight: 900, letterSpacing: '-0.05em', color: '#fff', display: 'block', lineHeight: 1 }}>Paypee</span>
-            <span style={{ fontSize: '0.65rem', fontWeight: 900, color: 'var(--primary)', letterSpacing: '2px', textTransform: 'uppercase', marginTop: '4px', display: 'block' }}>Institutional</span>
+            <span style={{ fontSize: '0.65rem', fontWeight: 900, color: 'var(--primary)', letterSpacing: '2px', textTransform: 'uppercase', marginTop: '4px', display: 'block' }}>Personal</span>
           </div>
         </div>
         
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-          <div style={{ fontSize: '0.7rem', fontWeight: 900, color: 'rgba(255,255,255,0.3)', letterSpacing: '2px', textTransform: 'uppercase', padding: '0 1.25rem 1rem' }}>Terminal Nodes</div>
-          <SidebarItem icon={LayoutDashboard} label="Overview" active={activeSection === 'overview'} onClick={() => navigate('overview')} />
-          <SidebarItem icon={Wallet} label="Smart Wallets" active={activeSection === 'wallets'} onClick={() => navigate('wallets')} />
-          <SidebarItem icon={CreditCard} label="Virtual Cards" active={activeSection === 'cards'} onClick={() => navigate('cards')} />
-          <SidebarItem icon={History} label="Audit Trail" active={activeSection === 'history'} onClick={() => navigate('history')} />
-          <SidebarItem icon={Send} label="Egress Rails" active={activeSection === 'transfers'} onClick={() => navigate('transfers')} />
-          
-          <div style={{ fontSize: '0.7rem', fontWeight: 900, color: 'rgba(255,255,255,0.3)', letterSpacing: '2px', textTransform: 'uppercase', padding: '2rem 1.25rem 1rem' }}>Capital Tools</div>
-          <SidebarItem icon={Lock} label="Smart Vaults" active={activeSection === 'vaults'} onClick={() => navigate('vaults')} />
-          <SidebarItem icon={Zap} label="Utility Hub" active={activeSection === 'bills'} onClick={() => navigate('bills')} />
-          <SidebarItem icon={ExternalLink} label="Ingress Links" active={activeSection === 'collections'} onClick={() => navigate('collections')} />
-          <SidebarItem icon={Bot} label="AI Sentinel" active={activeSection === 'ai'} onClick={() => navigate('ai')} />
+          <SidebarItem icon={LayoutDashboard} label="Home" active={activeSection === 'overview'} onClick={() => setActiveSection('overview')} />
+          <SidebarItem icon={Wallet} label="Wallets" active={activeSection === 'wallets'} onClick={() => setActiveSection('wallets')} />
+          <SidebarItem icon={CreditCard} label="Cards" active={activeSection === 'cards'} onClick={() => setActiveSection('cards')} />
+          <SidebarItem icon={Zap} label="Pay Bills" active={activeSection === 'bills'} onClick={() => setActiveSection('bills')} />
+          <SidebarItem icon={Lock} label="Savings" active={activeSection === 'vaults'} onClick={() => setActiveSection('vaults')} />
+          <SidebarItem icon={Send} label="Send Money" active={activeSection === 'payout'} onClick={() => setIsPayoutOpen(true)} />
+          <SidebarItem icon={ExternalLink} label="Receive Money" active={activeSection === 'collections'} onClick={() => setActiveSection('collections')} />
+          <SidebarItem icon={History} label="Transactions" active={activeSection === 'history'} onClick={() => setActiveSection('history')} />
+          <SidebarItem icon={Bot} label="AI Helper" active={activeSection === 'ai'} onClick={() => setActiveSection('ai')} />
         </div>
 
         <div style={{ borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '1.5rem', marginTop: '2rem' }}>
-          <SidebarItem icon={Settings} label="Core Settings" active={activeSection === 'settings'} onClick={() => navigate('settings')} />
-          <SidebarItem icon={LogOut} label="Terminate Session" onClick={onLogout} />
+          <SidebarItem icon={Settings} label="Settings" active={activeSection === 'settings'} onClick={() => setActiveSection('settings')} />
+          <SidebarItem icon={LogOut} label="Logout" onClick={onLogout} />
         </div>
       </aside>
 
@@ -371,10 +369,10 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
         }}>
            <div>
              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--primary)', fontWeight: 800, fontSize: '0.75rem', letterSpacing: '2px', textTransform: 'uppercase', marginBottom: '0.5rem' }}>
-               <Database size={14} fill="var(--primary)" /> System Active
+               <div style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--primary)', boxShadow: '0 0 10px var(--primary)' }} /> Online
              </div>
              <h1 style={{ fontSize: '2.2rem', fontWeight: 900, marginBottom: '0.2rem', letterSpacing: '-0.04em' }}>
-               Authorized, <span className="text-glow">{userData?.firstName || 'User'}</span>
+               Welcome back, <span className="text-glow">{userData?.firstName || 'User'}</span>
              </h1>
            </div>
 
@@ -383,7 +381,7 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
                  <Search size={18} color="var(--text-muted)" />
                  <input 
                     type="text" 
-                    placeholder="Search transaction ledger..." 
+                    placeholder="Search transactions..." 
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     style={{ background: 'transparent', border: 'none', color: '#fff', outline: 'none', fontSize: '0.95rem', width: '100%', fontWeight: 500 }} 
@@ -405,20 +403,26 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
                 )}
               </motion.button>
 
-              <div 
-                style={{ position: 'relative' }} 
-                onMouseEnter={() => setShowUserMenu(true)} 
-                onMouseLeave={() => setShowUserMenu(false)}
-              >
-                <motion.div 
-                  whileHover={{ scale: 1.05 }}
-                  onClick={() => setShowUserMenu(!showUserMenu)}
-                  style={{ width: 44, height: 44, borderRadius: '14px', background: 'linear-gradient(135deg, var(--primary) 0%, #a855f7 100%)', padding: '2px', cursor: 'pointer', boxShadow: '0 10px 20px rgba(0,0,0,0.3)' }}
-                >
-                   <div style={{ width: '100%', height: '100%', background: '#020617', borderRadius: '12px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.1)' }}>
-                      <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${userData?.email}`} alt="Avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                   </div>
-                </motion.div>
+              <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+                 <motion.button 
+                   whileTap={{ scale: 0.9 }}
+                   onClick={() => setShowMobileMenu(true)}
+                   className="mobile-only"
+                   style={{ padding: '0.75rem', borderRadius: '14px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', cursor: 'pointer' }}
+                 >
+                   <Menu size={20} />
+                 </motion.button>
+
+                 <motion.div 
+                   whileHover={{ scale: 1.05 }}
+                   onClick={() => setShowUserMenu(!showUserMenu)}
+                   style={{ width: 44, height: 44, borderRadius: '14px', background: 'linear-gradient(135deg, var(--primary) 0%, #a855f7 100%)', padding: '2px', cursor: 'pointer', boxShadow: '0 10px 20px rgba(0,0,0,0.3)' }}
+                 >
+                    <div style={{ width: '100%', height: '100%', background: '#020617', borderRadius: '12px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.1)' }}>
+                       <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${userData?.email}`} alt="Avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    </div>
+                 </motion.div>
+               </div>
 
                 <AnimatePresence>
                   {showUserMenu && (
@@ -444,26 +448,24 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
                           <div style={{ fontWeight: 900, fontSize: '1.1rem', color: '#fff', letterSpacing: '-0.01em' }}>{userData?.firstName} {userData?.lastName}</div>
                           <div style={{ padding: '0.25rem 0.6rem', background: userData?.kycStatus === 'VERIFIED' ? 'rgba(16, 185, 129, 0.15)' : 'rgba(244, 63, 94, 0.15)', borderRadius: '8px', fontSize: '0.65rem', fontWeight: 900, color: userData?.kycStatus === 'VERIFIED' ? 'var(--accent)' : '#f43f5e', border: `1px solid ${userData?.kycStatus === 'VERIFIED' ? 'rgba(16, 185, 129, 0.2)' : 'rgba(244, 63, 94, 0.2)'}`, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                            {userData?.kycStatus || 'UNVERIFIED'}
+                            {userData?.kycStatus === 'VERIFIED' ? 'Verified' : 'Pending'}
                           </div>
                         </div>
                         <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', overflow: 'hidden', textOverflow: 'ellipsis', fontWeight: 500 }}>{userData?.email}</div>
                       </div>
                       
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-                        <UserMenuItem icon={User} label="Identity Profile" onClick={() => { setActiveSection('settings'); setSettingsTab('profile'); setShowUserMenu(false); }} />
-                        <UserMenuItem icon={ShieldCheck} label="Security Core" onClick={() => { setActiveSection('settings'); setSettingsTab('security'); setShowUserMenu(false); }} />
-                        <UserMenuItem icon={Settings} label="System Config" onClick={() => { setActiveSection('settings'); setSettingsTab('profile'); setShowUserMenu(false); }} />
-                        <div style={{ margin: '0.75rem 0', borderTop: '1px solid rgba(255,255,255,0.08)' }} />
-                        <UserMenuItem icon={HelpCircle} label="Technical Support" onClick={() => { setActiveSection('help'); setShowUserMenu(false); }} />
-                        <div style={{ margin: '0.75rem 0', borderTop: '1px solid rgba(255,255,255,0.08)' }} />
-                        <UserMenuItem icon={LogOut} label="Terminate Session" onClick={onLogout} danger />
+                         <UserMenuItem icon={User} label="Profile" onClick={() => { setActiveSection('settings'); setSettingsTab('profile'); setShowUserMenu(false); }} />
+                         <UserMenuItem icon={ShieldCheck} label="Security" onClick={() => { setActiveSection('settings'); setSettingsTab('security'); setShowUserMenu(false); }} />
+                         <UserMenuItem icon={Settings} label="Settings" onClick={() => { setActiveSection('settings'); setSettingsTab('profile'); setShowUserMenu(false); }} />
+                         <div style={{ margin: '0.75rem 0', borderTop: '1px solid rgba(255,255,255,0.08)' }} />
+                         <UserMenuItem icon={HelpCircle} label="Help & Support" onClick={() => { setActiveSection('help'); setShowUserMenu(false); }} />
+                         <div style={{ margin: '0.75rem 0', borderTop: '1px solid rgba(255,255,255,0.08)' }} />
+                         <UserMenuItem icon={LogOut} label="Logout" onClick={onLogout} danger />
                       </div>
                     </motion.div>
                   )}
                 </AnimatePresence>
-              </div>
-           </div>
         </div>
 
         {/* Section Rendering */}
@@ -501,22 +503,22 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
                         <h4 style={{ fontSize: '1.25rem', fontWeight: 900, marginBottom: '0.4rem', color: '#fff', letterSpacing: '-0.01em' }}>Secure Your Capital Access</h4>
                         <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', fontWeight: 500 }}>Initialization of a 4-digit security PIN is required for outbound settlements.</p>
                       </div>
+                      <button 
+                        className="btn btn-primary" 
+                        onClick={() => setIsPinModalOpen(true)}
+                        style={{ padding: '1rem 2rem', borderRadius: '16px', fontSize: '1rem', fontWeight: 900 }}
+                      >
+                        Set PIN
+                      </button>
                     </div>
-                    <button 
-                      className="btn btn-primary" 
-                      onClick={() => setIsPinModalOpen(true)}
-                      style={{ padding: '1rem 2rem', borderRadius: '16px', fontSize: '1rem', fontWeight: 900 }}
-                    >
-                      Provision PIN
-                    </button>
                   </motion.div>
                 )}
                 
                 {/* 1. Master Capital Summary */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '3rem' }}>
-                   <div>
-                      <div style={{ color: 'var(--text-muted)', textTransform: 'uppercase', fontSize: '0.85rem', fontWeight: 900, letterSpacing: '2.5px', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                        AGGREGATE CAPITAL VOLUME
+                      <div>
+                        <div style={{ color: 'var(--text-muted)', textTransform: 'uppercase', fontSize: '0.85rem', fontWeight: 900, letterSpacing: '2.5px', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                        TOTAL BALANCE
                         <button 
                           onClick={() => setShowBalances(!showBalances)} 
                           style={{ background: 'rgba(255,255,255,0.05)', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', padding: '0.4rem', borderRadius: '8px' }}
@@ -530,7 +532,7 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
                       <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                         <div style={{ color: 'var(--accent)', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.95rem', background: 'rgba(16, 185, 129, 0.1)', padding: '0.4rem 1rem', borderRadius: '100px', border: '1px solid rgba(16, 185, 129, 0.2)' }}>
                            <div style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--accent)', boxShadow: '0 0 10px var(--accent)' }}></div>
-                           LIVE DATASTREAM
+                           LIVE UPDATES
                         </div>
                         <div style={{ color: 'var(--text-muted)', fontSize: '0.9rem', fontWeight: 600 }}>Sync: {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
                       </div>
@@ -539,16 +541,16 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
                    {/* 2. Rapid Command Actions */}
                    <div style={{ display: 'flex', gap: '1.25rem', flexWrap: 'wrap', justifyContent: 'flex-end' }} className="desktop-only">
                       <motion.button whileHover={{ y: -5 }} onClick={() => setIsPayoutOpen(true)} className="btn btn-primary" style={{ padding: '1.1rem 2.2rem', borderRadius: '18px', fontSize: '1.05rem', fontWeight: 900 }}>
-                         <Send size={18} /> Initiate Egress
+                         <Send size={18} /> Send
                       </motion.button>
                       <motion.button whileHover={{ y: -5 }} onClick={() => setIsAccountModalOpen(true)} className="btn btn-outline" style={{ padding: '1.1rem 2.2rem', borderRadius: '18px', fontSize: '1.05rem', fontWeight: 900 }}>
-                         <ArrowDownLeft size={18} /> Account Ingress
+                         <ArrowDownLeft size={18} /> Receive
                       </motion.button>
                       <motion.button whileHover={{ y: -5 }} onClick={() => setIsSwapOpen(true)} className="btn btn-outline" style={{ padding: '1.1rem 2.2rem', borderRadius: '18px', fontSize: '1.05rem', fontWeight: 900 }}>
-                         <Repeat size={18} /> FX Protocol
+                         <Repeat size={18} /> Swap
                       </motion.button>
-                      <motion.button whileHover={{ y: -5 }} onClick={() => navigate('bills')} className="btn btn-outline" style={{ padding: '1.1rem 2.2rem', borderRadius: '18px', fontSize: '1.05rem', fontWeight: 900 }}>
-                         <Zap size={18} /> Utility Hub
+                      <motion.button whileHover={{ y: -5 }} onClick={() => setActiveSection('bills')} className="btn btn-outline" style={{ padding: '1.1rem 2.2rem', borderRadius: '18px', fontSize: '1.05rem', fontWeight: 900 }}>
+                         <Zap size={18} /> Bills
                       </motion.button>
                    </div>
                 </div>
@@ -560,9 +562,9 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
                          <div style={{ width: 32, height: 32, borderRadius: '8px', background: 'rgba(99,102,241,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary)' }}>
                             <Globe size={18} />
                          </div>
-                         <h3 style={{ fontSize: '1.4rem', fontWeight: 900, letterSpacing: '-0.02em' }}>Global Asset Inventory</h3>
+                         <h3 style={{ fontSize: '1.4rem', fontWeight: 900, letterSpacing: '-0.02em' }}>Your Wallets</h3>
                       </div>
-                      <button onClick={() => navigate('wallets')} className="btn btn-outline" style={{ padding: '0.5rem 1.25rem', borderRadius: '12px', fontSize: '0.85rem', fontWeight: 800 }}>View Registry <ChevronRight size={16} /></button>
+                      <button onClick={() => setActiveSection('wallets')} className="btn btn-outline" style={{ padding: '0.5rem 1.25rem', borderRadius: '12px', fontSize: '0.85rem', fontWeight: 800 }}>See All <ChevronRight size={16} /></button>
                    </div>
                    
                    <div style={{ display: 'flex', gap: '1rem', overflowX: 'auto', paddingBottom: '1.25rem', marginBottom: '1.5rem' }} className="custom-scrollbar">
@@ -590,7 +592,7 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
                                }}
                             >
                                <div style={{ width: 10, height: 10, borderRadius: '50%', background: isActive ? 'var(--accent)' : 'transparent', border: isActive ? 'none' : '2px solid rgba(255,255,255,0.1)' }}></div>
-                               {w.currency} Protocol
+                               {w.currency} Wallet
                             </motion.button>
                          );
                       })}
@@ -954,36 +956,14 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
                <div style={{ width: 100, height: 100, background: 'rgba(99, 102, 241, 0.1)', borderRadius: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 2.5rem', color: 'var(--primary)', border: '1px solid rgba(99, 102, 241, 0.2)' }}>
                   <Send size={50} />
                </div>
-               <h3 style={{ fontSize: '2.5rem', fontWeight: 900, marginBottom: '1rem', letterSpacing: '-0.04em' }}>Global Egress Rails</h3>
-               <p style={{ color: 'var(--text-muted)', fontSize: '1.2rem', maxWidth: '500px', margin: '0 auto 3rem', fontWeight: 500, lineHeight: 1.6 }}>Deploy capital instantly across 150+ countries using Paypee's high-velocity egress network.</p>
-               <button onClick={() => setIsPayoutOpen(true)} className="btn btn-primary" style={{ padding: '1.25rem 3.5rem', borderRadius: '24px', fontSize: '1.1rem', fontWeight: 900 }}>Initiate New Settlement</button>
+               <h3 style={{ fontSize: '2.5rem', fontWeight: 900, marginBottom: '1rem', letterSpacing: '-0.04em' }}>Send Money</h3>
+               <p style={{ color: 'var(--text-muted)', fontSize: '1.2rem', maxWidth: '500px', margin: '0 auto 3rem', fontWeight: 500, lineHeight: 1.6 }}>Send money instantly to 150+ countries with Paypee.</p>
+               <button onClick={() => setIsPayoutOpen(true)} className="btn btn-primary" style={{ padding: '1.25rem 3.5rem', borderRadius: '24px', fontSize: '1.1rem', fontWeight: 900 }}>Send Money Now</button>
             </div>}
           </motion.div>
         </AnimatePresence>
       </main>
 
-      {/* Modern Floating Mobile Navigation */}
-      <nav className="floating-nav mobile-only">
-         <div onClick={() => navigate('overview')} className={`mobile-nav-btn ${activeSection === 'overview' ? 'active' : ''}`}>
-            <LayoutDashboard size={24} />
-            <span>Home</span>
-         </div>
-         <div onClick={() => navigate('wallets')} className={`mobile-nav-btn ${activeSection === 'wallets' ? 'active' : ''}`}>
-            <Wallet size={24} />
-            <span>Wallets</span>
-         </div>
-         <div onClick={() => setIsPayoutOpen(true)} style={{ background: 'var(--primary)', color: '#fff', width: 64, height: 64, borderRadius: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: '-35px', boxShadow: '0 15px 30px var(--primary-glow)', border: '1px solid rgba(255,255,255,0.1)' }}>
-            <Send size={28} />
-         </div>
-         <div onClick={() => navigate('cards')} className={`mobile-nav-btn ${activeSection === 'cards' ? 'active' : ''}`}>
-            <CreditCard size={24} />
-            <span>Cards</span>
-         </div>
-         <div onClick={() => navigate('ai')} className={`mobile-nav-btn ${activeSection === 'ai' ? 'active' : ''}`}>
-            <Bot size={24} />
-            <span>AI</span>
-         </div>
-      </nav>
 
       {/* Global Modals */}
       <PayoutModal isOpen={isPayoutOpen} onClose={() => setIsPayoutOpen(false)} onComplete={fetchUserData} wallets={userData?.wallets || []} />
@@ -997,10 +977,93 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
       />
       <TransactionReceiptModal transaction={selectedTx} onClose={() => setSelectedTx(null)} />
       <NotificationPanel notifications={notifications} show={showNotifications} onClose={() => setShowNotifications(false)} />
-      <PinSetupModal isOpen={isPinModalOpen} onClose={() => setIsPinModalOpen(false)} onSuccess={fetchUserData} />
+      {/* Mobile Bottom Navigation */}
+      <div className="mobile-only" style={{ 
+        position: 'fixed', 
+        bottom: 0, 
+        left: 0, 
+        right: 0, 
+        background: 'rgba(5, 8, 15, 0.9)', 
+        backdropFilter: 'blur(20px)', 
+        borderTop: '1px solid rgba(255,255,255,0.08)',
+        display: 'flex',
+        justifyContent: 'space-around',
+        padding: '0.75rem 0.5rem 2rem',
+        zIndex: 2000
+      }}>
+        <MobileNavButton icon={LayoutDashboard} label="Home" active={activeSection === 'overview'} onClick={() => navigate('overview')} />
+        <MobileNavButton icon={Wallet} label="Wallets" active={activeSection === 'wallets'} onClick={() => navigate('wallets')} />
+        <MobileNavButton icon={CreditCard} label="Cards" active={activeSection === 'cards'} onClick={() => navigate('cards')} />
+        <MobileNavButton icon={Menu} label="More" onClick={() => setShowMobileMenu(true)} />
+      </div>
+
+      {/* Mobile Hamburger Menu Drawer */}
+      <AnimatePresence>
+        {showMobileMenu && (
+          <>
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowMobileMenu(false)}
+              style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', zIndex: 3000, backdropFilter: 'blur(5px)' }}
+            />
+            <motion.div 
+              initial={{ x: '-100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '-100%' }}
+              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+              style={{ position: 'fixed', left: 0, top: 0, bottom: 0, width: '280px', background: '#020617', zIndex: 3001, padding: '2rem', borderRight: '1px solid rgba(255,255,255,0.1)' }}
+            >
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3rem' }}>
+                <span style={{ fontSize: '1.5rem', fontWeight: 900 }}>Menu</span>
+                <X onClick={() => setShowMobileMenu(false)} style={{ cursor: 'pointer' }} />
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                <SidebarItem icon={Lock} label="Savings" active={activeSection === 'vaults'} onClick={() => { setActiveSection('vaults'); setShowMobileMenu(false); }} />
+                <SidebarItem icon={Send} label="Send Money" active={activeSection === 'payout'} onClick={() => { setIsPayoutOpen(true); setShowMobileMenu(false); }} />
+                <SidebarItem icon={ArrowDownLeft} label="Receive Money" active={activeSection === 'collections'} onClick={() => { setActiveSection('collections'); setShowMobileMenu(false); }} />
+                <SidebarItem icon={History} label="Transactions" active={activeSection === 'history'} onClick={() => { setActiveSection('history'); setShowMobileMenu(false); }} />
+                <SidebarItem icon={Bot} label="AI Helper" active={activeSection === 'ai'} onClick={() => { setActiveSection('ai'); setShowMobileMenu(false); }} />
+                <div style={{ borderTop: '1px solid rgba(255,255,255,0.08)', margin: '1rem 0' }} />
+                <SidebarItem icon={Settings} label="Settings" active={activeSection === 'settings'} onClick={() => { setActiveSection('settings'); setShowMobileMenu(false); }} />
+                <SidebarItem icon={LogOut} label="Logout" onClick={onLogout} />
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
+
+const MobileNavButton = ({ icon: Icon, label, active, onClick }: any) => (
+  <motion.button 
+    whileTap={{ scale: 0.9 }}
+    onClick={onClick}
+    style={{ 
+      background: 'transparent', 
+      border: 'none', 
+      display: 'flex', 
+      flexDirection: 'column', 
+      alignItems: 'center', 
+      gap: '0.4rem', 
+      color: active ? 'var(--primary)' : 'var(--text-muted)',
+      cursor: 'pointer'
+    }}
+  >
+    <Icon size={22} />
+    <span style={{ fontSize: '0.7rem', fontWeight: 800 }}>{label}</span>
+  </motion.button>
+);
+
+const Menu = ({ size }: { size: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+);
+
+const X = ({ size = 20, onClick, style }: any) => (
+  <svg onClick={onClick} style={style} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+);
 
 export default IndividualDashboard;
 
@@ -1028,9 +1091,9 @@ const UserMenuItem = ({ icon: Icon, label, onClick, danger = false }: any) => (
 
 const HelpCenter = () => {
   const faqs = [
-    { q: "How do I create a USD account?", a: "Navigate to the 'Smart Wallets' module, click 'Deploy Asset Rail' and select USD. Your institutional virtual account will be provisioned in real-time." },
-    { q: "What are the settlement latencies?", a: "Intra-platform transfers are near-zero latency. External egress settlements vary by protocol (Instant to 24 hours)." },
-    { q: "How is my capital secured?", a: "Paypee employs multi-layer AES-256 encryption, hardware security modules (HSM), and real-time AI fraud sentinels." }
+    { q: "How do I add a Dollar account?", a: "Go to 'Wallets' and click 'Add Account'. Select Dollars (USD) and your account will be ready instantly." },
+    { q: "How long do transfers take?", a: "Transfers within Paypee are instant. Sending to other banks can take between a few seconds and a few hours." },
+    { q: "Is my money safe?", a: "Yes. We use the same high-level security as major global banks to keep your money and identity safe." }
   ];
 
   return (

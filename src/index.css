@@ -460,3 +460,40 @@ h1, h2, h3, h4, h5, h6 {
   border-color: var(--text-muted);
 }
 
+/* Responsive Utilities */
+@media (max-width: 768px) {
+  .desktop-only {
+    display: none !important;
+  }
+  
+  .mobile-full-width {
+    width: 100% !important;
+    padding: 1.5rem !important;
+  }
+}
+
+@media (min-width: 769px) {
+  .mobile-only {
+    display: none !important;
+  }
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.premium-card-hover {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.premium-card-hover:hover {
+  transform: translateY(-5px);
+  background: rgba(255, 255, 255, 0.03);
+  border-color: var(--primary);
+  box-shadow: 0 20px 40px -20px rgba(99, 102, 241, 0.2);
+}

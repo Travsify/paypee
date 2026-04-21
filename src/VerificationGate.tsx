@@ -155,12 +155,12 @@ const VerificationGate: React.FC<VerificationGateProps> = ({ kycStatus: initialS
   const handleVerify = async () => {
     setError('');
     if (!idImage) {
-      setError('High-fidelity ID document image is missing.');
+      setError('Please upload a clear photo of your ID.');
       setIsCapturingId(true);
       return;
     }
     if (!faceImage) { 
-      setError('Biometric selfie is required for liveness validation.'); 
+      setError('Please take a selfie so we can verify it\'s you.'); 
       setIsCapturingId(false);
       return; 
     }
@@ -193,8 +193,8 @@ const VerificationGate: React.FC<VerificationGateProps> = ({ kycStatus: initialS
         setShowModal(false);
         await fetchStatus();
       } else {
-        const backendError = data.error || 'Identity validation failed. Protocol error.';
-        const hint = data.status === 'REJECTED' ? ' Ensure lighting is optimal and document matches your profile.' : '';
+        const backendError = data.error || 'Verification failed. Please try again.';
+        const hint = data.status === 'REJECTED' ? ' Make sure the photo is clear and matches your details.' : '';
         setError(backendError + hint);
         if (data.status === 'REJECTED') {
           setKycStatus('REJECTED');
@@ -202,25 +202,25 @@ const VerificationGate: React.FC<VerificationGateProps> = ({ kycStatus: initialS
         }
       }
     } catch (err: any) {
-      setError(`Transmission error: ${err.message}. System retry recommended.`);
+      setError(`Something went wrong: ${err.message}. Please try again.`);
     } finally {
       setLoading(false);
     }
   };
 
   const idTypeOptions = accountType === 'BUSINESS'
-    ? [{ value: 'CAC', label: 'Institutional Registry', desc: 'CAC / RC Corporate Number', icon: Building2 }]
+    ? [{ value: 'CAC', label: 'Business Registration', desc: 'CAC / RC Number', icon: Building2 }]
     : [
-        { value: 'NIN', label: 'National Identity', desc: '11-digit NIN Protocol', icon: ShieldCheck },
-        { value: 'PASSPORT', label: 'Global Passport', desc: 'International Travel Document', icon: Globe },
-        { value: 'DRIVERS_LICENSE', label: 'Transit License', desc: 'Government Driver Authorization', icon: Activity },
-        { value: 'VOTERS_CARD', label: 'Civic Identification', desc: 'Voter VIN Registry', icon: User }
+        { value: 'NIN', label: 'NIN', desc: '11-digit NIN Number', icon: ShieldCheck },
+        { value: 'PASSPORT', label: 'Passport', desc: 'International Passport', icon: Globe },
+        { value: 'DRIVERS_LICENSE', label: 'Driver\'s License', desc: 'Government issued license', icon: Activity },
+        { value: 'VOTERS_CARD', label: 'Voter\'s Card', desc: 'Personal Identification', icon: User }
       ];
 
   const statusConfig = {
-    PENDING:    { color: '#f59e0b', bg: 'rgba(245,158,11,0.08)',   icon: <ShieldAlert size={18} />, text: 'UNRESTRICTED ACCESS PENDING: Please complete identity screening.' },
-    PROCESSING: { color: 'var(--primary)', bg: 'rgba(99,102,241,0.08)',   icon: <Clock size={18} />,       text: 'PROTOCOL IN PROGRESS: Verifying credentials against global registries...' },
-    REJECTED:   { color: '#f43f5e', bg: 'rgba(244,63,94,0.08)',    icon: <XCircle size={18} />,     text: 'VALIDATION FAILURE: Identity verification rejected. Please audit your data.' },
+    PENDING:    { color: '#f59e0b', bg: 'rgba(245,158,11,0.08)',   icon: <ShieldAlert size={18} />, text: 'Action Required: Please verify your account to unlock all features.' },
+    PROCESSING: { color: 'var(--primary)', bg: 'rgba(99,102,241,0.08)',   icon: <Clock size={18} />,       text: 'Checking your details... this usually takes a few minutes.' },
+    REJECTED: { color: '#f43f5e', bg: 'rgba(244,63,94,0.08)', icon: <XCircle size={18} />, text: 'Verification failed. Please check your information and try again.' },
   };
 
   const cfg = statusConfig[kycStatus as keyof typeof statusConfig];

@@ -659,7 +659,7 @@ app.post('/api/cards', authenticateToken, async (req: any, res: any): Promise<an
     const cardInitialAmount = initialAmount || (targetCurrency === 'USD' ? 1 : 100); // ₦100 for NGN
     
     const USD_TOTAL_COST = 5.00; // $5 USD total to user
-    const NGN_TOTAL_COST = 500; // ₦500 NGN total to user (lower fee as requested)
+    const NGN_TOTAL_COST = 1000; // ₦1000 NGN total to user (updated per request)
 
     // 1. Validate Wallet & Check Balance
     const user = await prisma.user.findUnique({ where: { id: userId } });

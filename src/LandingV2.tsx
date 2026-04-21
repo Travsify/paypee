@@ -52,7 +52,7 @@ const Nav = ({ onAuth, onNavigate }: { onAuth: () => void, onNavigate: (page: st
     </div>
     <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
        <button onClick={onAuth} style={{ background: 'transparent', color: theme.text1, border: 'none', fontWeight: 800, fontSize: '0.9rem', cursor: 'pointer' }}>Sign In</button>
-       <button onClick={onAuth} className="btn btn-primary" style={{ padding: '0.75rem 1.75rem', borderRadius: '14px', fontWeight: 900, fontSize: '0.9rem' }}>Deploy Protocol</button>
+       <button onClick={onAuth} className="btn btn-primary" style={{ padding: '0.75rem 1.75rem', borderRadius: '14px', fontWeight: 900, fontSize: '0.9rem' }}>Get Started</button>
     </div>
   </nav>
 );
@@ -74,14 +74,14 @@ const HeroSection = ({ onAuth }: { onAuth: () => void }) => {
       <div className="container" style={{ position: 'relative', zIndex: 10, textAlign: 'center' }}>
         <motion.div initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 1, ease: 'easeOut' }}>
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.75rem', padding: '0.6rem 1.5rem', ...glassPanel, borderRadius: '99px', color: theme.cyan, fontSize: '0.8rem', fontWeight: 900, letterSpacing: '3px', marginBottom: '3rem', border: '1px solid rgba(34, 211, 238, 0.2)' }}>
-             <Activity size={16} /> GLOBAL FINANCE OS v4.0
+             <Activity size={16} /> GLOBAL FINANCE APP v4.0
           </div>
           <h1 style={{ fontSize: 'clamp(3.5rem, 8vw, 6rem)', fontWeight: 900, letterSpacing: '-0.05em', lineHeight: 1, marginBottom: '1.5rem', color: theme.text1 }}>
              Global Finance.<br />
              <span className="text-glow">Unified & Instant.</span>
           </h1>
           <p style={{ fontSize: '1.25rem', color: theme.text2, maxWidth: '750px', margin: '0 auto 3.5rem', lineHeight: 1.7, fontWeight: 500 }}>
-             Hold any currency, send money worldwide in seconds, swap crypto and let <span style={{ color: 'var(--primary)', fontWeight: 800 }}>Sentinel AI</span> manage your finances — all from one premium financial terminal.
+             Hold any currency, send money worldwide in seconds, swap crypto and let <span style={{ color: 'var(--primary)', fontWeight: 800 }}>Sentinel AI</span> help you — all in one simple app.
           </p>
           <div style={{ display: 'flex', gap: '2rem', justifyContent: 'center', flexWrap: 'wrap' }}>
              <motion.button 
