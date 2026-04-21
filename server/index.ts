@@ -1515,6 +1515,20 @@ app.get('/api/verify/status', authenticateToken, async (req: any, res: any): Pro
   }
 });
 
+// Get notifications
+app.get('/api/notifications', authenticateToken, async (req: any, res: any): Promise<any> => {
+  try {
+    const notifications = await prisma.notification.findMany({
+      where: { userId: req.user.userId },
+      orderBy: { createdAt: 'desc' },
+      take: 20
+    });
+    res.json(notifications);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch notifications' });
+  }
+});
+
 // Mark notifications as read
 app.post('/api/notifications/read', authenticateToken, async (req: any, res: any): Promise<any> => {
   try {
