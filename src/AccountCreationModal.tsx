@@ -71,16 +71,25 @@ const AccountCreationModal: React.FC<AccountCreationModalProps> = ({
         initial={{ scale: 0.9, opacity: 0, y: 40 }}
         animate={{ scale: 1, opacity: 1, y: 0 }}
         className="paypee-modal-content"
-        style={{ maxWidth: '1000px', display: 'flex' }}
+        style={{ 
+          maxWidth: '950px', 
+          display: 'flex', 
+          flexDirection: window.innerWidth < 768 ? 'column' : 'row',
+          overflow: 'hidden'
+        }}
       >
         {/* Left Side: Dynamic Info */}
-        <div className="account-modal-left" style={{ 
-          background: 'linear-gradient(180deg, rgba(99, 102, 241, 0.15) 0%, transparent 100%)', 
-          padding: '4rem 3rem', 
-          borderRight: '1px solid rgba(255,255,255,0.05)', 
+        <div style={{ 
+          background: 'linear-gradient(180deg, rgba(99, 102, 241, 0.1) 0%, transparent 100%)', 
+          padding: window.innerWidth < 768 ? '2rem' : '4rem 3rem', 
+          borderRight: window.innerWidth < 768 ? 'none' : '1px solid rgba(255,255,255,0.05)', 
+          borderBottom: window.innerWidth < 768 ? '1px solid rgba(255,255,255,0.05)' : 'none',
+          display: 'flex',
           flexDirection: 'column', 
           gap: '2.5rem',
-          position: 'relative'
+          position: 'relative',
+          width: window.innerWidth < 768 ? '100%' : '400px',
+          flexShrink: 0
         }}>
            <AnimatePresence mode="wait">
              <motion.div
@@ -89,16 +98,26 @@ const AccountCreationModal: React.FC<AccountCreationModalProps> = ({
                animate={{ opacity: 1, x: 0 }}
                exit={{ opacity: 0, x: 20 }}
                transition={{ duration: 0.3 }}
-               style={{ display: 'flex', flexDirection: 'column', gap: '2rem', height: '100%' }}
+               style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}
              >
                 {currentCurrency ? (
                   <>
-                    <div style={{ width: 80, height: 80, background: 'rgba(255,255,255,0.03)', borderRadius: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(255,255,255,0.1)' }}>
+                    <div style={{ 
+                      width: 80, 
+                      height: 80, 
+                      background: 'rgba(255,255,255,0.02)', 
+                      borderRadius: '24px', 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      justifyContent: 'center', 
+                      border: '1px solid rgba(255,255,255,0.08)',
+                      boxShadow: `0 0 30px ${currentCurrency.color}22`
+                    }}>
                       <span style={{ fontSize: '3rem' }}>{currentCurrency.icon}</span>
                     </div>
 
                     <div>
-                      <h2 style={{ fontSize: '2rem', fontWeight: 900, marginBottom: '1rem', color: '#fff' }}>
+                      <h2 style={{ fontSize: '2.2rem', fontWeight: 900, marginBottom: '1rem', color: '#fff', lineHeight: 1.1 }}>
                         {currentCurrency.name} <br />
                         <span style={{ color: currentCurrency.color }}>{['USDC', 'USDT', 'BTC'].includes(currentCurrency.code) ? 'Wallet' : 'Account'}</span>
                       </h2>
@@ -107,7 +126,7 @@ const AccountCreationModal: React.FC<AccountCreationModalProps> = ({
 
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
                       {currentCurrency.benefits.map((b: string, i: number) => (
-                        <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '1rem', fontSize: '0.9rem', fontWeight: 600 }}>
+                        <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '1rem', fontSize: '0.95rem', fontWeight: 600 }}>
                           <div style={{ width: 24, height: 24, borderRadius: '50%', background: currentCurrency.color + '22', display: 'flex', alignItems: 'center', justifyContent: 'center', color: currentCurrency.color }}>
                             <Check size={14} strokeWidth={3} />
                           </div>
@@ -116,25 +135,43 @@ const AccountCreationModal: React.FC<AccountCreationModalProps> = ({
                       ))}
                     </div>
 
-                    <div style={{ marginTop: 'auto' }}>
+                    <div style={{ marginTop: 'auto', display: window.innerWidth < 768 ? 'none' : 'block' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
                         <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#10b981', boxShadow: '0 0 15px #10b981' }} />
-                        <span style={{ fontSize: '0.8rem', fontWeight: 800, color: '#10b981', letterSpacing: '1px' }}>SYSTEM_LIVE_API_CONNECTED</span>
+                        <span style={{ fontSize: '0.75rem', fontWeight: 800, color: '#10b981', letterSpacing: '2px' }}>API_ENCRYPTED_RAIL</span>
                       </div>
                     </div>
                   </>
                 ) : (
                   <>
-                    <div style={{ width: 80, height: 80, background: 'rgba(255,255,255,0.03)', borderRadius: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(255,255,255,0.1)' }}>
+                    <div style={{ 
+                      width: 80, 
+                      height: 80, 
+                      background: 'rgba(99, 102, 241, 0.05)', 
+                      borderRadius: '24px', 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      justifyContent: 'center', 
+                      border: '1px solid rgba(99, 102, 241, 0.1)',
+                      boxShadow: '0 0 30px rgba(99, 102, 241, 0.1)'
+                    }}>
                       <Globe size={40} color="var(--primary)" />
                     </div>
 
                     <div>
-                      <h2 style={{ fontSize: '2rem', fontWeight: 900, marginBottom: '1rem', color: '#fff' }}>
+                      <h2 style={{ fontSize: '2.2rem', fontWeight: 900, marginBottom: '1rem', color: '#fff', lineHeight: 1.1 }}>
                         Global Value <br />
                         <span style={{ color: 'var(--primary)' }}>Routing Engine</span>
                       </h2>
                       <p style={{ color: 'var(--text-muted)', fontSize: '1rem', lineHeight: 1.6 }}>Select a currency rail to deploy an instant smart-contract managed bank account.</p>
+                    </div>
+                    
+                    <div className="desktop-only" style={{ marginTop: 'auto', padding: '1.5rem', background: 'rgba(255,255,255,0.02)', borderRadius: '20px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem', color: 'var(--primary)' }}>
+                          <ShieldCheck size={18} />
+                          <span style={{ fontWeight: 800, fontSize: '0.8rem' }}>ISO 27001 Certified</span>
+                       </div>
+                       <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', margin: 0 }}>All accounts are provisioned via PCI-DSS compliant banking infrastructure.</p>
                     </div>
                   </>
                 )}
@@ -144,26 +181,27 @@ const AccountCreationModal: React.FC<AccountCreationModalProps> = ({
 
         {/* Right Side: Flow */}
         <div style={{ 
+          flex: 1,
           padding: '0', 
           display: 'flex', 
           flexDirection: 'column', 
           position: 'relative',
-          background: 'rgba(0,0,0,0.2)',
-          height: '100%'
+          background: 'rgba(0,0,0,0.1)',
+          maxHeight: window.innerWidth < 768 ? '60vh' : 'auto'
         }}>
-           <div className="account-modal-content-padding" style={{ padding: '3rem 3rem 1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', zIndex: 10 }}>
+           <div style={{ padding: '2.5rem 3rem 1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', zIndex: 10 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                  {step === 2 && (
-                    <button onClick={() => setStep(1)} style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', cursor: 'pointer', display: 'flex', padding: '0.4rem', borderRadius: '10px' }}>
-                       <ArrowLeft size={16} />
+                    <button onClick={() => setStep(1)} className="btn btn-outline" style={{ padding: '0.5rem', borderRadius: '12px' }}>
+                       <ArrowLeft size={18} />
                     </button>
                  )}
-                 <h3 style={{ fontSize: '1.4rem', fontWeight: 800, letterSpacing: '-0.02em' }}>{step === 1 ? 'Select Currency' : 'Configure Account'}</h3>
+                 <h3 style={{ fontSize: '1.6rem', fontWeight: 900, letterSpacing: '-0.02em' }}>{step === 1 ? 'Deploy New Rail' : 'Configuration'}</h3>
               </div>
-              <button onClick={onClose} style={{ background: 'rgba(255,255,255,0.05)', border: 'none', borderRadius: '50%', width: 32, height: 32, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}><X size={18} /></button>
+              <button onClick={onClose} className="btn btn-outline" style={{ borderRadius: '50%', width: 40, height: 40, padding: 0 }}><X size={20} /></button>
            </div>
 
-           <div className="account-modal-content-padding" style={{ flex: 1, overflowY: 'auto', padding: '0 3rem 2rem' }}>
+           <div style={{ flex: 1, overflowY: 'auto', padding: '1rem 3rem 3rem' }} className="no-scrollbar">
               <AnimatePresence mode="wait">
                  {step === 1 ? (
                    <motion.div
@@ -173,10 +211,10 @@ const AccountCreationModal: React.FC<AccountCreationModalProps> = ({
                       exit={{ opacity: 0, x: -20 }}
                       transition={{ duration: 0.2 }}
                    >
-                     <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem', fontSize: '0.9rem', lineHeight: 1.5 }}>
-                       Select a currency to create a new bank account.
+                     <p style={{ color: 'var(--text-muted)', marginBottom: '2rem', fontSize: '1rem', fontWeight: 500 }}>
+                        Select your preferred settlement currency.
                      </p>
-                     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                        {filteredCurrencies.length > 0 ? filteredCurrencies.map((c) => (
                          <div
                            key={c.code}
@@ -184,44 +222,51 @@ const AccountCreationModal: React.FC<AccountCreationModalProps> = ({
                            style={{ 
                              display: 'flex',
                              alignItems: 'center',
-                             gap: '1.5rem',
+                             gap: '1.25rem',
                              cursor: 'pointer',
-                             padding: '1rem 1.5rem',
-                             borderRadius: '20px',
+                             padding: '1.25rem 1.5rem',
+                             borderRadius: '24px',
                              background: 'rgba(255,255,255,0.02)',
                              border: '1px solid rgba(255,255,255,0.05)',
-                             transition: 'all 0.2s'
+                             transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)'
                            }}
                            onMouseEnter={(e) => {
-                             e.currentTarget.style.background = 'rgba(255,255,255,0.05)';
-                             e.currentTarget.style.borderColor = c.color;
+                             e.currentTarget.style.background = 'rgba(255,255,255,0.04)';
+                             e.currentTarget.style.borderColor = c.color + '44';
+                             e.currentTarget.style.transform = 'scale(1.01)';
                            }}
                            onMouseLeave={(e) => {
                              e.currentTarget.style.background = 'rgba(255,255,255,0.02)';
                              e.currentTarget.style.borderColor = 'rgba(255,255,255,0.05)';
+                             e.currentTarget.style.transform = 'scale(1)';
                            }}
                          >
                            <div style={{ 
-                             width: '48px', 
-                             height: '48px', 
-                             borderRadius: '16px', 
-                             background: c.color + '22',
+                             width: '56px', 
+                             height: '56px', 
+                             borderRadius: '18px', 
+                             background: c.color + '15',
                              display: 'flex',
                              alignItems: 'center',
                              justifyContent: 'center',
-                             fontSize: '1.5rem'
+                             fontSize: '1.8rem',
+                             border: `1px solid ${c.color}22`
                            }}>
                              {c.icon}
                            </div>
                            <div style={{ flex: 1 }}>
-                             <div style={{ fontSize: '1.2rem', fontWeight: 800 }}>{c.code}</div>
-                             <div style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>{c.name}</div>
+                             <div style={{ fontSize: '1.25rem', fontWeight: 900 }}>{c.code}</div>
+                             <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 600 }}>{c.name}</div>
                            </div>
-                           <ChevronRight size={20} color="var(--text-muted)" />
+                           <div style={{ width: 32, height: 32, background: 'rgba(255,255,255,0.03)', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                             <ChevronRight size={18} color="var(--text-muted)" />
+                           </div>
                          </div>
                        )) : (
-                         <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-muted)' }}>
-                           You have created accounts for all available currencies.
+                         <div style={{ textAlign: 'center', padding: '4rem 2rem', color: 'var(--text-muted)', background: 'rgba(255,255,255,0.01)', borderRadius: '32px', border: '1px dashed rgba(255,255,255,0.1)' }}>
+                            <Globe size={40} style={{ marginBottom: '1.5rem', opacity: 0.3 }} />
+                            <div style={{ fontSize: '1.1rem', fontWeight: 800, color: '#fff' }}>All Rails Deployed</div>
+                            <p style={{ marginTop: '0.5rem', fontSize: '0.9rem' }}>You have successfully created accounts for all supported global currencies.</p>
                          </div>
                        )}
                      </div>
@@ -237,96 +282,87 @@ const AccountCreationModal: React.FC<AccountCreationModalProps> = ({
                    >
                      {currentCurrency && (
                        <>
-                         <div style={{ background: 'rgba(99, 102, 241, 0.05)', border: `1px solid ${currentCurrency.color}55`, borderRadius: '24px', padding: '1.5rem', marginBottom: '2rem' }}>
-                           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
-                              <div style={{ fontSize: '2rem' }}>{currentCurrency.icon}</div>
-                              <div>
-                              <div style={{ fontSize: '1.2rem', fontWeight: 800 }}>Deploying {currentCurrency.code} {['USDC', 'USDT', 'BTC'].includes(currentCurrency.code) ? 'Wallet' : 'Account'}</div>
-                                 <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{currentCurrency.region}</div>
-                              </div>
-                           </div>
-                           <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', lineHeight: 1.5 }}>
-                             {currentCurrency.code === 'NGN' 
-                               ? 'Central bank regulations require your BVN for NGN virtual account generation.' 
-                               : `Standard KYC limits apply to this ${currentCurrency.code} account. Ensure your identity verification is fully approved.`}
-                           </p>
+                         <div style={{ background: 'rgba(255, 255, 255, 0.02)', border: `1px solid ${currentCurrency.color}22`, borderRadius: '28px', padding: '1.75rem', marginBottom: '2.5rem' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem', marginBottom: '1.25rem' }}>
+                               <div style={{ fontSize: '2.5rem' }}>{currentCurrency.icon}</div>
+                               <div>
+                                  <div style={{ fontSize: '1.3rem', fontWeight: 900 }}>Configure {currentCurrency.code} {['USDC', 'USDT', 'BTC'].includes(currentCurrency.code) ? 'Wallet' : 'Account'}</div>
+                                  <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 600 }}>{currentCurrency.region} Compliance Region</div>
+                               </div>
+                            </div>
+                            <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', lineHeight: 1.6, margin: 0 }}>
+                              {currentCurrency.code === 'NGN' 
+                                ? 'Central bank regulations (CBN) require a valid BVN verification to provision a dedicated NUBAN account.' 
+                                : `This ${currentCurrency.code} rail will be provisioned with full SWIFT/SEPA capabilities upon successful identity validation.`}
+                            </p>
                          </div>
 
                          {['NGN', 'USD', 'EUR', 'GBP'].includes(currentCurrency.code) && (
-                            <div style={{ marginBottom: '2rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                              <h4 style={{ fontSize: '0.8rem', color: 'var(--primary)', letterSpacing: '1px', textTransform: 'uppercase', marginBottom: '0.5rem' }}>Tier 1 KYC Requirements</h4>
-                              
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', marginBottom: '3rem' }}>
                               <div>
-                                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: '#475569', letterSpacing: '1px', marginBottom: '0.5rem' }}>ENTER 11-DIGIT BVN</label>
-                                <input type="text" value={kycData.bvn} onChange={e => setKycData({...kycData, bvn: e.target.value})} maxLength={11} placeholder="Required by regulations" style={{ width: '100%', padding: '0.8rem', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', color: '#fff', fontSize: '0.9rem', outline: 'none' }} />
+                                <label className="form-label">11-DIGIT BANK VERIFICATION NUMBER</label>
+                                <input type="text" className="form-input" value={kycData.bvn} onChange={e => setKycData({...kycData, bvn: e.target.value})} maxLength={11} placeholder="Required for NUBAN activation" />
                               </div>
 
-                              <div style={{ display: 'flex', gap: '1rem' }}>
-                                <div style={{ flex: 1 }}>
-                                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: '#475569', letterSpacing: '1px', marginBottom: '0.5rem' }}>DATE OF BIRTH</label>
-                                  <input type="date" value={kycData.dob} onChange={e => setKycData({...kycData, dob: e.target.value})} style={{ width: '100%', padding: '0.8rem', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', color: '#fff', fontSize: '0.9rem', outline: 'none' }} />
+                              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+                                <div>
+                                  <label className="form-label">DATE OF BIRTH</label>
+                                  <input type="date" className="form-input" value={kycData.dob} onChange={e => setKycData({...kycData, dob: e.target.value})} />
                                 </div>
-                                <div style={{ flex: 1 }}>
-                                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: '#475569', letterSpacing: '1px', marginBottom: '0.5rem' }}>PHONE NUMBER</label>
-                                  <input type="tel" value={kycData.phoneNumber} onChange={e => setKycData({...kycData, phoneNumber: e.target.value})} placeholder="08012345678" style={{ width: '100%', padding: '0.8rem', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', color: '#fff', fontSize: '0.9rem', outline: 'none' }} />
+                                <div>
+                                  <label className="form-label">LEGAL PHONE NUMBER</label>
+                                  <input type="tel" className="form-input" value={kycData.phoneNumber} onChange={e => setKycData({...kycData, phoneNumber: e.target.value})} placeholder="+234..." />
                                 </div>
                               </div>
 
                               <div>
-                                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: '#475569', letterSpacing: '1px', marginBottom: '0.5rem' }}>STREET ADDRESS</label>
-                                <input type="text" value={kycData.street} onChange={e => setKycData({...kycData, street: e.target.value})} placeholder="123 Main Street" style={{ width: '100%', padding: '0.8rem', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', color: '#fff', fontSize: '0.9rem', outline: 'none' }} />
+                                <label className="form-label">RESIDENTIAL ADDRESS</label>
+                                <input type="text" className="form-input" value={kycData.street} onChange={e => setKycData({...kycData, street: e.target.value})} placeholder="Full street address" />
                               </div>
 
-                              <div style={{ display: 'flex', gap: '1rem' }}>
-                                <div style={{ flex: 1 }}>
-                                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: '#475569', letterSpacing: '1px', marginBottom: '0.5rem' }}>CITY</label>
-                                  <input type="text" value={kycData.city} onChange={e => setKycData({...kycData, city: e.target.value})} placeholder="Lagos" style={{ width: '100%', padding: '0.8rem', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', color: '#fff', fontSize: '0.9rem', outline: 'none' }} />
+                              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+                                <div>
+                                  <label className="form-label">CITY</label>
+                                  <input type="text" className="form-input" value={kycData.city} onChange={e => setKycData({...kycData, city: e.target.value})} placeholder="e.g. Lagos" />
                                 </div>
-                                <div style={{ flex: 1 }}>
-                                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: '#475569', letterSpacing: '1px', marginBottom: '0.5rem' }}>STATE</label>
-                                  <input type="text" value={kycData.state} onChange={e => setKycData({...kycData, state: e.target.value})} placeholder="Lagos" style={{ width: '100%', padding: '0.8rem', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', color: '#fff', fontSize: '0.9rem', outline: 'none' }} />
+                                <div>
+                                  <label className="form-label">STATE / PROVINCE</label>
+                                  <input type="text" className="form-input" value={kycData.state} onChange={e => setKycData({...kycData, state: e.target.value})} placeholder="e.g. Lagos State" />
                                 </div>
                               </div>
                             </div>
                          )}
 
-                         <div style={{ marginTop: 'auto', paddingTop: '1rem' }}>
-                           <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                             <ShieldCheck size={14} color="var(--primary)" />
-                             Direct Tier-1 Provisioning Enabled
-                           </p>
-                           
-                           <button 
-                             disabled={isProcessing || (['NGN', 'USD', 'EUR', 'GBP'].includes(currentCurrency.code) && (kycData.bvn.length !== 11 || !kycData.dob || !kycData.street))}
-                             onClick={() => onSelect(currentCurrency.code, ['NGN', 'USD', 'EUR', 'GBP'].includes(currentCurrency.code) ? kycData.bvn : undefined, kycData)}
-                             style={{ 
-                               width: '100%', 
-                               padding: '1.4rem', 
-                               background: isProcessing || (['NGN', 'USD', 'EUR', 'GBP'].includes(currentCurrency.code) && (kycData.bvn.length !== 11 || !kycData.dob || !kycData.street)) ? 'rgba(255,255,255,0.05)' : 'var(--primary)', 
-                               color: isProcessing || (['NGN', 'USD', 'EUR', 'GBP'].includes(currentCurrency.code) && (kycData.bvn.length !== 11 || !kycData.dob || !kycData.street)) ? '#64748b' : '#fff',
-                               border: 'none', 
-                               borderRadius: '24px', 
-                               fontWeight: 900, 
-                               fontSize: '1.1rem',
-                               cursor: isProcessing || (['NGN', 'USD', 'EUR', 'GBP'].includes(currentCurrency.code) && (kycData.bvn.length !== 11 || !kycData.dob || !kycData.street)) ? 'not-allowed' : 'pointer',
-                               boxShadow: (!isProcessing && !(['NGN', 'USD', 'EUR', 'GBP'].includes(currentCurrency.code) && (kycData.bvn.length !== 11 || !kycData.dob || !kycData.street))) ? '0 20px 40px -10px rgba(99, 102, 241, 0.5)' : 'none',
-                               display: 'flex',
-                               alignItems: 'center',
-                               justifyContent: 'center',
-                               gap: '1rem'
-                             }}
-                           >
-                             {isProcessing ? (
-                               <>
-                                 <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1, ease: 'linear' }}><RefreshCcw size={20} /></motion.div>
-                                 Creating {['USDC', 'USDT', 'BTC'].includes(currentCurrency.code) ? 'Wallet' : 'Account'}...
-                               </>
-                             ) : (
-                               <>
-                                 Create {currentCurrency.code} {['USDC', 'USDT', 'BTC'].includes(currentCurrency.code) ? 'Wallet' : 'Bank Account'} <ChevronRight size={20} />
-                               </>
-                             )}
-                           </button>
+                         <div style={{ marginTop: 'auto' }}>
+                            <div style={{ background: 'rgba(16, 185, 129, 0.05)', borderRadius: '20px', padding: '1rem 1.5rem', marginBottom: '1.5rem', border: '1px solid rgba(16, 185, 129, 0.1)', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                               <ShieldCheck size={18} color="#10b981" />
+                               <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#10b981' }}>Secure End-to-End Encryption Active</span>
+                            </div>
+                            
+                            <button 
+                              disabled={isProcessing || (['NGN', 'USD', 'EUR', 'GBP'].includes(currentCurrency.code) && (kycData.bvn.length !== 11 || !kycData.dob || !kycData.street))}
+                              onClick={() => onSelect(currentCurrency.code, ['NGN', 'USD', 'EUR', 'GBP'].includes(currentCurrency.code) ? kycData.bvn : undefined, kycData)}
+                              className="btn btn-primary"
+                              style={{ 
+                                width: '100%', 
+                                padding: '1.4rem', 
+                                borderRadius: '24px', 
+                                fontSize: '1.15rem', 
+                                fontWeight: 900,
+                                opacity: (isProcessing || (['NGN', 'USD', 'EUR', 'GBP'].includes(currentCurrency.code) && (kycData.bvn.length !== 11 || !kycData.dob || !kycData.street))) ? 0.5 : 1
+                              }}
+                            >
+                              {isProcessing ? (
+                                <>
+                                  <RefreshCcw size={22} className="animate-spin" />
+                                  Initializing Smart-Contract...
+                                </>
+                              ) : (
+                                <>
+                                  Deploy {currentCurrency.code} Rail <ChevronRight size={22} />
+                                </>
+                              )}
+                            </button>
                          </div>
                        </>
                      )}
@@ -345,8 +381,15 @@ const AccountCreationModal: React.FC<AccountCreationModalProps> = ({
           -ms-overflow-style: none;
           scrollbar-width: none;
         }
+        @media (max-width: 767px) {
+          .paypee-modal-content {
+             max-height: 95vh;
+             border-radius: 32px;
+          }
+        }
       `}</style>
     </div>
   );
 };
+
 export default AccountCreationModal;

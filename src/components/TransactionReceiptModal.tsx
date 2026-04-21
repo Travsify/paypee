@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Share2, Printer, CheckCircle2, Zap, Lock } from 'lucide-react';
+import { X, Share2, Printer, CheckCircle2, Zap, Lock, ShieldCheck, Globe, ArrowRight } from 'lucide-react';
 
 interface TransactionReceiptModalProps {
   transaction: any;
@@ -31,98 +31,91 @@ const TransactionReceiptModal: React.FC<TransactionReceiptModalProps> = ({ trans
   };
 
   const isDeposit = transaction.type === 'DEPOSIT';
-  const statusColor = transaction.status === 'SUCCESS' || transaction.status === 'COMPLETED' ? '#22d3ee' : '#f43f5e';
+  const statusColor = transaction.status === 'SUCCESS' || transaction.status === 'COMPLETED' ? '#10b981' : '#f43f5e';
 
   return (
     <AnimatePresence>
-      <div className="paypee-modal-overlay" style={{ zIndex: 2000 }}>
+      <div style={{ position: 'fixed', inset: 0, background: 'rgba(2,6,23,0.95)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 30000, padding: '2rem', backdropFilter: 'blur(15px)' }}>
         <motion.div 
-          initial={{ scale: 0.9, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          exit={{ scale: 0.9, opacity: 0 }}
-          className="receipt-container"
+          initial={{ scale: 0.95, opacity: 0, y: 20 }}
+          animate={{ scale: 1, opacity: 1, y: 0 }}
+          exit={{ scale: 0.95, opacity: 0, y: 20 }}
+          className="no-print"
           style={{
             background: '#fff',
             color: '#000',
-            width: '95%',
-            maxWidth: '450px',
-            maxHeight: '90vh',
-            overflowY: 'auto',
+            width: '100%',
+            maxWidth: '500px',
             borderRadius: '32px',
-            padding: '2.5rem',
+            padding: '3rem',
             position: 'relative',
-            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
-            scrollbarWidth: 'thin',
-            scrollbarColor: '#6366f1 transparent'
+            boxShadow: '0 50px 100px -20px rgba(0, 0, 0, 0.6)',
+            overflow: 'hidden'
           }}
         >
           <button 
             onClick={onClose} 
-            className="no-print"
-            style={{ position: 'absolute', top: '1.5rem', right: '1.5rem', background: 'rgba(0,0,0,0.05)', border: 'none', borderRadius: '50%', width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', zIndex: 100 }}
+            style={{ position: 'absolute', top: '2rem', right: '2rem', background: 'rgba(0,0,0,0.05)', border: 'none', borderRadius: '12px', width: '44px', height: '44px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', zIndex: 100 }}
           >
-            <X size={20} />
+            <X size={22} color="#000" />
           </button>
 
-          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1.5rem' }}>
-            <div style={{ padding: '0.4rem 1rem', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '100px', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-               <Lock size={12} color="#6366f1" />
-               <span style={{ fontSize: '0.65rem', fontWeight: 800, color: '#64748b', letterSpacing: '0.05em' }}>SECURE SETTLEMENT RECEIPT</span>
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '2.5rem' }}>
+            <div style={{ padding: '0.6rem 1.5rem', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '100px', display: 'flex', alignItems: 'center', gap: '0.6rem', boxShadow: '0 5px 15px rgba(0,0,0,0.05)' }}>
+               <ShieldCheck size={16} color="var(--primary)" />
+               <span style={{ fontSize: '0.75rem', fontWeight: 900, color: '#64748b', letterSpacing: '1px', textTransform: 'uppercase' }}>SECURE SETTLEMENT RECEIPT</span>
             </div>
           </div>
 
-          <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
-            <div style={{ width: '60px', height: '60px', background: '#6366f1', borderRadius: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem' }}>
-              <Zap size={32} color="#fff" strokeWidth={3} />
+          <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
+            <div style={{ width: '80px', height: '80px', background: 'var(--primary)', borderRadius: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 2rem', boxShadow: '0 15px 30px rgba(99, 102, 241, 0.2)' }}>
+              <Zap size={40} color="#fff" fill="#fff" />
             </div>
-            <h2 style={{ fontSize: '1.5rem', fontWeight: 900, letterSpacing: '-0.02em', marginBottom: '0.5rem' }}>Transaction Receipt</h2>
-            <div style={{ color: '#64748b', fontSize: '0.9rem', fontWeight: 500 }}>Paypee Global Settlements • Terminal {Math.floor(1000 + Math.random() * 9000)}</div>
+            <h2 style={{ fontSize: '2rem', fontWeight: 900, letterSpacing: '-0.03em', marginBottom: '0.75rem', color: '#000' }}>Proof of Payment</h2>
+            <div style={{ color: '#64748b', fontSize: '1rem', fontWeight: 600 }}>Paypee Global Settlements • Node {Math.floor(1000 + Math.random() * 9000)}</div>
           </div>
 
-          <div style={{ textAlign: 'center', marginBottom: '2.5rem', background: 'rgba(0,0,0,0.02)', padding: '2rem', borderRadius: '24px' }}>
-            <div style={{ fontSize: '0.8rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '0.5rem' }}>
-              {isDeposit ? 'Amount Received' : 'Amount Sent'}
+          <div style={{ textAlign: 'center', marginBottom: '3.5rem', background: '#f8fafc', padding: '2.5rem', borderRadius: '28px', border: '1px solid #f1f5f9' }}>
+            <div style={{ fontSize: '0.85rem', fontWeight: 900, color: '#64748b', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '0.75rem' }}>
+              {isDeposit ? 'Net Credits' : 'Net Debits'}
             </div>
-            <div style={{ fontSize: '2.5rem', fontWeight: 900 }}>
+            <div style={{ fontSize: '3rem', fontWeight: 900, color: '#000', letterSpacing: '-0.04em' }}>
               {transaction.currency} {parseFloat(transaction.amount).toLocaleString(undefined, { minimumFractionDigits: 2 })}
             </div>
-            <div style={{ color: statusColor, fontWeight: 700, fontSize: '0.9rem', marginTop: '0.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem' }}>
-               <CheckCircle2 size={16} /> {transaction.status}
+            <div style={{ color: statusColor, fontWeight: 900, fontSize: '1rem', marginTop: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', textTransform: 'uppercase', letterSpacing: '1px' }}>
+               <CheckCircle2 size={20} /> {transaction.status}
             </div>
           </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-             <ReceiptRow label="Transaction Type" value={transaction.type} />
-             <ReceiptRow label="Description" value={transaction.desc || (isDeposit ? 'Incoming Settlement' : 'Transfer Payout')} />
-             <ReceiptRow label="Date & Time" value={new Date(transaction.createdAt).toLocaleString()} />
-             <ReceiptRow label="Reference" value={transaction.reference} />
-             <ReceiptRow label="Source Wallet" value={transaction.currency + ' Wallet'} />
-             {transaction.metadata?.bankCode && <ReceiptRow label="Destination Bank" value={transaction.metadata.bankCode} />}
-             {transaction.metadata?.accountNumber && <ReceiptRow label="Account Number" value={transaction.metadata.accountNumber} />}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+             <ReceiptRow label="Transaction Rail" value={transaction.type} />
+             <ReceiptRow label="Protocol Desc" value={transaction.desc || (isDeposit ? 'Incoming Ingress' : 'Egress Payout')} />
+             <ReceiptRow label="Timestamp" value={new Date(transaction.createdAt).toLocaleString(undefined, { dateStyle: 'long', timeStyle: 'short' })} />
+             <ReceiptRow label="Immutable Ref" value={transaction.reference} />
              
-             <div style={{ marginTop: '1rem', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
-                <div style={{ padding: '0.75rem', background: '#f0fdf4', borderRadius: '12px', border: '1px solid #dcfce7' }}>
-                   <div style={{ fontSize: '0.65rem', fontWeight: 800, color: '#16a34a', marginBottom: '0.2rem' }}>SPEED</div>
-                   <div style={{ fontSize: '0.8rem', fontWeight: 700, color: '#065f46' }}>Instant Settlement</div>
+             <div style={{ marginTop: '1.5rem', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem' }}>
+                <div style={{ padding: '1rem', background: '#f0fdf4', borderRadius: '18px', border: '1px solid #dcfce7' }}>
+                   <div style={{ fontSize: '0.7rem', fontWeight: 900, color: '#16a34a', marginBottom: '0.4rem', letterSpacing: '1px' }}>VELOCITY</div>
+                   <div style={{ fontSize: '0.95rem', fontWeight: 900, color: '#065f46' }}>Instant</div>
                 </div>
-                <div style={{ padding: '0.75rem', background: '#eff6ff', borderRadius: '12px', border: '1px solid #dbeafe' }}>
-                   <div style={{ fontSize: '0.65rem', fontWeight: 800, color: '#2563eb', marginBottom: '0.2rem' }}>ROUTING</div>
-                   <div style={{ fontSize: '0.8rem', fontWeight: 700, color: '#1e40af' }}>Global Rail Enabled</div>
+                <div style={{ padding: '1rem', background: '#eff6ff', borderRadius: '18px', border: '1px solid #dbeafe' }}>
+                   <div style={{ fontSize: '0.7rem', fontWeight: 900, color: '#2563eb', marginBottom: '0.4rem', letterSpacing: '1px' }}>NETWORKS</div>
+                   <div style={{ fontSize: '0.95rem', fontWeight: 900, color: '#1e40af' }}>Global Rail</div>
                 </div>
              </div>
           </div>
 
-          <div style={{ borderTop: '2px dashed #e2e8f0', margin: '2.5rem 0', paddingTop: '2rem' }}>
-             <div style={{ textAlign: 'center', color: '#64748b', fontSize: '0.75rem', marginBottom: '2rem', lineHeight: 1.6 }}>
-                This transaction is protected by Paypee's multi-layer encryption and real-time fraud monitoring. For support, contact hi@paypee.co
+          <div style={{ borderTop: '2px dashed #e2e8f0', margin: '3rem 0', paddingTop: '2.5rem' }}>
+             <div style={{ textAlign: 'center', color: '#64748b', fontSize: '0.85rem', marginBottom: '3rem', lineHeight: 1.7, fontWeight: 500 }}>
+                This settlement record is cryptographically signed and stored on the immutable Paypee ledger. For auditing, visit paypee.co/verify
              </div>
              
-             <div className="no-print" style={{ display: 'flex', gap: '1rem' }}>
-                <button onClick={handlePrint} style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', padding: '1rem', background: '#000', color: '#fff', border: 'none', borderRadius: '16px', fontWeight: 700, cursor: 'pointer' }}>
-                   <Printer size={18} /> Print
+             <div style={{ display: 'flex', gap: '1.25rem' }}>
+                <button onClick={handlePrint} className="btn btn-primary" style={{ flex: 1, padding: '1.25rem', borderRadius: '20px', background: '#000', border: 'none', fontSize: '1.1rem', fontWeight: 900 }}>
+                   <Printer size={20} /> Print Receipt
                 </button>
-                <button onClick={handleShare} style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', padding: '1rem', background: 'rgba(0,0,0,0.05)', color: '#000', border: 'none', borderRadius: '16px', fontWeight: 700, cursor: 'pointer' }}>
-                   <Share2 size={18} /> Share
+                <button onClick={handleShare} className="btn btn-outline" style={{ flex: 1, padding: '1.25rem', borderRadius: '20px', background: '#f8fafc', color: '#000', border: '1px solid #e2e8f0', fontSize: '1.1rem', fontWeight: 900 }}>
+                   <Share2 size={20} /> Share Proof
                 </button>
              </div>
           </div>
@@ -133,9 +126,9 @@ const TransactionReceiptModal: React.FC<TransactionReceiptModalProps> = ({ trans
 };
 
 const ReceiptRow = ({ label, value }: { label: string, value: string }) => (
-  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '1rem' }}>
-    <span style={{ color: '#64748b', fontSize: '0.85rem', fontWeight: 600 }}>{label}</span>
-    <span style={{ fontWeight: 700, fontSize: '0.85rem', textAlign: 'right', maxWidth: '200px', wordBreak: 'break-all' }}>{value}</span>
+  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '2rem', paddingBottom: '1rem', borderBottom: '1px solid #f1f5f9' }}>
+    <span style={{ color: '#64748b', fontSize: '0.95rem', fontWeight: 700 }}>{label}</span>
+    <span style={{ fontWeight: 900, fontSize: '0.95rem', textAlign: 'right', maxWidth: '240px', wordBreak: 'break-all', color: '#000' }}>{value}</span>
   </div>
 );
 

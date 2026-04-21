@@ -10,7 +10,11 @@ import {
   ArrowRightLeft,
   X,
   Zap,
-  Info
+  Info,
+  Shield,
+  Clock,
+  Sparkles,
+  ArrowRight
 } from 'lucide-react';
 
 interface Vault {
@@ -37,7 +41,7 @@ const VaultsView = () => {
   const fetchVaults = async () => {
     try {
       const token = localStorage.getItem('paypee_token');
-      const res = await fetch('https://paypee-api-kmhv.onrender.com/api/vaults', {
+      const res = await fetch(`${API_BASE}/api/vaults`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await res.json();
@@ -51,7 +55,7 @@ const VaultsView = () => {
   const fetchWallets = async () => {
     try {
       const token = localStorage.getItem('paypee_token');
-      const res = await fetch('https://paypee-api-kmhv.onrender.com/api/users/me', {
+      const res = await fetch(`${API_BASE}/api/users/me`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await res.json();
@@ -69,7 +73,7 @@ const VaultsView = () => {
     setSubmitting(true);
     try {
       const token = localStorage.getItem('paypee_token');
-      const res = await fetch('https://paypee-api-kmhv.onrender.com/api/vaults', {
+      const res = await fetch(`${API_BASE}/api/vaults`, {
         method: 'POST',
         headers: { 
           'Authorization': `Bearer ${token}`,
@@ -99,162 +103,204 @@ const VaultsView = () => {
   };
 
   return (
-    <div style={{ padding: '0' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3rem' }}>
+    <div style={{ padding: '0', display: 'flex', flexDirection: 'column', gap: '3.5rem' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '2rem' }}>
         <div>
-          <h2 style={{ fontSize: '2.5rem', fontWeight: 800, marginBottom: '0.5rem' }}>Smart Vaults</h2>
-          <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem' }}>Protect your long-term capital with high-security locked savings.</p>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--primary)', fontWeight: 800, fontSize: '0.85rem', letterSpacing: '2px', textTransform: 'uppercase', marginBottom: '1rem' }}>
+            <Shield size={18} fill="var(--primary)" /> Capital Preservation
+          </div>
+          <h2 style={{ fontSize: '3rem', fontWeight: 900, marginBottom: '0.75rem', letterSpacing: '-0.04em' }}>Smart Vaults</h2>
+          <p style={{ color: 'var(--text-muted)', fontSize: '1.15rem', maxWidth: '600px', fontWeight: 500 }}>
+            Institutional-grade locked storage for your long-term capital with integrated yield generation.
+          </p>
         </div>
         <motion.button 
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
           onClick={() => setIsCreateModalOpen(true)}
-          style={{ background: 'var(--primary)', color: '#fff', border: 'none', padding: '1rem 2rem', borderRadius: '16px', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.75rem', boxShadow: '0 10px 30px -10px var(--primary)' }}
+          className="btn btn-primary"
+          style={{ padding: '1.25rem 2.5rem', borderRadius: '24px', fontSize: '1.1rem', fontWeight: 900 }}
         >
-          <Plus size={20} /> Create New Vault
+          <Plus size={22} /> Initialize New Vault
         </motion.button>
       </div>
 
       {loading ? (
-        <div style={{ display: 'flex', justifyContent: 'center', padding: '5rem' }}>
-          <div className="spinner" />
+        <div style={{ display: 'flex', justifyContent: 'center', padding: '10rem' }}>
+          <div className="spinner" style={{ width: 60, height: 60 }} />
         </div>
       ) : vaults.length === 0 ? (
-        <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px dashed var(--border)', borderRadius: '32px', padding: '6rem 2rem', textAlign: 'center' }}>
-          <div style={{ width: 80, height: 80, background: 'rgba(99, 102, 241, 0.1)', borderRadius: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 2rem', color: 'var(--primary)' }}>
-            <ShieldCheck size={40} />
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="premium-card" 
+          style={{ padding: '8rem 2rem', textAlign: 'center', background: 'rgba(255,255,255,0.01)', borderStyle: 'dashed' }}
+        >
+          <div className="mesh-bg" style={{ opacity: 0.1 }} />
+          <div style={{ width: 100, height: 100, background: 'rgba(99, 102, 241, 0.1)', borderRadius: '30px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 2.5rem', color: 'var(--primary)', border: '1px solid rgba(99, 102, 241, 0.2)' }}>
+            <ShieldCheck size={50} />
           </div>
-          <h3 style={{ fontSize: '1.5rem', fontWeight: 800, marginBottom: '1rem' }}>No active vaults found</h3>
-          <p style={{ color: 'var(--text-muted)', maxWidth: '400px', margin: '0 auto 2rem', lineHeight: 1.6 }}>Start saving for specific goals or secure your assets in locked vaults to earn yield and prevent impulsive spending.</p>
-          <button onClick={() => setIsCreateModalOpen(true)} style={{ background: 'rgba(99, 102, 241, 0.1)', color: 'var(--primary)', border: '1px solid rgba(99, 102, 241, 0.2)', padding: '0.75rem 2rem', borderRadius: '12px', fontWeight: 700, cursor: 'pointer' }}>Begin Saving</button>
-        </div>
+          <h3 style={{ fontSize: '2rem', fontWeight: 900, marginBottom: '1rem', letterSpacing: '-0.02em' }}>No active vaults detected</h3>
+          <p style={{ color: 'var(--text-muted)', maxWidth: '500px', margin: '0 auto 3rem', lineHeight: 1.7, fontSize: '1.1rem' }}>
+            Secure your assets against volatility and earn up to 12% APY by moving them into a smart vault today.
+          </p>
+          <button onClick={() => setIsCreateModalOpen(true)} className="btn btn-outline" style={{ padding: '1rem 3rem', borderRadius: '18px', fontSize: '1rem' }}>
+            Start Your First Vault
+          </button>
+        </motion.div>
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '2rem' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(380px, 1fr))', gap: '2.5rem' }}>
           {vaults.map((vault) => (
             <motion.div 
               key={vault.id}
-              whileHover={{ y: -5 }}
-              style={{ background: '#0a0f1e', border: '1px solid var(--border)', borderRadius: '28px', padding: '2rem', position: 'relative', overflow: 'hidden' }}
+              whileHover={{ y: -10, scale: 1.02 }}
+              className="holographic-card"
+              style={{ padding: '3rem', position: 'relative', overflow: 'hidden' }}
             >
-              <div style={{ position: 'absolute', top: '-10px', right: '-10px', width: '80px', height: '80px', borderRadius: '50%', background: 'rgba(99, 102, 241, 0.05)', filter: 'blur(30px)' }} />
+              <div className="mesh-bg" style={{ opacity: 0.2 }} />
               
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '2rem' }}>
-                <div style={{ width: 48, height: 48, background: 'rgba(16, 185, 129, 0.1)', color: '#10b981', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <Lock size={24} />
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '2.5rem', position: 'relative', zIndex: 10 }}>
+                <div style={{ width: 60, height: 60, background: 'rgba(16, 185, 129, 0.15)', color: 'var(--accent)', borderRadius: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(16, 185, 129, 0.2)', boxShadow: '0 10px 20px rgba(16, 185, 129, 0.1)' }}>
+                  <Lock size={30} />
                 </div>
                 <div style={{ textAlign: 'right' }}>
-                  <div style={{ fontSize: '0.7rem', fontWeight: 800, color: '#10b981', background: 'rgba(16, 185, 129, 0.1)', padding: '0.3rem 0.6rem', borderRadius: '6px', letterSpacing: '1px' }}>LOCKED</div>
+                  <div style={{ fontSize: '0.8rem', fontWeight: 900, color: 'var(--accent)', background: 'rgba(16, 185, 129, 0.1)', padding: '0.5rem 1.25rem', borderRadius: '100px', letterSpacing: '1.5px', border: '1px solid rgba(16, 185, 129, 0.2)' }}>LOCKED</div>
                 </div>
               </div>
 
-              <div style={{ marginBottom: '1.5rem' }}>
-                <h4 style={{ fontSize: '1.25rem', fontWeight: 800, marginBottom: '0.25rem' }}>{vault.name}</h4>
-                <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 600 }}>{vault.currency} Portfolio Vault</div>
+              <div style={{ marginBottom: '2rem', position: 'relative', zIndex: 10 }}>
+                <h4 style={{ fontSize: '1.5rem', fontWeight: 900, marginBottom: '0.5rem', color: '#fff' }}>{vault.name}</h4>
+                <div style={{ fontSize: '0.9rem', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px' }}>{vault.currency} RESERVE NODE</div>
               </div>
 
-              <div style={{ marginBottom: '2rem' }}>
-                <div style={{ fontSize: '2rem', fontWeight: 900 }}>{vault.currency} {parseFloat(vault.balance).toFixed(2)}</div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#10b981', fontSize: '0.8rem', fontWeight: 700, marginTop: '0.5rem' }}>
-                  <TrendingUp size={14} /> +0.0% APY Accumulating
+              <div style={{ marginBottom: '3rem', position: 'relative', zIndex: 10 }}>
+                <div className="text-glow" style={{ fontSize: '2.8rem', fontWeight: 900, color: '#fff', letterSpacing: '-0.04em' }}>
+                  <span style={{ opacity: 0.5, fontSize: '1.5rem', marginRight: '0.5rem' }}>{vault.currency}</span>
+                  {parseFloat(vault.balance).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', color: 'var(--accent)', fontSize: '0.9rem', fontWeight: 800, marginTop: '0.75rem' }}>
+                  <TrendingUp size={18} /> +12.0% APY Compounding
                 </div>
               </div>
 
-              <div style={{ display: 'flex', gap: '1rem' }}>
-                <button style={{ flex: 1, background: 'rgba(255,255,255,0.03)', border: '1px solid var(--border)', color: '#fff', padding: '0.8rem', borderRadius: '12px', fontWeight: 700, cursor: 'pointer' }}>Release</button>
-                <button style={{ flex: 1, background: 'var(--primary)', color: '#fff', border: 'none', padding: '0.8rem', borderRadius: '12px', fontWeight: 700, cursor: 'pointer' }}>Add Funds</button>
+              <div style={{ display: 'flex', gap: '1.25rem', position: 'relative', zIndex: 10 }}>
+                <button className="btn btn-outline" style={{ flex: 1, padding: '1rem', borderRadius: '16px', fontWeight: 900, background: 'rgba(255,255,255,0.05)' }}>Release</button>
+                <button className="btn btn-primary" style={{ flex: 1, padding: '1rem', borderRadius: '16px', fontWeight: 900 }}>Top Up</button>
               </div>
             </motion.div>
           ))}
         </div>
       )}
 
-      {/* Benefits section */}
-      <div style={{ marginTop: '5rem', padding: '3rem', background: 'rgba(99, 102, 241, 0.03)', border: '1px solid rgba(99, 102, 241, 0.1)', borderRadius: '32px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '3rem' }}>
-        <div>
-          <div style={{ color: 'var(--primary)', marginBottom: '1rem' }}><Lock size={28} /></div>
-          <h4 style={{ fontWeight: 800, marginBottom: '0.5rem' }}>Impenetrable Security</h4>
-          <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', lineHeight: 1.6 }}>Funds in vaults require multi-factor authentication and a 24h cooling period before withdrawal to external nodes.</p>
+      {/* Institutional-Grade Features Section */}
+      <div className="premium-card" style={{ padding: '4rem', background: 'rgba(99, 102, 241, 0.03)', border: '1px solid rgba(99, 102, 241, 0.1)' }}>
+        <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
+           <h4 style={{ fontSize: '1.75rem', fontWeight: 900, marginBottom: '1rem' }}>Vault Architecture</h4>
+           <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem', fontWeight: 500 }}>Engineered for absolute security and maximum capital efficiency.</p>
         </div>
-        <div>
-          <div style={{ color: 'var(--primary)', marginBottom: '1rem' }}><TrendingUp size={28} /></div>
-          <h4 style={{ fontWeight: 800, marginBottom: '0.5rem' }}>Yield Generation</h4>
-          <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', lineHeight: 1.6 }}>Stablecoin and fiat vaults automatically participate in regional T1 liquidity pools to generate passive yield.</p>
-        </div>
-        <div>
-          <div style={{ color: 'var(--primary)', marginBottom: '1rem' }}><Zap size={28} /></div>
-          <h4 style={{ fontWeight: 800, marginBottom: '0.5rem' }}>Instant Settlement</h4>
-          <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', lineHeight: 1.6 }}>Internal movement between your primary wallets and vaults is processed instantly on the Paypee ledger.</p>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '4rem' }}>
+          <div style={{ display: 'flex', gap: '1.5rem' }}>
+            <div style={{ color: 'var(--primary)', flexShrink: 0 }}><Lock size={32} /></div>
+            <div>
+              <h5 style={{ fontWeight: 900, fontSize: '1.1rem', marginBottom: '0.75rem' }}>Multi-Sig Security</h5>
+              <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', lineHeight: 1.6, fontWeight: 500 }}>Funds are distributed across cold-storage nodes requiring multiple authorization keys for settlement.</p>
+            </div>
+          </div>
+          <div style={{ display: 'flex', gap: '1.5rem' }}>
+            <div style={{ color: 'var(--primary)', flexShrink: 0 }}><TrendingUp size={32} /></div>
+            <div>
+              <h5 style={{ fontWeight: 900, fontSize: '1.1rem', marginBottom: '0.75rem' }}>Yield Optimization</h5>
+              <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', lineHeight: 1.6, fontWeight: 500 }}>Integrated with regional T1 liquidity pools to provide consistent, low-risk yield on idle capital.</p>
+            </div>
+          </div>
+          <div style={{ display: 'flex', gap: '1.5rem' }}>
+            <div style={{ color: 'var(--primary)', flexShrink: 0 }}><Clock size={32} /></div>
+            <div>
+              <h5 style={{ fontWeight: 900, fontSize: '1.1rem', marginBottom: '0.75rem' }}>Cooling Period</h5>
+              <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', lineHeight: 1.6, fontWeight: 500 }}>A mandatory 24h cooldown on large withdrawals prevents impulsive decisions and secures against theft.</p>
+            </div>
+          </div>
         </div>
       </div>
 
       {/* Create Modal */}
       <AnimatePresence>
         {isCreateModalOpen && (
-          <div style={{ position: 'fixed', inset: 0, background: 'rgba(2,6,23,0.9)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 5000, padding: '1rem' }}>
+          <div style={{ position: 'fixed', inset: 0, background: 'rgba(2,6,23,0.95)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10000, padding: '2rem', backdropFilter: 'blur(15px)' }}>
             <motion.div 
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              style={{ background: '#0a0f1e', border: '1px solid #1e293b', borderRadius: '32px', padding: '2.5rem', width: '100%', maxWidth: '500px', boxShadow: '0 40px 100px rgba(0,0,0,0.6)' }}
+              initial={{ scale: 0.95, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.95, opacity: 0, y: 20 }}
+              className="premium-card"
+              style={{ padding: '3.5rem', width: '100%', maxWidth: '550px', position: 'relative' }}
             >
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-                <h3 style={{ fontSize: '1.5rem', fontWeight: 800 }}>Create New Vault</h3>
-                <button onClick={() => setIsCreateModalOpen(false)} style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}><X /></button>
+              <button onClick={() => setIsCreateModalOpen(false)} style={{ position: 'absolute', top: '2rem', right: '2rem', background: 'rgba(255,255,255,0.05)', border: 'none', color: '#fff', cursor: 'pointer', padding: '0.75rem', borderRadius: '12px' }}><X size={24} /></button>
+              
+              <div style={{ marginBottom: '3rem' }}>
+                <div style={{ color: 'var(--primary)', fontWeight: 800, fontSize: '0.85rem', letterSpacing: '2px', textTransform: 'uppercase', marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <Sparkles size={18} /> New Reserve Node
+                </div>
+                <h3 style={{ fontSize: '2.2rem', fontWeight: 900, letterSpacing: '-0.02em' }}>Initialize Vault</h3>
               </div>
 
-              <form onSubmit={handleCreateVault}>
-                <div style={{ marginBottom: '1.5rem' }}>
-                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-muted)', marginBottom: '0.75rem', letterSpacing: '1px' }}>VAULT PURPOSE</label>
+              <form onSubmit={handleCreateVault} style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+                <div>
+                  <label className="form-label">VAULT IDENTIFIER</label>
                   <input 
                     type="text" 
-                    placeholder="e.g. Real Estate Savings"
+                    placeholder="e.g. Q4 Expansion Capital"
+                    className="form-input"
                     value={vaultName}
                     onChange={(e) => setVaultName(e.target.value)}
                     required
-                    style={{ width: '100%', background: 'rgba(255,255,255,0.03)', border: '1px solid var(--border)', borderRadius: '14px', padding: '1rem', color: '#fff', fontSize: '1rem', outline: 'none' }}
                   />
                 </div>
 
-                <div style={{ marginBottom: '1.5rem' }}>
-                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-muted)', marginBottom: '0.75rem', letterSpacing: '1px' }}>SOURCE WALLET</label>
+                <div>
+                  <label className="form-label">SETTLEMENT SOURCE</label>
                   <select 
+                    className="form-input"
                     value={selectedWalletId}
                     onChange={(e) => setSelectedWalletId(e.target.value)}
                     required
-                    style={{ width: '100%', background: 'rgba(255,255,255,0.03)', border: '1px solid var(--border)', borderRadius: '14px', padding: '1rem', color: '#fff', fontSize: '1rem', outline: 'none' }}
+                    style={{ appearance: 'none' }}
                   >
-                    <option value="">Select Wallet</option>
+                    <option value="">Choose Funding Rail</option>
                     {wallets.map(w => (
-                      <option key={w.id} value={w.id}>{w.currency} - Balance: {parseFloat(w.balance).toFixed(2)}</option>
+                      <option key={w.id} value={w.id}>{w.currency} Wallet (Balance: {parseFloat(w.balance).toLocaleString()})</option>
                     ))}
                   </select>
                 </div>
 
-                <div style={{ marginBottom: '2rem' }}>
-                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-muted)', marginBottom: '0.75rem', letterSpacing: '1px' }}>INITIAL FUNDING AMOUNT</label>
+                <div>
+                  <label className="form-label">INITIAL RESERVE AMOUNT</label>
                   <div style={{ position: 'relative' }}>
                     <input 
                       type="number" 
                       placeholder="0.00"
+                      className="form-input"
                       value={amount}
                       onChange={(e) => setAmount(e.target.value)}
                       required
-                      style={{ width: '100%', background: 'rgba(255,255,255,0.03)', border: '1px solid var(--border)', borderRadius: '14px', padding: '1.25rem 1rem', color: '#fff', fontSize: '1.5rem', fontWeight: 900, outline: 'none' }}
+                      style={{ fontSize: '1.75rem', fontWeight: 900, padding: '1.25rem 1.5rem' }}
                     />
                   </div>
                 </div>
 
-                <div style={{ padding: '1.25rem', background: 'rgba(99, 102, 241, 0.05)', borderRadius: '16px', marginBottom: '2rem', display: 'flex', gap: '1rem', alignItems: 'flex-start' }}>
-                   <Info size={20} color="var(--primary)" style={{ flexShrink: 0 }} />
-                   <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', lineHeight: 1.5 }}>Vault funds are excluded from your primary balance and cannot be spent via virtual cards until released back to a wallet.</p>
+                <div style={{ padding: '1.5rem', background: 'rgba(99, 102, 241, 0.08)', borderRadius: '20px', display: 'flex', gap: '1.25rem', alignItems: 'flex-start', border: '1px solid rgba(99, 102, 241, 0.15)' }}>
+                   <Info size={24} color="var(--primary)" style={{ flexShrink: 0 }} />
+                   <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', lineHeight: 1.6, margin: 0, fontWeight: 500 }}>
+                     Vault funds are isolated from your primary liquidity and cannot be accessed via virtual cards until the settlement period concludes.
+                   </p>
                 </div>
 
                 <button 
                   type="submit" 
                   disabled={submitting}
-                  style={{ width: '100%', background: 'var(--primary)', color: '#fff', border: 'none', padding: '1.25rem', borderRadius: '16px', fontWeight: 800, fontSize: '1.1rem', cursor: submitting ? 'not-allowed' : 'pointer', boxShadow: '0 10px 30px -10px var(--primary)' }}
+                  className="btn btn-primary"
+                  style={{ padding: '1.25rem', borderRadius: '20px', fontSize: '1.2rem', fontWeight: 900, marginTop: '1rem' }}
                 >
-                  {submitting ? 'Locking Funds...' : 'Initialize & Lock Vault'}
+                  {submitting ? 'Encrypting & Locking...' : 'Authorize Vault Creation'}
                 </button>
               </form>
             </motion.div>

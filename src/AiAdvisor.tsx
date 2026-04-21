@@ -8,7 +8,10 @@ import {
   MessageSquare, 
   BarChart, 
   Zap,
-  Bot
+  Bot,
+  Database,
+  Shield,
+  Activity
 } from 'lucide-react';
 
 interface Message {
@@ -20,7 +23,7 @@ interface Message {
 
 const AiAdvisor = ({ transactions = [], userName = 'User' }: { transactions?: any[], userName?: string }) => {
   const [messages, setMessages] = useState<Message[]>([
-    { id: '1', role: 'assistant', text: `Hello ${userName}! I'm your Paypee AI Intelligence. Ask me anything about your balance, spending, or even request a transfer.`, type: 'normal' }
+    { id: '1', role: 'assistant', text: `Authorized. Initializing Paypee Sentinel for ${userName}. I am synchronized with your transaction ledger and ready for capital analysis. How can I assist you today?`, type: 'normal' }
   ]);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
@@ -52,14 +55,14 @@ const AiAdvisor = ({ transactions = [], userName = 'User' }: { transactions?: an
       const query = input.toLowerCase();
       if (query.includes('spend') || query.includes('spent') || query.includes('burn')) {
          aiText = transactions.length === 0 
-           ? "You have 0 transactions recorded yet. No spending data to analyze!" 
-           : `I've analyzed your real traffic. You have spent $${totalSpend.toFixed(2)} and received $${totalIncome.toFixed(2)} based on your transaction history.`;
+           ? "Transaction ledger is currently empty. No spending data available for indexing." 
+           : `Protocol Analysis Complete: Total egress volume is $${totalSpend.toFixed(2)} with an ingress total of $${totalIncome.toFixed(2)}. Spending velocity remains stable.`;
          aiType = 'insight';
       } else if (query.includes('transfer') || query.includes('send') || query.includes('pay')) {
-         aiText = transactions.length === 0 ? "You can't initiate transfers yet because you have no funds." : "Understood. Please go to the Transfers tab to execute money movement securely. I am not authorized to move money outside of API requests.";
+         aiText = transactions.length === 0 ? "Egress protocols are locked until first ingress event is detected." : "Capital movement requested. I have prepared the Egress Rail module. Please authenticate the transfer manually to proceed.";
          aiType = 'action';
       } else {
-         aiText = `As an AI embedded in your finance hub, I can see you have ${transactions.length} total transactions on record. Let me know if you want deeper analytics on them!`;
+         aiText = `Indexing complete. I currently maintain a record of ${transactions.length} immutable events in your ledger. Would you like a deep-dive into your recent liquidity trends?`;
       }
 
       setMessages(prev => [...prev, { id: (Date.now() + 1).toString(), role: 'assistant', text: aiText, type: aiType }]);
@@ -67,71 +70,141 @@ const AiAdvisor = ({ transactions = [], userName = 'User' }: { transactions?: an
   };
 
   return (
-    <div style={{ padding: '1rem', height: '100%', display: 'flex', flexDirection: 'column' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '2rem' }}>
-        <div style={{ width: 48, height: 48, background: 'rgba(99, 102, 241, 0.1)', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary)' }}>
-           <Bot size={28} />
+    <div style={{ height: 'calc(100vh - 18rem)', display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
+          <div style={{ width: 56, height: 56, background: 'rgba(99, 102, 241, 0.15)', borderRadius: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary)', border: '1px solid rgba(99, 102, 241, 0.2)' }}>
+             <Bot size={32} />
+          </div>
+          <div>
+             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--primary)', fontWeight: 800, fontSize: '0.75rem', letterSpacing: '2px', textTransform: 'uppercase', marginBottom: '0.25rem' }}>
+               <Database size={14} fill="var(--primary)" /> Sentinel Core Active
+             </div>
+             <h2 style={{ fontSize: '1.75rem', fontWeight: 900, letterSpacing: '-0.03em' }}>AI Financial Sentinel</h2>
+          </div>
         </div>
-        <div>
-           <h2 style={{ fontSize: '1.5rem', fontWeight: 800 }}>AI Financial Advisor</h2>
-           <p style={{ fontSize: '0.85rem', color: '#64748b' }}>Powered by Paypee Intelligence Engine</p>
+        <div style={{ display: 'flex', gap: '1rem' }}>
+           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'rgba(255,255,255,0.03)', padding: '0.5rem 1rem', borderRadius: '12px', border: '1px solid var(--border)' }}>
+              <div style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--accent)', boxShadow: '0 0 10px var(--accent)' }} />
+              <span style={{ fontSize: '0.8rem', fontWeight: 800, color: '#fff' }}>COGNITIVE SYNC: 100%</span>
+           </div>
         </div>
       </div>
 
-      <div style={chatContainerStyle} ref={scrollRef}>
+      <div 
+        ref={scrollRef}
+        className="premium-card custom-scrollbar" 
+        style={{ 
+          flex: 1, 
+          overflowY: 'auto', 
+          display: 'flex', 
+          flexDirection: 'column', 
+          gap: '1.5rem', 
+          padding: '2.5rem', 
+          background: 'rgba(255,255,255,0.01)',
+          borderStyle: 'dashed'
+        }}
+      >
           <AnimatePresence>
             {messages.map((m) => (
               <motion.div 
                 key={m.id}
-                initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                initial={{ opacity: 0, y: 10, scale: 0.98 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 style={{ 
-                  ...messageStyle, 
+                  maxWidth: '75%', 
+                  padding: '1.5rem', 
+                  position: 'relative',
                   alignSelf: m.role === 'user' ? 'flex-end' : 'flex-start',
                   background: m.role === 'user' ? 'var(--primary)' : 'rgba(255,255,255,0.03)',
-                  border: m.role === 'assistant' ? '1px solid #1e293b' : 'none',
-                  borderRadius: m.role === 'user' ? '20px 20px 4px 20px' : '4px 20px 20px 20px'
+                  border: m.role === 'assistant' ? '1px solid rgba(255,255,255,0.05)' : 'none',
+                  borderRadius: m.role === 'user' ? '24px 24px 4px 24px' : '4px 24px 24px 24px',
+                  boxShadow: m.role === 'user' ? '0 15px 30px -10px var(--primary-glow)' : 'none'
                 }}
               >
-                {m.type === 'insight' && <div style={badgeStyle}><BarChart size={12} /> SPENDING INSIGHT</div>}
-                {m.type === 'action' && <div style={{ ...badgeStyle, background: '#10b98122', color: '#10b981' }}><Zap size={12} /> ACTION PREPARED</div>}
-                <div style={{ fontSize: '0.95rem', lineHeight: 1.5 }}>{m.text}</div>
+                {m.role === 'assistant' && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
+                    <div style={{ width: 24, height: 24, borderRadius: '6px', background: 'rgba(99, 102, 241, 0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary)' }}>
+                      <Bot size={14} />
+                    </div>
+                    <div style={{ fontSize: '0.7rem', fontWeight: 900, color: 'var(--primary)', letterSpacing: '1.5px', textTransform: 'uppercase' }}>Sentinel Response</div>
+                  </div>
+                )}
+                {m.type === 'insight' && (
+                  <div style={{ fontSize: '0.65rem', fontWeight: 900, letterSpacing: '1.5px', marginBottom: '1rem', padding: '0.4rem 0.8rem', background: 'rgba(99, 102, 241, 0.15)', color: 'var(--primary)', borderRadius: '8px', display: 'inline-flex', alignItems: 'center', gap: '0.5rem', border: '1px solid rgba(99, 102, 241, 0.2)' }}>
+                    <Activity size={14} /> ANALYTICS INDEXED
+                  </div>
+                )}
+                {m.type === 'action' && (
+                  <div style={{ fontSize: '0.65rem', fontWeight: 900, letterSpacing: '1.5px', marginBottom: '1rem', padding: '0.4rem 0.8rem', background: 'rgba(16, 185, 129, 0.15)', color: 'var(--accent)', borderRadius: '8px', display: 'inline-flex', alignItems: 'center', gap: '0.5rem', border: '1px solid rgba(16, 185, 129, 0.2)' }}>
+                    <Shield size={14} /> SECURITY GATE AUTHORIZED
+                  </div>
+                )}
+                <div style={{ fontSize: '1rem', lineHeight: 1.6, fontWeight: 500, color: m.role === 'user' ? '#fff' : 'rgba(255,255,255,0.9)' }}>{m.text}</div>
+                <div style={{ marginTop: '1rem', fontSize: '0.65rem', color: m.role === 'user' ? 'rgba(255,255,255,0.6)' : 'var(--text-muted)', fontWeight: 800 }}>{new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
               </motion.div>
             ))}
             {isTyping && (
-              <motion.div style={{ alignSelf: 'flex-start', padding: '1rem', color: '#64748b' }}>AI is thinking...</motion.div>
+              <motion.div 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                style={{ alignSelf: 'flex-start', padding: '1rem', display: 'flex', alignItems: 'center', gap: '0.75rem', color: 'var(--text-muted)', fontWeight: 600, fontSize: '0.9rem' }}
+              >
+                <div className="spinner" style={{ width: 16, height: 16, borderTopColor: 'var(--primary)' }} /> Sentinel is processing ledger...
+              </motion.div>
             )}
           </AnimatePresence>
       </div>
 
-      <div style={inputContainerStyle}>
-          <input 
-            type="text" 
-            placeholder="Ask anything (e.g. 'Show me my burn rate' or 'Send $10 to Sam')" 
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-            style={inputStyle}
-          />
-          <button onClick={handleSend} style={sendButtonStyle}><SendIcon size={20} /></button>
-      </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+          <div style={{ display: 'flex', gap: '1rem' }}>
+              <input 
+                type="text" 
+                placeholder="Submit inquiry to Sentinel Core (e.g. 'Analyze my capital velocity' or 'Isolate high-risk events')" 
+                className="form-input"
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleSend()}
+                style={{ flex: 1, padding: '1.4rem', fontSize: '1.1rem', fontWeight: 600 }}
+              />
+              <button 
+                onClick={handleSend} 
+                className="btn btn-primary"
+                style={{ width: '80px', borderRadius: '18px' }}
+              >
+                <SendIcon size={24} />
+              </button>
+          </div>
 
-      <div style={{ marginTop: '1.5rem', display: 'flex', gap: '0.75rem' }}>
-         <p style={{ fontSize: '0.75rem', color: '#475569', fontWeight: 600 }}>SUGGESTIONS:</p>
-         {['Monthly MRR', 'Card Spend Check', 'Lock Cloud Cards'].map((s) => (
-           <button key={s} onClick={() => setInput(s)} style={sugButtonStyle}>{s}</button>
-         ))}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem', flexWrap: 'wrap' }}>
+             <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 900, letterSpacing: '2px', textTransform: 'uppercase' }}>Command Suggestions:</div>
+             <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+                {['Monthly MRR Analysis', 'Rail Egress Check', 'Lock Protocol Cards', 'Liquidity Report'].map((s) => (
+                  <motion.button 
+                    key={s} 
+                    whileHover={{ scale: 1.05, background: 'rgba(255,255,255,0.06)' }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => setInput(s)} 
+                    style={{ 
+                      fontSize: '0.85rem', 
+                      color: '#fff', 
+                      background: 'rgba(255,255,255,0.03)', 
+                      border: '1px solid var(--border)', 
+                      padding: '0.6rem 1.25rem', 
+                      borderRadius: '12px', 
+                      cursor: 'pointer',
+                      fontWeight: 700,
+                      transition: 'all 0.2s'
+                    }}
+                  >
+                    {s}
+                  </motion.button>
+                ))}
+             </div>
+          </div>
       </div>
     </div>
   );
 };
-
-const chatContainerStyle: React.CSSProperties = { flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '1rem', padding: '1rem', background: 'rgba(255,255,255,0.01)', borderRadius: '24px', border: '1px solid #1e293b', marginBottom: '1.5rem' };
-const messageStyle: React.CSSProperties = { maxWidth: '80%', padding: '1.25rem', position: 'relative' };
-const inputContainerStyle: React.CSSProperties = { display: 'flex', gap: '1rem' };
-const inputStyle: React.CSSProperties = { flex: 1, background: 'rgba(255,255,255,0.03)', border: '1px solid #1e293b', borderRadius: '16px', padding: '1.2rem', color: '#fff', outline: 'none' };
-const sendButtonStyle: React.CSSProperties = { width: '60px', borderRadius: '16px', background: 'var(--primary)', border: 'none', color: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' };
-const badgeStyle: React.CSSProperties = { fontSize: '0.65rem', fontWeight: 900, letterSpacing: '0.1em', marginBottom: '0.75rem', padding: '0.3rem 0.6rem', background: 'rgba(99, 102, 241, 0.1)', color: 'var(--primary)', borderRadius: '6px', display: 'inline-flex', alignItems: 'center', gap: '0.4rem' };
-const sugButtonStyle: React.CSSProperties = { fontSize: '0.7rem', color: '#64748b', background: 'transparent', border: '1px solid #1e293b', padding: '0.4rem 0.8rem', borderRadius: '8px', cursor: 'pointer' };
 
 export default AiAdvisor;

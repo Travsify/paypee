@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, useMotionValue, useTransform } from 'framer-motion';
-import { Wallet, ShieldCheck, Copy, Check, Trash2, RefreshCw, Zap } from 'lucide-react';
+import { Wallet, ShieldCheck, Copy, Check, Trash2, RefreshCw, Zap, ExternalLink } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 
 const CopyButton = ({ text, label }: { text: string, label: string }) => {
@@ -16,7 +16,7 @@ const CopyButton = ({ text, label }: { text: string, label: string }) => {
 
   return (
     <motion.div 
-      whileHover={{ scale: 1.1 }}
+      whileHover={{ scale: 1.1, background: 'rgba(255,255,255,0.15)' }}
       whileTap={{ scale: 0.9 }}
       onClick={handleCopy}
       title={`Copy ${label}`}
@@ -24,16 +24,16 @@ const CopyButton = ({ text, label }: { text: string, label: string }) => {
         display: 'flex', 
         alignItems: 'center', 
         justifyContent: 'center',
-        width: '28px',
-        height: '28px',
-        borderRadius: '8px', 
+        width: '32px',
+        height: '32px',
+        borderRadius: '10px', 
         background: copied ? 'rgba(16, 185, 129, 0.2)' : 'rgba(255,255,255,0.08)',
         border: '1px solid rgba(255,255,255,0.1)',
         cursor: 'pointer',
         transition: 'all 0.2s',
       }}
     >
-      {copied ? <Check size={14} color="#10b981" /> : <Copy size={14} opacity={0.6} color="#fff" />}
+      {copied ? <Check size={16} color="#10b981" /> : <Copy size={16} opacity={0.6} color="#fff" />}
     </motion.div>
   );
 };
@@ -110,8 +110,8 @@ const BalanceCard: React.FC<BalanceCardProps> = ({
   // 3D Tilt Effect
   const x = useMotionValue(0);
   const y = useMotionValue(0);
-  const rotateX = useTransform(y, [-100, 100], [10, -10]);
-  const rotateY = useTransform(x, [-100, 100], [-10, 10]);
+  const rotateX = useTransform(y, [-150, 150], [10, -10]);
+  const rotateY = useTransform(x, [-150, 150], [-10, 10]);
 
   function handleMouse(event: React.MouseEvent) {
     const rect = event.currentTarget.getBoundingClientRect();
@@ -127,83 +127,86 @@ const BalanceCard: React.FC<BalanceCardProps> = ({
   }
   
   return (
-    <div style={{ perspective: '1200px', minWidth: '360px', height: '100%', minHeight: '280px', position: 'relative' }}>
+    <div style={{ perspective: '1500px', width: '100%', height: '100%', minHeight: '320px', position: 'relative' }}>
       <motion.div
         onMouseMove={handleMouse}
         onMouseLeave={handleMouseLeave}
+        className="holographic-card"
         style={{ 
           rotateX, rotateY,
           width: '100%', height: '100%', 
-          padding: '2rem', borderRadius: '28px', 
-          background: gradient, color: '#fff', 
-          boxShadow: '0 30px 60px -12px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.2)', 
-          border: '1px solid rgba(255,255,255,0.15)',
+          padding: '2.5rem', 
+          background: gradient, 
           display: 'flex', flexDirection: 'column', justifyContent: 'space-between', 
-          overflow: 'hidden', position: 'relative'
+          position: 'relative',
+          boxShadow: '0 40px 80px -20px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.2)'
         }}
       >
-        {/* Decorative elements */}
-        <div style={{ position: 'absolute', top: '-10%', right: '-5%', opacity: 0.1, transform: 'rotate(15deg)' }}>
-          <Zap size={180} />
-        </div>
-        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '50%', background: 'linear-gradient(180deg, rgba(255,255,255,0.2) 0%, transparent 100%)', pointerEvents: 'none' }} />
+        <div className="mesh-bg" style={{ opacity: 0.3 }} />
+        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '60%', background: 'linear-gradient(180deg, rgba(255,255,255,0.15) 0%, transparent 100%)', pointerEvents: 'none' }} />
 
         {/* Header */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', position: 'relative', zIndex: 10 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-            <div style={{ width: 40, height: 40, borderRadius: '12px', background: 'rgba(255,255,255,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.1)' }}>
-              <span style={{ fontWeight: 900, fontSize: '1.25rem' }}>{symbol}</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+            <div style={{ width: 48, height: 48, borderRadius: '16px', background: 'rgba(255,255,255,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(12px)', border: '1px solid rgba(255,255,255,0.1)' }}>
+              <span style={{ fontWeight: 900, fontSize: '1.5rem' }}>{symbol}</span>
             </div>
             <div>
-              <div style={{ fontWeight: 900, fontSize: '0.85rem', letterSpacing: '1px', textTransform: 'uppercase' }}>{currency}</div>
-              <div style={{ fontSize: '0.6rem', fontWeight: 700, opacity: 0.6, letterSpacing: '0.5px' }}>{type} ASSET</div>
+              <div style={{ fontWeight: 900, fontSize: '1rem', letterSpacing: '1.5px', textTransform: 'uppercase' }}>{currency}</div>
+              <div style={{ fontSize: '0.7rem', fontWeight: 800, opacity: 0.7, letterSpacing: '0.5px' }}>{type} ASSET</div>
             </div>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
             {onRefresh && (
               <motion.button 
-                whileHover={{ rotate: 180, background: 'rgba(255,255,255,0.2)' }}
+                whileHover={{ rotate: 180, scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
                 onClick={(e) => { e.stopPropagation(); onRefresh(); }}
-                style={{ background: 'rgba(255,255,255,0.1)', border: 'none', padding: '0.5rem', borderRadius: '10px', cursor: 'pointer', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s' }}
+                className="btn btn-outline"
+                style={{ padding: '0.6rem', borderRadius: '12px', background: 'rgba(255,255,255,0.1)', border: 'none' }}
               >
-                <RefreshCw size={16} />
+                <RefreshCw size={18} />
               </motion.button>
             )}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', background: 'rgba(16, 185, 129, 0.2)', border: '1px solid rgba(16, 185, 129, 0.3)', padding: '0.4rem 0.8rem', borderRadius: '100px', backdropFilter: 'blur(10px)' }}>
-              <ShieldCheck size={14} color="#10b981" />
-              <span style={{ fontSize: '0.65rem', fontWeight: 900, letterSpacing: '0.5px', color: '#10b981' }}>VERIFIED</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'rgba(16, 185, 129, 0.2)', border: '1px solid rgba(16, 185, 129, 0.3)', padding: '0.5rem 1rem', borderRadius: '100px', backdropFilter: 'blur(10px)' }}>
+              <ShieldCheck size={16} color="#10b981" />
+              <span style={{ fontSize: '0.75rem', fontWeight: 900, letterSpacing: '1px', color: '#10b981' }}>VERIFIED</span>
             </div>
           </div>
         </div>
 
         {/* Balance Section */}
-        <div style={{ position: 'relative', zIndex: 10, marginTop: '1.5rem' }}>
-          <div style={{ fontSize: '0.75rem', fontWeight: 700, opacity: 0.7, marginBottom: '0.4rem', textTransform: 'uppercase', letterSpacing: '1.5px' }}>Available Balance</div>
-          <div style={{ fontSize: '3rem', fontWeight: 900, display: 'flex', alignItems: 'baseline', gap: '0.4rem', letterSpacing: '-0.04em' }}>
-            <span style={{ fontSize: '1.5rem', opacity: 0.6, fontWeight: 700 }}>{symbol}</span>
-            <span className="text-glow">{hideBalance ? '••••••' : parseFloat(amount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+        <div style={{ position: 'relative', zIndex: 10, marginTop: '2rem' }}>
+          <div style={{ fontSize: '0.85rem', fontWeight: 800, opacity: 0.8, marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '2px' }}>Net Liquidity</div>
+          <div style={{ fontSize: '3.5rem', fontWeight: 900, display: 'flex', alignItems: 'baseline', gap: '0.5rem', letterSpacing: '-0.04em' }}>
+            <span style={{ fontSize: '1.8rem', opacity: 0.6, fontWeight: 800 }}>{symbol}</span>
+            <span className="text-glow" style={{ textShadow: '0 0 30px rgba(255,255,255,0.3)' }}>
+              {hideBalance ? '••••••' : parseFloat(amount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            </span>
           </div>
         </div>
 
         {/* Actions Row */}
         {(onSwap || onPayout) && (
-          <div style={{ display: 'flex', gap: '1rem', marginTop: '2rem', position: 'relative', zIndex: 10 }}>
+          <div style={{ display: 'flex', gap: '1.25rem', marginTop: '2.5rem', position: 'relative', zIndex: 10 }}>
             {onSwap && (
               <motion.button 
-                whileHover={{ scale: 1.05, background: 'rgba(255,255,255,0.3)' }}
-                whileTap={{ scale: 0.95 }}
+                whileHover={{ scale: 1.02, background: 'rgba(255,255,255,0.25)' }}
+                whileTap={{ scale: 0.98 }}
                 onClick={(e) => { e.stopPropagation(); onSwap(); }}
-                style={{ flex: 1, background: 'rgba(255,255,255,0.15)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '0.8rem', borderRadius: '16px', fontWeight: 800, cursor: 'pointer', fontSize: '0.85rem', backdropFilter: 'blur(10px)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
+                className="btn btn-outline"
+                style={{ flex: 1, padding: '1rem', borderRadius: '18px', fontWeight: 900, fontSize: '0.95rem', background: 'rgba(255,255,255,0.12)', border: '1px solid rgba(255,255,255,0.1)' }}
               >
-                Convert
+                Instant Swap
               </motion.button>
             )}
             {onPayout && (
               <motion.button 
-                whileHover={{ scale: 1.05, background: '#f8fafc' }}
-                whileTap={{ scale: 0.95 }}
+                whileHover={{ scale: 1.02, background: '#f8fafc' }}
+                whileTap={{ scale: 0.98 }}
                 onClick={(e) => { e.stopPropagation(); onPayout(); }}
-                style={{ flex: 1, background: '#fff', border: 'none', color: '#000', padding: '0.8rem', borderRadius: '16px', fontWeight: 800, cursor: 'pointer', fontSize: '0.85rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
+                className="btn btn-primary"
+                style={{ flex: 1, padding: '1rem', borderRadius: '18px', fontWeight: 900, fontSize: '0.95rem', background: '#fff', color: '#000', border: 'none' }}
               >
                 Withdraw
               </motion.button>
@@ -213,52 +216,55 @@ const BalanceCard: React.FC<BalanceCardProps> = ({
 
         {/* Footer Details */}
         <div style={{ 
-          marginTop: '2rem', paddingTop: '1.5rem', borderTop: '1px solid rgba(255,255,255,0.15)', 
-          position: 'relative', zIndex: 10, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end'
+          marginTop: '2.5rem', paddingTop: '2rem', borderTop: '1px solid rgba(255,255,255,0.15)', 
+          position: 'relative', zIndex: 10, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: '1.5rem'
         }}>
           <div style={{ flex: 1 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.75rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
               <div style={{ 
-                fontSize: '0.7rem', 
+                fontSize: '0.75rem', 
                 fontWeight: 900, 
-                padding: '0.3rem 0.8rem',
-                borderRadius: '8px',
-                background: 'rgba(0,0,0,0.2)',
+                padding: '0.4rem 1rem',
+                borderRadius: '10px',
+                background: 'rgba(0,0,0,0.3)',
                 color: 'rgba(255,255,255,0.9)',
                 textTransform: 'uppercase', 
-                letterSpacing: '1px',
-                border: '1px solid rgba(255,255,255,0.05)'
+                letterSpacing: '1.5px',
+                border: '1px solid rgba(255,255,255,0.08)'
               }}>
-                {bank ? (['USDC', 'USDT', 'BTC'].includes(currency.toUpperCase()) ? `${bank.toUpperCase()} NETWORK` : bank.toUpperCase()) : 'PROVISIONING...'}
+                {bank ? (['USDC', 'USDT', 'BTC'].includes(currency.toUpperCase()) ? `${bank.toUpperCase()} RAIL` : bank.toUpperCase()) : 'PROVISIONING...'}
               </div>
               {bank && <CopyButton text={bank} label="Bank/Network" />}
             </div>
             
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.75rem' }}>
-              <div style={{ fontSize: '1.2rem', fontWeight: 900, fontFamily: 'monospace', letterSpacing: '1px', color: 'rgba(255,255,255,0.95)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
+              <div style={{ fontSize: '1.3rem', fontWeight: 900, fontFamily: 'var(--font-inter)', letterSpacing: '1px', color: '#fff' }}>
                 {accNo ? (accNo.length > 20 ? accNo.slice(0, 8) + '...' + accNo.slice(-8) : accNo.match(/.{1,4}/g)?.join(' ')) : '•••• •••• ••••'}
               </div>
               {accNo && <CopyButton text={accNo} label="Account/Address" />}
             </div>
             
             {!['USDC', 'USDT', 'BTC'].includes(currency.toUpperCase()) && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <div style={{ fontSize: '0.8rem', fontWeight: 700, opacity: 0.8 }}>{accName}</div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                <div style={{ fontSize: '0.9rem', fontWeight: 800, color: 'rgba(255,255,255,0.8)', letterSpacing: '0.5px' }}>{accName}</div>
                 {accName && <CopyButton text={accName} label="Account Name" />}
               </div>
             )}
           </div>
           
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.75rem' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
             {accNo && (
-              <div style={{ background: '#fff', padding: '0.4rem', borderRadius: '12px', boxShadow: '0 10px 20px rgba(0,0,0,0.2)' }}>
-                <QRCodeSVG value={accNo} size={70} />
-              </div>
+              <motion.div 
+                whileHover={{ scale: 1.1 }}
+                style={{ background: '#fff', padding: '0.6rem', borderRadius: '16px', boxShadow: '0 15px 30px rgba(0,0,0,0.4)', cursor: 'pointer' }}
+              >
+                <QRCodeSVG value={accNo} size={80} />
+              </motion.div>
             )}
             
             {onDelete && (
               <motion.button 
-                whileHover={{ scale: 1.1, background: 'rgba(244, 63, 94, 0.3)' }}
+                whileHover={{ scale: 1.1, background: 'rgba(244, 63, 94, 0.4)' }}
                 whileTap={{ scale: 0.9 }}
                 onClick={(e) => {
                    e.stopPropagation();
@@ -267,9 +273,10 @@ const BalanceCard: React.FC<BalanceCardProps> = ({
                       onDelete(targetId);
                    }
                 }}
-                style={{ background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.1)', padding: '0.5rem', borderRadius: '10px', cursor: 'pointer', color: '#fff', backdropFilter: 'blur(5px)', display: 'flex', justifyContent: 'center', width: '100%' }}
+                className="btn btn-outline"
+                style={{ background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.1)', padding: '0.6rem', borderRadius: '12px', width: '100%' }}
               >
-                <Trash2 size={16} />
+                <Trash2 size={18} />
               </motion.button>
             )}
           </div>

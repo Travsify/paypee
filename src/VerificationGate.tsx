@@ -11,9 +11,19 @@ import {
   XCircle,
   RefreshCcw,
   Bell,
-  X
+  X,
+  ShieldCheck,
+  Camera,
+  Scan,
+  Smartphone,
+  Eye,
+  Activity,
+  Lock,
+  Globe
 } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
+import NotificationPanel from './components/NotificationPanel';
+import { API_BASE } from './config';
 
 interface VerificationGateProps {
   kycStatus: string;
@@ -31,8 +41,6 @@ interface Notification {
   createdAt: string;
 }
 
-import { API_BASE } from './config';
-
 const VerificationGate: React.FC<VerificationGateProps> = ({ kycStatus: initialStatus, accountType, onStatusChange, forceShow }) => {
   const [kycStatus, setKycStatus] = useState(initialStatus);
   const [showModal, setShowModal] = useState(false);
@@ -45,7 +53,7 @@ const VerificationGate: React.FC<VerificationGateProps> = ({ kycStatus: initialS
   const [faceImage, setFaceImage] = useState<string | null>(null);
   const [error, setError] = useState('');
   const [showMobileScan, setShowMobileScan] = useState(false);
-  const [isCapturingId, setIsCapturingId] = useState(true); // Toggle between ID and Face
+  const [isCapturingId, setIsCapturingId] = useState(true);
 
   const videoRef = React.useRef<HTMLVideoElement>(null);
   const canvasRef = React.useRef<HTMLCanvasElement>(null);
@@ -64,7 +72,6 @@ const VerificationGate: React.FC<VerificationGateProps> = ({ kycStatus: initialS
     } catch (_) {}
   }, [token, kycStatus, onStatusChange]);
 
-  // Resume mobile verify from sessionStorage
   useEffect(() => {
     const step = sessionStorage.getItem('mobile_verify_step');
     if (step === '2') {
@@ -77,7 +84,6 @@ const VerificationGate: React.FC<VerificationGateProps> = ({ kycStatus: initialS
       if (sIdNumber) setIdNumber(sIdNumber);
       if (sDob) setDob(sDob);
       
-      // Cleanup
       sessionStorage.removeItem('mobile_verify_step');
       sessionStorage.removeItem('mobile_verify_idType');
       sessionStorage.removeItem('mobile_verify_idNumber');
@@ -108,14 +114,13 @@ const VerificationGate: React.FC<VerificationGateProps> = ({ kycStatus: initialS
     if (videoRef.current && canvasRef.current) {
       const ctx = canvasRef.current.getContext('2d');
       if (ctx) {
-        // High resolution (720p) for better OCR and document detection
         ctx.filter = 'brightness(1.02) contrast(1.05)';
         ctx.drawImage(videoRef.current, 0, 0, 1280, 720);
         const dataUrl = canvasRef.current.toDataURL('image/jpeg', 0.95);
         
         if (isCapturingId) {
           setIdImage(dataUrl);
-          setIsCapturingId(false); // Move to face capture next
+          setIsCapturingId(false);
         } else {
           setFaceImage(dataUrl);
           if (stream) stream.getTracks().forEach(t => t.stop());
@@ -124,25 +129,23 @@ const VerificationGate: React.FC<VerificationGateProps> = ({ kycStatus: initialS
     }
   };
 
-  // Poll every 10s while PROCESSING, otherwise 30s for notifications
   useEffect(() => {
     fetchStatus();
-
     const interval = setInterval(fetchStatus, kycStatus === 'PROCESSING' ? 10000 : 30000);
     return () => clearInterval(interval);
   }, [kycStatus, fetchStatus]);
 
   const handleNextStep = () => {
     setError('');
-    if (!idNumber.trim()) { setError('Please enter your ID number.'); return; }
+    if (!idNumber.trim()) { setError('Identification ID is required.'); return; }
     if (idType === 'NIN' && idNumber.trim().length !== 11) {
-      setError('NIN must be exactly 11 digits.'); return;
+      setError('NIN must be exactly 11 digits for protocol validation.'); return;
     }
     if (idType === 'CAC' && idNumber.trim().length < 5) {
-      setError('Please enter a valid CAC/RC number.'); return;
+      setError('Please provide a valid CAC/RC institutional ID.'); return;
     }
     if (showDob && !dob) {
-      setError('Please select your Date of Birth.');
+      setError('Date of Birth is required for compliance screening.');
       return;
     }
     setKycStep(2);
@@ -150,16 +153,14 @@ const VerificationGate: React.FC<VerificationGateProps> = ({ kycStatus: initialS
   };
 
   const handleVerify = async () => {
-    console.log('[FRONTEND DEBUG] 🎬 Verification button clicked!');
     setError('');
     if (!idImage) {
-      setError('Please capture a clear photo of your ID document showing all four edges.');
+      setError('High-fidelity ID document image is missing.');
       setIsCapturingId(true);
       return;
     }
     if (!faceImage) { 
-      console.warn('[FRONTEND DEBUG] ❌ No selfie captured yet.');
-      setError('Please capture a live selfie to proceed.'); 
+      setError('Biometric selfie is required for liveness validation.'); 
       setIsCapturingId(false);
       return; 
     }
@@ -169,7 +170,6 @@ const VerificationGate: React.FC<VerificationGateProps> = ({ kycStatus: initialS
     
     try {
       if (stream) {
-        console.log('[FRONTEND DEBUG] 🎥 Stopping camera stream...');
         stream.getTracks().forEach(t => t.stop());
       }
 
@@ -179,13 +179,7 @@ const VerificationGate: React.FC<VerificationGateProps> = ({ kycStatus: initialS
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ 
-          idType, 
-          idNumber: idNumber.trim(), 
-          dob, 
-          faceImage,
-          idImage
-        })
+        body: JSON.stringify({ idType, idNumber: idNumber.trim(), dob, faceImage, idImage })
       });
 
       const data = await res.json();
@@ -199,8 +193,8 @@ const VerificationGate: React.FC<VerificationGateProps> = ({ kycStatus: initialS
         setShowModal(false);
         await fetchStatus();
       } else {
-        const backendError = data.error || 'Verification failed. Please check your details.';
-        const hint = data.status === 'REJECTED' ? ' Ensure your face is clearly visible, well-lit, and matches your ID.' : '';
+        const backendError = data.error || 'Identity validation failed. Protocol error.';
+        const hint = data.status === 'REJECTED' ? ' Ensure lighting is optimal and document matches your profile.' : '';
         setError(backendError + hint);
         if (data.status === 'REJECTED') {
           setKycStatus('REJECTED');
@@ -208,25 +202,25 @@ const VerificationGate: React.FC<VerificationGateProps> = ({ kycStatus: initialS
         }
       }
     } catch (err: any) {
-      setError(`Network error: ${err.message}. Please try again.`);
+      setError(`Transmission error: ${err.message}. System retry recommended.`);
     } finally {
       setLoading(false);
     }
   };
 
   const idTypeOptions = accountType === 'BUSINESS'
-    ? [{ value: 'CAC', label: 'CAC / RC Number', desc: 'Corporate Affairs Commission registration' }]
+    ? [{ value: 'CAC', label: 'Institutional Registry', desc: 'CAC / RC Corporate Number', icon: Building2 }]
     : [
-        { value: 'NIN', label: 'National ID (NIN)', desc: '11-digit National Identification Number' },
-        { value: 'PASSPORT', label: 'International Passport', desc: 'Valid Nigerian Passport Number' },
-        { value: 'DRIVERS_LICENSE', label: 'Driver\'s License', desc: 'Valid Nigerian Driver\'s License' },
-        { value: 'VOTERS_CARD', label: 'Voter\'s Card (VIN)', desc: 'Valid Voter Identification Number' }
+        { value: 'NIN', label: 'National Identity', desc: '11-digit NIN Protocol', icon: ShieldCheck },
+        { value: 'PASSPORT', label: 'Global Passport', desc: 'International Travel Document', icon: Globe },
+        { value: 'DRIVERS_LICENSE', label: 'Transit License', desc: 'Government Driver Authorization', icon: Activity },
+        { value: 'VOTERS_CARD', label: 'Civic Identification', desc: 'Voter VIN Registry', icon: User }
       ];
 
   const statusConfig = {
-    PENDING:    { color: '#f59e0b', bg: 'rgba(245,158,11,0.1)',   icon: <ShieldAlert size={18} />, text: 'Complete your verification to unlock all features.' },
-    PROCESSING: { color: '#6366f1', bg: 'rgba(99,102,241,0.1)',   icon: <Clock size={18} />,       text: 'Your verification is being processed...' },
-    REJECTED:   { color: '#f43f5e', bg: 'rgba(244,63,94,0.1)',    icon: <XCircle size={18} />,     text: 'Verification failed. Please retry with correct details.' },
+    PENDING:    { color: '#f59e0b', bg: 'rgba(245,158,11,0.08)',   icon: <ShieldAlert size={18} />, text: 'UNRESTRICTED ACCESS PENDING: Please complete identity screening.' },
+    PROCESSING: { color: 'var(--primary)', bg: 'rgba(99,102,241,0.08)',   icon: <Clock size={18} />,       text: 'PROTOCOL IN PROGRESS: Verifying credentials against global registries...' },
+    REJECTED:   { color: '#f43f5e', bg: 'rgba(244,63,94,0.08)',    icon: <XCircle size={18} />,     text: 'VALIDATION FAILURE: Identity verification rejected. Please audit your data.' },
   };
 
   const cfg = statusConfig[kycStatus as keyof typeof statusConfig];
@@ -238,9 +232,7 @@ const VerificationGate: React.FC<VerificationGateProps> = ({ kycStatus: initialS
 
   const fetchNotifications = useCallback(async () => {
     try {
-      const res = await fetch(`${API_BASE}/api/notifications`, { 
-        headers: { 'Authorization': `Bearer ${token}` } 
-      });
+      const res = await fetch(`${API_BASE}/api/notifications`, { headers: { 'Authorization': `Bearer ${token}` } });
       const data = await res.json();
       setNotifications(data);
     } catch (_) {}
@@ -255,15 +247,6 @@ const VerificationGate: React.FC<VerificationGateProps> = ({ kycStatus: initialS
   if (kycStatus === 'VERIFIED' && !forceShow) {
     return (
       <div style={{ position: 'fixed', top: '1.5rem', right: '1.5rem', zIndex: 1000 }}>
-        <button 
-          onClick={() => setShowNotifications(!showNotifications)}
-          style={{ background: '#0f172a', border: '1px solid #1e293b', color: '#fff', width: '45px', height: '45px', borderRadius: '15px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', position: 'relative', boxShadow: '0 10px 25px rgba(0,0,0,0.3)' }}
-        >
-          <Bell size={20} />
-          {notifications.some(n => !n.read) && (
-            <span style={{ position: 'absolute', top: '-5px', right: '-5px', width: '12px', height: '12px', background: '#f43f5e', borderRadius: '50%', border: '2px solid #0f172a' }} />
-          )}
-        </button>
         <AnimatePresence>
           {showNotifications && (
             <NotificationPanel notifications={notifications} show={showNotifications} onClose={() => setShowNotifications(false)} />
@@ -275,15 +258,15 @@ const VerificationGate: React.FC<VerificationGateProps> = ({ kycStatus: initialS
 
   return (
     <>
-      {/* Sticky Status Banner */}
       <motion.div
         initial={{ y: -60 }}
         animate={{ y: 0 }}
         style={{
-          background: cfg?.bg || 'rgba(99,102,241,0.1)',
-          borderBottom: `1px solid ${cfg?.color || '#6366f1'}33`,
+          background: 'rgba(10, 15, 30, 0.8)',
+          backdropFilter: 'blur(30px)',
+          borderBottom: `1px solid ${forceShow ? 'rgba(245,158,11,0.2)' : (cfg?.color + '33')}`,
           color: '#fff',
-          padding: '0.8rem 2rem',
+          padding: '1rem 2.5rem',
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
@@ -292,29 +275,23 @@ const VerificationGate: React.FC<VerificationGateProps> = ({ kycStatus: initialS
           zIndex: 1000,
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: forceShow ? '#f59e0b' : cfg?.color }}>
-          {forceShow ? <ShieldAlert size={18} /> : cfg?.icon}
-          <span style={{ fontWeight: 600, fontSize: '0.9rem', color: '#fff' }}>
-            {forceShow ? 'Card Issuer requires additional details (DOB & Selfie).' : cfg?.text}
-          </span>
-          {kycStatus === 'PROCESSING' && (
-            <motion.div animate={{ rotate: 360 }} transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}>
-              <RefreshCcw size={14} color={cfg?.color} />
-            </motion.div>
-          )}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          <div style={{ width: 36, height: 36, borderRadius: '10px', background: forceShow ? 'rgba(245,158,11,0.1)' : cfg?.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', color: forceShow ? '#f59e0b' : cfg?.color, border: `1px solid ${forceShow ? 'rgba(245,158,11,0.2)' : (cfg?.color + '44')}` }}>
+             {forceShow ? <ShieldAlert size={20} /> : cfg?.icon}
+          </div>
+          <div>
+            <div style={{ fontWeight: 900, fontSize: '0.95rem', color: '#fff', letterSpacing: '-0.01em' }}>
+              {forceShow ? 'Institutional Compliance Required' : cfg?.text}
+            </div>
+            {kycStatus === 'PROCESSING' && (
+               <div style={{ fontSize: '0.7rem', color: 'var(--primary)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px', marginTop: '2px', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <RefreshCcw size={10} className="animate-spin" /> Synchronizing with Maplerad Core...
+               </div>
+            )}
+          </div>
         </div>
 
-        <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
-          <button 
-            onClick={() => setShowNotifications(!showNotifications)}
-            style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '0.4rem', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}
-          >
-            <Bell size={18} />
-            {notifications.some(n => !n.read) && (
-              <span style={{ position: 'absolute', top: '-2px', right: '-2px', width: '8px', height: '8px', background: '#f43f5e', borderRadius: '50%' }} />
-            )}
-          </button>
-
+        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
           <AnimatePresence>
             {showNotifications && (
               <NotificationPanel notifications={notifications} show={showNotifications} onClose={() => setShowNotifications(false)} />
@@ -322,217 +299,262 @@ const VerificationGate: React.FC<VerificationGateProps> = ({ kycStatus: initialS
           </AnimatePresence>
 
           {(kycStatus === 'PENDING' || kycStatus === 'REJECTED' || forceShow) && (
-            <button
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
               onClick={() => { setShowModal(true); setKycStep(1); setError(''); }}
-              style={{ background: forceShow ? '#f59e0b' : cfg?.color, border: 'none', color: '#fff', padding: '0.4rem 1.2rem', borderRadius: '8px', fontSize: '0.85rem', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.4rem' }}
+              className="btn btn-primary"
+              style={{ padding: '0.6rem 1.5rem', borderRadius: '12px', fontSize: '0.85rem', fontWeight: 900, background: forceShow ? '#f59e0b' : cfg?.color }}
             >
-              {forceShow ? 'Update Now' : kycStatus === 'REJECTED' ? 'Retry Verification' : 'Verify Now'} <ChevronRight size={14} />
-            </button>
+              {forceShow ? 'Provision Now' : kycStatus === 'REJECTED' ? 'Restart Protocol' : 'Begin Verification'} <ChevronRight size={16} />
+            </motion.button>
           )}
         </div>
       </motion.div>
 
-      {/* KYC Modal */}
       <AnimatePresence>
         {showModal && (
           <div className="paypee-modal-overlay">
             <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
+              initial={{ scale: 0.95, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.95, opacity: 0, y: 20 }}
               className="paypee-modal-content"
-              style={{ maxWidth: '520px' }}
+              style={{ maxWidth: '560px', overflow: 'hidden' }}
             >
-              <div style={{ padding: '2.5rem' }}>
-              <button onClick={() => setShowModal(false)} style={{ position: 'absolute', top: '1.5rem', right: '1.5rem', background: 'rgba(255,255,255,0.05)', border: '1px solid #1e293b', color: '#fff', cursor: 'pointer', borderRadius: '50%', width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10 }}>
-                <X size={20} />
-              </button>
+              <div style={{ position: 'relative', zIndex: 1, padding: '3.5rem' }}>
+                <button onClick={() => setShowModal(false)} className="btn btn-outline" style={{ position: 'absolute', top: '1.5rem', right: '1.5rem', padding: '0.6rem', borderRadius: '50%' }}>
+                  <X size={20} />
+                </button>
 
-              <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-                <div style={{ width: 72, height: 72, background: 'rgba(99,102,241,0.1)', borderRadius: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#6366f1', margin: '0 auto 1.25rem' }}>
-                  {kycStep === 2 ? <User size={36} /> : accountType === 'BUSINESS' ? <Building2 size={36} /> : <User size={36} />}
+                <div style={{ textAlign: 'center', marginBottom: '3.5rem' }}>
+                  <div style={{ width: 80, height: 80, background: 'rgba(99,102,241,0.1)', borderRadius: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary)', margin: '0 auto 1.5rem', border: '1px solid rgba(99,102,241,0.15)' }}>
+                    {kycStep === 2 ? (isCapturingId ? <Scan size={40} /> : <Eye size={40} />) : accountType === 'BUSINESS' ? <Building2 size={40} /> : <ShieldCheck size={40} />}
+                  </div>
+                  <h2 style={{ fontSize: '2rem', fontWeight: 900, marginBottom: '0.75rem', letterSpacing: '-0.03em' }}>
+                    {kycStep === 2 ? (isCapturingId ? 'Document Capture' : 'Biometric Match') : kycStatus === 'REJECTED' ? 'Policy Reclamation' : accountType === 'BUSINESS' ? 'Business Registry' : 'Identity Protocol'}
+                  </h2>
+                  <p style={{ color: 'var(--text-muted)', fontSize: '1rem', lineHeight: 1.6, fontWeight: 500 }}>
+                    {kycStep === 2 
+                      ? isCapturingId 
+                        ? `Place your ${idType} clearly within the optical frame. All four corners must be visible. No glare or shadows.`
+                        : `Initialization of biometric liveness check. Position your face within the digital oval and maintain stability.`
+                      : kycStatus === 'REJECTED' 
+                      ? 'Previous validation attempt was unsuccessful. Please audit your document clarity and input accuracy.'
+                      : `Comply with global fintech standards to unlock institutional-grade capital movement and issuance rails.`
+                    }
+                  </p>
                 </div>
-                <h2 style={{ fontSize: '1.6rem', fontWeight: 800, marginBottom: '0.4rem' }}>
-                  {kycStep === 2 ? (isCapturingId ? 'ID Document Photo' : 'Liveness Face Match') : kycStatus === 'REJECTED' ? 'Retry Verification' : accountType === 'BUSINESS' ? 'Business Verification' : 'Identity Verification'}
-                </h2>
-                <p style={{ color: '#64748b', fontSize: '0.9rem', lineHeight: 1.5 }}>
-                  {kycStep === 2 
-                    ? isCapturingId 
-                      ? `Please place your ${idType} card within the frame. Ensure all four edges are showing and text is readable. No scans or photocopies.`
-                      : `Now, take a live selfie. Ensure your face is well-lit and fits the oval frame.`
-                    : kycStatus === 'REJECTED' 
-                    ? 'Your previous attempt failed. Please check your ID number carefully and ensure your document photo is clear.'
-                    : `Verify your ${accountType === 'BUSINESS' ? 'business registration' : 'identity'} to unlock global transfers, card issuance, and all Paypee features.`
-                  }
-                </p>
-              </div>
 
-              {kycStep === 1 ? (
-                <>
-                  <div style={{ marginBottom: '1.25rem' }}>
-                    <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 800, color: '#475569', letterSpacing: '1.5px', marginBottom: '0.75rem' }}>
-                      VERIFICATION TYPE
-                    </label>
-                    <div style={{ display: 'grid', gap: '0.6rem' }}>
-                      {idTypeOptions.map(opt => (
-                        <div
-                          key={opt.value}
-                          onClick={() => setIdType(opt.value)}
-                          style={{ background: idType === opt.value ? 'rgba(99,102,241,0.1)' : 'rgba(255,255,255,0.02)', border: `2px solid ${idType === opt.value ? '#6366f1' : '#1e293b'}`, borderRadius: '14px', padding: '0.9rem 1.1rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '1rem', transition: 'all 0.2s' }}
-                        >
-                          <div style={{ width: 18, height: 18, borderRadius: '50%', border: idType === opt.value ? '5px solid #6366f1' : '2px solid #475569', transition: 'all 0.2s', flexShrink: 0 }} />
-                          <div>
-                            <div style={{ fontWeight: 700, fontSize: '0.9rem' }}>{opt.label}</div>
-                            <div style={{ fontSize: '0.75rem', color: '#64748b' }}>{opt.desc}</div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div style={{ marginBottom: '1.5rem' }}>
-                    <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 800, color: '#475569', letterSpacing: '1.5px', marginBottom: '0.6rem' }}>
-                      {idType === 'NIN' ? 'NIN NUMBER' : idType === 'CAC' ? 'CAC / RC NUMBER' : 'ID NUMBER'}
-                    </label>
-                    <input
-                      type="text"
-                      value={idNumber}
-                      onChange={e => { setIdNumber(e.target.value); setError(''); }}
-                      placeholder={idType === 'CAC' ? 'e.g. RC123456 or BN123456' : idType === 'NIN' ? 'Enter 11-digit NIN' : 'Enter your ID number'}
-                      maxLength={20}
-                      style={{ width: '100%', background: 'rgba(255,255,255,0.03)', border: `2px solid ${error ? '#f43f5e' : '#1e293b'}`, borderRadius: '12px', padding: '0.9rem 1.1rem', color: '#fff', fontSize: '1rem', fontWeight: 600, letterSpacing: '2px', outline: 'none', boxSizing: 'border-box', transition: 'border 0.2s' }}
-                    />
-                  </div>
-
-                  {showDob && (
-                    <div style={{ marginBottom: '1.5rem' }}>
-                      <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 800, color: '#475569', letterSpacing: '1.5px', marginBottom: '0.6rem' }}>
-                        DATE OF BIRTH
+                {kycStep === 1 ? (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 900, color: 'var(--primary)', letterSpacing: '2px', textTransform: 'uppercase', marginBottom: '1.25rem' }}>
+                        1. SELECT IDENTIFICATION PROTOCOL
                       </label>
-                      <input 
-                        type="date" 
-                        value={dob} 
-                        onChange={e => { setDob(e.target.value); setError(''); }}
-                        style={{ width: '100%', background: 'rgba(255,255,255,0.03)', border: `2px solid ${error ? '#f43f5e' : '#1e293b'}`, borderRadius: '12px', padding: '0.9rem 1.1rem', color: '#fff', fontSize: '1rem', fontWeight: 600, outline: 'none', boxSizing: 'border-box', transition: 'border 0.2s', colorScheme: 'dark' }}
-                      />
+                      <div style={{ display: 'grid', gap: '0.75rem' }}>
+                        {idTypeOptions.map(opt => (
+                          <motion.div
+                            key={opt.value}
+                            whileHover={{ background: 'rgba(255,255,255,0.03)', x: 4 }}
+                            onClick={() => setIdType(opt.value)}
+                            style={{ 
+                              background: idType === opt.value ? 'rgba(99,102,241,0.1)' : 'rgba(255,255,255,0.01)', 
+                              border: `1px solid ${idType === opt.value ? 'var(--primary)' : 'rgba(255,255,255,0.06)'}`, 
+                              borderRadius: '20px', 
+                              padding: '1.25rem 1.5rem', 
+                              cursor: 'pointer', 
+                              display: 'flex', 
+                              alignItems: 'center', 
+                              gap: '1.25rem', 
+                              transition: 'all 0.2s' 
+                            }}
+                          >
+                            <div style={{ width: 44, height: 44, borderRadius: '12px', background: idType === opt.value ? 'var(--primary)' : 'rgba(255,255,255,0.03)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: idType === opt.value ? '#fff' : 'var(--text-muted)', transition: 'all 0.2s' }}>
+                              <opt.icon size={22} />
+                            </div>
+                            <div style={{ flex: 1 }}>
+                              <div style={{ fontWeight: 800, fontSize: '1rem', color: idType === opt.value ? '#fff' : 'rgba(255,255,255,0.8)' }}>{opt.label}</div>
+                              <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 500 }}>{opt.desc}</div>
+                            </div>
+                            <div style={{ width: 22, height: 22, borderRadius: '50%', border: `2px solid ${idType === opt.value ? 'var(--primary)' : 'rgba(255,255,255,0.1)'}`, padding: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                               {idType === opt.value && <div style={{ width: '100%', height: '100%', borderRadius: '50%', background: 'var(--primary)' }} />}
+                            </div>
+                          </motion.div>
+                        ))}
+                      </div>
                     </div>
-                  )}
 
-                  <AnimatePresence>
-                    {error && (
-                      <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
-                        style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', background: 'rgba(244,63,94,0.1)', border: '1px solid rgba(244,63,94,0.3)', borderRadius: '10px', padding: '0.8rem 1rem', marginBottom: '1.25rem', color: '#f43f5e', fontSize: '0.85rem', fontWeight: 600 }}
-                      >
-                        <AlertCircle size={16} /> {error}
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 900, color: 'var(--primary)', letterSpacing: '2px', textTransform: 'uppercase', marginBottom: '1rem' }}>
+                        2. SECURE DATA ENTRY
+                      </label>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                          <span style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--text-muted)' }}>{idType === 'NIN' ? 'NIN ID NUMBER' : idType === 'CAC' ? 'CORPORATE REGISTRY ID' : 'DOCUMENT ID NUMBER'}</span>
+                          <input
+                            type="text"
+                            value={idNumber}
+                            onChange={e => { setIdNumber(e.target.value); setError(''); }}
+                            placeholder={idType === 'CAC' ? 'e.g. RC000000' : 'Enter Identification Number'}
+                            className="form-input"
+                            style={{ fontSize: '1.2rem', fontWeight: 800, letterSpacing: '1px' }}
+                          />
+                        </div>
 
-                  <motion.button
-                    whileTap={{ scale: 0.98 }}
-                    onClick={handleNextStep}
-                    disabled={!idNumber.trim()}
-                    style={{ width: '100%', background: (!idNumber.trim()) ? '#1e293b' : '#6366f1', color: (!idNumber.trim()) ? '#475569' : '#fff', border: 'none', padding: '1.1rem', borderRadius: '14px', fontSize: '1rem', fontWeight: 700, cursor: (!idNumber.trim()) ? 'not-allowed' : 'pointer', transition: 'all 0.3s', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
-                  >
-                    Continue <ChevronRight size={18} />
-                  </motion.button>
-                </>
-              ) : showMobileScan ? (
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: '1.5rem', padding: '1rem 0' }}>
-                   <div style={{ background: '#fff', padding: '1.5rem', borderRadius: '24px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                     <QRCodeSVG 
-                       value={window.location.origin + window.location.pathname + `?auth=${token}&step=2&idType=${idType}&idNumber=${idNumber}&dob=${dob}`} 
-                       size={180}
-                       level="H"
-                       includeMargin={true}
-                     />
-                   </div>
-                   <button
-                     onClick={() => setShowMobileScan(false)}
-                     style={{ background: 'transparent', border: 'none', color: '#6366f1', fontWeight: 700, cursor: 'pointer', padding: '0.5rem' }}
-                   >
-                     Back to Desktop Camera
-                   </button>
-                </div>
-              ) : (
-                <>
-                  <div style={{ background: '#1e293b', borderRadius: '24px', height: '320px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', marginBottom: '1.5rem', border: '2px dashed #475569', position: 'relative', overflow: 'hidden' }}>
-                     {isCapturingId && idImage ? (
-                       <img src={idImage} style={{ width: '100%', height: '100%', objectFit: 'contain', background: '#000' }} alt="Captured ID" />
-                     ) : !isCapturingId && faceImage ? (
-                       <img src={faceImage} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="Captured Selfie" />
-                     ) : !loading ? (
-                       <>
-                         <video ref={videoRef} autoPlay playsInline muted style={{ width: '100%', height: '100%', objectFit: 'cover', transform: isCapturingId ? 'none' : 'scaleX(-1)' }} />
-                         <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        {showDob && (
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                            <span style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--text-muted)' }}>DATE OF BIRTH (COMPLIANCE CHECK)</span>
+                            <input 
+                              type="date" 
+                              value={dob} 
+                              onChange={e => { setDob(e.target.value); setError(''); }}
+                              className="form-input"
+                              style={{ colorScheme: 'dark' }}
+                            />
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    <AnimatePresence>
+                      {error && (
+                        <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }}
+                          style={{ display: 'flex', alignItems: 'center', gap: '1rem', background: 'rgba(244,63,94,0.1)', border: '1px solid rgba(244,63,94,0.2)', borderRadius: '16px', padding: '1.25rem', color: '#f43f5e', fontSize: '0.9rem', fontWeight: 700 }}
+                        >
+                          <AlertCircle size={20} /> {error}
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={handleNextStep}
+                      disabled={!idNumber.trim()}
+                      className="btn btn-primary"
+                      style={{ padding: '1.25rem', borderRadius: '18px', fontSize: '1.1rem', fontWeight: 900, background: !idNumber.trim() ? 'rgba(255,255,255,0.05)' : 'var(--primary)', color: !idNumber.trim() ? 'rgba(255,255,255,0.2)' : '#fff' }}
+                    >
+                      Initialize Biometric Phase <ChevronRight size={20} />
+                    </motion.button>
+                  </div>
+                ) : showMobileScan ? (
+                  <div style={{ textAlign: 'center', padding: '1rem 0' }}>
+                     <div style={{ background: '#fff', padding: '2rem', borderRadius: '32px', display: 'inline-block', marginBottom: '2.5rem', boxShadow: '0 20px 50px rgba(0,0,0,0.5)' }}>
+                       <QRCodeSVG 
+                         value={window.location.origin + window.location.pathname + `?auth=${token}&step=2&idType=${idType}&idNumber=${idNumber}&dob=${dob}`} 
+                         size={220}
+                         level="H"
+                         includeMargin={true}
+                       />
+                     </div>
+                     <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', marginBottom: '2rem', fontWeight: 500 }}>Scan with your mobile device to complete biometrics with a high-resolution camera.</p>
+                     <button
+                       onClick={() => setShowMobileScan(false)}
+                       className="btn btn-outline"
+                       style={{ width: '100%', padding: '1rem', borderRadius: '14px' }}
+                     >
+                       Revert to Internal Camera
+                     </button>
+                  </div>
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
+                    <div style={{ position: 'relative', borderRadius: '32px', height: '360px', overflow: 'hidden', background: '#000', border: '1px solid rgba(255,255,255,0.1)', boxShadow: '0 30px 60px rgba(0,0,0,0.5)' }}>
+                       {isCapturingId && idImage ? (
+                         <img src={idImage} style={{ width: '100%', height: '100%', objectFit: 'contain' }} alt="ID Protocol" />
+                       ) : !isCapturingId && faceImage ? (
+                         <img src={faceImage} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="Biometric Match" />
+                       ) : !loading ? (
+                         <>
+                           <video ref={videoRef} autoPlay playsInline muted style={{ width: '100%', height: '100%', objectFit: 'cover', transform: isCapturingId ? 'none' : 'scaleX(-1)' }} />
+                           <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                             {isCapturingId ? (
+                               <div style={{ width: '85%', height: '65%', border: '2px solid var(--primary)', borderRadius: '16px', boxShadow: '0 0 0 1000px rgba(2,6,23,0.6)' }}>
+                                 <div style={{ position: 'absolute', top: '-2.5rem', left: '50%', transform: 'translateX(-50%)', color: 'var(--primary)', fontSize: '0.7rem', fontWeight: 900, letterSpacing: '2px', textTransform: 'uppercase' }}>ALIGN DOCUMENT</div>
+                               </div>
+                             ) : (
+                               <div style={{ width: 180, height: 240, border: '2px solid var(--accent)', borderRadius: '50% 50% 40% 40%', boxShadow: '0 0 0 1000px rgba(2,6,23,0.6)' }}>
+                                  <div style={{ position: 'absolute', top: '-2.5rem', left: '50%', transform: 'translateX(-50%)', color: 'var(--accent)', fontSize: '0.7rem', fontWeight: 900, letterSpacing: '2px', textTransform: 'uppercase' }}>ALIGN BIOMETRICS</div>
+                               </div>
+                             )}
+                           </div>
+                         </>
+                       ) : (
+                         <div style={{ position: 'absolute', inset: 0, background: 'rgba(2,6,23,0.8)', backdropFilter: 'blur(10px)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: '1.5rem' }}>
+                           <RefreshCcw size={48} className="animate-spin" color="var(--primary)" />
+                           <span style={{ color: '#fff', fontWeight: 900, fontSize: '0.8rem', letterSpacing: '3px', textTransform: 'uppercase' }}>PROCESSING PROTOCOL...</span>
+                         </div>
+                       )}
+                       <canvas ref={canvasRef} width="1280" height="720" style={{ display: 'none' }} />
+                    </div>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                       {(!idImage || (idImage && !faceImage)) ? (
+                         <div style={{ display: 'flex', gap: '1rem' }}>
+                           <motion.button
+                             whileHover={{ scale: 1.02 }}
+                             whileTap={{ scale: 0.98 }}
+                             onClick={captureImage}
+                             className="btn btn-primary"
+                             style={{ flex: 1, padding: '1.25rem', borderRadius: '18px', fontSize: '1.1rem', fontWeight: 900 }}
+                           >
+                             <Camera size={20} /> {isCapturingId ? 'Capture ID Data' : 'Capture Biometrics'}
+                           </motion.button>
                            {isCapturingId ? (
-                             <div style={{ width: '85%', height: '70%', border: '3px solid #6366f1', borderRadius: '12px', boxShadow: '0 0 0 1000px rgba(0,0,0,0.5)' }}>
-                               <div style={{ position: 'absolute', top: '10%', left: '50%', transform: 'translateX(-50%)', color: '#6366f1', fontSize: '0.7rem', fontWeight: 800 }}>ALIGN ID WITHIN FRAME</div>
-                             </div>
-                           ) : (
-                             <div style={{ width: 160, height: 210, border: '4px solid #10b981', borderRadius: '50% 50% 40% 40%', opacity: 0.9, boxShadow: '0 0 0 1000px rgba(0,0,0,0.5)' }} />
+                              <motion.button 
+                                whileHover={{ scale: 1.05 }}
+                                onClick={() => setShowMobileScan(true)}
+                                className="btn btn-outline"
+                                style={{ width: '64px', padding: 0, borderRadius: '18px' }}
+                              >
+                                 <Smartphone size={24} />
+                              </motion.button>
+                           ) : idImage && (
+                              <motion.button 
+                                whileHover={{ scale: 1.05 }}
+                                onClick={() => { setIdImage(null); setIsCapturingId(true); }}
+                                className="btn btn-outline"
+                                style={{ width: '64px', padding: 0, borderRadius: '18px' }}
+                              >
+                                 <RefreshCcw size={24} />
+                              </motion.button>
                            )}
                          </div>
-                       </>
-                     ) : (
-                       <div style={{ position: 'absolute', inset: 0, background: 'rgba(99,102,241,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: '1rem' }}>
-                         <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1, ease: 'linear' }} style={{ color: '#fff' }}><RefreshCcw size={40} /></motion.div>
-                         <span style={{ color: '#fff', fontWeight: 800, letterSpacing: '1px' }}>PROCESSING...</span>
-                       </div>
-                     )}
-                     <canvas ref={canvasRef} width="1280" height="720" style={{ display: 'none' }} />
-                  </div>
-                  
-                  <AnimatePresence>
-                    {error && (
-                      <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
-                        style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', background: 'rgba(244,63,94,0.1)', border: '1px solid rgba(244,63,94,0.3)', borderRadius: '10px', padding: '0.8rem 1rem', marginBottom: '1.25rem', color: '#f43f5e', fontSize: '0.85rem', fontWeight: 600, textAlign: 'left' }}
-                      >
-                        <AlertCircle size={20} style={{ flexShrink: 0 }} /> <span>{error}</span>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
+                       ) : (
+                         <div style={{ display: 'flex', gap: '1.25rem' }}>
+                           <motion.button
+                             whileTap={{ scale: 0.98 }}
+                             onClick={() => { setFaceImage(null); setIsCapturingId(false); }}
+                             disabled={loading}
+                             className="btn btn-outline"
+                             style={{ flex: 1, padding: '1.1rem', borderRadius: '18px', fontWeight: 900 }}
+                           >
+                             Recalibrate Selfie
+                           </motion.button>
+                           <motion.button
+                             whileTap={{ scale: 0.98 }}
+                             onClick={handleVerify}
+                             disabled={loading}
+                             className="btn btn-primary"
+                             style={{ flex: 2, padding: '1.1rem', borderRadius: '18px', fontSize: '1.1rem', fontWeight: 900 }}
+                           >
+                             {loading ? 'Submitting...' : 'Authorize Submission'}
+                           </motion.button>
+                         </div>
+                       )}
+                    </div>
 
-                  {(!idImage || (idImage && !faceImage)) ? (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                      <motion.button
-                        whileTap={{ scale: 0.98 }}
-                        onClick={captureImage}
-                        style={{ width: '100%', background: '#f59e0b', color: '#fff', border: 'none', padding: '1.1rem', borderRadius: '14px', fontSize: '1rem', fontWeight: 700, cursor: 'pointer', transition: 'all 0.3s' }}
-                      >
-                        {isCapturingId ? 'Capture ID Document' : 'Capture Selfie'}
-                      </motion.button>
-                      {isCapturingId && idImage && (
-                         <button
-                           onClick={() => setIdImage(null)}
-                           style={{ background: 'transparent', border: '1px solid #475569', color: '#94a3b8', padding: '1rem', borderRadius: '14px', fontSize: '0.9rem', fontWeight: 600, cursor: 'pointer' }}
-                         >
-                           Retake ID Photo
-                         </button>
+                    <AnimatePresence>
+                      {error && (
+                        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
+                          style={{ display: 'flex', alignItems: 'center', gap: '1rem', background: 'rgba(244,63,94,0.1)', border: '1px solid rgba(244,63,94,0.2)', borderRadius: '16px', padding: '1.25rem', color: '#f43f5e', fontSize: '0.9rem', fontWeight: 700 }}
+                        >
+                          <AlertCircle size={22} style={{ flexShrink: 0 }} /> {error}
+                        </motion.div>
                       )}
-                    </div>
-                  ) : (
-                    <div style={{ display: 'flex', gap: '1rem' }}>
-                      <motion.button
-                        whileTap={{ scale: 0.98 }}
-                        onClick={() => { setFaceImage(null); setIsCapturingId(false); }}
-                        disabled={loading}
-                        style={{ flex: '1', background: 'rgba(255,255,255,0.05)', color: '#fff', border: '1px solid #475569', padding: '1.1rem', borderRadius: '14px', fontSize: '1rem', fontWeight: 700, cursor: loading ? 'not-allowed' : 'pointer' }}
-                      >
-                        Retake Selfie
-                      </motion.button>
-                      <motion.button
-                        whileTap={{ scale: 0.98 }}
-                        onClick={handleVerify}
-                        disabled={loading}
-                        style={{ flex: '2', background: loading ? '#1e293b' : '#6366f1', color: loading ? '#475569' : '#fff', border: 'none', padding: '1.1rem', borderRadius: '14px', fontSize: '1rem', fontWeight: 700, cursor: loading ? 'not-allowed' : 'pointer', boxShadow: loading ? 'none' : '0 10px 30px -10px rgba(99,102,241,0.5)' }}
-                      >
-                        {loading ? 'Processing...' : 'Submit & Verify'}
-                      </motion.button>
-                    </div>
-                  )}
-                </>
-              )}
+                    </AnimatePresence>
+                  </div>
+                )}
               </div>
             </motion.div>
           </div>
@@ -543,60 +565,3 @@ const VerificationGate: React.FC<VerificationGateProps> = ({ kycStatus: initialS
 };
 
 export default VerificationGate;
-
-// ==================
-// Notification Panel
-// ==================
-const NotificationPanel = ({ notifications, show, onClose }: { notifications: Notification[], show: boolean, onClose: () => void }) => {
-  if (!show) return null;
-
-  const typeColors: Record<string, string> = {
-    ERROR: '#f43f5e',
-    SUCCESS: '#10b981',
-    WARNING: '#f59e0b',
-    INFO: '#6366f1'
-  };
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: -10, scale: 0.97 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
-      exit={{ opacity: 0 }}
-      style={{ position: 'fixed', top: '4.5rem', right: '2rem', width: '380px', background: '#0a0f1e', border: '1px solid #1e293b', borderRadius: '24px', boxShadow: '0 30px 60px rgba(0,0,0,0.8)', zIndex: 5000, overflow: 'hidden' }}
-    >
-      <div style={{ padding: '1.25rem 1.5rem', borderBottom: '1px solid #1e293b', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#0f172a' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-           <Bell size={18} color="#6366f1" />
-           <span style={{ fontWeight: 800, fontSize: '1rem', letterSpacing: '-0.01em' }}>Recent Activity</span>
-        </div>
-        <button onClick={onClose} style={{ background: 'rgba(255,255,255,0.05)', border: 'none', color: '#64748b', cursor: 'pointer', display: 'flex', padding: '0.4rem', borderRadius: '50%' }}><X size={16} /></button>
-      </div>
-      <div style={{ maxHeight: '450px', overflowY: 'auto', background: '#0a0f1e' }}>
-        {notifications.length === 0 ? (
-          <div style={{ padding: '4rem 2rem', textAlign: 'center', color: '#475569', fontSize: '0.85rem' }}>
-            <Bell size={40} style={{ opacity: 0.1, marginBottom: '1rem' }} />
-            <div>No activity yet</div>
-          </div>
-        ) : notifications.map(n => (
-          <div key={n.id} style={{ padding: '1.25rem 1.5rem', borderBottom: '1px solid rgba(255,255,255,0.03)', background: n.read ? 'transparent' : 'rgba(99,102,241,0.03)', position: 'relative' }}>
-            {!n.read && <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: '3px', background: typeColors[n.type] || '#6366f1' }} />}
-            <div style={{ display: 'flex', gap: '1rem', alignItems: 'flex-start' }}>
-              <div style={{ width: 10, height: 10, borderRadius: '50%', background: typeColors[n.type] || '#6366f1', marginTop: '0.3rem', flexShrink: 0, boxShadow: `0 0 10px ${typeColors[n.type] || '#6366f1'}` }} />
-              <div style={{ flex: 1 }}>
-                <div style={{ fontWeight: 800, fontSize: '0.9rem', marginBottom: '0.35rem', color: '#fff', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  {n.title}
-                  {n.type === 'SUCCESS' && <CheckCircle2 size={14} color="#10b981" />}
-                </div>
-                <div style={{ fontSize: '0.85rem', color: '#94a3b8', lineHeight: 1.6 }}>{n.message}</div>
-                <div style={{ fontSize: '0.7rem', color: '#475569', marginTop: '0.6rem', fontWeight: 600 }}>{new Date(n.createdAt).toLocaleTimeString()} • {new Date(n.createdAt).toLocaleDateString()}</div>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-      <div style={{ padding: '1rem', borderTop: '1px solid #1e293b', background: '#0f172a', textAlign: 'center' }}>
-         <button style={{ background: 'transparent', border: 'none', color: '#6366f1', fontSize: '0.8rem', fontWeight: 700, cursor: 'pointer' }}>View All Activity</button>
-      </div>
-    </motion.div>
-  );
-};

@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Bell, X, CheckCircle2 } from 'lucide-react';
+import { Bell, X, CheckCircle2, AlertCircle, Info, Zap, Sparkles } from 'lucide-react';
 
 interface Notification {
   id: string;
@@ -22,61 +22,120 @@ const NotificationPanel: React.FC<NotificationPanelProps> = ({ notifications, sh
 
   const typeColors: Record<string, string> = {
     ERROR: '#f43f5e',
-    SUCCESS: '#10b981',
+    SUCCESS: 'var(--accent)',
     WARNING: '#f59e0b',
-    INFO: '#6366f1'
+    INFO: 'var(--primary)'
+  };
+
+  const getIcon = (type: string) => {
+    switch(type) {
+      case 'SUCCESS': return <CheckCircle2 size={16} color="var(--accent)" />;
+      case 'ERROR': return <AlertCircle size={16} color="#f43f5e" />;
+      case 'WARNING': return <Info size={16} color="#f59e0b" />;
+      default: return <Zap size={16} color="var(--primary)" />;
+    }
   };
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: -10, scale: 0.97 }}
+      initial={{ opacity: 0, y: -20, scale: 0.95 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
-      exit={{ opacity: 0 }}
+      exit={{ opacity: 0, y: -20, scale: 0.95 }}
+      className="premium-card"
       style={{ 
         position: 'fixed', 
-        top: '5.5rem', 
-        right: '2rem', 
-        width: '380px', 
-        background: '#0a0f1e', 
-        border: '1px solid var(--border)', 
-        borderRadius: '24px', 
-        boxShadow: '0 30px 60px rgba(0,0,0,0.8)', 
-        zIndex: 1000, 
-        overflow: 'hidden' 
+        top: '6rem', 
+        right: '2.5rem', 
+        width: '420px', 
+        zIndex: 10000, 
+        padding: 0,
+        overflow: 'hidden',
+        boxShadow: '0 40px 100px rgba(0,0,0,0.8)',
+        backdropFilter: 'blur(30px)'
       }}
     >
-      <div style={{ padding: '1.25rem 1.5rem', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(255,255,255,0.02)' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-           <Bell size={18} color="#6366f1" />
-           <span style={{ fontWeight: 800, fontSize: '1rem', letterSpacing: '-0.01em' }}>Recent Activity</span>
+      <div style={{ padding: '1.75rem 2rem', borderBottom: '1px solid rgba(255,255,255,0.08)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(255,255,255,0.02)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+           <div style={{ width: 36, height: 36, borderRadius: '10px', background: 'rgba(99, 102, 241, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary)' }}>
+              <Bell size={20} />
+           </div>
+           <div>
+              <span style={{ fontWeight: 900, fontSize: '1.1rem', color: '#fff', letterSpacing: '-0.02em' }}>Security Intel</span>
+              <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px' }}>AI SENTINEL CORE</div>
+           </div>
         </div>
-        <button onClick={onClose} style={{ background: 'rgba(255,255,255,0.05)', border: 'none', color: '#64748b', cursor: 'pointer', display: 'flex', padding: '0.4rem', borderRadius: '50%' }}><X size={16} /></button>
+        <motion.button 
+          whileHover={{ scale: 1.1, background: 'rgba(255,255,255,0.1)' }}
+          whileTap={{ scale: 0.9 }}
+          onClick={onClose} 
+          style={{ background: 'rgba(255,255,255,0.05)', border: 'none', color: '#fff', cursor: 'pointer', display: 'flex', padding: '0.6rem', borderRadius: '10px' }}
+        >
+          <X size={18} />
+        </motion.button>
       </div>
-      <div style={{ maxHeight: '450px', overflowY: 'auto' }}>
+
+      <div style={{ maxHeight: '500px', overflowY: 'auto', padding: '1rem 0' }} className="custom-scrollbar">
         {notifications.length === 0 ? (
-          <div style={{ padding: '4rem 2rem', textAlign: 'center', color: '#475569', fontSize: '0.85rem' }}>
-            <Bell size={40} style={{ opacity: 0.1, marginBottom: '1rem' }} />
-            <div>No activity yet</div>
+          <div style={{ padding: '6rem 3rem', textAlign: 'center' }}>
+            <div style={{ width: 80, height: 80, borderRadius: '50%', background: 'rgba(255,255,255,0.02)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 2rem', border: '1px dashed rgba(255,255,255,0.1)' }}>
+               <Sparkles size={32} style={{ opacity: 0.2, color: 'var(--primary)' }} />
+            </div>
+            <div style={{ fontWeight: 800, fontSize: '1.1rem', color: '#fff', marginBottom: '0.5rem' }}>Neutral Operations</div>
+            <div style={{ fontSize: '0.9rem', color: 'var(--text-muted)', fontWeight: 500 }}>No anomalous activity detected.</div>
           </div>
         ) : notifications.map(n => (
-          <div key={n.id} style={{ padding: '1.25rem 1.5rem', borderBottom: '1px solid rgba(255,255,255,0.03)', background: n.read ? 'transparent' : 'rgba(99,102,241,0.03)', position: 'relative' }}>
-            {!n.read && <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: '3px', background: typeColors[n.type] || '#6366f1' }} />}
-            <div style={{ display: 'flex', gap: '1rem', alignItems: 'flex-start' }}>
-              <div style={{ width: 10, height: 10, borderRadius: '50%', background: typeColors[n.type] || '#6366f1', marginTop: '0.3rem', flexShrink: 0, boxShadow: `0 0 10px ${typeColors[n.type] || '#6366f1'}` }} />
+          <motion.div 
+            key={n.id} 
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            style={{ 
+              padding: '1.5rem 2rem', 
+              borderBottom: '1px solid rgba(255,255,255,0.03)', 
+              background: n.read ? 'transparent' : 'rgba(99, 102, 241, 0.05)', 
+              position: 'relative',
+              cursor: 'pointer',
+              transition: 'all 0.2s'
+            }}
+            whileHover={{ background: 'rgba(255,255,255,0.02)' }}
+          >
+            {!n.read && (
+               <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: '4px', background: typeColors[n.type] || 'var(--primary)', boxShadow: `0 0 15px ${typeColors[n.type] || 'var(--primary)'}` }} />
+            )}
+            <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'flex-start' }}>
+              <div style={{ 
+                width: 12, 
+                height: 12, 
+                borderRadius: '50%', 
+                background: typeColors[n.type] || 'var(--primary)', 
+                marginTop: '0.4rem', 
+                flexShrink: 0, 
+                boxShadow: `0 0 12px ${typeColors[n.type] || 'var(--primary)'}`,
+                animation: !n.read ? 'pulse 2s infinite' : 'none'
+              }} />
               <div style={{ flex: 1 }}>
-                <div style={{ fontWeight: 800, fontSize: '0.9rem', marginBottom: '0.35rem', color: '#fff', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div style={{ fontWeight: 900, fontSize: '1rem', marginBottom: '0.5rem', color: '#fff', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   {n.title}
-                  {n.type === 'SUCCESS' && <CheckCircle2 size={14} color="#10b981" />}
+                  {getIcon(n.type)}
                 </div>
-                <div style={{ fontSize: '0.85rem', color: '#94a3b8', lineHeight: 1.6 }}>{n.message}</div>
-                <div style={{ fontSize: '0.7rem', color: '#475569', marginTop: '0.6rem', fontWeight: 600 }}>{new Date(n.createdAt).toLocaleTimeString()} • {new Date(n.createdAt).toLocaleDateString()}</div>
+                <div style={{ fontSize: '0.9rem', color: 'rgba(255,255,255,0.6)', lineHeight: 1.6, fontWeight: 500 }}>{n.message}</div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginTop: '1rem' }}>
+                   <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                     {new Date(n.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} • {new Date(n.createdAt).toLocaleDateString([], { day: '2-digit', month: 'short' })}
+                   </div>
+                   {!n.read && (
+                      <div style={{ fontSize: '0.65rem', fontWeight: 900, color: 'var(--primary)', background: 'rgba(99, 102, 241, 0.15)', padding: '0.2rem 0.6rem', borderRadius: '4px' }}>NEW</div>
+                   )}
+                </div>
               </div>
             </div>
-          </div>
+          </motion.div>
         ))}
       </div>
-      <div style={{ padding: '1rem', borderTop: '1px solid var(--border)', background: 'rgba(255,255,255,0.01)', textAlign: 'center' }}>
-         <button style={{ background: 'transparent', border: 'none', color: '#6366f1', fontSize: '0.8rem', fontWeight: 700, cursor: 'pointer' }}>View All Activity</button>
+
+      <div style={{ padding: '1.5rem', borderTop: '1px solid rgba(255,255,255,0.08)', background: 'rgba(255,255,255,0.01)', textAlign: 'center' }}>
+         <button className="btn btn-outline" style={{ width: '100%', borderRadius: '12px', padding: '0.8rem', fontSize: '0.85rem', fontWeight: 900 }}>
+            Archive All Activity
+         </button>
       </div>
     </motion.div>
   );
