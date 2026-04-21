@@ -41,16 +41,17 @@ const VerificationGate: React.FC<VerificationGateProps> = ({ kycStatus: initialS
   const [idType, setIdType] = useState(accountType === 'BUSINESS' ? 'CAC' : 'NIN');
   const [idNumber, setIdNumber] = useState('');
   const [dob, setDob] = useState('');
+  const [idImage, setIdImage] = useState<string | null>(null);
   const [faceImage, setFaceImage] = useState<string | null>(null);
   const [error, setError] = useState('');
   const [showMobileScan, setShowMobileScan] = useState(false);
+  const [isCapturingId, setIsCapturingId] = useState(true); // Toggle between ID and Face
 
   const videoRef = React.useRef<HTMLVideoElement>(null);
   const canvasRef = React.useRef<HTMLCanvasElement>(null);
   const [stream, setStream] = useState<MediaStream | null>(null);
 
   const token = localStorage.getItem('paypee_token');
-  const headers = { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
 
   const fetchStatus = useCallback(async () => {
     try {
@@ -103,16 +104,22 @@ const VerificationGate: React.FC<VerificationGateProps> = ({ kycStatus: initialS
     };
   }, [kycStep, faceImage, loading]);
 
-  const captureFace = () => {
+  const captureImage = () => {
     if (videoRef.current && canvasRef.current) {
       const ctx = canvasRef.current.getContext('2d');
       if (ctx) {
-        // Apply image enhancements to improve Prembly face match success rate
-        ctx.filter = 'brightness(1.15) contrast(1.1) saturate(1.05)';
-        ctx.drawImage(videoRef.current, 0, 0, 240, 320);
-        const dataUrl = canvasRef.current.toDataURL('image/jpeg', 0.9);
-        setFaceImage(dataUrl);
-        if (stream) stream.getTracks().forEach(t => t.stop());
+        // High resolution (720p) for better OCR and document detection
+        ctx.filter = 'brightness(1.02) contrast(1.05)';
+        ctx.drawImage(videoRef.current, 0, 0, 1280, 720);
+        const dataUrl = canvasRef.current.toDataURL('image/jpeg', 0.95);
+        
+        if (isCapturingId) {
+          setIdImage(dataUrl);
+          setIsCapturingId(false); // Move to face capture next
+        } else {
+          setFaceImage(dataUrl);
+          if (stream) stream.getTracks().forEach(t => t.stop());
+        }
       }
     }
   };
@@ -124,9 +131,6 @@ const VerificationGate: React.FC<VerificationGateProps> = ({ kycStatus: initialS
     const interval = setInterval(fetchStatus, kycStatus === 'PROCESSING' ? 10000 : 30000);
     return () => clearInterval(interval);
   }, [kycStatus, fetchStatus]);
-
-
-
 
   const handleNextStep = () => {
     setError('');
@@ -142,20 +146,26 @@ const VerificationGate: React.FC<VerificationGateProps> = ({ kycStatus: initialS
       return;
     }
     setKycStep(2);
+    setIsCapturingId(true);
   };
 
   const handleVerify = async () => {
     console.log('[FRONTEND DEBUG] 🎬 Verification button clicked!');
     setError('');
+    if (!idImage) {
+      setError('Please capture a clear photo of your ID document showing all four edges.');
+      setIsCapturingId(true);
+      return;
+    }
     if (!faceImage) { 
       console.warn('[FRONTEND DEBUG] ❌ No selfie captured yet.');
-      setError('Please capture a selfie to proceed.'); 
+      setError('Please capture a live selfie to proceed.'); 
+      setIsCapturingId(false);
       return; 
     }
 
     setLoading(true);
     const token = localStorage.getItem('paypee_token');
-    console.log('[FRONTEND DEBUG] 🔑 Auth Token exists?', !!token);
     
     try {
       if (stream) {
@@ -163,24 +173,24 @@ const VerificationGate: React.FC<VerificationGateProps> = ({ kycStatus: initialS
         stream.getTracks().forEach(t => t.stop());
       }
 
-      console.log('[FRONTEND DEBUG] 🚀 Sending FETCH request to Render...');
-      console.log('[FRONTEND DEBUG] Payload size:', faceImage.length);
-
       const res = await fetch(`${API_BASE}/api/verify/identity`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ idType, idNumber: idNumber.trim(), dob, faceImage })
+        body: JSON.stringify({ 
+          idType, 
+          idNumber: idNumber.trim(), 
+          dob, 
+          faceImage,
+          idImage
+        })
       });
 
-      console.log('[FRONTEND DEBUG] 🛰️ Server Response Received. Status:', res.status);
       const data = await res.json();
-      console.log('[FRONTEND DEBUG] Server Response Data:', data);
 
       if (res.ok) {
-        console.log('[FRONTEND DEBUG] ✅ Verification Successful!');
         setKycStatus(data.status);
         if (onStatusChange) onStatusChange(data.status);
         if (data.status === 'VERIFIED') {
@@ -189,7 +199,6 @@ const VerificationGate: React.FC<VerificationGateProps> = ({ kycStatus: initialS
         setShowModal(false);
         await fetchStatus();
       } else {
-        console.warn('[FRONTEND DEBUG] ❌ Server rejected verification:', data.error);
         const backendError = data.error || 'Verification failed. Please check your details.';
         const hint = data.status === 'REJECTED' ? ' Ensure your face is clearly visible, well-lit, and matches your ID.' : '';
         setError(backendError + hint);
@@ -199,11 +208,9 @@ const VerificationGate: React.FC<VerificationGateProps> = ({ kycStatus: initialS
         }
       }
     } catch (err: any) {
-      console.error('[FRONTEND DEBUG] 💥 Browser Network Error:', err.message);
-      setError(`Network error: ${err.message}. If you are on a slow connection, please try again.`);
+      setError(`Network error: ${err.message}. Please try again.`);
     } finally {
       setLoading(false);
-      console.log('[FRONTEND DEBUG] 🏁 Verification attempt finished.');
     }
   };
 
@@ -226,7 +233,45 @@ const VerificationGate: React.FC<VerificationGateProps> = ({ kycStatus: initialS
   const isBusiness = accountType === 'BUSINESS';
   const showDob = !isBusiness && (idType === 'NIN' || idType === 'BVN' || idType === 'PASSPORT');
 
-  if (kycStatus === 'VERIFIED' && !forceShow) return null;
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [showNotifications, setShowNotifications] = useState(false);
+
+  const fetchNotifications = useCallback(async () => {
+    try {
+      const res = await fetch(`${API_BASE}/api/notifications`, { 
+        headers: { 'Authorization': `Bearer ${token}` } 
+      });
+      const data = await res.json();
+      setNotifications(data);
+    } catch (_) {}
+  }, [token]);
+
+  useEffect(() => {
+    fetchNotifications();
+    const interval = setInterval(fetchNotifications, 30000);
+    return () => clearInterval(interval);
+  }, [fetchNotifications]);
+
+  if (kycStatus === 'VERIFIED' && !forceShow) {
+    return (
+      <div style={{ position: 'fixed', top: '1.5rem', right: '1.5rem', zIndex: 1000 }}>
+        <button 
+          onClick={() => setShowNotifications(!showNotifications)}
+          style={{ background: '#0f172a', border: '1px solid #1e293b', color: '#fff', width: '45px', height: '45px', borderRadius: '15px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', position: 'relative', boxShadow: '0 10px 25px rgba(0,0,0,0.3)' }}
+        >
+          <Bell size={20} />
+          {notifications.some(n => !n.read) && (
+            <span style={{ position: 'absolute', top: '-5px', right: '-5px', width: '12px', height: '12px', background: '#f43f5e', borderRadius: '50%', border: '2px solid #0f172a' }} />
+          )}
+        </button>
+        <AnimatePresence>
+          {showNotifications && (
+            <NotificationPanel notifications={notifications} show={showNotifications} onClose={() => setShowNotifications(false)} />
+          )}
+        </AnimatePresence>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -260,9 +305,22 @@ const VerificationGate: React.FC<VerificationGateProps> = ({ kycStatus: initialS
         </div>
 
         <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+          <button 
+            onClick={() => setShowNotifications(!showNotifications)}
+            style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '0.4rem', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}
+          >
+            <Bell size={18} />
+            {notifications.some(n => !n.read) && (
+              <span style={{ position: 'absolute', top: '-2px', right: '-2px', width: '8px', height: '8px', background: '#f43f5e', borderRadius: '50%' }} />
+            )}
+          </button>
 
+          <AnimatePresence>
+            {showNotifications && (
+              <NotificationPanel notifications={notifications} show={showNotifications} onClose={() => setShowNotifications(false)} />
+            )}
+          </AnimatePresence>
 
-          {/* Action Button */}
           {(kycStatus === 'PENDING' || kycStatus === 'REJECTED' || forceShow) && (
             <button
               onClick={() => { setShowModal(true); setKycStep(1); setError(''); }}
@@ -273,8 +331,6 @@ const VerificationGate: React.FC<VerificationGateProps> = ({ kycStatus: initialS
           )}
         </div>
       </motion.div>
-
-
 
       {/* KYC Modal */}
       <AnimatePresence>
@@ -292,19 +348,20 @@ const VerificationGate: React.FC<VerificationGateProps> = ({ kycStatus: initialS
                 <X size={20} />
               </button>
 
-              {/* Header */}
               <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
                 <div style={{ width: 72, height: 72, background: 'rgba(99,102,241,0.1)', borderRadius: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#6366f1', margin: '0 auto 1.25rem' }}>
                   {kycStep === 2 ? <User size={36} /> : accountType === 'BUSINESS' ? <Building2 size={36} /> : <User size={36} />}
                 </div>
                 <h2 style={{ fontSize: '1.6rem', fontWeight: 800, marginBottom: '0.4rem' }}>
-                  {kycStep === 2 ? 'Liveness Face Match' : kycStatus === 'REJECTED' ? 'Retry Verification' : accountType === 'BUSINESS' ? 'Business Verification' : 'Identity Verification'}
+                  {kycStep === 2 ? (isCapturingId ? 'ID Document Photo' : 'Liveness Face Match') : kycStatus === 'REJECTED' ? 'Retry Verification' : accountType === 'BUSINESS' ? 'Business Verification' : 'Identity Verification'}
                 </h2>
                 <p style={{ color: '#64748b', fontSize: '0.9rem', lineHeight: 1.5 }}>
                   {kycStep === 2 
-                    ? `Prembly IdentityPass requires a live selfie to match against your ${idType} profile.`
+                    ? isCapturingId 
+                      ? `Please place your ${idType} card within the frame. Ensure all four edges are showing and text is readable. No scans or photocopies.`
+                      : `Now, take a live selfie. Ensure your face is well-lit and fits the oval frame.`
                     : kycStatus === 'REJECTED' 
-                    ? 'Your previous attempt failed. Please check your ID number carefully and try again.'
+                    ? 'Your previous attempt failed. Please check your ID number carefully and ensure your document photo is clear.'
                     : `Verify your ${accountType === 'BUSINESS' ? 'business registration' : 'identity'} to unlock global transfers, card issuance, and all Paypee features.`
                   }
                 </p>
@@ -312,7 +369,6 @@ const VerificationGate: React.FC<VerificationGateProps> = ({ kycStatus: initialS
 
               {kycStep === 1 ? (
                 <>
-                  {/* ID Type Selector */}
                   <div style={{ marginBottom: '1.25rem' }}>
                     <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 800, color: '#475569', letterSpacing: '1.5px', marginBottom: '0.75rem' }}>
                       VERIFICATION TYPE
@@ -334,7 +390,6 @@ const VerificationGate: React.FC<VerificationGateProps> = ({ kycStatus: initialS
                     </div>
                   </div>
 
-                  {/* ID Number Input */}
                   <div style={{ marginBottom: '1.5rem' }}>
                     <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 800, color: '#475569', letterSpacing: '1.5px', marginBottom: '0.6rem' }}>
                       {idType === 'NIN' ? 'NIN NUMBER' : idType === 'CAC' ? 'CAC / RC NUMBER' : 'ID NUMBER'}
@@ -346,8 +401,6 @@ const VerificationGate: React.FC<VerificationGateProps> = ({ kycStatus: initialS
                       placeholder={idType === 'CAC' ? 'e.g. RC123456 or BN123456' : idType === 'NIN' ? 'Enter 11-digit NIN' : 'Enter your ID number'}
                       maxLength={20}
                       style={{ width: '100%', background: 'rgba(255,255,255,0.03)', border: `2px solid ${error ? '#f43f5e' : '#1e293b'}`, borderRadius: '12px', padding: '0.9rem 1.1rem', color: '#fff', fontSize: '1rem', fontWeight: 600, letterSpacing: '2px', outline: 'none', boxSizing: 'border-box', transition: 'border 0.2s' }}
-                      onFocus={e => { if (!error) e.target.style.borderColor = '#6366f1'; }}
-                      onBlur={e => { if (!error) e.target.style.borderColor = '#1e293b'; }}
                     />
                   </div>
 
@@ -362,13 +415,9 @@ const VerificationGate: React.FC<VerificationGateProps> = ({ kycStatus: initialS
                         onChange={e => { setDob(e.target.value); setError(''); }}
                         style={{ width: '100%', background: 'rgba(255,255,255,0.03)', border: `2px solid ${error ? '#f43f5e' : '#1e293b'}`, borderRadius: '12px', padding: '0.9rem 1.1rem', color: '#fff', fontSize: '1rem', fontWeight: 600, outline: 'none', boxSizing: 'border-box', transition: 'border 0.2s', colorScheme: 'dark' }}
                       />
-                      <p style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.3)', marginTop: '0.5rem' }}>
-                        Must match the date on your {idType} record.
-                      </p>
                     </div>
                   )}
 
-                  {/* Error */}
                   <AnimatePresence>
                     {error && (
                       <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
@@ -379,15 +428,6 @@ const VerificationGate: React.FC<VerificationGateProps> = ({ kycStatus: initialS
                     )}
                   </AnimatePresence>
 
-                  {/* Security note */}
-                  <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid #1e293b', borderRadius: '10px', padding: '0.9rem', marginBottom: '1.5rem', display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}>
-                    <ShieldAlert size={15} color="#475569" style={{ marginTop: '0.1rem', flexShrink: 0 }} />
-                    <span style={{ fontSize: '0.75rem', color: '#475569', lineHeight: 1.5 }}>
-                      Your ID is verified live through Prembly's secure infrastructure and never stored raw.
-                    </span>
-                  </div>
-
-                  {/* Submit */}
                   <motion.button
                     whileTap={{ scale: 0.98 }}
                     onClick={handleNextStep}
@@ -407,12 +447,6 @@ const VerificationGate: React.FC<VerificationGateProps> = ({ kycStatus: initialS
                        includeMargin={true}
                      />
                    </div>
-                   <div>
-                     <h3 style={{ fontSize: '1.2rem', fontWeight: 800, marginBottom: '0.5rem' }}>Scan with your Phone</h3>
-                     <p style={{ color: '#94a3b8', fontSize: '0.9rem', lineHeight: 1.5 }}>
-                       Open your phone's camera and scan this code to continue verification seamlessly with a better camera.
-                     </p>
-                   </div>
                    <button
                      onClick={() => setShowMobileScan(false)}
                      style={{ background: 'transparent', border: 'none', color: '#6366f1', fontWeight: 700, cursor: 'pointer', padding: '0.5rem' }}
@@ -422,24 +456,33 @@ const VerificationGate: React.FC<VerificationGateProps> = ({ kycStatus: initialS
                 </div>
               ) : (
                 <>
-                  <div style={{ background: '#1e293b', borderRadius: '24px', height: '280px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', marginBottom: '1.5rem', border: '2px dashed #475569', position: 'relative', overflow: 'hidden' }}>
-                     {faceImage ? (
+                  <div style={{ background: '#1e293b', borderRadius: '24px', height: '320px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', marginBottom: '1.5rem', border: '2px dashed #475569', position: 'relative', overflow: 'hidden' }}>
+                     {isCapturingId && idImage ? (
+                       <img src={idImage} style={{ width: '100%', height: '100%', objectFit: 'contain', background: '#000' }} alt="Captured ID" />
+                     ) : !isCapturingId && faceImage ? (
                        <img src={faceImage} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="Captured Selfie" />
                      ) : !loading ? (
                        <>
-                         <video ref={videoRef} autoPlay playsInline muted style={{ width: '100%', height: '100%', objectFit: 'cover', transform: 'scaleX(-1)' }} />
+                         <video ref={videoRef} autoPlay playsInline muted style={{ width: '100%', height: '100%', objectFit: 'cover', transform: isCapturingId ? 'none' : 'scaleX(-1)' }} />
                          <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                           <div style={{ width: 140, height: 180, border: '4px solid #10b981', borderRadius: '50% 50% 40% 40%', opacity: 0.9, boxShadow: '0 0 0 1000px rgba(0,0,0,0.4)' }} />
+                           {isCapturingId ? (
+                             <div style={{ width: '85%', height: '70%', border: '3px solid #6366f1', borderRadius: '12px', boxShadow: '0 0 0 1000px rgba(0,0,0,0.5)' }}>
+                               <div style={{ position: 'absolute', top: '10%', left: '50%', transform: 'translateX(-50%)', color: '#6366f1', fontSize: '0.7rem', fontWeight: 800 }}>ALIGN ID WITHIN FRAME</div>
+                             </div>
+                           ) : (
+                             <div style={{ width: 160, height: 210, border: '4px solid #10b981', borderRadius: '50% 50% 40% 40%', opacity: 0.9, boxShadow: '0 0 0 1000px rgba(0,0,0,0.5)' }} />
+                           )}
                          </div>
                        </>
                      ) : (
                        <div style={{ position: 'absolute', inset: 0, background: 'rgba(99,102,241,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: '1rem' }}>
                          <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1, ease: 'linear' }} style={{ color: '#fff' }}><RefreshCcw size={40} /></motion.div>
-                         <span style={{ color: '#fff', fontWeight: 800, letterSpacing: '1px' }}>ANALYZING BIOMETRICS...</span>
+                         <span style={{ color: '#fff', fontWeight: 800, letterSpacing: '1px' }}>PROCESSING...</span>
                        </div>
                      )}
-                     <canvas ref={canvasRef} width="240" height="320" style={{ display: 'none' }} />
+                     <canvas ref={canvasRef} width="1280" height="720" style={{ display: 'none' }} />
                   </div>
+                  
                   <AnimatePresence>
                     {error && (
                       <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
@@ -449,42 +492,44 @@ const VerificationGate: React.FC<VerificationGateProps> = ({ kycStatus: initialS
                       </motion.div>
                     )}
                   </AnimatePresence>
-                  
-                  {!faceImage ? (
-                     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                       <motion.button
-                         whileTap={{ scale: 0.98 }}
-                         onClick={captureFace}
-                         style={{ width: '100%', background: '#f59e0b', color: '#fff', border: 'none', padding: '1.1rem', borderRadius: '14px', fontSize: '1rem', fontWeight: 700, cursor: 'pointer', transition: 'all 0.3s' }}
-                       >
-                         Take Snapshot
-                       </motion.button>
-                       <button
-                         onClick={() => setShowMobileScan(true)}
-                         style={{ background: 'transparent', border: '1px solid #475569', color: '#94a3b8', padding: '1rem', borderRadius: '14px', fontSize: '0.9rem', fontWeight: 600, cursor: 'pointer' }}
-                       >
-                         Verify from Phone
-                       </button>
-                     </div>
+
+                  {(!idImage || (idImage && !faceImage)) ? (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                      <motion.button
+                        whileTap={{ scale: 0.98 }}
+                        onClick={captureImage}
+                        style={{ width: '100%', background: '#f59e0b', color: '#fff', border: 'none', padding: '1.1rem', borderRadius: '14px', fontSize: '1rem', fontWeight: 700, cursor: 'pointer', transition: 'all 0.3s' }}
+                      >
+                        {isCapturingId ? 'Capture ID Document' : 'Capture Selfie'}
+                      </motion.button>
+                      {isCapturingId && idImage && (
+                         <button
+                           onClick={() => setIdImage(null)}
+                           style={{ background: 'transparent', border: '1px solid #475569', color: '#94a3b8', padding: '1rem', borderRadius: '14px', fontSize: '0.9rem', fontWeight: 600, cursor: 'pointer' }}
+                         >
+                           Retake ID Photo
+                         </button>
+                      )}
+                    </div>
                   ) : (
-                     <div style={{ display: 'flex', gap: '1rem' }}>
-                       <motion.button
-                         whileTap={{ scale: 0.98 }}
-                         onClick={() => setFaceImage(null)}
-                         disabled={loading}
-                         style={{ flex: '1', background: 'rgba(255,255,255,0.05)', color: '#fff', border: '1px solid #475569', padding: '1.1rem', borderRadius: '14px', fontSize: '1rem', fontWeight: 700, cursor: loading ? 'not-allowed' : 'pointer', letterSpacing: '-0.3px' }}
-                       >
-                         Retake
-                       </motion.button>
-                       <motion.button
-                         whileTap={{ scale: 0.98 }}
-                         onClick={handleVerify}
-                         disabled={loading}
-                         style={{ flex: '2', background: loading ? '#1e293b' : '#6366f1', color: loading ? '#475569' : '#fff', border: 'none', padding: '1.1rem', borderRadius: '14px', fontSize: '1rem', fontWeight: 700, cursor: loading ? 'not-allowed' : 'pointer', transition: 'all 0.3s', boxShadow: loading ? 'none' : '0 10px 30px -10px rgba(99,102,241,0.5)' }}
-                       >
-                         {loading ? 'Processing...' : 'Submit & Verify'}
-                       </motion.button>
-                     </div>
+                    <div style={{ display: 'flex', gap: '1rem' }}>
+                      <motion.button
+                        whileTap={{ scale: 0.98 }}
+                        onClick={() => { setFaceImage(null); setIsCapturingId(false); }}
+                        disabled={loading}
+                        style={{ flex: '1', background: 'rgba(255,255,255,0.05)', color: '#fff', border: '1px solid #475569', padding: '1.1rem', borderRadius: '14px', fontSize: '1rem', fontWeight: 700, cursor: loading ? 'not-allowed' : 'pointer' }}
+                      >
+                        Retake Selfie
+                      </motion.button>
+                      <motion.button
+                        whileTap={{ scale: 0.98 }}
+                        onClick={handleVerify}
+                        disabled={loading}
+                        style={{ flex: '2', background: loading ? '#1e293b' : '#6366f1', color: loading ? '#475569' : '#fff', border: 'none', padding: '1.1rem', borderRadius: '14px', fontSize: '1rem', fontWeight: 700, cursor: loading ? 'not-allowed' : 'pointer', boxShadow: loading ? 'none' : '0 10px 30px -10px rgba(99,102,241,0.5)' }}
+                      >
+                        {loading ? 'Processing...' : 'Submit & Verify'}
+                      </motion.button>
+                    </div>
                   )}
                 </>
               )}
@@ -493,12 +538,11 @@ const VerificationGate: React.FC<VerificationGateProps> = ({ kycStatus: initialS
           </div>
         )}
       </AnimatePresence>
-
-      {/* Full-screen blocker removed to allow dashboard visibility during processing */}
-
     </>
   );
 };
+
+export default VerificationGate;
 
 // ==================
 // Notification Panel
@@ -556,5 +600,3 @@ const NotificationPanel = ({ notifications, show, onClose }: { notifications: No
     </motion.div>
   );
 };
-
-export default VerificationGate;

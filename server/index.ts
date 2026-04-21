@@ -714,6 +714,16 @@ app.post('/api/cards', authenticateToken, async (req: any, res: any): Promise<an
     let bridgecardId = (user.metadata as any)?.bridgecard_id;
     if (!bridgecardId) {
       console.log(`[BRIDGECARD] Registering new cardholder for ${user.email}...`);
+      
+      // Construct public URLs for Bridgecard to fetch the images
+      // Bridgecard requires HTTPS URLs, not base64 data
+      const publicBaseUrl = process.env.PUBLIC_API_URL || 'https://paypee-api-kmhv.onrender.com';
+      const selfieUrl = `${publicBaseUrl}/api/kyc-images/${userId}/selfie`;
+      const idImageUrl = `${publicBaseUrl}/api/kyc-images/${userId}/id`;
+      
+      console.log(`[BRIDGECARD] Selfie URL: ${selfieUrl}`);
+      console.log(`[BRIDGECARD] ID Image URL: ${idImageUrl}`);
+      
       const customer = await Bridgecard.createCustomer({
         firstName: user.firstName || 'User',
         lastName: user.lastName || 'Paypee',
@@ -722,7 +732,8 @@ app.post('/api/cards', authenticateToken, async (req: any, res: any): Promise<an
         bvn: bvn || (user.metadata as any)?.bvn,
         id_type: (user.metadata as any)?.kyc_id_type,
         id_no: (user.metadata as any)?.nin || (user.metadata as any)?.bvn,
-        selfie_image: (user.metadata as any)?.selfie_base64,
+        selfie_image_url: selfieUrl,
+        id_image_url: idImageUrl,
         date_of_birth: (user.metadata as any)?.date_of_birth,
         address: (user.metadata as any)?.address
       });
@@ -796,8 +807,9 @@ app.post('/api/cards', authenticateToken, async (req: any, res: any): Promise<an
       throw prismaError;
     }
   } catch (error: any) {
-    console.error('[CARDS] Issuance Error:', error.message);
-    res.status(500).json({ error: error.message || 'Failed to issue virtual card' });
+    console.error('[CARDS] Issuance Error:', error.response?.data || error.message);
+    const providerError = error.response?.data?.message || error.message || 'Failed to issue virtual card';
+    res.status(500).json({ error: providerError });
   }
 });
 
@@ -1474,14 +1486,30 @@ app.get('/api/verify/status', authenticateToken, async (req: any, res: any): Pro
 
     const user = await prisma.user.findUnique({
       where: { id: userId },
-      select: { kycStatus: true, email: true, firstName: true }
+      select: { kycStatus: true, email: true, firstName: true, metadata: true }
     });
+
+    if (!user) return res.status(404).json({ error: 'User not found' });
+
+    let currentStatus = user.kycStatus;
+
+    // FORCE RE-VERIFICATION for legacy users who only have a selfie
+    // Bridgecard/Prembly now requires a live document image with 'four edges showing'
+    if (currentStatus === 'VERIFIED' && !(user.metadata as any)?.id_image_base64) {
+      console.log(`[KYC] Demoting legacy user ${userId} to PENDING to collect ID document photo.`);
+      await prisma.user.update({
+        where: { id: userId },
+        data: { kycStatus: 'PENDING' }
+      });
+      currentStatus = 'PENDING';
+    }
+
     const notifications = await prisma.notification.findMany({
       where: { userId },
       orderBy: { createdAt: 'desc' },
       take: 20
     });
-    res.json({ kycStatus: user?.kycStatus, notifications });
+    res.json({ kycStatus: currentStatus, notifications });
   } catch (error) {
     res.status(500).json({ error: 'Failed to fetch status' });
   }
@@ -1503,12 +1531,12 @@ app.post('/api/notifications/read', authenticateToken, async (req: any, res: any
 // Submit KYC Verification (LIVE — No demo mode)
 app.post('/api/verify/identity', authenticateToken, async (req: any, res: any): Promise<any> => {
   try {
-    const { idType, idNumber, faceImage, dob } = req.body;
+    const { idType, idNumber, faceImage, idImage, dob } = req.body;
     const userId = req.user.userId;
 
     console.log(`[KYC DEBUG] 🏁 Starting verification for user: ${userId}`);
     console.log(`[KYC DEBUG] ID Type: ${idType}, ID Number: ${idNumber}`);
-    console.log(`[KYC DEBUG] Image received? ${!!faceImage} (Size: ${faceImage?.length || 0} chars)`);
+    console.log(`[KYC DEBUG] Image received? Selfie=${!!faceImage}, ID=${!!idImage}`);
 
     const PREMBLY_SECRET_KEY = process.env.PREMBLY_SECRET_KEY || 'live_sk_2a238fff60994964b3f8d9a5a6178d23';
 
@@ -1538,7 +1566,7 @@ app.post('/api/verify/identity', authenticateToken, async (req: any, res: any): 
     });
 
     await NotificationService.create(userId, '🔄 Verification In Progress', 
-      `We have received your ${idType} submission and are performing a biometric face match. This usually takes 30-60 seconds.`,
+      `We have received your ${idType} and document photo. We are now performing a biometric face match. This usually takes 30-60 seconds.`,
       'INFO'
     );
 
@@ -1615,6 +1643,7 @@ app.post('/api/verify/identity', authenticateToken, async (req: any, res: any): 
       if (idType === 'BVN') kycMetadata.bvn = idNumber;
       if (idType === 'NIN') kycMetadata.nin = idNumber;
       if (faceImage) kycMetadata.selfie_base64 = faceImage;
+      if (idImage) kycMetadata.id_image_base64 = idImage;
       
       // Capture DOB if provided directly from frontend (crucial for card issuance)
       if (dob) kycMetadata.date_of_birth = dob;
@@ -1647,8 +1676,9 @@ app.post('/api/verify/identity', authenticateToken, async (req: any, res: any): 
     }
 
   } catch (error: any) {
-    console.error('[KYC DEBUG] 💥 CRITICAL ERROR:', error.message);
-    res.status(500).json({ error: 'An unexpected system error occurred.' });
+    console.error('[KYC DEBUG] 💥 CRITICAL ERROR:', error.response?.data || error.message);
+    const providerError = error.response?.data?.message || error.response?.data?.error || error.message || 'An unexpected system error occurred.';
+    res.status(500).json({ error: providerError });
   }
 });
 
@@ -2428,6 +2458,48 @@ app.get('/api/admin/fix-swaps', async (req: any, res: any) => {
     res.json({ message: `Fixed ${fixedCount} swaps`, details });
   } catch (err: any) {
     res.status(500).json({ error: err.message });
+  }
+});
+
+// ==========================================
+// Public KYC Image Serving (NO AUTH - Bridgecard fetches these)
+// Bridgecard requires selfie_image and id_image as publicly accessible URLs,
+// NOT as base64 strings. This endpoint serves stored base64 as real images.
+// ==========================================
+app.get('/api/kyc-images/:userId/:type', async (req: any, res: any): Promise<any> => {
+  try {
+    const { userId, type } = req.params;
+    
+    if (!['selfie', 'id'].includes(type)) {
+      return res.status(400).send('Invalid image type');
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { metadata: true }
+    });
+
+    if (!user) return res.status(404).send('Not found');
+
+    const metadata = user.metadata as any;
+    const base64Field = type === 'selfie' ? 'selfie_base64' : 'id_image_base64';
+    const base64Data = metadata?.[base64Field];
+
+    if (!base64Data) return res.status(404).send('Image not found');
+
+    // Strip the data URL prefix if present
+    const rawBase64 = base64Data.replace(/^data:image\/[a-z]+;base64,/, '');
+    const imageBuffer = Buffer.from(rawBase64, 'base64');
+
+    res.set({
+      'Content-Type': 'image/jpeg',
+      'Content-Length': imageBuffer.length,
+      'Cache-Control': 'public, max-age=3600'
+    });
+    res.send(imageBuffer);
+  } catch (error: any) {
+    console.error('[KYC-IMAGE] Error serving image:', error.message);
+    res.status(500).send('Error');
   }
 });
 

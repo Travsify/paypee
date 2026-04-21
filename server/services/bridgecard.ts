@@ -24,6 +24,8 @@ const bridgecardClient = axios.create({
 
 /**
  * Register a cardholder on Bridgecard (Synchronous)
+ * IMPORTANT: selfie_image and id_image must be publicly accessible URLs (NOT base64).
+ * See: https://docs.bridgecard.co/reference/api-reference/cardholder
  */
 export const createCustomer = async (userData: {
   firstName: string;
@@ -33,7 +35,8 @@ export const createCustomer = async (userData: {
   bvn?: string; // Legacy fallback
   id_type?: string;
   id_no?: string;
-  selfie_image?: string;
+  selfie_image_url?: string; // PUBLIC URL (required by Bridgecard)
+  id_image_url?: string;     // PUBLIC URL (required by Bridgecard)
   date_of_birth?: string;
   address?: any;
 }) => {
@@ -47,8 +50,25 @@ export const createCustomer = async (userData: {
       throw new Error(`A valid 11-digit ${userData.id_type || 'BVN'} is required to issue a virtual card.`);
     }
 
-    // Sanitize selfie image (Bridgecard expects raw base64 without prefix)
-    const sanitizedSelfie = userData.selfie_image?.replace(/^data:image\/[a-z]+;base64,/, '') || '';
+    // Build identity object based on id_type
+    // For BVN: needs bvn + selfie_image (URL)
+    // For NIN/Passport/PVC/Drivers License: needs id_no + id_image (URL) + bvn
+    const identity: any = {
+      id_type: identityType,
+      bvn: userData.bvn,
+    };
+
+    if (identityType === 'NIGERIAN_BVN_VERIFICATION') {
+      // BVN flow: just needs selfie URL
+      identity.selfie_image = userData.selfie_image_url || '';
+      console.log(`[BRIDGECARD] Using BVN flow with selfie URL: ${identity.selfie_image ? identity.selfie_image.substring(0, 80) + '...' : 'MISSING'}`);
+    } else {
+      // NIN / other ID flow: needs id_no + id_image URL + bvn
+      identity.id_no = identityNumber;
+      identity.id_image = userData.id_image_url || '';
+      identity.bvn = userData.bvn;
+      console.log(`[BRIDGECARD] Using ${identityType} flow with id_image URL: ${identity.id_image ? identity.id_image.substring(0, 80) + '...' : 'MISSING'}`);
+    }
 
     const payload = {
       first_name: (userData.firstName || '').trim(),
@@ -68,15 +88,10 @@ export const createCustomer = async (userData: {
         postal_code: userData.address?.postalCode || '100001',
         house_no: '1'
       },
-      identity: {
-        id_type: identityType,
-        bvn: userData.bvn, // Bridgecard strictly requires a valid BVN for all Nigerian cards
-        id_no: identityNumber,
-        selfie_image: sanitizedSelfie
-      }
+      identity
     };
 
-    console.log('[BRIDGECARD] [v1.1-phone-fix] Sending Registration Payload:', JSON.stringify({ ...payload, identity: { ...payload.identity, selfie_image: '[REDACTED]' } }, null, 2));
+    console.log('[BRIDGECARD] [v2.0-url-fix] Sending Registration Payload:', JSON.stringify(payload, null, 2));
 
     const response = await bridgecardClient.post('/cardholder/register_cardholder_synchronously', payload);
     const data = response.data.data;
