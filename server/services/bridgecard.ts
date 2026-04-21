@@ -127,35 +127,49 @@ export const createCustomer = async (userData: {
 
 /**
  * Issue a virtual card
+ * Docs: https://docs.bridgecard.co/reference/api-reference/usd-cards#create-a-card
+ * Required fields: cardholder_id, card_type, card_brand, card_currency, card_limit, funding_amount, pin
  */
 export const issueVirtualCard = async (cardholderId: string, currency: string, amount: number) => {
   try {
     console.log(`[BRIDGECARD] Issuing ${currency} card for cardholder ${cardholderId}`);
     
-    // Bridgecard requires a card_type (e.g. 'virtual') and currency
+    // Encrypt a default PIN using AES-256 (Bridgecard requirement)
+    // Using the Bridgecard secret key as the encryption key per their docs
+    const AES256 = require('aes-everywhere');
+    const defaultPin = '1234';
+    const encryptedPin = AES256.encrypt(defaultPin, BRIDGECARD_SECRET_KEY);
+    
+    // funding_amount is in CENTS: $3 = "300", $4 = "400"
+    // Card limit $5,000 requires min $3 funding, $10,000 requires min $4
+    const fundingAmountCents = Math.max(300, Math.round(amount * 100));
+    
     const payload = {
       cardholder_id: cardholderId,
       card_type: 'virtual',
-      card_brand: 'Mastercard', // Bridgecard often defaults to Mastercard for USD
-      currency: currency || 'USD',
+      card_brand: 'Mastercard',
+      card_currency: 'USD', // Bridgecard uses "card_currency", not "currency"
+      card_limit: '500000', // $5,000 limit (in cents)
+      funding_amount: String(fundingAmountCents),
+      pin: encryptedPin,
       meta_data: {
-        issuing_id: BRIDGECARD_ISSUING_ID
+        issuing_id: BRIDGECARD_ISSUING_ID,
+        platform: 'paypee'
       }
     };
+
+    console.log('[BRIDGECARD] Create Card Payload:', JSON.stringify({ ...payload, pin: '[ENCRYPTED]' }, null, 2));
 
     const response = await bridgecardClient.post('/cards/create_card', payload);
     const cardData = response.data.data;
 
-    // Bridgecard cards are issued with $0 balance usually, need to fund it immediately
-    if (amount > 0) {
-      console.log(`[BRIDGECARD] Funding new card with $${amount}...`);
-      await fundCard(cardData.card_id, amount);
-    }
-
+    console.log('[BRIDGECARD] Card created successfully:', cardData);
     return cardData;
   } catch (error: any) {
-    console.error('[BRIDGECARD] Issue Card Error:', error.response?.data || error.message);
-    throw new Error(error.response?.data?.message || 'Failed to issue virtual card on Bridgecard');
+    const errorData = error.response?.data;
+    console.error('[BRIDGECARD] Issue Card Error:', JSON.stringify(errorData, null, 2) || error.message);
+    const msg = errorData?.message || (errorData ? JSON.stringify(errorData) : error.message) || 'Failed to issue virtual card on Bridgecard';
+    throw new Error(msg);
   }
 };
 
