@@ -990,7 +990,7 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
         display: 'flex',
         justifyContent: 'space-around',
         padding: '0.75rem 0.5rem 2rem',
-        zIndex: 2000
+        zIndex: 40000
       }}>
         <MobileNavButton icon={LayoutDashboard} label="Home" active={activeSection === 'overview'} onClick={() => navigate('overview')} />
         <MobileNavButton icon={Wallet} label="Wallets" active={activeSection === 'wallets'} onClick={() => navigate('wallets')} />
@@ -1007,14 +1007,14 @@ const IndividualDashboard = ({ onLogout }: { onLogout?: () => void }) => {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setShowMobileMenu(false)}
-              style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', zIndex: 3000, backdropFilter: 'blur(5px)' }}
+              style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', zIndex: 40001, backdropFilter: 'blur(5px)' }}
             />
             <motion.div 
               initial={{ x: '-100%' }}
               animate={{ x: 0 }}
               exit={{ x: '-100%' }}
               transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              style={{ position: 'fixed', left: 0, top: 0, bottom: 0, width: '280px', background: '#020617', zIndex: 3001, padding: '2rem', borderRight: '1px solid rgba(255,255,255,0.1)' }}
+              style={{ position: 'fixed', left: 0, top: 0, bottom: 0, width: '280px', background: '#020617', zIndex: 40002, padding: '2rem', borderRight: '1px solid rgba(255,255,255,0.1)' }}
             >
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3rem' }}>
                 <span style={{ fontSize: '1.5rem', fontWeight: 900 }}>Menu</span>

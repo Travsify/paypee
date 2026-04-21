@@ -167,7 +167,7 @@ const SwapModal: React.FC<SwapModalProps> = ({ isOpen, onClose, onComplete, wall
         initial={{ scale: 0.95, opacity: 0, y: 30 }} 
         animate={{ scale: 1, opacity: 1, y: 0 }}
         className="paypee-modal-content"
-        style={{ maxWidth: '580px', padding: 0, background: '#0a0f1e', border: '1px solid rgba(255,255,255,0.08)', boxShadow: '0 50px 100px rgba(0,0,0,0.8)' }}
+        style={{ maxWidth: '580px', maxHeight: '90vh', overflowY: 'auto', overflowX: 'hidden', padding: 0, background: '#0a0f1e', border: '1px solid rgba(255,255,255,0.08)', boxShadow: '0 50px 100px rgba(0,0,0,0.8)' }}
       >
         <div className="mesh-bg" style={{ opacity: 0.1 }} />
         

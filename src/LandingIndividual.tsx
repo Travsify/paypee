@@ -31,8 +31,8 @@ const LandingIndividual = ({ onAuth }: { onAuth: () => void }) => {
                 transition={{ duration: 0.8 }}
                 style={{ textAlign: 'left', fontSize: '4.5rem', marginBottom: '1.5rem', lineHeight: 1.1 }}
               >
-                Your Global <br />
-                <span style={{ color: 'var(--primary)' }}>Money Hub.</span>
+                Your Easy <br />
+                <span style={{ color: 'var(--primary)' }}>Money Place.</span>
               </motion.h1>
               <motion.p
                 initial={{ opacity: 0 }}
@@ -40,7 +40,7 @@ const LandingIndividual = ({ onAuth }: { onAuth: () => void }) => {
                 transition={{ delay: 0.4 }}
                 style={{ margin: '0 0 2.5rem 0', fontSize: '1.25rem', maxWidth: '500px', color: 'var(--text-muted)' }}
               >
-                Access USD, EUR, and GBP wallets instantly. Issue virtual cards, send money globally, and manage your personal wealth without borders.
+                Keep different types of money like Dollars and Pounds. Get a magic card for buying things online, and send money anywhere easily.
               </motion.p>
               <motion.div 
                 className="hero-btns"
@@ -80,14 +80,14 @@ const LandingIndividual = ({ onAuth }: { onAuth: () => void }) => {
       <section className="section container">
         <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
            <h2 style={{ fontSize: '3rem' }}>Everything You Need</h2>
-           <p style={{ color: 'var(--text-muted)', fontSize: '1.2rem' }}>We've reimagined personal finance for the modern African.</p>
+           <p style={{ color: 'var(--text-muted)', fontSize: '1.2rem' }}>We made money super easy to use for everyone.</p>
         </div>
         <div className="grid">
            {[
-             { icon: <Globe />, title: "Multi-Currency Wallets", desc: "Hold your net worth in NGN, USD, GBP, and EUR to protect against local currency devaluation." },
-             { icon: <CreditCard />, title: "Virtual Cards", desc: "Create a virtual Mastercard in one tap. Perfect for Netflix, AWS, Apple Music, and global shopping." },
-             { icon: <Zap />, title: "Instant Transfers", desc: "Send money localized or globally at lightning speed. Zero hidden fees, crystal clear exchange rates." },
-             { icon: <ShieldCheck />, title: "Bank-Grade Security", desc: "Your money is protected by 256-bit encryption and regulated global custody partners." }
+             { icon: <Globe />, title: "Different Money", desc: "Keep Naira, Dollars, and Pounds all in one place so your money is always safe." },
+             { icon: <CreditCard />, title: "Magic Cards", desc: "Get a card right on your phone to buy things from Netflix or Apple music." },
+             { icon: <Zap />, title: "Super Fast Send", desc: "Send money to your friends super fast. No tricky rules, just easy sending." },
+             { icon: <ShieldCheck />, title: "Super Safe", desc: "Your money is locked up tight with a big strong lock so nobody else can take it." }
            ].map((item, idx) => (
              <motion.div key={idx} className="card tilt-card" whileHover={{ y: -5 }}>
                 <div className="card-icon" style={{ color: 'var(--primary)' }}>{item.icon}</div>
@@ -128,8 +128,8 @@ const LandingIndividual = ({ onAuth }: { onAuth: () => void }) => {
             </div>
             <div className="info-content" style={{ paddingLeft: '4rem' }}>
                <h2>Cards that just work.</h2>
-               <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem', marginBottom: '2rem' }}>Stop worrying about transaction limits and card failures. Our USD virtual cards are universally accepted anywhere Mastercard is supported online.</p>
-               <button className="btn btn-outline" onClick={onAuth}>Issue Your Card Today</button>
+               <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem', marginBottom: '2rem' }}>Don't worry about cards failing anymore. Our magic cards work everywhere on the internet so you can buy what you want easily.</p>
+               <button className="btn btn-outline" onClick={onAuth}>Get Your Card Today</button>
             </div>
          </div>
       </section>

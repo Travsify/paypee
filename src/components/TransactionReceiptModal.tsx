@@ -35,7 +35,7 @@ const TransactionReceiptModal: React.FC<TransactionReceiptModalProps> = ({ trans
 
   return (
     <AnimatePresence>
-      <div style={{ position: 'fixed', inset: 0, background: 'rgba(2,6,23,0.95)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 30000, padding: '2rem', backdropFilter: 'blur(15px)' }}>
+      <div style={{ position: 'fixed', inset: 0, background: 'rgba(2,6,23,0.95)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1500, padding: '2rem 2rem 100px 2rem', backdropFilter: 'blur(15px)' }}>
         <motion.div 
           initial={{ scale: 0.95, opacity: 0, y: 20 }}
           animate={{ scale: 1, opacity: 1, y: 0 }}
@@ -49,7 +49,9 @@ const TransactionReceiptModal: React.FC<TransactionReceiptModalProps> = ({ trans
             padding: '3rem',
             position: 'relative',
             boxShadow: '0 50px 100px -20px rgba(0, 0, 0, 0.6)',
-            overflow: 'hidden'
+            maxHeight: '90vh',
+            overflowY: 'auto',
+            overflowX: 'hidden'
           }}
         >
           <button 

@@ -444,7 +444,7 @@ const PayoutModal: React.FC<PayoutModalProps> = ({ isOpen, onClose, onComplete, 
         initial={{ scale: 0.95, opacity: 0, y: 20 }}
         animate={{ scale: 1, opacity: 1, y: 0 }}
         className="paypee-modal-content"
-        style={{ maxWidth: '650px', overflow: 'visible' }}
+        style={{ maxWidth: '650px', maxHeight: '90vh', overflowY: 'auto', overflowX: 'hidden' }}
       >
         <div style={{ padding: '3rem' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem' }}>
